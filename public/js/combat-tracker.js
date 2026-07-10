@@ -125,7 +125,34 @@ function buildTracker(spec, state, key) {
   const rPlus = el('button', 'ct-step', '▶'); rPlus.type = 'button'; rPlus.title = 'Round suivant';
   rMinus.addEventListener('click', () => { state.round = Math.max(1, state.round - 1); state.turn = 0; paintRound(); persist(); render(); });
   rPlus.addEventListener('click', () => { state.round += 1; state.turn = 0; paintRound(); persist(); render(); });
-  controls.append(initBtn, rMinus, rdLabel, rPlus, reset, noteBtn);
+  // 🎬 Génère la scène Foundry : acteurs importés du compendium d'adversaires,
+  // tokens posés, fond = map du bloc si c'est un fichier Foundry. MJ seulement.
+  const sceneBtn = el('button', 'ct-step', '🎬'); sceneBtn.type = 'button';
+  sceneBtn.title = 'Créer la scène dans Foundry (tokens depuis le compendium)';
+  sceneBtn.addEventListener('click', async () => {
+    const combatants = spec.groups.flatMap((g) => g.rows.map((r) => ({ name: r.name, count: r.n || 1 })));
+    if (!combatants.length) return alert('Aucun combattant dans ce bloc.');
+    sceneBtn.disabled = true; sceneBtn.textContent = '…';
+    try {
+      const res = await fetch('/api/gm/foundry/combat-scene', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: spec.title, map: spec.map, combatants }),
+      });
+      const out = await res.json();
+      if (!res.ok) throw new Error(out.error || 'échec');
+      sceneBtn.textContent = '✓';
+      alert(`Scène « ${out.sceneName} » créée dans Foundry (${out.tokens} tokens)` +
+        (out.missing?.length ? `\n⚠️ introuvables : ${out.missing.join(', ')}` : ''));
+    } catch (e) {
+      sceneBtn.textContent = '🎬';
+      alert('Échec : ' + e.message);
+    } finally {
+      sceneBtn.disabled = false;
+      setTimeout(() => { sceneBtn.textContent = '🎬'; }, 2000);
+    }
+  });
+  controls.append(initBtn, rMinus, rdLabel, rPlus, reset, noteBtn, sceneBtn);
   head.appendChild(controls);
   root.appendChild(head);
 

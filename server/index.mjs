@@ -304,6 +304,16 @@ async function handleApi(req, res, urlPath) {
           return sendJSON(res, 200, { ok: true });
         }
         if (action === 'combat' && req.method === 'GET') return sendJSON(res, 200, await tools.combatState());
+        if (action === 'combat-scene' && req.method === 'POST') {
+          const body = JSON.parse(await readBody(req, 50_000));
+          const combatants = (Array.isArray(body.combatants) ? body.combatants : [])
+            .map((c) => ({ name: String(c.name || '').slice(0, 80), count: Math.max(1, Math.min(12, +c.count || 1)) }))
+            .filter((c) => c.name).slice(0, 20);
+          if (!combatants.length) return sendJSON(res, 400, { error: 'aucun combattant' });
+          const out = await tools.createCombatScene(
+            { title: body.title, map: body.map, combatants }, { store, config: cc });
+          return sendJSON(res, 200, out);
+        }
         if (action === 'dash' && req.method === 'GET') return sendJSON(res, 200, await dashPayload());
         if (action === 'ship') {
           if (req.method === 'GET') return sendJSON(res, 200, { ship: await shipSvc().applyShip('get') });
