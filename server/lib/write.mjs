@@ -195,3 +195,82 @@ export function createWriteService({ store, config, logger = console }) {
 
   return { gmList, gmGet, gmSave, publicGet, publicSave, notesList, noteSave, noteDelete, cfgSave };
 }
+
+/* ----------------------------------------------------------------------------
+ * Bibliothèque de rencontres — journal dédié, flags.holocron.encounters :
+ * [{ id, title, map, note, groups:[{name, rows:[{name,count,w,s,soak,attack,key}]}],
+ *    updatedAt, updatedBy }]. Éditée par le créateur de combats du Holocron ET
+ * manipulable par un assistant IA via MCP (même flag).
+ * -------------------------------------------------------------------------- */
+export function createEncounterService({ store, config }) {
+  const idx = () => store.get('journalsIndex') || [];
+
+  async function library() {
+    const name = config().journals.encounters;
+    let entry = idx().find((j) => j.name === name);
+    if (!entry) {
+      await mcpCall('create_document', { type: 'JournalEntry', data: [{
+        name, ownership: { default: 0 },
+        flags: { holocron: { encounters: [] } },
+        pages: [{ name: 'Rencontres', type: 'text', text: {
+          content: '<p>Bibliothèque des rencontres du Holocron (flags.holocron.encounters).</p>', format: 1 } }],
+      }] });
+      await store.sync.journalsIndex();
+      entry = idx().find((j) => j.name === name);
+      if (!entry) throw new Error('bibliothèque de rencontres introuvable');
+    }
+    return entry;
+  }
+
+  async function list() {
+    const entry = await library();
+    return entry.flags?.holocron?.encounters || [];
+  }
+
+  async function save(enc, updatedBy) {
+    const entry = await library();
+    const all = [...(entry.flags?.holocron?.encounters || [])];
+    const clean = {
+      id: String(enc.id || `enc-${Math.random().toString(36).slice(2, 10)}`),
+      title: String(enc.title || 'Rencontre').slice(0, 120),
+      map: String(enc.map || '').slice(0, 200),
+      note: String(enc.note || '').slice(0, 500),
+      groups: (Array.isArray(enc.groups) ? enc.groups : []).slice(0, 10).map((g) => ({
+        name: String(g.name || '').slice(0, 80),
+        rows: (Array.isArray(g.rows) ? g.rows : []).slice(0, 20).map((r) => ({
+          name: String(r.name || '').slice(0, 80),
+          count: Math.max(1, Math.min(12, +r.count || 1)),
+          w: Math.max(0, +r.w || 0), s: Math.max(0, +r.s || 0),
+          soak: String(r.soak || '').slice(0, 40),
+          attack: String(r.attack || '').slice(0, 120),
+          key: String(r.key || '').slice(0, 120),
+        })),
+      })),
+      updatedAt: Date.now(),
+      updatedBy: String(updatedBy || 'MJ').slice(0, 80),
+    };
+    const i = all.findIndex((e) => e.id === clean.id);
+    if (i >= 0) all[i] = clean; else all.push(clean);
+    await mcpCall('modify_document', { type: 'JournalEntry', _id: entry._id,
+      updates: [{ 'flags.holocron.encounters': all }] });
+    store.patch('journalsIndex', (items) => {
+      const j = items.find((x) => x._id === entry._id);
+      if (j) { j.flags = j.flags || {}; j.flags.holocron = { ...(j.flags.holocron || {}), encounters: all }; }
+    });
+    return clean;
+  }
+
+  async function remove(id) {
+    const entry = await library();
+    const all = (entry.flags?.holocron?.encounters || []).filter((e) => e.id !== id);
+    await mcpCall('modify_document', { type: 'JournalEntry', _id: entry._id,
+      updates: [{ 'flags.holocron.encounters': all }] });
+    store.patch('journalsIndex', (items) => {
+      const j = items.find((x) => x._id === entry._id);
+      if (j) { j.flags = j.flags || {}; j.flags.holocron = { ...(j.flags.holocron || {}), encounters: all }; }
+    });
+    return { ok: true };
+  }
+
+  return { list, save, remove };
+}

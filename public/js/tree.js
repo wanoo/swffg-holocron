@@ -127,10 +127,12 @@ export function mountSidebar() {
   }
 
   // Outils transverses (toujours visibles) — calculateur d'astrogation.
-  tree.appendChild(makeGroup('Outils', 'misc', 2, [
+  const tools = [
     { href: '#/navicomputer', label: '🖥️ Navi-Computer' },
     { href: '#/astronav', label: '🪐 Astronav' },
-  ]));
+  ];
+  if (getGMKey() || Data.gm) tools.push({ href: '#/rencontres', label: '⚔️ Rencontres (MJ)' });
+  tree.appendChild(makeGroup('Outils', 'misc', tools.length, tools));
 
   applyFilters();
 }

@@ -1589,3 +1589,29 @@ body.gm-session .gm-doc h2, body.gm-session .gm-doc h3, body.gm-session .gm-doc 
 .login-menu p { margin: 0 0 0.5rem; }
 .login-gm { color: var(--gold, #d9b45b); font-weight: 700; }
 .login-menu button { border: 1px solid var(--line); background: transparent; color: var(--fg); border-radius: 8px; padding: 0.3rem 0.7rem; cursor: pointer; }
+
+/* --- créateur de rencontres (MJ) ---------------------------------------------- */
+.enc-wrap { display: grid; grid-template-columns: 260px 1fr; gap: 1rem; align-items: start; }
+@media (max-width: 900px) { .enc-wrap { grid-template-columns: 1fr; } }
+.enc-list { display: flex; flex-direction: column; gap: 0.4rem; }
+.enc-new { border: 1px dashed var(--gold, #d9b45b); color: var(--gold, #d9b45b); background: transparent; border-radius: 9px; padding: 0.5rem; cursor: pointer; font-weight: 700; }
+.enc-item { text-align: left; border: 1px solid var(--line, #2a3242); background: var(--panel, #10151f); color: var(--fg); border-radius: 9px; padding: 0.5rem 0.7rem; cursor: pointer; display: flex; flex-direction: column; gap: 0.15rem; }
+.enc-item small { color: var(--fg-dim); }
+.enc-item.active { border-color: var(--gold, #d9b45b); }
+.enc-fields { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 0.7rem; }
+.enc-fields input, .enc-group input { background: var(--bg, #0a0e15); color: var(--fg); border: 1px solid var(--line); border-radius: 7px; padding: 0.4rem 0.55rem; font: 500 0.85rem/1 var(--font-ui); }
+.enc-title { font-size: 1.05rem !important; font-weight: 700; }
+.enc-group { border: 1px solid var(--line); border-radius: 10px; padding: 0.6rem; margin-bottom: 0.6rem; background: var(--panel-2, #0d1219); }
+.enc-gname { width: 100%; margin-bottom: 0.45rem; }
+.enc-row { display: grid; grid-template-columns: 1.4fr 3.2rem 3.2rem 3.2rem 3.6rem 1.6fr 1.2fr auto; gap: 0.3rem; margin-bottom: 0.3rem; }
+.enc-row input.sm { padding: 0.4rem 0.3rem; text-align: center; }
+.enc-add { border: 1px dashed var(--line); background: transparent; color: var(--fg-muted); border-radius: 7px; padding: 0.3rem 0.6rem; cursor: pointer; }
+.enc-add:hover { border-color: var(--gold); color: var(--gold); }
+.enc-del { border: 0; background: transparent; color: var(--danger, #e5544b); cursor: pointer; }
+.enc-gfoot { display: flex; gap: 0.5rem; margin-top: 0.3rem; }
+.enc-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.8rem 0; }
+.enc-btn { border: 1px solid var(--line); background: transparent; color: var(--fg); border-radius: 999px; padding: 0.45rem 0.9rem; cursor: pointer; font-weight: 600; }
+.enc-btn.gold { border-color: var(--gold); color: var(--gold); }
+.enc-btn.gold:hover { background: var(--gold); color: #0c1018; }
+.enc-btn.danger { border-color: var(--danger); color: var(--danger); }
+.enc-track { border-top: 1px solid var(--line); padding-top: 0.7rem; }

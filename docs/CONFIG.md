@@ -74,3 +74,24 @@ Toute la spécificité de VOTRE campagne vit dans un journal Foundry (nom par d�
 | `flags.holocron.poi` | journal POI | mondes d'intérêt (Astronav) |
 | `flags.holocron.codex` | journal codex | allégeance/équipage/PNJ (navicomputer) |
 | `flags.holocron.note` | page notes MJ | métadonnées d'une note |
+
+## Bibliothèque de rencontres (créateur de combats)
+
+Le journal `⚔️ Bibliothèque de rencontres` porte `flags.holocron.encounters` :
+
+```jsonc
+[{
+  "id": "enc-xxxx", "title": "Embuscade", "map": "worlds/…/battlemap.webp",
+  "note": "contexte",
+  "groups": [{ "name": "Vague 1", "rows": [
+    { "name": "Nightbrother", "count": 3, "w": 9, "s": 0, "soak": "3",
+      "attack": "Lance — Dég 6 · Crit 3", "key": "chargent au contact" }
+  ]}],
+  "updatedAt": 0, "updatedBy": "MJ"
+}]
+```
+
+Éditée par la page **#/rencontres** du Holocron (autocomplétion sur le pack
+d'adversaires, stats auto-remplies, tracker intégré, bouton 🎬 scène Foundry).
+**Un assistant IA connecté à Foundry (MCP) peut écrire ce flag directement**
+pour générer des rencontres — le MJ les retrouve aussitôt dans le créateur.

@@ -17,7 +17,7 @@ import {
 } from './lib/auth.mjs';
 import { setCorsOrigin, cors, sendJSON, sendVersioned, readBody, rateLimited, makeStatic, MIME } from './lib/http.mjs';
 import { createContentService } from './lib/content.mjs';
-import { createWriteService } from './lib/write.mjs';
+import { createWriteService, createEncounterService } from './lib/write.mjs';
 import { createShipService, createDashService } from './lib/ship.mjs';
 import { createAstroService } from './lib/astro.mjs';
 import * as tools from './lib/session-tools.mjs';
@@ -45,6 +45,7 @@ const store = createStore({ dataDir: ENV.dataDir, logger: console });
 const cc = () => campaignConfig(store);
 const content = createContentService({ store, config: cc });
 const writer = createWriteService({ store, config: cc, logger: console });
+const encounters = createEncounterService({ store, config: cc });
 const dashPayload = createDashService({ journals: campaignConfig(store).journals });
 const shipSvc = () => createShipService({ journalName: cc().journals.ship });
 const astro = createAstroService({ publicDir: PUBLIC_DIR, config: cc });
@@ -237,6 +238,16 @@ async function handleApi(req, res, urlPath) {
       } catch (e) {
         return sendJSON(res, e.code || 500, { error: e.message, ...(e.current ? { current: e.current } : {}) });
       }
+    }
+    if (parts[1] === 'encounters') {
+      try {
+        if (req.method === 'GET') return sendJSON(res, 200, { encounters: await encounters.list() });
+        if (req.method === 'PUT') {
+          const body = JSON.parse(await readBody(req, 100_000));
+          return sendJSON(res, 200, { encounter: await encounters.save(body, session?.name) });
+        }
+        if (req.method === 'DELETE' && id) return sendJSON(res, 200, await encounters.remove(id));
+      } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
     }
     if (parts[1] === 'notes') {
       try {

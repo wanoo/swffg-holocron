@@ -32,7 +32,7 @@ export const CAMPAIGN_DEFAULTS = {
   journals: {
     ship: '🚀 Vaisseau du groupe', codex: '🖥️ Codex du groupe',
     poi: "🌍 Mondes d'intérêt", holonet: '📡 HoloNet — Actualités',
-    gmNotes: '🗒️ Notes MJ (Holocron)',
+    gmNotes: '🗒️ Notes MJ (Holocron)', encounters: '⚔️ Bibliothèque de rencontres',
   },
   registry: [],
   advLinks: { externalUrl: '', map: [] },
