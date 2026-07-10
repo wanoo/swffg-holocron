@@ -100,18 +100,19 @@ export function mountSidebar() {
   buildFilters(filters);
   tree.innerHTML = '';
 
-  // Ordre voulu : Règles → PJ → Notes des PJ → Campagne → Personnages (PNJ)
-  // → Organisations → (en bas) PNJ du monde & Bestiaire.
-  appendCategory(tree, 'feigrnbb7j7nXQI8'); // Règles du jeu
+  // Ordre : Règles → PJ → puis les catégories de la config (notes, actes, PNJ,
+  // orgs…) dans l'ordre des kinds — plus aucun id de campagne en dur.
+  const KIND_ORDER = ['rules', 'notes', 'story', 'pc', 'org', 'misc'];
+  const cats = [...Data.categories].sort((a, b) => {
+    const ka = KIND_ORDER.indexOf(a.kind), kb = KIND_ORDER.indexOf(b.kind);
+    return (ka < 0 ? 99 : ka) - (kb < 0 ? 99 : kb);
+  });
+  for (const cat of cats.filter((c) => c.kind === 'rules')) appendCategory(tree, cat.id);
 
   const pcItems = Data.pcs.map((p) => ({ href: `#/pc/${p.id}`, label: p.name }));
   tree.appendChild(makeGroup('Personnages joueurs', 'players', Data.pcs.length, pcItems));
 
-  appendCategory(tree, 'K0fMMrlfBNrybpGR'); // Notes des joueurs
-  appendCategory(tree, 'HbsyBZVq49TXndf5'); // Campagne — Actes
-  appendCategory(tree, 'OhCEe8KwUvDI0Z8b'); // Personnages (PNJ)
-  appendCategory(tree, '42NyXzT4i0RSRqkp'); // Organisations
-  appendCategory(tree, '__misc__'); // Divers (vide → ignoré)
+  for (const cat of cats.filter((c) => c.kind !== 'rules')) appendCategory(tree, cat.id);
 
   // En bas : PNJ du monde + Adversaires (vues listes) — RÉSERVÉ AU MJ.
   // Les stats d'adversaires/boss sont des spoilers : le groupe n'apparaît que
