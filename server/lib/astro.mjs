@@ -38,6 +38,28 @@ export function createAstroService({ publicDir, config, logger = console }) {
     } catch { return poiCache?.poi || []; }
   }
 
+  // Toggle MJ d'un monde d'intérêt : écrit flags.holocron.poi du journal dédié
+  // (même stockage que la macro ⭐ Foundry), crée le journal au besoin.
+  async function setPoi({ name, note = '', act = '', on = true }) {
+    const jname = config().journals.poi;
+    let list = await mcpCall('get_journals', { where: { name: jname } });
+    let j = (Array.isArray(list) ? list : []).find((x) => x && x.name === jname);
+    if (!j) {
+      await mcpCall('create_document', { type: 'JournalEntry', data: [{
+        name: jname, ownership: { default: 2 }, flags: { holocron: { poi: [] } },
+        pages: [{ name: 'Liste', type: 'text', text: { content: "<p>Mondes d'intérêt (Astronav).</p>", format: 1 } }],
+      }] });
+      list = await mcpCall('get_journals', { where: { name: jname } });
+      j = (Array.isArray(list) ? list : []).find((x) => x && x.name === jname);
+      if (!j) throw new Error('journal POI introuvable');
+    }
+    let poiList = (j.flags?.holocron?.poi || []).filter((p) => p.name !== name);
+    if (on) poiList.push({ name: String(name).slice(0, 80), note: String(note).slice(0, 200), act: String(act).slice(0, 10) });
+    await mcpCall('modify_document', { type: 'JournalEntry', _id: j._id, updates: [{ 'flags.holocron.poi': poiList }] });
+    poiCache = { t: Date.now(), poi: poiList }; // write-through
+    return poiList;
+  }
+
   async function route(q) {
     const { byName, graph } = await astroData();
     const o = byName[q.get('from') || ''], dst = byName[q.get('to') || ''];
@@ -63,5 +85,5 @@ export function createAstroService({ publicDir, config, logger = console }) {
     } };
   }
 
-  return { astroData, poi, route };
+  return { astroData, poi, setPoi, route };
 }

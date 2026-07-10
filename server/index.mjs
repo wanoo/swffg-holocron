@@ -201,6 +201,12 @@ async function handleApi(req, res, urlPath) {
     try {
       if (parts[1] === 'planets' && req.method === 'GET') return sendJSON(res, 200, { planets: (await astro.astroData()).names });
       if (parts[1] === 'poi' && req.method === 'GET') return sendJSON(res, 200, { poi: await astro.poi() });
+      if (parts[1] === 'poi' && req.method === 'PUT') {
+        if (!gmOK(req, session)) return sendJSON(res, 401, { error: 'réservé MJ' });
+        const body = JSON.parse(await readBody(req, 10_000));
+        if (!body.name) return sendJSON(res, 400, { error: 'name requis' });
+        return sendJSON(res, 200, { poi: await astro.setPoi(body) });
+      }
       if (parts[1] === 'route' && req.method === 'GET') {
         if (rateLimited(req, 30)) return sendJSON(res, 429, { error: 'trop de calculs' });
         const r = await astro.route(q);

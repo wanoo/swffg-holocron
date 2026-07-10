@@ -1615,3 +1615,5 @@ body.gm-session .gm-doc h2, body.gm-session .gm-doc h3, body.gm-session .gm-doc 
 .enc-btn.gold:hover { background: var(--gold); color: #0c1018; }
 .enc-btn.danger { border-color: var(--danger); color: var(--danger); }
 .enc-track { border-top: 1px solid var(--line); padding-top: 0.7rem; }
+.an-poi { border: 1px solid var(--gold, #d9b45b); color: var(--gold, #d9b45b); background: transparent; border-radius: 999px; padding: 0.4rem 0.8rem; cursor: pointer; font-weight: 700; }
+.an-poi.on { background: var(--gold, #d9b45b); color: #0c1018; }

@@ -785,7 +785,9 @@ export async function mountAstronav(container) {
         ${camp}${laneHtml}${fbadges}${facts}${p.desc ? `<p class="an-desc">${esc(p.desc)}</p>` : ''}
         ${meta && meta !== esc(p.region) ? `<p class="an-desc an-metaline">${meta}</p>` : ''}
         ${pts}
-        <div class="an-acts"><button class="an-o" type="button">Définir origine</button><button class="an-d" type="button">Définir destination</button></div>
+        <div class="an-acts"><button class="an-o" type="button">Définir origine</button><button class="an-d" type="button">Définir destination</button>
+          ${(Data.gm || getGMKey()) ? `<button class="an-poi${p.poi ? ' on' : ''}" type="button" title="Monde d'intérêt (épinglé pour les joueurs)">${p.poi ? '⭐ Épinglé' : '☆ Épingler'}</button>` : ''}
+        </div>
       </div>`;
     const ov = el('div', 'an-overlay');
     ov.appendChild(body);
@@ -793,6 +795,32 @@ export async function mountAstronav(container) {
     body.querySelector('.an-close').addEventListener('click', () => ov.remove());
     body.querySelector('.an-o').addEventListener('click', () => { orig.value = p.name; compute(); ov.remove(); });
     body.querySelector('.an-d').addEventListener('click', () => { dest.value = p.name; compute(); ov.remove(); });
+    const poiBtn = body.querySelector('.an-poi');
+    if (poiBtn) poiBtn.addEventListener('click', async () => {
+      const on = !p.poi;
+      let note = p.campaign || '';
+      if (on) { note = window.prompt('Note (visible des joueurs, optionnelle) :', note) ?? ''; }
+      poiBtn.disabled = true; poiBtn.textContent = '…';
+      try {
+        const r = await fetch('/api/astro/poi', {
+          method: 'PUT', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json', ...(getGMKey() ? { 'x-gm-key': getGMKey() } : {}) },
+          body: JSON.stringify({ name: p.name, note, on }),
+        });
+        if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'échec');
+        // état local immédiat : épingle + note + sélecteurs + carte
+        p.poi = on;
+        if (on) { p.campaign = note || p.campaign; CAMPAIGN.add(p.name); if (!CAMPAIGN_ORDER.includes(p.name)) CAMPAIGN_ORDER.push(p.name); }
+        else { if (!(Data.config?.campaignPlanets || []).includes(p.name)) { CAMPAIGN.delete(p.name); const i = CAMPAIGN_ORDER.indexOf(p.name); if (i >= 0) CAMPAIGN_ORDER.splice(i, 1); } if (!(Data.config?.campaignPlanets || []).includes(p.name)) delete p.campaign; }
+        const ov2 = orig.value, dv2 = dest.value;
+        fillSelects(); orig.value = ov2; dest.value = dv2;
+        renderLibrary(); compute();
+        poiBtn.classList.toggle('on', on);
+        poiBtn.textContent = on ? '⭐ Épinglé' : '☆ Épingler';
+      } catch (e) {
+        poiBtn.textContent = '⚠️ ' + String(e.message).slice(0, 18);
+      } finally { poiBtn.disabled = false; }
+    });
     document.body.appendChild(ov);
     const onKey = (e) => { if (e.key === 'Escape') { ov.remove(); document.removeEventListener('keydown', onKey); } };
     document.addEventListener('keydown', onKey);
