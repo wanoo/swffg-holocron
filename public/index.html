@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Archive Holocron — Star Wars FFG</title>
+    <meta
+      name="description"
+      content="Archive hors-ligne des journaux, fiches et bestiaire d'une campagne Star Wars — Force et Destinée (FFG)."
+    />
+    <meta name="theme-color" content="#0e1116" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <link rel="stylesheet" href="css/fonts.css" />
+    <link rel="stylesheet" href="css/dice.css" />
+    <link rel="stylesheet" href="css/journal.css" />
+    <link rel="stylesheet" href="css/sheet.css" />
+    <link rel="stylesheet" href="css/app.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#content">Aller au contenu</a>
+
+    <header class="topbar">
+      <button class="icon-btn hamburger" id="btn-menu" aria-label="Ouvrir le menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <a class="brand" href="#/" aria-label="Accueil">
+        <span class="brand-mark" aria-hidden="true">◈</span>
+        <span class="brand-text">Archive Holocron</span>
+      </a>
+      <div class="topbar-spacer"></div>
+      <button class="search-trigger" id="btn-search" aria-label="Rechercher (Ctrl+K)">
+        <span aria-hidden="true">⌕</span>
+        <span class="search-trigger-label">Rechercher</span>
+        <kbd>Ctrl K</kbd>
+      </button>
+      <button class="icon-btn" id="btn-generator" aria-label="Générateur de dés" title="Générateur de dés">
+        <span aria-hidden="true">🎲</span>
+      </button>
+      <button class="icon-btn" id="btn-gm" aria-label="Espace Maître du Jeu" title="Espace MJ (clé requise)">
+        <span aria-hidden="true">🔒</span>
+      </button>
+      <button class="icon-btn" id="btn-legend" aria-label="Légende des dés et symboles" title="Dés &amp; Symboles">
+        <span class="ffg-die dt-proficiency" aria-hidden="true">c</span>
+      </button>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar" id="sidebar" aria-label="Navigation">
+        <div class="sidebar-search">
+          <input
+            id="sidebar-search-box"
+            type="text"
+            readonly
+            placeholder="Rechercher…  (Ctrl K)"
+            aria-label="Ouvrir la recherche"
+          />
+        </div>
+        <div class="filters" id="filters" role="group" aria-label="Filtrer par catégorie"></div>
+        <nav class="tree" id="tree" aria-label="Sommaire"></nav>
+      </aside>
+
+      <main class="main" id="content" tabindex="-1"></main>
+    </div>
+
+    <div class="scrim" id="scrim" hidden></div>
+
+    <!-- Palette de recherche (Ctrl/Cmd-K) -->
+    <div class="palette-backdrop" id="palette" hidden>
+      <div class="palette holo-frame" role="dialog" aria-modal="true" aria-label="Recherche">
+        <input
+          id="palette-input"
+          type="text"
+          placeholder="Rechercher journaux, pages, personnages…"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <ul class="palette-results" id="palette-results" role="listbox"></ul>
+        <div class="palette-hint">
+          <kbd>↑</kbd><kbd>↓</kbd> naviguer · <kbd>↵</kbd> ouvrir · <kbd>Esc</kbd> fermer
+        </div>
+      </div>
+    </div>
+
+    <!-- Modale légende -->
+    <div class="modal-backdrop on-dark" id="legend" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-label="Dés et symboles">
+        <div class="modal-head">
+          <h2>Dés &amp; Symboles</h2>
+          <button class="icon-btn" data-close aria-label="Fermer">✕</button>
+        </div>
+        <div class="modal-body" id="legend-body"></div>
+      </div>
+    </div>
+
+    <!-- Modale générateur de dés -->
+    <div class="modal-backdrop on-dark" id="generator" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-label="Générateur de dés">
+        <div class="modal-head">
+          <h2>Générateur de dés</h2>
+          <button class="icon-btn" data-close aria-label="Fermer">✕</button>
+        </div>
+        <div class="modal-body" id="generator-body"></div>
+      </div>
+    </div>
+
+    <!-- Modale carte compendium -->
+    <div class="modal-backdrop on-dark" id="card-modal" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-label="Référence">
+        <div class="modal-head">
+          <h2 id="card-title">Référence</h2>
+          <button class="icon-btn" data-close aria-label="Fermer">✕</button>
+        </div>
+        <div class="modal-body" id="card-body"></div>
+      </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>

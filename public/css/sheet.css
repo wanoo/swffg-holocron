@@ -1,0 +1,398 @@
+/* sheet.css — fiches de personnage, navigateurs de listes, ancres de chapitre. */
+
+/* Décalage d'ancrage pour la barre supérieure sticky. */
+.chapter { scroll-margin-top: calc(var(--topbar-h) + 3.2rem); }
+
+/* --- Fiche --------------------------------------------------------------- */
+.sheet {
+  max-width: 60rem;
+  margin: 0 auto;
+}
+.sheet-head {
+  display: flex;
+  gap: 1.1rem;
+  align-items: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 1.1rem;
+}
+.sheet-portrait {
+  width: 92px;
+  height: 92px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 2px solid var(--gold-soft);
+  flex: 0 0 auto;
+}
+.sheet-portrait.fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #12161d;
+  background: hsl(var(--h, 40), 45%, 62%);
+}
+.sheet-headinfo { min-width: 0; }
+.sheet-headinfo .eyebrow { color: var(--gold); text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.75rem; font-weight: 700; }
+.sheet-headinfo h1 { margin: 0.15rem 0 0.5rem; font-size: 1.7rem; }
+.sheet-badges { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.sheet-badge {
+  font-size: 0.8rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  color: var(--fg);
+}
+.sheet-badge .bk { color: var(--fg-dim); text-transform: uppercase; font-size: 0.72em; letter-spacing: 0.04em; }
+
+/* Caractéristiques */
+.char-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.char-cell {
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.7rem 0.3rem;
+  text-align: center;
+}
+.char-val { font-size: 1.9rem; font-weight: 700; color: var(--gold); line-height: 1; }
+.char-name { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--fg-muted); margin-top: 0.3rem; }
+
+/* Stats dérivées */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+}
+.stat-cell {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.6rem;
+  text-align: center;
+}
+.stat-val { font-size: 1.25rem; font-weight: 700; color: var(--fg); }
+.stat-name { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--fg-muted); margin-top: 0.2rem; }
+
+.sheet-section { margin: 1.4rem 0; }
+.sheet-section-title {
+  font-size: 1.05rem;
+  color: var(--gold);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.3rem;
+  margin: 0 0 0.8rem;
+}
+.skill-group-title { margin: 0.9rem 0 0.4rem; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fg-muted); }
+
+/* Compétences */
+.skill-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.3rem 0.8rem;
+}
+.skill-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.5rem;
+  border-radius: 7px;
+  border: 1px solid transparent;
+}
+.skill-cell.has-rank { background: var(--panel); border-color: var(--line-soft); }
+.skill-cell .career-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); flex: 0 0 auto; }
+.skill-cell .skill-name { flex: 1; min-width: 0; font-size: 0.9rem; color: var(--fg); text-decoration: none; }
+a.skill-name:hover { color: var(--holo); text-decoration: underline; }
+.skill-cell .skill-rank {
+  font-size: 0.78rem;
+  color: var(--fg-dim);
+  min-width: 1.1em;
+  text-align: center;
+}
+.skill-pool { white-space: nowrap; }
+.skill-grid.adversary { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+
+/* Talents & capacités */
+.talent-card {
+  background: var(--panel);
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.5rem;
+}
+.talent-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; margin-bottom: 0.25rem; }
+.talent-name { font-weight: 700; color: var(--fg); }
+.talent-rank, .talent-act { font-size: 0.72rem; padding: 0.05em 0.5em; border-radius: 999px; background: var(--bg-3); color: var(--fg-muted); border: 1px solid var(--line); }
+.talent-src { margin-left: auto; font-size: 0.72rem; color: var(--fg-dim); }
+.talent-card .rich { color: var(--fg-muted); font-size: 0.9rem; line-height: 1.55; }
+.talent-card .rich p { margin: 0 0 0.4em; }
+.talent-card .rich p:last-child { margin-bottom: 0; }
+
+.tag-list { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.7rem; }
+.tag { font-size: 0.78rem; padding: 0.15rem 0.6rem; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line); color: var(--fg); }
+
+.equip-list { margin: 0.2rem 0 0.6rem 1.1rem; color: var(--fg); }
+.equip-list li { margin: 0.2rem 0; }
+
+.gauge-notes .kv { margin: 0.3rem 0; }
+.kv-k { color: var(--fg-dim); }
+.gauge-notes .rich { display: inline; }
+.gauge-notes .rich p { display: inline; margin: 0; }
+
+/* Tableau d'armes (sur châssis sombre) */
+.sheet-table { border-collapse: collapse; width: 100%; min-width: max-content; font-size: 0.9rem; }
+.sheet-table th, .sheet-table td { border: 1px solid var(--line); padding: 0.4em 0.7em; text-align: left; }
+.sheet-table thead th { background: var(--sw-red); color: #f4e6cf; white-space: nowrap; }
+.sheet-table tbody tr:nth-child(even) { background: var(--panel); }
+
+/* --- Navigateurs de listes ---------------------------------------------- */
+.browser-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+.browser-search input {
+  height: 38px;
+  min-width: 220px;
+  padding: 0 0.8rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--fg);
+  font-family: var(--font-ui);
+}
+.type-chips { display: flex; gap: 0.3rem; }
+.type-chip {
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--fg-muted);
+  cursor: pointer;
+  font-size: 0.82rem;
+}
+.type-chip.on { background: var(--holo); border-color: var(--holo); color: #04121b; }
+.source-select {
+  height: 38px;
+  padding: 0 0.6rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--fg);
+  font-family: var(--font-ui);
+  max-width: 240px;
+}
+.browser-count { margin-left: auto; color: var(--fg-dim); font-size: 0.85rem; }
+
+.bestiary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.6rem;
+}
+.bestiary-card {
+  display: block;
+  padding: 0.7rem 0.85rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--fg);
+  text-decoration: none;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.bestiary-card:hover { border-color: var(--gold-soft); transform: translateY(-2px); }
+.bc-top { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.bc-name { font-weight: 600; }
+.bc-type { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.08em 0.5em; border-radius: 999px; border: 1px solid var(--line); color: var(--fg-muted); flex: 0 0 auto; }
+.bc-type.t-nemesis { --bc: #ff8f88; color: var(--bc); border-color: color-mix(in srgb, var(--bc) 45%, transparent); background: color-mix(in srgb, var(--bc) 10%, transparent); }
+.bc-type.t-rival { --bc: #ffd27a; color: var(--bc); border-color: color-mix(in srgb, var(--bc) 45%, transparent); background: color-mix(in srgb, var(--bc) 10%, transparent); }
+.bc-type.t-minion { --bc: #9fd0ff; color: var(--bc); border-color: color-mix(in srgb, var(--bc) 45%, transparent); background: color-mix(in srgb, var(--bc) 10%, transparent); }
+.bc-sub { color: var(--fg-muted); font-size: 0.8rem; margin-top: 0.2rem; }
+.bc-stats { color: var(--fg-dim); font-size: 0.75rem; margin-top: 0.4rem; font-variant-numeric: tabular-nums; }
+.bestiary-sentinel { height: 1px; }
+
+/* Compétences cliquables (amorcent le générateur) */
+.skill-cell[role='button'] { cursor: pointer; }
+.skill-cell[role='button']:hover { border-color: var(--holo); background: var(--panel-2); }
+.skill-cell:focus-visible { outline: 2px solid var(--holo); outline-offset: 2px; }
+.skill-rules { margin-left: auto; text-decoration: none; opacity: 0.7; font-size: 0.9rem; }
+.skill-rules:hover { opacity: 1; }
+.skill-cell .skill-name { flex: 0 1 auto; }
+.skill-cell .skill-pool { margin-left: 0.2rem; }
+
+/* --- Arbres (talents de spécialisation & améliorations de Force) --- */
+.spec-tree, .force-tree { margin: 0 0 1.6rem; }
+.spec-tree-head h4, .force-tree-head h4 { margin: 0 0 0.2rem; color: var(--gold); font-size: 1rem; }
+.spec-tree-head .rich, .force-tree-head .rich { color: var(--fg-muted); font-size: 0.88rem; margin-bottom: 0.7rem; line-height: 1.5; }
+.spec-tree-head .rich p { margin: 0 0 0.4em; }
+
+/* Conteneur scrollable horizontalement pour les arbres (mobile). */
+.tree-scroll {
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 2px;
+}
+.talent-tree {
+  display: grid;
+  grid-template-columns: auto repeat(4, minmax(110px, 1fr));
+  gap: 30px 26px;
+  align-items: stretch;
+  min-width: 520px;
+}
+.upgrade-tree { min-width: 520px; }
+.tier-cost {
+  align-self: center;
+  color: var(--gold-soft);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.upgrade-tree {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px 0;
+}
+.upgrade-tree .tree-cell { margin: 0 1%; }
+.tree-cell.size-single { flex: 0 0 21%; }
+.tree-cell.size-double { flex: 0 0 46%; }
+.tree-cell.size-triple { flex: 0 0 71%; }
+.tree-cell.size-full { flex: 0 0 96%; }
+
+.tree-cell {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
+  background: var(--panel);
+  min-height: 58px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.35rem;
+  cursor: pointer;
+}
+.tree-cell:hover { border-color: var(--holo); }
+.tree-cell:focus-visible { outline: 2px solid var(--holo); outline-offset: 2px; }
+.tree-cell.empty { background: transparent; border-style: dashed; opacity: 0.2; cursor: default; min-height: 58px; }
+.tree-cell.learned {
+  border-color: var(--gold);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 16%, transparent), color-mix(in srgb, var(--gold) 6%, transparent));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 40%, transparent) inset;
+}
+.tree-cell.unlearned { opacity: 0.6; }
+.tree-cell .tree-name { font-size: 0.82rem; font-weight: 600; color: var(--fg); line-height: 1.2; }
+.tree-cell .tree-foot { display: flex; align-items: center; gap: 0.4rem; }
+.tree-cell .tree-rank { font-size: 0.66rem; color: var(--fg-muted); }
+.tree-cell .tree-cost { font-size: 0.66rem; color: var(--gold-soft); margin-left: auto; }
+
+/* Connecteurs de l'arbre (barres façon Foundry) */
+.conn { position: absolute; background: var(--fg-dim); z-index: 0; border-radius: 2px; }
+.tree-cell.learned .conn { background: var(--gold); }
+.conn-top { top: -30px; transform: translateX(-50%); width: 4px; height: 30px; }
+.conn-right { right: -26px; top: 50%; transform: translateY(-50%); height: 4px; width: 26px; }
+.upgrade-tree .conn-right { right: -1%; width: 2%; }
+
+/* --- Générateur de dés --- */
+.dg-seed { color: var(--fg-muted); margin-bottom: 0.8rem; }
+.dg-seed strong { color: var(--gold); }
+.dg-pool {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+.dg-die {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+.dg-die-label { display: flex; align-items: center; gap: 0.4rem; }
+.dg-die-label .ffg-die { font-size: 1.35rem; }
+.dg-die-name { font-size: 0.85rem; }
+.dg-stepper { display: flex; align-items: center; gap: 0.3rem; }
+.dg-btn {
+  width: 26px; height: 26px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--fg);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+}
+.dg-btn:hover { border-color: var(--holo); }
+.dg-count { min-width: 1.4em; text-align: center; font-variant-numeric: tabular-nums; font-weight: 700; }
+
+.dg-actions { display: flex; gap: 0.6rem; margin-bottom: 1rem; }
+.dg-roll {
+  flex: 1;
+  padding: 0.6rem;
+  border: 0;
+  border-radius: 8px;
+  background: var(--gold);
+  color: var(--on-gold);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  font-family: var(--font-ui);
+}
+.dg-roll:hover { background: var(--gold-bright); }
+.dg-reset {
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--fg-muted);
+  cursor: pointer;
+  font-family: var(--font-ui);
+}
+.dg-poolline { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.8rem; flex-wrap: wrap; }
+.dg-poolview .ffg-die { font-size: 1.5rem; }
+.dg-result {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.9rem;
+  background: var(--bg-3);
+  margin-bottom: 1rem;
+}
+.dg-outcome { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+.dg-outcome.ok { color: #7ddc8f; }
+.dg-outcome.ko { color: var(--danger); }
+.dg-symbols { margin-bottom: 0.4rem; }
+.dg-symbols .ffg-die { font-size: 1.7rem; }
+.dg-net { font-size: 0.9rem; }
+
+.dg-help { border-top: 1px solid var(--line); padding-top: 0.9rem; }
+.dg-help-title { margin: 0 0 0.6rem; color: var(--gold); font-size: 0.95rem; }
+.dg-help-bucket { margin-bottom: 0.8rem; }
+.dg-help-head { display: flex; align-items: center; gap: 0.4rem; font-weight: 700; margin-bottom: 0.3rem; }
+.dg-help-head .ffg-die { font-size: 1.2rem; }
+.dg-help-list { list-style: none; margin: 0; padding: 0; }
+.dg-help-list li { display: flex; align-items: baseline; gap: 0.5rem; padding: 0.2rem 0; font-size: 0.88rem; color: var(--fg-muted); }
+.dg-help-cost { white-space: nowrap; flex: 0 0 auto; }
+.dg-help-cost .ffg-die { font-size: 1rem; }
+.dg-help-list .rich { display: inline; }
+.dg-help-list .rich p { display: inline; margin: 0; }
+
+@media (max-width: 620px) {
+  .char-row { grid-template-columns: repeat(3, 1fr); }
+  .sheet-head { flex-direction: column; text-align: center; align-items: center; }
+  .sheet-badges { justify-content: center; }
+  .browser-count { margin-left: 0; width: 100%; }
+  .stat-row { grid-template-columns: repeat(2, 1fr); }
+}

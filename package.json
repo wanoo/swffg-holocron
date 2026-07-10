@@ -1,0 +1,17 @@
+{
+  "name": "swffg-holocron",
+  "version": "0.1.0",
+  "description": "Campaign companion web service for Star Wars FFG on FoundryVTT — Foundry is the single source of truth, the Holocron displays it beautifully.",
+  "type": "module",
+  "license": "MIT",
+  "repository": "github:wanoo/swffg-holocron",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server/index.mjs",
+    "check": "find server public/js -name '*.mjs' -o -name '*.js' | xargs -n1 node --check",
+    "test": "node --test server/test/"
+  },
+  "optionalDependencies": {
+    "foundry-mcp-server": "github:wanoo/foundry-vtt-mcp#clever-basepath"
+  }
+}

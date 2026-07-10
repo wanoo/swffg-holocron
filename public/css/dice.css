@@ -1,0 +1,96 @@
+/* dice.css — glyphes FFG + couleurs sémantiques, calibrés pour le thème sombre.
+   (Les @font-face vivent dans fonts.css.) */
+
+/* Glyphe de dé / symbole rendu inline dans le texte et les tableaux. */
+.ffg-die {
+  font-family: 'EotESymbol', sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  /* Alignement baseline propre, y compris en séquence [di][di][di]. */
+  vertical-align: baseline;
+  display: inline-block;
+  font-size: 1.15em;
+  letter-spacing: 0;
+  /* évite que la sélection/copie n'insère le caractère brut de police */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Léger espacement entre glyphes consécutifs pour la lisibilité. */
+.ffg-die + .ffg-die {
+  margin-left: 0.04em;
+}
+
+/* Couleurs sémantiques par type — calibrées pour le thème sombre.
+   Aptitude/difficulté/défi éclaircis (le green/purple CSS est illisible sur sombre). */
+.dt-boost { color: #8fd4ff; }
+.dt-ability { color: #4fae53; }
+.dt-proficiency { color: #f2c811; }
+.dt-difficulty { color: #b07ae0; }
+.dt-challenge { color: #e5544b; }
+.dt-setback,
+.dt-force,
+.dt-forcepoint,
+.dt-success,
+.dt-advantage,
+.dt-triumph,
+.dt-failure,
+.dt-threat,
+.dt-despair,
+.dt-light,
+.dt-dark {
+  color: #f4f1e8;
+}
+/* L'infortune (dé noir) garde un cerne clair pour rester identifiable. */
+.dt-setback { text-shadow: 0 0 1px rgba(255, 255, 255, 0.35); }
+
+/* Impression (fond blanc) : on repasse aux encres Foundry sombres. */
+@media print {
+  .dt-boost { color: #57a6d6; }
+  .dt-ability { color: green; }
+  .dt-difficulty { color: purple; }
+  .dt-challenge { color: red; }
+  .dt-setback,
+  .dt-force,
+  .dt-forcepoint,
+  .dt-success,
+  .dt-advantage,
+  .dt-triumph,
+  .dt-failure,
+  .dt-threat,
+  .dt-despair,
+  .dt-light,
+  .dt-dark { color: #111; text-shadow: none; }
+  .dt-boost, .dt-proficiency { text-shadow: 0 0 1px rgba(0, 0, 0, 0.55); }
+}
+
+/* Légende dés & symboles */
+.legend-group h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.legend-list {
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.4rem 1rem;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.legend-item .ffg-die {
+  font-size: 1.5rem;
+  width: 1.6rem;
+  text-align: center;
+}
+.legend-label {
+  font-size: 0.9rem;
+}

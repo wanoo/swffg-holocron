@@ -1,0 +1,288 @@
+/* journal.css — surface de lecture « dalle holocron » : sombre, or & bleu holo.
+   Les tokens --page-* pilotent tout ; --mix-base sert de base aux fonds teintés
+   (color-mix) et repasse à blanc à l'impression. */
+
+.reader {
+  --page-bg: #121826; /* dalle holocron, un cran au-dessus de --bg */
+  --page-fg: var(--fg);
+  --page-muted: var(--fg-muted);
+  --page-rule: var(--line);
+  --page-accent: var(--gold); /* titres : or holocron */
+  --page-link: var(--holo);
+  --mix-base: var(--page-bg);
+}
+
+/* La « dalle » : facette de lecture encadrée par le châssis, liseré or discret. */
+.page-surface {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 3%, var(--page-bg)), var(--page-bg) 22%);
+  color: var(--page-fg);
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--gold-soft) 26%, var(--line));
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--gold) 14%, transparent) inset, 0 10px 40px rgba(0, 0, 0, 0.45);
+  padding: clamp(1.25rem, 3vw, 2.75rem);
+  max-width: 62rem;
+  margin: 0 auto 2rem;
+}
+
+.journal-content {
+  font-family: 'Signika', 'Roboto', system-ui, sans-serif;
+  font-size: 1.03rem;
+  line-height: 1.65;
+  color: var(--page-fg);
+}
+
+.journal-content > *:first-child { margin-top: 0; }
+
+/* Hiérarchie des titres */
+.journal-content h1,
+.journal-content h2,
+.journal-content h3,
+.journal-content h4 {
+  font-family: 'Signika', sans-serif;
+  line-height: 1.2;
+  color: var(--page-accent);
+  margin: 1.8em 0 0.5em;
+  font-weight: 700;
+}
+.journal-content h1 { font-size: 1.9rem; }
+.journal-content h2 {
+  font-size: 1.5rem;
+  border-bottom: 2px solid var(--page-accent);
+  padding-bottom: 0.2em;
+}
+.journal-content h3 { font-size: 1.22rem; }
+.journal-content h4 { font-size: 1.06rem; color: var(--gold-soft); }
+
+.journal-content p { margin: 0 0 1em; }
+.journal-content a { color: var(--page-link); text-decoration: underline; text-underline-offset: 2px; }
+
+/* Listes */
+.journal-content ul,
+.journal-content ol { margin: 0 0 1em 1.4em; padding: 0; }
+.journal-content li { margin: 0.25em 0; }
+
+/* Citations */
+.journal-content blockquote {
+  margin: 1.2em 0;
+  padding: 0.6em 1.1em;
+  border-left: 4px solid var(--page-accent);
+  background: color-mix(in srgb, var(--page-accent) 8%, var(--mix-base));
+  color: var(--page-fg);
+  font-style: italic;
+}
+.journal-content blockquote p:last-child { margin-bottom: 0; }
+
+.journal-content hr {
+  border: 0;
+  border-top: 1px solid var(--page-rule);
+  margin: 1.6em 0;
+}
+
+.journal-content code,
+.journal-content pre {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+}
+.journal-content code { padding: 0.05em 0.35em; }
+.journal-content pre { padding: 0.8em 1em; overflow-x: auto; }
+
+/* Images de contenu */
+.journal-content img { max-width: 100%; height: auto; border-radius: 6px; }
+.journal-content img.img-broken { display: none; }
+
+/* --- Tableaux (fidélité Foundry, en-têtes rouge sombre) --- */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1.2em 0;
+  border: 1px solid var(--page-rule);
+  border-radius: 8px;
+}
+.journal-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.95rem;
+  background: var(--mix-base);
+}
+/* Neutralise les hacks de mise en page Foundry (largeurs %, colonnes sticky) :
+   sur des tableaux déjà scrollables ils produisent des colonnes géantes et des
+   cellules qui flottent par-dessus le contenu. */
+.journal-table [style*='width'] { width: auto !important; }
+.journal-table [style*='position'] { position: static !important; }
+/* Dans un tableau, les pastilles compendium peuvent se replier entre les mots
+   (box-decoration-break: clone rend la coupure propre). */
+.journal-table .citem { white-space: normal; }
+/* … et certains tableaux portent un white-space:nowrap inline (sur la table,
+   les lignes ou les paragraphes internes) → colonnes kilométriques. */
+.journal-table { white-space: normal; } /* coupe l'héritage d'un wrapper nowrap */
+.journal-table td { white-space: normal !important; }
+.journal-table [style*='white-space'] { white-space: normal !important; }
+.journal-table caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: 700;
+  color: var(--page-accent);
+  padding: 0.4em 0.6em;
+}
+.journal-table th,
+.journal-table td {
+  border: 1px solid var(--page-rule);
+  padding: 0.5em 0.7em;
+  vertical-align: top;
+  text-align: left;
+}
+.journal-table thead th,
+.journal-table th[scope='col'] {
+  background: var(--sw-red); /* en-têtes rouge Empire, fidèles au style FFG */
+  color: #f4e6cf;
+  font-weight: 700;
+}
+/* Les liens/styles inline hérités de Foundry restent lisibles sur l'en-tête rouge. */
+.journal-table thead a,
+.journal-table thead [style*='color'] { color: #f4e6cf !important; }
+.journal-table tbody tr:nth-child(even),
+.journal-table tr:nth-child(even) { background: color-mix(in srgb, var(--gold) 6%, transparent); }
+
+/* Tableaux « résultats » (blessures critiques…) : première colonne = fourchette d100 */
+.journal-table.results td:first-child,
+.journal-table td[data-roll],
+.journal-table td:first-child { }
+
+/* --- Pastilles de référence compendium (or holocron sur dalle sombre) --- */
+.citem {
+  display: inline;
+  font: inherit;
+  cursor: pointer;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 22%, var(--mix-base)), color-mix(in srgb, var(--gold) 12%, var(--mix-base)));
+  color: var(--gold-bright);
+  border: 1px solid color-mix(in srgb, var(--gold-soft) 70%, transparent);
+  border-radius: 999px;
+  padding: 0.05em 0.6em 0.1em;
+  line-height: 1.4;
+  white-space: nowrap;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.citem:hover,
+.citem:focus-visible { background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 34%, var(--mix-base)), color-mix(in srgb, var(--gold) 20%, var(--mix-base))); outline: none; }
+.citem.is-known { box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 40%, transparent) inset; }
+.citem:not(.is-known) { opacity: 0.85; cursor: default; }
+.citem-ico { color: var(--gold-soft); margin-right: 0.2em; font-size: 0.85em; }
+
+.xref {
+  color: var(--page-link);
+  font-weight: 600;
+  cursor: pointer;
+}
+.ref-plain { font-weight: 600; color: var(--page-muted); }
+
+/* En-tête de page (titre + portrait éventuel) */
+.page-head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.page-head .portrait {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid var(--page-accent);
+  flex: 0 0 auto;
+}
+.page-head h2.page-title {
+  margin: 0;
+  border: 0;
+  font-size: 1.6rem;
+  color: var(--page-accent);
+}
+
+/* --- Édition collaborative des notes / actes --- */
+.note-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.4rem 0.6rem;
+  margin-bottom: 0.8rem;
+  border: 1px dashed var(--page-rule);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--gold) 4%, transparent);
+}
+.note-status { font-size: 0.82rem; color: var(--page-muted); }
+.note-edit-btn {
+  margin-left: auto;
+  border: 1px solid var(--gold);
+  background: var(--gold);
+  color: var(--on-gold);
+  border-radius: 999px;
+  padding: 0.2rem 0.8rem;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+}
+.note-edit-btn:hover { background: var(--gold-bright); border-color: var(--gold-bright); }
+
+.note-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  padding: 0.4rem;
+  border: 1px solid var(--page-rule);
+  border-radius: 8px 8px 0 0;
+  background: var(--panel);
+  position: sticky;
+  top: var(--topbar-h, 56px);
+  z-index: 5;
+}
+.note-tool {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 0.5rem;
+  border: 1px solid var(--page-rule);
+  background: var(--bg-2);
+  color: var(--page-fg);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.note-tool:hover { background: var(--panel-2); border-color: var(--gold-soft); }
+.note-editor {
+  border: 1px solid var(--page-rule);
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+  padding: 1rem 1.1rem;
+  min-height: 8rem;
+  background: var(--bg-2);
+  outline: none;
+}
+.note-editor:focus { box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 35%, transparent) inset; }
+.note-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.7rem;
+}
+.note-save {
+  border: 0;
+  background: var(--gold);
+  color: var(--on-gold);
+  border-radius: 8px;
+  padding: 0.45rem 1.1rem;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+.note-save:hover { background: var(--gold-bright); }
+.note-save:disabled { opacity: 0.6; cursor: default; }
+.note-cancel {
+  border: 1px solid var(--page-rule);
+  background: transparent;
+  color: var(--page-muted);
+  border-radius: 8px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  font: inherit;
+}
+.note-msg { font-size: 0.82rem; color: var(--gold); }

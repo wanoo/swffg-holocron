@@ -1,0 +1,16 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Syntax check (server + front)
+        run: |
+          find server public/js -name '*.mjs' -o -name '*.js' | while read f; do
+            node --check "$f" || exit 1
+          done
+      - name: Unit tests
+        run: '[ -d server/test ] && node --test server/test/ || echo "no tests yet"'
