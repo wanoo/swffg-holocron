@@ -40,7 +40,8 @@ export function createAstroService({ publicDir, config, logger = console }) {
 
   // Toggle MJ d'un monde d'intérêt : écrit flags.holocron.poi du journal dédié
   // (même stockage que la macro ⭐ Foundry), crée le journal au besoin.
-  async function setPoi({ name, note = '', act = '', on = true }) {
+  // vis : 'gm' (repérage privé MJ) ou 'all' (épinglé pour les joueurs, défaut).
+  async function setPoi({ name, note = '', act = '', vis = 'all', on = true }) {
     const jname = config().journals.poi;
     let list = await mcpCall('get_journals', { where: { name: jname } });
     let j = (Array.isArray(list) ? list : []).find((x) => x && x.name === jname);
@@ -54,7 +55,7 @@ export function createAstroService({ publicDir, config, logger = console }) {
       if (!j) throw new Error('journal POI introuvable');
     }
     let poiList = (j.flags?.holocron?.poi || []).filter((p) => p.name !== name);
-    if (on) poiList.push({ name: String(name).slice(0, 80), note: String(note).slice(0, 200), act: String(act).slice(0, 10) });
+    if (on) poiList.push({ name: String(name).slice(0, 80), note: String(note).slice(0, 200), act: String(act).slice(0, 10), vis: vis === 'gm' ? 'gm' : 'all' });
     await mcpCall('modify_document', { type: 'JournalEntry', _id: j._id, updates: [{ 'flags.holocron.poi': poiList }] });
     poiCache = { t: Date.now(), poi: poiList }; // write-through
     return poiList;

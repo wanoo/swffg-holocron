@@ -178,7 +178,7 @@ export async function mountAstronav(container) {
     </div>
     <div class="an-libhead">
       <h2>Registre des mondes</h2>
-      <input class="an-search" id="an-search" type="search" placeholder="Rechercher un système…" aria-label="Rechercher">
+      <input class="an-search" id="an-search" type="search" placeholder="Rechercher un système… (Entrée : zoom carte)" aria-label="Rechercher">
     </div>
     <div class="an-filters" id="an-filters">
       <select id="f-region" aria-label="Zone"><option value="">🌌 Toutes les zones</option></select>
@@ -232,6 +232,17 @@ export async function mountAstronav(container) {
   });
   let st;
   wrap.querySelector('#an-search').addEventListener('input', () => { clearTimeout(st); st = setTimeout(renderLibrary, 150); });
+  // Entrée dans la recherche → zoom carte sur le meilleur résultat localisable.
+  wrap.querySelector('#an-search').addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const F = getFilters(); if (!anyFilter(F)) return;
+    const hits = PLANETS.filter((p) => matchP(p, F) && posOf(p));
+    if (!hits.length) return;
+    const t = F.text;
+    const best = hits.find((p) => p.name.toLowerCase() === t)
+      || hits.sort((a, b) => a.name.length - b.name.length)[0];
+    focusPlanet(best);
+  });
   ['f-region', 'f-clim', 'f-aff', 'f-pop'].forEach((id) => wrap.querySelector('#' + id).addEventListener('change', renderLibrary));
   ['f-faune', 'f-flore'].forEach((id) => wrap.querySelector('#' + id).addEventListener('click', (e) => {
     const on = e.currentTarget.getAttribute('aria-pressed') === 'true';
@@ -262,13 +273,18 @@ export async function mountAstronav(container) {
   })();
 
   // Mondes d'intérêt flaggés depuis Foundry (macro ⭐) → épinglés pour les joueurs.
+  // Le serveur ne renvoie les épingles « vis: gm » qu'au MJ (session ou clé).
   (async () => {
     let poi = [];
-    try { poi = (await (await fetch('/api/astro/poi')).json()).poi || []; } catch { return; }
+    try {
+      const r = await fetch('/api/astro/poi', { credentials: 'same-origin', headers: getGMKey() ? { 'x-gm-key': getGMKey() } : {} });
+      poi = (await r.json()).poi || [];
+    } catch { return; }
     let changed = false;
     for (const it of poi) {
       const p = byName[it && it.name]; if (!p) continue;
       p.poi = true;
+      p.poiVis = it.vis === 'gm' ? 'gm' : 'all';
       const note = ((it.act ? `Acte ${it.act} — ` : '') + (it.note || '')).trim();
       if (note) p.campaign = note;
       if (!CAMPAIGN.has(it.name)) { CAMPAIGN.add(it.name); CAMPAIGN_ORDER.push(it.name); changed = true; }
@@ -587,8 +603,8 @@ export async function mountAstronav(container) {
       const r = vp.getBoundingClientRect();
       if (z === 'in') zoomAt(r.width / 2, r.height / 2, 1.4);
       else if (z === 'out') zoomAt(r.width / 2, r.height / 2, 1 / 1.4);
-      else if (z === 'reset') fitGalaxy();
-      else if (z === 'route') fitRoute(byName[orig.value], byName[dest.value]);
+      else if (z === 'reset') { view.focus = null; fitGalaxy(); }
+      else if (z === 'route') { view.focus = null; fitRoute(byName[orig.value], byName[dest.value]); }
     });
 
     // pincement (2 doigts)
@@ -687,6 +703,20 @@ export async function mountAstronav(container) {
     };
     if (o) marker(o, '#6fbf8f');
     if (dst && dst.name !== (o && o.name)) marker(dst, '#57c7ff');
+    // monde ciblé (📍 recherche/fiche) : réticule doré, indépendant du trajet
+    const fp = view.focus;
+    if (fp && (!o || fp.name !== o.name) && (!dst || fp.name !== dst.name)) {
+      const sp = SP(fp);
+      if (sp) {
+        ctx.strokeStyle = '#ffd76a'; ctx.lineWidth = 2.2;
+        ctx.beginPath(); ctx.arc(sp[0], sp[1], 16, 0, 7); ctx.stroke();
+        ctx.beginPath(); ctx.arc(sp[0], sp[1], 5, 0, 7); ctx.fillStyle = '#ffd76a'; ctx.fill();
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          ctx.beginPath(); ctx.moveTo(sp[0] + dx * 20, sp[1] + dy * 20); ctx.lineTo(sp[0] + dx * 30, sp[1] + dy * 30); ctx.stroke();
+        }
+        label(sp[0] + 22, sp[1] - 14, fp.name, '#ffd76a', 15);
+      }
+    }
   }
 
   function fitBox(x0, y0, x1, y1, pad) {
@@ -705,6 +735,15 @@ export async function mountAstronav(container) {
     const w = view.vp.clientWidth, h = view.vp.clientHeight;
     view.minS = Math.min(w, h) / STAGE;
     view.s = view.minS; view.clamp(); schedule();
+  }
+  // Centre + zoome la carte sur un monde (recherche, fiche 📍) avec marqueur dédié.
+  function focusPlanet(p) {
+    if (!view || !p) return;
+    const im = posOf(p); if (!im) return;
+    view.focus = p;
+    const R = 200; // demi-fenêtre en px image ≈ zoom secteur
+    fitBox(im[0] - R, im[1] - R, im[0] + R, im[1] + R, 0);
+    wrap.querySelector('#an-chart').scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
   function fitRoute(o, dst) {
     // cadre l'itinéraire complet (tous les segments), sinon la paire o/dst
@@ -733,7 +772,7 @@ export async function mountAstronav(container) {
   function thumb(p) { return p.img ? `<img src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy" referrerpolicy="no-referrer">` : `<div class="an-orb" style="--oc:${orbColor(p)}">${esc(p.name[0])}</div>`; }
   function cardHTML(p) {
     return `<button class="an-pcard" data-name="${esc(p.name)}">
-      <div class="an-thumb">${CAMPAIGN.has(p.name) ? '<span class="an-star">★</span>' : ''}${thumb(p)}</div>
+      <div class="an-thumb">${CAMPAIGN.has(p.name) ? `<span class="an-star">${p.poiVis === 'gm' ? '🔒' : '★'}</span>` : ''}${thumb(p)}</div>
       <div class="an-body"><h4>${esc(p.name)}</h4><div class="an-meta"><span class="an-coord">${esc(p.coord || '?')}</span>${p.sector ? `<span class="an-sectag">· ${esc(p.sector)}</span>` : ''}</div></div></button>`;
   }
   function renderLibrary() {
@@ -786,7 +825,8 @@ export async function mountAstronav(container) {
         ${meta && meta !== esc(p.region) ? `<p class="an-desc an-metaline">${meta}</p>` : ''}
         ${pts}
         <div class="an-acts"><button class="an-o" type="button">Définir origine</button><button class="an-d" type="button">Définir destination</button>
-          ${(Data.gm || getGMKey()) ? `<button class="an-poi${p.poi ? ' on' : ''}" type="button" title="Monde d'intérêt (épinglé pour les joueurs)">${p.poi ? '⭐ Épinglé' : '☆ Épingler'}</button>` : ''}
+          <button class="an-map" type="button" title="Centrer la carte sur ce monde">📍 Carte</button>
+          ${(Data.gm || getGMKey()) ? `<button class="an-poi" type="button"></button>` : ''}
         </div>
       </div>`;
     const ov = el('div', 'an-overlay');
@@ -795,32 +835,41 @@ export async function mountAstronav(container) {
     body.querySelector('.an-close').addEventListener('click', () => ov.remove());
     body.querySelector('.an-o').addEventListener('click', () => { orig.value = p.name; compute(); ov.remove(); });
     body.querySelector('.an-d').addEventListener('click', () => { dest.value = p.name; compute(); ov.remove(); });
+    body.querySelector('.an-map').addEventListener('click', () => { ov.remove(); focusPlanet(p); });
+    // Épingle à 3 niveaux : ☆ off → 🔒 MJ seulement → ⭐ visible de tous → ☆.
     const poiBtn = body.querySelector('.an-poi');
-    if (poiBtn) poiBtn.addEventListener('click', async () => {
-      const on = !p.poi;
+    const poiState = () => (!p.poi ? 'off' : (p.poiVis === 'gm' ? 'gm' : 'all'));
+    const POI_UI = {
+      off: ['☆ Épingler', '', 'Non épinglé — cliquer : repérage MJ seulement'],
+      gm: ['🔒 Épinglé (MJ)', 'gm', 'Visible du MJ seulement — cliquer : visible de tous'],
+      all: ['⭐ Épinglé (tous)', 'on', 'Visible des joueurs — cliquer : désépingler'],
+    };
+    const paintPoi = () => { const [txt, cls, tip] = POI_UI[poiState()]; poiBtn.textContent = txt; poiBtn.className = 'an-poi' + (cls ? ' ' + cls : ''); poiBtn.title = tip; };
+    if (poiBtn) { paintPoi(); poiBtn.addEventListener('click', async () => {
+      const next = { off: 'gm', gm: 'all', all: 'off' }[poiState()];
       let note = p.campaign || '';
-      if (on) { note = window.prompt('Note (visible des joueurs, optionnelle) :', note) ?? ''; }
+      if (poiState() === 'off') { note = window.prompt('Note (affichée avec l’épingle, optionnelle) :', note) ?? ''; }
       poiBtn.disabled = true; poiBtn.textContent = '…';
       try {
         const r = await fetch('/api/astro/poi', {
           method: 'PUT', credentials: 'same-origin',
           headers: { 'Content-Type': 'application/json', ...(getGMKey() ? { 'x-gm-key': getGMKey() } : {}) },
-          body: JSON.stringify({ name: p.name, note, on }),
+          body: JSON.stringify({ name: p.name, note, vis: next === 'gm' ? 'gm' : 'all', on: next !== 'off' }),
         });
         if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'échec');
         // état local immédiat : épingle + note + sélecteurs + carte
-        p.poi = on;
-        if (on) { p.campaign = note || p.campaign; CAMPAIGN.add(p.name); if (!CAMPAIGN_ORDER.includes(p.name)) CAMPAIGN_ORDER.push(p.name); }
-        else { if (!(Data.config?.campaignPlanets || []).includes(p.name)) { CAMPAIGN.delete(p.name); const i = CAMPAIGN_ORDER.indexOf(p.name); if (i >= 0) CAMPAIGN_ORDER.splice(i, 1); } if (!(Data.config?.campaignPlanets || []).includes(p.name)) delete p.campaign; }
+        p.poi = next !== 'off';
+        p.poiVis = next === 'off' ? undefined : next;
+        if (p.poi) { p.campaign = note || p.campaign; CAMPAIGN.add(p.name); if (!CAMPAIGN_ORDER.includes(p.name)) CAMPAIGN_ORDER.push(p.name); }
+        else if (!(Data.config?.campaignPlanets || []).includes(p.name)) { CAMPAIGN.delete(p.name); const i = CAMPAIGN_ORDER.indexOf(p.name); if (i >= 0) CAMPAIGN_ORDER.splice(i, 1); delete p.campaign; }
         const ov2 = orig.value, dv2 = dest.value;
         fillSelects(); orig.value = ov2; dest.value = dv2;
         renderLibrary(); compute();
-        poiBtn.classList.toggle('on', on);
-        poiBtn.textContent = on ? '⭐ Épinglé' : '☆ Épingler';
+        paintPoi();
       } catch (e) {
         poiBtn.textContent = '⚠️ ' + String(e.message).slice(0, 18);
       } finally { poiBtn.disabled = false; }
-    });
+    }); }
     document.body.appendChild(ov);
     const onKey = (e) => { if (e.key === 'Escape') { ov.remove(); document.removeEventListener('keydown', onKey); } };
     document.addEventListener('keydown', onKey);

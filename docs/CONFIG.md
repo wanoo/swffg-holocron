@@ -71,7 +71,7 @@ Toute la spécificité de VOTRE campagne vit dans un journal Foundry (nom par d�
 | `flags.holocron.legacyId` | journal | ancre historique (`#/journal/<id>`) |
 | `flags.holocron.kind/statut/mort` | journal | catégorie + pastille PNJ |
 | `flags.holocron.ship` | journal vaisseau | état partagé du vaisseau |
-| `flags.holocron.poi` | journal POI | mondes d'intérêt (Astronav) |
+| `flags.holocron.poi` | journal POI | mondes d'intérêt Astronav — `[{name, note, act, vis}]`, `vis: "gm"` = repérage privé MJ (filtré pour les joueurs), `"all"`/absent = épinglé pour tous |
 | `flags.holocron.codex` | journal codex | allégeance/équipage/PNJ (navicomputer) |
 | `flags.holocron.note` | page notes MJ | métadonnées d'une note |
 

@@ -200,7 +200,11 @@ async function handleApi(req, res, urlPath) {
   if (parts[0] === 'astro') {
     try {
       if (parts[1] === 'planets' && req.method === 'GET') return sendJSON(res, 200, { planets: (await astro.astroData()).names });
-      if (parts[1] === 'poi' && req.method === 'GET') return sendJSON(res, 200, { poi: await astro.poi() });
+      if (parts[1] === 'poi' && req.method === 'GET') {
+        // les épingles « vis: gm » (repérage privé) ne sortent que pour le MJ
+        const all = await astro.poi();
+        return sendJSON(res, 200, { poi: gmOK(req, session) ? all : all.filter((p) => (p?.vis || 'all') !== 'gm') });
+      }
       if (parts[1] === 'poi' && req.method === 'PUT') {
         if (!gmOK(req, session)) return sendJSON(res, 401, { error: 'réservé MJ' });
         const body = JSON.parse(await readBody(req, 10_000));
