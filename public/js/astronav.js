@@ -844,32 +844,43 @@ export async function mountAstronav(container) {
     const seg = body.querySelector('.an-poiseg');
     const poiState = () => (!p.poi ? 'off' : (p.poiVis === 'gm' ? 'gm' : 'all'));
     const paintPoi = () => seg.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.v === poiState()));
-    if (seg) { paintPoi(); seg.addEventListener('click', async (e) => {
+    // Applique un état d'épingle localement (fiche + registre + sélecteurs + carte).
+    const applyPoi = (v, note) => {
+      p.poi = v !== 'off';
+      p.poiVis = v === 'off' ? undefined : v;
+      if (p.poi) { p.campaign = note || p.campaign; CAMPAIGN.add(p.name); if (!CAMPAIGN_ORDER.includes(p.name)) CAMPAIGN_ORDER.push(p.name); }
+      else if (!(Data.config?.campaignPlanets || []).includes(p.name)) { CAMPAIGN.delete(p.name); const i = CAMPAIGN_ORDER.indexOf(p.name); if (i >= 0) CAMPAIGN_ORDER.splice(i, 1); delete p.campaign; }
+      const ov2 = orig.value, dv2 = dest.value;
+      fillSelects(); orig.value = ov2; dest.value = dv2;
+      renderLibrary(); compute();
+      paintPoi();
+    };
+    // Optimiste : l'état s'affiche au clic, l'écriture Foundry part en fond
+    // (file séquentielle pour préserver l'ordre des clics), rollback si erreur.
+    let poiQueue = Promise.resolve();
+    if (seg) { paintPoi(); seg.addEventListener('click', (e) => {
       const next = e.target.closest('button')?.dataset.v;
       if (!next || next === poiState()) return;
       let note = p.campaign || '';
       if (poiState() === 'off') { note = window.prompt('Note (affichée avec l’épingle, optionnelle) :', note) ?? ''; }
+      const prev = { poi: p.poi, poiVis: p.poiVis, campaign: p.campaign };
+      applyPoi(next, note);
       seg.classList.add('busy');
-      try {
-        const r = await fetch('/api/astro/poi', {
-          method: 'PUT', credentials: 'same-origin',
-          headers: { 'Content-Type': 'application/json', ...(getGMKey() ? { 'x-gm-key': getGMKey() } : {}) },
-          body: JSON.stringify({ name: p.name, note, vis: next === 'gm' ? 'gm' : 'all', on: next !== 'off' }),
-        });
-        if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'échec');
-        // état local immédiat : épingle + note + sélecteurs + carte
-        p.poi = next !== 'off';
-        p.poiVis = next === 'off' ? undefined : next;
-        if (p.poi) { p.campaign = note || p.campaign; CAMPAIGN.add(p.name); if (!CAMPAIGN_ORDER.includes(p.name)) CAMPAIGN_ORDER.push(p.name); }
-        else if (!(Data.config?.campaignPlanets || []).includes(p.name)) { CAMPAIGN.delete(p.name); const i = CAMPAIGN_ORDER.indexOf(p.name); if (i >= 0) CAMPAIGN_ORDER.splice(i, 1); delete p.campaign; }
-        const ov2 = orig.value, dv2 = dest.value;
-        fillSelects(); orig.value = ov2; dest.value = dv2;
-        renderLibrary(); compute();
-        paintPoi();
-      } catch (err) {
-        seg.classList.add('err'); seg.title = String(err.message).slice(0, 80);
-        setTimeout(() => seg.classList.remove('err'), 2500);
-      } finally { seg.classList.remove('busy'); }
+      poiQueue = poiQueue.then(async () => {
+        try {
+          const r = await fetch('/api/astro/poi', {
+            method: 'PUT', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json', ...(getGMKey() ? { 'x-gm-key': getGMKey() } : {}) },
+            body: JSON.stringify({ name: p.name, note, vis: next === 'gm' ? 'gm' : 'all', on: next !== 'off' }),
+          });
+          if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'échec');
+        } catch (err) {
+          Object.assign(p, prev);
+          applyPoi(prev.poi ? (prev.poiVis || 'all') : 'off', prev.campaign);
+          seg.classList.add('err'); seg.title = 'Écriture Foundry échouée : ' + String(err.message).slice(0, 80);
+          setTimeout(() => seg.classList.remove('err'), 3000);
+        } finally { seg.classList.remove('busy'); }
+      });
     }); }
     document.body.appendChild(ov);
     const onKey = (e) => { if (e.key === 'Escape') { ov.remove(); document.removeEventListener('keydown', onKey); } };

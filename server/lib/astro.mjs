@@ -25,6 +25,7 @@ export function createAstroService({ publicDir, config, logger = console }) {
   }
 
   let poiCache = null;
+  let poiJournalId = null; // _id du journal POI, mémorisé pour écrire sans lookup
   async function poi() {
     const now = Date.now();
     if (poiCache && now - poiCache.t < 30_000) return poiCache.poi;
@@ -32,6 +33,7 @@ export function createAstroService({ publicDir, config, logger = console }) {
     try {
       const list = await mcpCall('get_journals', { where: { name } });
       const j = (Array.isArray(list) ? list : []).find((x) => x && x.name === name);
+      if (j) poiJournalId = j._id;
       const val = j?.flags?.holocron?.poi || [];
       poiCache = { t: now, poi: val };
       return val;
@@ -43,20 +45,30 @@ export function createAstroService({ publicDir, config, logger = console }) {
   // vis : 'gm' (repérage privé MJ) ou 'all' (épinglé pour les joueurs, défaut).
   async function setPoi({ name, note = '', act = '', vis = 'all', on = true }) {
     const jname = config().journals.poi;
-    let list = await mcpCall('get_journals', { where: { name: jname } });
-    let j = (Array.isArray(list) ? list : []).find((x) => x && x.name === jname);
-    if (!j) {
-      await mcpCall('create_document', { type: 'JournalEntry', data: [{
-        name: jname, ownership: { default: 2 }, flags: { holocron: { poi: [] } },
-        pages: [{ name: 'Liste', type: 'text', text: { content: "<p>Mondes d'intérêt (Astronav).</p>", format: 1 } }],
-      }] });
-      list = await mcpCall('get_journals', { where: { name: jname } });
-      j = (Array.isArray(list) ? list : []).find((x) => x && x.name === jname);
-      if (!j) throw new Error('journal POI introuvable');
+    let base;
+    // chemin rapide : _id connu + cache write-through frais → une seule écriture MCP
+    if (poiJournalId && poiCache && Date.now() - poiCache.t < 10_000) {
+      base = poiCache.poi;
+    } else {
+      let list = await mcpCall('get_journals', { where: { name: jname } });
+      let j = (Array.isArray(list) ? list : []).find((x) => x && x.name === jname);
+      if (!j) {
+        await mcpCall('create_document', { type: 'JournalEntry', data: [{
+          name: jname, ownership: { default: 2 }, flags: { holocron: { poi: [] } },
+          pages: [{ name: 'Liste', type: 'text', text: { content: "<p>Mondes d'intérêt (Astronav).</p>", format: 1 } }],
+        }] });
+        list = await mcpCall('get_journals', { where: { name: jname } });
+        j = (Array.isArray(list) ? list : []).find((x) => x && x.name === jname);
+        if (!j) throw new Error('journal POI introuvable');
+      }
+      poiJournalId = j._id;
+      base = j.flags?.holocron?.poi || [];
     }
-    let poiList = (j.flags?.holocron?.poi || []).filter((p) => p.name !== name);
+    let poiList = base.filter((p) => p.name !== name);
     if (on) poiList.push({ name: String(name).slice(0, 80), note: String(note).slice(0, 200), act: String(act).slice(0, 10), vis: vis === 'gm' ? 'gm' : 'all' });
-    await mcpCall('modify_document', { type: 'JournalEntry', _id: j._id, updates: [{ 'flags.holocron.poi': poiList }] });
+    try {
+      await mcpCall('modify_document', { type: 'JournalEntry', _id: poiJournalId, updates: [{ 'flags.holocron.poi': poiList }] });
+    } catch (e) { poiJournalId = null; throw e; } // journal disparu ? on re-cherchera
     poiCache = { t: Date.now(), poi: poiList }; // write-through
     return poiList;
   }

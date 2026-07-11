@@ -1621,6 +1621,6 @@ body.gm-session .gm-doc h2, body.gm-session .gm-doc h3, body.gm-session .gm-doc 
 .an-poiseg button.active[data-v="off"] { background: rgba(86, 96, 122, 0.35); color: #dfe5f2; }
 .an-poiseg button.active[data-v="gm"] { background: #b48ce0; color: #0c1018; }
 .an-poiseg button.active[data-v="all"] { background: var(--gold, #d9b45b); color: #0c1018; }
-.an-poiseg.busy { opacity: 0.5; pointer-events: none; }
+.an-poiseg.busy { opacity: 0.8; } /* écriture en fond — les clics restent possibles */
 .an-poiseg.err { border-color: #e07a7a; }
 .an-map { border: 1px solid #57c7ff; color: #57c7ff; background: transparent; border-radius: 999px; padding: 0.4rem 0.8rem; cursor: pointer; font-weight: 700; }
