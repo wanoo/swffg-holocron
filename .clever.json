@@ -1,12 +1,12 @@
 {
   "apps": [
     {
-      "app_id": "app_b1d937d6-c013-46fd-adcc-874fab18ac72",
-      "org_id": "user_2ddd8775-6150-462d-a8c9-2b51716fc298",
-      "deploy_url": "https://push-n3-par-clevercloud-customers.services.clever-cloud.com/app_b1d937d6-c013-46fd-adcc-874fab18ac72.git",
-      "git_ssh_url": "git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_b1d937d6-c013-46fd-adcc-874fab18ac72.git",
-      "name": "swffg-holocron-staging",
-      "alias": "swffg-holocron-staging"
+      "app_id": "app_08497d91-be66-4d0c-aff8-a87095dfc3de",
+      "org_id": "orga_c7767b74-60be-4716-addf-bb1da4f78b3b",
+      "deploy_url": "https://push-n3-par-clevercloud-customers.services.clever-cloud.com/app_08497d91-be66-4d0c-aff8-a87095dfc3de.git",
+      "git_ssh_url": "git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_08497d91-be66-4d0c-aff8-a87095dfc3de.git",
+      "name": "swffg-holocron",
+      "alias": "staging-org"
     }
   ]
 }
