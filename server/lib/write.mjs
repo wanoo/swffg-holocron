@@ -193,7 +193,44 @@ export function createWriteService({ store, config, logger = console }) {
     return { ok: true };
   }
 
-  return { gmList, gmGet, gmSave, publicGet, publicSave, notesList, noteSave, noteDelete, cfgSave };
+  // --- Dossiers MJ (fiche narrative par entité, affichée sur les fiches) ------
+  // Journal dédié (config.journals.dossiers), flags.holocron.dossiers =
+  // { entityId: { role, statut, veut, levier, indices, attitude, replique, advId } }.
+  // Éditable dans Foundry ou par un assistant IA (MCP) — l'Holocron ne fait que lire.
+  function dossiers() {
+    const name = config().journals.dossiers;
+    const entry = idx().find((j) => j.name === name);
+    return entry?.flags?.holocron?.dossiers || {};
+  }
+
+  // --- Backrefs « Mentionné dans (MJ) » : index inverse CALCULÉ (SSOT Foundry).
+  // Pour chaque entité du registre (config.registry), la liste des chapitres
+  // bible dont le texte mentionne une de ses formes. Cache par révision.
+  let backrefsCache = null;
+  function backrefs() {
+    const chapters = gmList();
+    const key = chapters.map((c) => `${c.id}:${c.updatedAt}`).join('|');
+    if (backrefsCache?.key === key) return backrefsCache.map;
+    const registry = (config().registry || []).filter((e) => e?.id && Array.isArray(e.forms) && e.forms.length);
+    const esc = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const matchers = registry.map((e) => ({
+      id: e.id,
+      re: new RegExp(`(^|[^\\p{L}])(${e.forms.map((f) => esc(String(f).toLowerCase())).join('|')})([^\\p{L}]|$)`, 'u'),
+    }));
+    const map = {};
+    for (const c of chapters) {
+      const doc = gmGet(c.id);
+      if (!doc?.html) continue;
+      const text = ' ' + doc.html.replace(/<[^>]+>/g, ' ').toLowerCase() + ' ';
+      for (const m of matchers) {
+        if (m.re.test(text)) (map[m.id] = map[m.id] || []).push({ id: c.id, name: c.name });
+      }
+    }
+    backrefsCache = { key, map };
+    return map;
+  }
+
+  return { gmList, gmGet, gmSave, publicGet, publicSave, notesList, noteSave, noteDelete, cfgSave, dossiers, backrefs };
 }
 
 /* ----------------------------------------------------------------------------

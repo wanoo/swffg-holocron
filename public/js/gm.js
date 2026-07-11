@@ -10,6 +10,7 @@ import { addSearchDocs } from './search.js';
 import { renderCombat } from './combat-tracker.js';
 import { linkifyPnj, attachPnjPreview } from './pnj-registry.js';
 import { mountNotes, openNotes } from './notes.js';
+import { openLoginModal } from './login.js';
 import { openScreen } from './gm-screen.js';
 import { renderGmHome } from './gm-home.js';
 import { initSession, isSessionOn, toggleSession, teardownSession, refreshSessionBar, injectPins } from './gm-session.js';
@@ -165,15 +166,20 @@ function indexHeadings(html, cid) {
   return { html: out, headings };
 }
 
-// --- écran de saisie de la clé -------------------------------------------
+// --- porte d'entrée MJ ------------------------------------------------------
+// Auth Foundry active → connexion avec un compte MJ (la clé n'est qu'un secours).
+// Sans auth (instance minimale) → clé MJ classique.
 function renderGate(container, onOk) {
   container.innerHTML = '';
   const wrap = el('div', 'gm-gate holo-frame');
   wrap.innerHTML = `
     <div class="gm-lock" aria-hidden="true">🔒</div>
-    <h1>Espace Maître du Jeu</h1>
-    <p class="muted">Section réservée. Entrez la clé MJ pour accéder aux documents de campagne.
-    Ce contenu n'est jamais chargé sans la clé.</p>`;
+    <h1>Espace Maître du Jeu</h1>`;
+  const authOn = Boolean(Data.authEnabled);
+  wrap.insertAdjacentHTML('beforeend', authOn
+    ? '<p class="muted">Section réservée. Connecte-toi avec ton compte <b>Foundry</b> de MJ — ce contenu n\'est jamais chargé sans autorisation.</p>'
+    : '<p class="muted">Section réservée. Entrez la clé MJ pour accéder aux documents de campagne. Ce contenu n\'est jamais chargé sans la clé.</p>');
+
   const form = el('form', 'gm-gate-form');
   const input = el('input', 'gm-key-input');
   input.type = 'password';
@@ -183,9 +189,29 @@ function renderGate(container, onOk) {
   btn.type = 'submit';
   const msg = el('div', 'gm-key-msg');
   form.append(input, btn, msg);
-  wrap.appendChild(form);
+
+  if (authOn) {
+    const loginBtn = el('button', 'gm-key-btn', '◈ Se connecter');
+    loginBtn.type = 'button';
+    loginBtn.addEventListener('click', () => openLoginModal());
+    wrap.appendChild(loginBtn);
+    // dès qu'une session MJ arrive (le login re-déclenche hashchange, mais on
+    // couvre aussi le cas d'une connexion depuis le bandeau), on entre.
+    const onSess = async () => {
+      if (!Data.gm) return;
+      const list = await gmList().catch(() => null);
+      if (list) { document.removeEventListener('holocron:session', onSess); onOk(list); }
+    };
+    document.addEventListener('holocron:session', onSess);
+    const alt = el('details', 'gm-gate-alt');
+    alt.innerHTML = '<summary class="muted">Clé MJ (secours)</summary>';
+    alt.appendChild(form);
+    wrap.appendChild(alt);
+  } else {
+    wrap.appendChild(form);
+  }
   container.appendChild(wrap);
-  input.focus();
+  if (!authOn) input.focus();
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();

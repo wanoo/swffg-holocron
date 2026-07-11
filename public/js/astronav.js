@@ -102,7 +102,7 @@ function shipEndpoint(mode) {
 }
 function shipHeaders(mode, json) {
   const h = json ? { 'Content-Type': 'application/json' } : {};
-  if (mode === 'gm') h['x-gm-key'] = getGMKey() || '';
+  if (mode === 'gm') { if (getGMKey()) h['x-gm-key'] = getGMKey(); } // sinon session MJ (cookie)
   else { const id = playerIdentity(); if (!id) throw new Error('identité requise'); if (id.key) h['x-player-key'] = id.key; }
   return h;
 }
@@ -258,9 +258,9 @@ export async function mountAstronav(container) {
 
   // Détection du pont Foundry (sans prompt : on ne demande l'identité qu'au clic).
   (async () => {
-    if (getGMKey()) {
+    if (getGMKey() || Data.gm) {
       try {
-        const st = await (await fetch('/api/gm/foundry/status', { headers: { 'x-gm-key': getGMKey() } })).json();
+        const st = await (await fetch('/api/gm/foundry/status', { credentials: 'same-origin', headers: getGMKey() ? { 'x-gm-key': getGMKey() } : {} })).json();
         if (st && st.enabled) {
           hasGmBridge = true;
           try { shipState = { ...SHIP_DEFAULTS, ...(await bridgeShipGet('gm')) }; shipMode = 'gm'; } catch { /* garde le local */ }

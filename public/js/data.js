@@ -143,11 +143,13 @@ export async function login(userid, password) {
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(body.error || 'connexion refusée');
   Data.me = body.me;
+  Data.gm = (body.me?.role ?? 0) >= 3; // ASSISTANT+ = MJ, comme côté serveur
   return body.me;
 }
 export async function logout() {
   await fetch(API + '/logout', { method: 'POST', credentials: 'same-origin' });
   Data.me = null;
+  Data.gm = false;
 }
 export async function listUsers() {
   const body = await (await fetch(API + '/users')).json();

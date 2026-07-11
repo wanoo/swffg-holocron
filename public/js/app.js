@@ -198,7 +198,9 @@ async function appendPnjGmVolet(container, journal) {
   if (!(getGMKey() || Data.gm) || !journal?.statut) return; // seulement fiches PNJ typées, MJ présent
   let dossiers = {};
   try { dossiers = await gmGetDossiers(); } catch { return; }
-  const d = dossiers[journal.id];
+  const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+  const d = dossiers[journal.id]
+    || Object.values(dossiers).find((x) => x?.name && norm(x.name) === norm(journal.name));
   if (!d) return;
   const sec = document.createElement('section');
   sec.className = 'chapter page-surface gm-dossier pnj-gm-volet';

@@ -227,6 +227,8 @@ async function handleApi(req, res, urlPath) {
     const id = parts[2] ? decodeURIComponent(parts[2]) : null;
 
     if (parts[1] === 'docs' && req.method === 'GET' && !id) return sendJSON(res, 200, { docs: writer.gmList() });
+    if (parts[1] === 'dossiers' && req.method === 'GET') return sendJSON(res, 200, { dossiers: writer.dossiers() });
+    if (parts[1] === 'backrefs' && req.method === 'GET') return sendJSON(res, 200, { backrefs: writer.backrefs() });
     if (parts[1] === 'docs' && req.method === 'GET' && id) {
       // configs séance : gm:cfg:* vit dans le journal ⚙️ (compat client gm-config.js)
       if (id.startsWith('cfg:')) {

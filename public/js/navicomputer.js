@@ -13,10 +13,10 @@ const SHIP_DEFAULTS = { name: 'Vaisseau du groupe', vivres: 60, vivresMax: 60, f
 // codex (allégeance/PJ/PNJ), HoloNet, vaisseau — via /api/(gm/)foundry/dash.
 // Repli hors-ligne : données statiques du site + localStorage.
 async function fetchDash() {
-  const gm = getGMKey();
+  const gm = getGMKey() || Data.gm; // clé de secours OU session MJ Foundry
   try {
     if (gm) {
-      const r = await fetch('/api/gm/foundry/dash', { headers: { 'x-gm-key': gm } });
+      const r = await fetch('/api/gm/foundry/dash', { credentials: 'same-origin', headers: getGMKey() ? { 'x-gm-key': getGMKey() } : {} });
       if (r.ok) return { ...(await r.json()), _src: 'Foundry (MJ)' };
     }
     const key = localStorage.getItem('holocron-table-key');
@@ -104,7 +104,7 @@ async function renderDash(host) {
   host.innerHTML = `
     <div class="nc-panel nc-alleg">
       <div class="nc-emblem">◈</div>
-      <div><p class="nc-eyebrow">Allégeance du groupe${!remote && getGMKey() ? ' <button class="nc-edit" id="nc-alleg-edit" title="Modifier">✎</button>' : ''}</p>
+      <div><p class="nc-eyebrow">Allégeance du groupe${!remote && (getGMKey() || Data.gm) ? ' <button class="nc-edit" id="nc-alleg-edit" title="Modifier">✎</button>' : ''}</p>
         <h2 id="nc-alleg-name">${esc(alleg)}</h2></div>
     </div>
 

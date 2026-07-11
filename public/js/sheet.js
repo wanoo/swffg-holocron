@@ -515,15 +515,18 @@ export function renderSheet(entity, kind) {
   return root;
 }
 
-// Sections gated (Dossier MJ + back-links) — n'apparaissent QUE clé MJ présente.
+// Sections gated (Dossier MJ + back-links) — session MJ Foundry ou clé de secours.
 async function appendGmSections(root, entity, kind) {
-  if (!getGMKey() || !entity?.id) return;
+  if (!(Data.gm || getGMKey()) || !entity?.id) return;
   let dossiers = {}, backrefs = {};
   try { [dossiers, backrefs] = await Promise.all([gmGetDossiers(), gmGetBackrefs()]); } catch { return; }
   const anchor = root; // insère après les blocs existants
 
-  // 1) Dossier MJ narratif (gabarit constant).
-  const d = dossiers[entity.id];
+  // 1) Dossier MJ narratif (gabarit constant). Résolution par id, puis par NOM :
+  // les ids d'entités peuvent changer (rebuild de pack), le nom reste stable.
+  const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+  const d = dossiers[entity.id]
+    || Object.values(dossiers).find((x) => x?.name && norm(x.name) === norm(entity.name));
   if (d) {
     const sec = el('section', 'sheet-section gm-dossier');
     sec.appendChild(el('h3', 'sheet-section-title', '🔒 Dossier MJ'));
