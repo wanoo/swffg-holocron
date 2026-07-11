@@ -1615,7 +1615,12 @@ body.gm-session .gm-doc h2, body.gm-session .gm-doc h3, body.gm-session .gm-doc 
 .enc-btn.gold:hover { background: var(--gold); color: #0c1018; }
 .enc-btn.danger { border-color: var(--danger); color: var(--danger); }
 .enc-track { border-top: 1px solid var(--line); padding-top: 0.7rem; }
-.an-poi { border: 1px solid var(--gold, #d9b45b); color: var(--gold, #d9b45b); background: transparent; border-radius: 999px; padding: 0.4rem 0.8rem; cursor: pointer; font-weight: 700; }
-.an-poi.on { background: var(--gold, #d9b45b); color: #0c1018; }
-.an-poi.gm { border-color: #b48ce0; color: #c9a6ff; }
+.an-poiseg { display: inline-flex; border: 1px solid #56607a; border-radius: 999px; overflow: hidden; }
+.an-poiseg button { background: transparent; border: 0; border-left: 1px solid rgba(86, 96, 122, 0.4); color: #9aa3b5; padding: 0.4rem 0.75rem; cursor: pointer; font-weight: 700; }
+.an-poiseg button:first-child { border-left: 0; }
+.an-poiseg button.active[data-v="off"] { background: rgba(86, 96, 122, 0.35); color: #dfe5f2; }
+.an-poiseg button.active[data-v="gm"] { background: #b48ce0; color: #0c1018; }
+.an-poiseg button.active[data-v="all"] { background: var(--gold, #d9b45b); color: #0c1018; }
+.an-poiseg.busy { opacity: 0.5; pointer-events: none; }
+.an-poiseg.err { border-color: #e07a7a; }
 .an-map { border: 1px solid #57c7ff; color: #57c7ff; background: transparent; border-radius: 999px; padding: 0.4rem 0.8rem; cursor: pointer; font-weight: 700; }

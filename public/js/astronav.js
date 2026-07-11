@@ -826,7 +826,11 @@ export async function mountAstronav(container) {
         ${pts}
         <div class="an-acts"><button class="an-o" type="button">Définir origine</button><button class="an-d" type="button">Définir destination</button>
           <button class="an-map" type="button" title="Centrer la carte sur ce monde">📍 Carte</button>
-          ${(Data.gm || getGMKey()) ? `<button class="an-poi" type="button"></button>` : ''}
+          ${(Data.gm || getGMKey()) ? `<span class="an-poiseg" role="group" aria-label="Épingle du monde">
+            <button type="button" data-v="off" title="Non épinglé">☆ Off</button>
+            <button type="button" data-v="gm" title="Repérage privé — visible du MJ seulement">🔒 MJ</button>
+            <button type="button" data-v="all" title="Épinglé pour les joueurs (Astronav + carte)">⭐ Tous</button>
+          </span>` : ''}
         </div>
       </div>`;
     const ov = el('div', 'an-overlay');
@@ -836,20 +840,16 @@ export async function mountAstronav(container) {
     body.querySelector('.an-o').addEventListener('click', () => { orig.value = p.name; compute(); ov.remove(); });
     body.querySelector('.an-d').addEventListener('click', () => { dest.value = p.name; compute(); ov.remove(); });
     body.querySelector('.an-map').addEventListener('click', () => { ov.remove(); focusPlanet(p); });
-    // Épingle à 3 niveaux : ☆ off → 🔒 MJ seulement → ⭐ visible de tous → ☆.
-    const poiBtn = body.querySelector('.an-poi');
+    // Épingle à 3 positions : ☆ off · 🔒 MJ seulement · ⭐ visible de tous.
+    const seg = body.querySelector('.an-poiseg');
     const poiState = () => (!p.poi ? 'off' : (p.poiVis === 'gm' ? 'gm' : 'all'));
-    const POI_UI = {
-      off: ['☆ Épingler', '', 'Non épinglé — cliquer : repérage MJ seulement'],
-      gm: ['🔒 Épinglé (MJ)', 'gm', 'Visible du MJ seulement — cliquer : visible de tous'],
-      all: ['⭐ Épinglé (tous)', 'on', 'Visible des joueurs — cliquer : désépingler'],
-    };
-    const paintPoi = () => { const [txt, cls, tip] = POI_UI[poiState()]; poiBtn.textContent = txt; poiBtn.className = 'an-poi' + (cls ? ' ' + cls : ''); poiBtn.title = tip; };
-    if (poiBtn) { paintPoi(); poiBtn.addEventListener('click', async () => {
-      const next = { off: 'gm', gm: 'all', all: 'off' }[poiState()];
+    const paintPoi = () => seg.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.v === poiState()));
+    if (seg) { paintPoi(); seg.addEventListener('click', async (e) => {
+      const next = e.target.closest('button')?.dataset.v;
+      if (!next || next === poiState()) return;
       let note = p.campaign || '';
       if (poiState() === 'off') { note = window.prompt('Note (affichée avec l’épingle, optionnelle) :', note) ?? ''; }
-      poiBtn.disabled = true; poiBtn.textContent = '…';
+      seg.classList.add('busy');
       try {
         const r = await fetch('/api/astro/poi', {
           method: 'PUT', credentials: 'same-origin',
@@ -866,9 +866,10 @@ export async function mountAstronav(container) {
         fillSelects(); orig.value = ov2; dest.value = dv2;
         renderLibrary(); compute();
         paintPoi();
-      } catch (e) {
-        poiBtn.textContent = '⚠️ ' + String(e.message).slice(0, 18);
-      } finally { poiBtn.disabled = false; }
+      } catch (err) {
+        seg.classList.add('err'); seg.title = String(err.message).slice(0, 80);
+        setTimeout(() => seg.classList.remove('err'), 2500);
+      } finally { seg.classList.remove('busy'); }
     }); }
     document.body.appendChild(ov);
     const onKey = (e) => { if (e.key === 'Escape') { ov.remove(); document.removeEventListener('keydown', onKey); } };
