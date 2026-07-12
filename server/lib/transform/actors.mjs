@@ -65,22 +65,23 @@ SKILL_BY_EN[normKey('Knowledge: Warfare')] = SKILL_FR.WARF;
 SKILL_BY_EN[normKey('Knowledge: Xenology')] = SKILL_FR.XEN;
 
 // Rang final = max(rang stocké, rangs octroyés espèce/carrière, cible d'achat XP).
-// `skillMods`/`xpTargets` sont indexés par nom EN (« Lightsaber ») ou clé système.
-function transformSkills(sysSkills, skillMods = {}, xpTargets = {}) {
+// `skillMods`/`xpTargets`/`boost`/`setback` sont indexés par nom EN ou clé système.
+function transformSkills(sysSkills, skillMods = {}, xpTargets = {}, boost = {}, setback = {}) {
   const idx = (map) => { const o = {}; for (const [k, v] of Object.entries(map || {})) o[normKey(k)] = num(v); return o; };
-  const mods = idx(skillMods), xps = idx(xpTargets);
+  const mods = idx(skillMods), xps = idx(xpTargets), bst = idx(boost), stb = idx(setback);
   const out = [];
   for (const [key, s] of Object.entries(sysSkills || {})) {
     if (!s || typeof s !== 'object') continue;
     const nk = normKey(s.value || key);
     const fr = SKILL_FR[nk] || SKILL_FR[normKey(key)] || SKILL_BY_EN[nk] || SKILL_BY_EN[normKey(key)] || null;
     const lookups = [fr ? normKey(fr[1]) : null, nk, normKey(key)].filter(Boolean);
-    const modRank = Math.max(0, ...lookups.map((k) => mods[k] || 0));
-    const xpRank = Math.max(0, ...lookups.map((k) => xps[k] || 0));
+    const pick = (m) => Math.max(0, ...lookups.map((k) => m[k] || 0));
     out.push({
       name: fr ? fr[0] : str(s.label || key),
       en: fr ? fr[1] : str(key),
-      rank: Math.max(val(s.rank, 0), modRank, xpRank),
+      rank: Math.max(val(s.rank, 0), pick(mods), pick(xps)),
+      boost: pick(bst),            // dés boost ajoutés par des talents (Skill Boost)
+      setbackRemove: pick(stb),    // dés de contrainte retirés (Skill Remove Setback)
       characteristic: str(s.characteristic || (fr ? fr[2] : '')),
       career: Boolean(s.careerskill),
       type: str(s.type || (fr ? fr[3] : 'General')),
@@ -148,11 +149,11 @@ function talentModIndex(doc) {
     if (it.type !== 'specialization') continue;
     for (const t of Object.values(sysOf(it).talents || {})) {
       if (!t || typeof t !== 'object' || !t.name) continue;
-      const e = idx[t.name] || (idx[t.name] = { Characteristic: {}, Stat: {} });
+      const e = idx[t.name] || (idx[t.name] = { Characteristic: {}, Stat: {}, 'Skill Boost': {}, 'Skill Remove Setback': {} });
       for (const v of Object.values(t.attributes || {})) {
-        if (!v || typeof v !== 'object' || !v.mod) continue;
+        if (!v || typeof v !== 'object' || !v.mod || !e[v.modtype]) continue;
         const n = Number(v.value);
-        if ((v.modtype === 'Stat' || v.modtype === 'Characteristic') && Number.isFinite(n) && n) e[v.modtype][v.mod] = n;
+        if (Number.isFinite(n) && n) e[v.modtype][v.mod] = Math.max(e[v.modtype][v.mod] || 0, n); // max par exemplaire (les copies OggDude ne cumulent pas)
       }
     }
   }
@@ -211,6 +212,12 @@ function deriveFFG(doc) {
   const stat = (m) => num(species.Stat?.[m]) + num(item.Stat?.[m]) + talentContrib('Stat', m);
   const skillMods = { ...(species['Skill Rank'] || {}) };
   for (const [k, v] of Object.entries(item['Skill Rank'] || {})) skillMods[k] = (skillMods[k] || 0) + v;
+  // effets de talents sur les JETS de compétence (dés boost ajoutés, contraintes retirées)
+  const skillBoost = {}, skillSetback = {};
+  for (const [name, cnt] of Object.entries(xp.talentRanks)) {
+    for (const [sk, v] of Object.entries(tIdx[name]?.['Skill Boost'] || {})) skillBoost[sk] = (skillBoost[sk] || 0) + v * cnt;
+    for (const [sk, v] of Object.entries(tIdx[name]?.['Skill Remove Setback'] || {})) skillSetback[sk] = (skillSetback[sk] || 0) + v * cnt;
+  }
   return {
     chars,
     wounds: stat('Wounds') + chars.Brawn,
@@ -220,7 +227,7 @@ function deriveFFG(doc) {
     defenceMelee: stat('Defence-Melee') + num(item.Stat?.Defence) + armDef,
     forceRating: stat('ForcePool'),
     encumbrance: 5 + chars.Brawn + stat('Encumbrance'),
-    skillMods, xpSkills: xp.skills, xp,
+    skillMods, skillBoost, skillSetback, xpSkills: xp.skills, xp,
   };
 }
 
@@ -276,7 +283,7 @@ export function transformCharacter(doc) {
       forcePool: { value: val(st.forcePool), max: bestMax(st.forcePool?.max, d.forceRating) },
       credits: val(st.credits),
     },
-    skills: transformSkills(sys.skills, d.skillMods, d.xpSkills),
+    skills: transformSkills(sys.skills, d.skillMods, d.xpSkills, d.skillBoost, d.skillSetback),
     experience: (() => {
       const total = num(sys.experience?.total ?? st.experience?.total);
       // l'XP disponible stockée est périmée (le système la recalcule) → l'xpLog fait foi.
@@ -313,9 +320,11 @@ export function transformCharacter(doc) {
         .filter((m) => /^Qualité\s/i.test(str(m?.name)))
         .map((m) => str(m?.name).replace(/^Qualité\s+/i, '').trim())
         .filter((n) => n && n.length <= 28))];
+      const skEn = unwrap(s.skill);
+      const skFr = (SKILL_FR[normKey(skEn)] || SKILL_BY_EN[normKey(skEn)] || null);
       return {
         name: w.name,
-        skill: unwrap(s.skill),
+        skill: skFr ? skFr[0] : skEn,
         damage: val(s.damage),
         crit: val(s.crit),
         range: unwrap(s.range),

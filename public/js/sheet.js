@@ -310,13 +310,16 @@ function skillRow(s, charVal, kind) {
   }
   const cdc = el('td', 'sk-cdc'); cdc.innerHTML = s.career ? '<span class="cdc-on" title="Compétence de carrière">◼</span>' : '<span class="cdc-off">◻</span>';
   const rank = el('td', 'sk-rk'); rank.textContent = String(s.rank);
+  const boost = kind === 'adversary' ? 0 : (s.boost || 0);
   const jet = el('td', 'sk-jet');
   for (let i = 0; i < prof; i++) jet.appendChild(makeGlyph('proficiency'));
   for (let i = 0; i < abil; i++) jet.appendChild(makeGlyph('ability'));
-  if (!prof && !abil) jet.textContent = '—';
+  for (let i = 0; i < boost; i++) jet.appendChild(makeGlyph('boost')); // dés boost de talents
+  if (s.setbackRemove) { const b = el('span', 'sk-rmsb'); b.textContent = `−${s.setbackRemove}`; b.title = `${s.setbackRemove} dé(s) de contrainte retiré(s) par un talent`; jet.appendChild(makeGlyph('setback')); jet.appendChild(b); }
+  if (!prof && !abil && !boost) jet.insertBefore(document.createTextNode('—'), jet.firstChild);
   tr.append(nameCell, cdc, rank, jet);
   tr.tabIndex = 0; tr.setAttribute('role', 'button'); tr.title = 'Lancer cette compétence';
-  const roll = () => openGenerator({ proficiency: prof, ability: abil, skillKey: normSkillKey(s.en || s.name), skillName: s.name });
+  const roll = () => openGenerator({ proficiency: prof, ability: abil, boost, skillKey: normSkillKey(s.en || s.name), skillName: s.name });
   tr.addEventListener('click', roll);
   tr.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); roll(); } });
   return tr;
@@ -326,6 +329,20 @@ function skillRow(s, charVal, kind) {
 function openTreeCard(cell, metaText) {
   const html = cell.explain || cell.description || '<p class="muted">Aucune description.</p>';
   openCard(cell.name || 'Talent', renderRichHTML(html), metaText);
+}
+
+// Carte détaillée d'un objet (arme/armure/matériel) : caractéristiques + description.
+function openItemCard(name, rows, description) {
+  const node = el('div', 'item-card');
+  const dl = el('dl', 'item-card-dl');
+  for (const [k, v] of rows) {
+    if (v == null || v === '' || v === '—') continue;
+    dl.innerHTML += `<dt>${escape(k)}</dt><dd>${enrichDiceString(String(v))}</dd>`;
+  }
+  if (dl.childNodes.length) node.appendChild(dl);
+  if (description && String(description).trim()) node.appendChild(renderRichHTML(description));
+  else if (!dl.childNodes.length) node.appendChild(el('p', 'muted', 'Aucun détail.'));
+  openCard(name, node);
 }
 
 const SIZE_N = { single: 1, double: 2, triple: 3, full: 4 };
@@ -544,8 +561,15 @@ function weaponsBlock(entity) {
   const tb = el('tbody');
   for (const w of weapons) {
     const special = [w.special, ...(w.qualities || [])].filter(Boolean).join(', ');
-    const tr = el('tr');
+    const tr = el('tr', 'clickable');
     tr.innerHTML = `<td>${enrichDiceString(w.name)}</td><td>${escape(w.skill)}</td><td>${escape(String(w.damage))}</td><td>${escape(String(w.crit))}</td><td>${escape(w.range)}</td><td>${enrichDiceString(special)}</td>`;
+    tr.tabIndex = 0; tr.setAttribute('role', 'button'); tr.title = 'Détails de l\'arme';
+    const open = () => openItemCard(w.name, [
+      ['Compétence', w.skill], ['Dégâts', w.damage], ['Critique', w.crit], ['Portée', w.range],
+      ['Spécial', special],
+    ], w.description);
+    tr.addEventListener('click', open);
+    tr.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
     tb.appendChild(tr);
   }
   table.appendChild(tb);
@@ -561,15 +585,27 @@ function gearBlock(entity) {
   if (!armour.length && !gearArr.length && typeof gear !== 'string') return null;
   const sec = section('Équipement');
 
+  const clickableLi = (label, name, rows, desc) => {
+    const li = el('li', 'clickable'); li.innerHTML = label;
+    li.tabIndex = 0; li.setAttribute('role', 'button');
+    const open = () => openItemCard(name, rows, desc);
+    li.addEventListener('click', open);
+    li.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+    return li;
+  };
   if (armour.length) {
     const ul = el('ul', 'equip-list');
-    for (const a of armour) ul.appendChild(el('li', null, `<strong>${escape(a.name)}</strong> — Déf ${escape(String(a.defence))}, Enc ${escape(String(a.soak))}`));
+    for (const a of armour) ul.appendChild(clickableLi(
+      `<strong>${escape(a.name)}</strong> — Déf ${escape(String(a.defence))}, Enc ${escape(String(a.soak))}`,
+      a.name, [['Défense', a.defence], ['Encaissement', a.soak]], a.description));
     sec.appendChild(el('h4', 'skill-group-title', 'Armures'));
     sec.appendChild(ul);
   }
   if (gearArr.length) {
     const ul = el('ul', 'equip-list');
-    for (const g of gearArr) ul.appendChild(el('li', null, `${escape(g.name)}${g.quantity > 1 ? ` ×${g.quantity}` : ''}`));
+    for (const g of gearArr) ul.appendChild(clickableLi(
+      `${escape(g.name)}${g.quantity > 1 ? ` ×${g.quantity}` : ''}`,
+      g.name, [['Quantité', g.quantity > 1 ? g.quantity : '']], g.description));
     sec.appendChild(el('h4', 'skill-group-title', 'Matériel'));
     sec.appendChild(ul);
   }

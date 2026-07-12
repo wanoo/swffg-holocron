@@ -4,6 +4,10 @@ import { transformCharacter, transformAdversary } from './transform/actors.mjs';
 import { buildJournalsView } from './transform/journals.mjs';
 import { canSee, isGM } from './auth.mjs';
 
+// Version de SCHÉMA : à incrémenter dès que la FORME des vues change (transform), pour
+// invalider les ETag/caches clients même si les données Foundry n'ont pas bougé.
+const SCHEMA_VERSION = 3;
+
 export function createContentService({ store, config }) {
   const actorFolderId = (name) => {
     if (!name) return null;
@@ -69,12 +73,13 @@ export function createContentService({ store, config }) {
 
   function versions() {
     const cc = config();
+    const S = SCHEMA_VERSION * 1000; // décale toutes les versions quand le schéma change
     return {
-      manifest: store.version('config') * 31 + store.version('actors') + store.version('journalsIndex') + store.version(`pack:${cc.packs.adversaries}`),
-      journals: store.version('journalsIndex') * 31 + store.version('folders') + store.version('config'),
-      pcs: store.version('actors') * 31 + store.version('folders'),
-      npcs: store.version('actors') * 31 + store.version('folders') + 7,
-      adversaries: store.version(`pack:${cc.packs.adversaries}`),
+      manifest: S + store.version('config') * 31 + store.version('actors') + store.version('journalsIndex') + store.version(`pack:${cc.packs.adversaries}`),
+      journals: S + store.version('journalsIndex') * 31 + store.version('folders') + store.version('config'),
+      pcs: S + store.version('actors') * 31 + store.version('folders'),
+      npcs: S + store.version('actors') * 31 + store.version('folders') + 7,
+      adversaries: S + store.version(`pack:${cc.packs.adversaries}`),
     };
   }
 

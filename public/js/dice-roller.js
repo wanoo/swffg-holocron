@@ -298,6 +298,7 @@ export function openGenerator(seed) {
     for (const k of Object.keys(pool)) pool[k] = 0;
     pool.proficiency = seed.proficiency || 0;
     pool.ability = seed.ability || 0;
+    pool.boost = seed.boost || 0;
     currentSkill = seed.skillKey ? { key: seed.skillKey, name: seed.skillName || seed.skillKey } : null;
   }
   rebuild();
