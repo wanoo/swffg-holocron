@@ -277,60 +277,55 @@ function skillsBlock(entity, kind) {
     return sec;
   }
 
-  // PJ / PNJ : tableaux par groupe (format de la fiche officielle :
-  // Compétence (CAR) | CdC | Rang | Jet), en 2 colonnes.
+  // PJ / PNJ : grille de « chips » responsive, groupées par catégorie. Chaque chip
+  // remplit l'espace (auto-fill) → peu de vide, dense et lisible, jouable en ligne.
   const chars = entity.characteristics || {};
   const groups = {};
   for (const s of skills) (groups[s.type] || (groups[s.type] = [])).push(s);
   const order = ['General', 'Combat', 'Social', 'Knowledge', 'Magic'];
   const keys = Object.keys(groups).sort((a, b) => order.indexOf(a) - order.indexOf(b));
 
-  const cols = el('div', 'skill-cols');
   for (const gk of keys) {
-    const list = groups[gk].sort((a, b) => a.name.localeCompare(b.name, 'fr'));
-    const box = el('div', 'skill-groupbox');
-    box.appendChild(el('h4', 'skill-group-title', SKILL_GROUP_FR[gk] || gk));
-    const table = el('table', 'skill-table');
-    table.innerHTML = '<thead><tr><th>Compétence</th><th class="sk-cdc">CdC</th><th class="sk-rk">Rang</th><th class="sk-jet">Jet</th></tr></thead>';
-    const tb = el('tbody');
-    for (const s of list) tb.appendChild(skillRow(s, chars[s.characteristic] ?? 0, kind));
-    table.appendChild(tb);
-    box.appendChild(table);
-    cols.appendChild(box);
+    const list = groups[gk].sort((a, b) => (b.rank - a.rank) || a.name.localeCompare(b.name, 'fr'));
+    sec.appendChild(el('h4', 'skill-cat', SKILL_GROUP_FR[gk] || gk));
+    const grid = el('div', 'skill-chips');
+    for (const s of list) grid.appendChild(skillChip(s, chars[s.characteristic] ?? 0, kind));
+    sec.appendChild(grid);
   }
-  sec.appendChild(cols);
   return sec;
 }
 
-// Une ligne de compétence : Compétence (CAR) | CdC | Rang | pool de dés. Cliquable → jet.
-function skillRow(s, charVal, kind) {
-  const tr = el('tr', 'skill-tr' + (s.rank > 0 ? ' has-rank' : '') + (s.career ? ' career' : ''));
+// Chip de compétence : [carrière] Nom (CAR) · rang en pips · pool de dés. Clic = jet.
+function skillChip(s, charVal, kind) {
   const prof = kind === 'adversary' ? 0 : Math.min(s.rank, charVal);
   const abil = kind === 'adversary' ? s.rank : Math.max(s.rank, charVal) - prof;
+  const boost = kind === 'adversary' ? 0 : (s.boost || 0);
   const abbr = CHAR_ABBR[s.characteristic] || '';
-  const nameCell = el('td', 'sk-name');
-  nameCell.innerHTML = `${enrichDiceString(s.name)}${abbr ? ` <span class="sk-car">(${abbr})</span>` : ''}`;
+  const chip = el('div', 'skchip' + (s.rank > 0 ? ' trained' : '') + (s.career ? ' career' : ''));
+  chip.tabIndex = 0; chip.setAttribute('role', 'button'); chip.title = `Lancer : ${s.name}`;
+  const pips = Array.from({ length: 5 }, (_, i) => `<i class="pip${i < s.rank ? ' on' : ''}"></i>`).join('');
+  const head = el('div', 'skchip-head');
+  head.innerHTML = `<span class="skchip-name">${enrichDiceString(s.name)}</span><span class="skchip-car">${abbr}</span>`;
   const rules = kind !== 'adversary' ? competencesPage(s.name) : null;
   if (rules) {
-    const book = el('button', 'skill-rules', '📖'); book.type = 'button'; book.title = 'Règles de la compétence';
+    const book = el('button', 'skchip-book', '📖'); book.type = 'button'; book.title = 'Règles';
     book.addEventListener('click', (e) => { e.stopPropagation(); openCard(rules.name, renderRichHTML(rules.html), 'Compétences'); });
-    nameCell.appendChild(book);
+    head.appendChild(book);
   }
-  const cdc = el('td', 'sk-cdc'); cdc.innerHTML = s.career ? '<span class="cdc-on" title="Compétence de carrière">◼</span>' : '<span class="cdc-off">◻</span>';
-  const rank = el('td', 'sk-rk'); rank.textContent = String(s.rank);
-  const boost = kind === 'adversary' ? 0 : (s.boost || 0);
-  const jet = el('td', 'sk-jet');
+  const bottom = el('div', 'skchip-bottom');
+  bottom.innerHTML = `<span class="skchip-pips">${pips}</span>`;
+  const jet = el('span', 'skchip-jet');
   for (let i = 0; i < prof; i++) jet.appendChild(makeGlyph('proficiency'));
   for (let i = 0; i < abil; i++) jet.appendChild(makeGlyph('ability'));
-  for (let i = 0; i < boost; i++) jet.appendChild(makeGlyph('boost')); // dés boost de talents
-  if (s.setbackRemove) { const b = el('span', 'sk-rmsb'); b.textContent = `−${s.setbackRemove}`; b.title = `${s.setbackRemove} dé(s) de contrainte retiré(s) par un talent`; jet.appendChild(makeGlyph('setback')); jet.appendChild(b); }
-  if (!prof && !abil && !boost) jet.insertBefore(document.createTextNode('—'), jet.firstChild);
-  tr.append(nameCell, cdc, rank, jet);
-  tr.tabIndex = 0; tr.setAttribute('role', 'button'); tr.title = 'Lancer cette compétence';
+  for (let i = 0; i < boost; i++) jet.appendChild(makeGlyph('boost'));
+  if (s.setbackRemove) { jet.appendChild(makeGlyph('setback')); const b = el('span', 'sk-rmsb', `−${s.setbackRemove}`); b.title = `${s.setbackRemove} contrainte(s) retirée(s) par un talent`; jet.appendChild(b); }
+  if (!prof && !abil && !boost) jet.textContent = '—';
+  bottom.appendChild(jet);
+  chip.append(head, bottom);
   const roll = () => openGenerator({ proficiency: prof, ability: abil, boost, skillKey: normSkillKey(s.en || s.name), skillName: s.name });
-  tr.addEventListener('click', roll);
-  tr.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); roll(); } });
-  return tr;
+  chip.addEventListener('click', roll);
+  chip.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); roll(); } });
+  return chip;
 }
 
 // Ouvre la modale d'explication d'une case (talent ou amélioration).

@@ -400,32 +400,37 @@ a.skill-name:hover { color: var(--holo); text-decoration: underline; }
 .dg-help-list .rich { display: inline; }
 .dg-help-list .rich p { display: inline; margin: 0; }
 
-/* Compétences — tableaux façon fiche officielle (2 colonnes, design homogène) */
-.skill-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.9rem 1.1rem; align-items: start; }
-.skill-groupbox { min-width: 0; border: 1px solid color-mix(in srgb, var(--gold) 22%, transparent); border-radius: 10px; overflow: hidden; background: color-mix(in srgb, var(--gold) 3%, transparent); }
-.skill-groupbox .skill-group-title {
-  margin: 0; padding: 0.5rem 0.8rem; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--gold); background: color-mix(in srgb, var(--gold) 12%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--gold) 22%, transparent);
+/* Compétences — grille de chips responsive (dense, fluide, jouable en ligne) */
+.skill-cat {
+  margin: 1rem 0 0.5rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--gold); display: flex; align-items: center; gap: 0.6rem;
 }
-.skill-table { width: 100%; border-collapse: collapse; }
-.skill-table thead th { text-align: left; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.5; padding: 0.35rem 0.7rem 0.2rem; font-weight: 700; }
-.skill-table th.sk-cdc, .skill-table th.sk-rk, .skill-table th.sk-jet { text-align: center; }
-.skill-table td { padding: 0.2rem 0.6rem; border-top: 1px solid color-mix(in srgb, var(--line) 45%, transparent); vertical-align: middle; }
-.skill-tr { cursor: pointer; }
-.skill-tr:nth-child(even) td { background: color-mix(in srgb, white 2%, transparent); }
-.skill-tr:hover td { background: color-mix(in srgb, var(--gold) 10%, transparent); }
-.skill-tr.has-rank .sk-name { color: var(--fg); font-weight: 600; }
-.skill-tr.has-rank { }
-.sk-name { font-size: 0.9rem; white-space: nowrap; }
-.sk-car { font-size: 0.7rem; opacity: 0.5; }
-.sk-cdc { text-align: center; width: 2.4rem; }
-.cdc-on { color: var(--gold); } .cdc-off { opacity: 0.28; }
-.sk-rk { text-align: center; width: 2.6rem; font-variant-numeric: tabular-nums; font-weight: 700; color: var(--gold); }
-.skill-tr:not(.has-rank) .sk-rk { color: var(--fg-muted); opacity: 0.5; }
-.sk-jet { white-space: nowrap; text-align: right; }
-.sk-jet .ffg-die { font-size: 1.05rem; }
-.skill-rules { background: none; border: 0; cursor: pointer; opacity: 0.35; font-size: 0.8rem; margin-left: 0.25rem; padding: 0; }
-.skill-rules:hover { opacity: 0.9; }
+.skill-cat::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 35%, transparent), transparent); }
+.skill-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 0.5rem; }
+.skchip {
+  display: flex; flex-direction: column; gap: 0.3rem; padding: 0.5rem 0.65rem; cursor: pointer;
+  border: 1px solid var(--line); border-left: 3px solid transparent; border-radius: 9px;
+  background: color-mix(in srgb, white 1.5%, transparent); transition: border-color .12s, background .12s;
+}
+.skchip:hover { border-color: var(--holo); background: color-mix(in srgb, var(--holo) 8%, transparent); }
+.skchip:focus-visible { outline: 2px solid var(--holo); outline-offset: 1px; }
+.skchip.career { border-left-color: var(--gold); }
+.skchip.trained { background: color-mix(in srgb, var(--gold) 7%, transparent); }
+.skchip.trained.career { background: color-mix(in srgb, var(--gold) 11%, transparent); }
+.skchip-head { display: flex; align-items: baseline; gap: 0.35rem; }
+.skchip-name { flex: 1; min-width: 0; font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.skchip:not(.trained) .skchip-name { font-weight: 500; color: var(--fg-muted); }
+.skchip-car { font-size: 0.66rem; opacity: 0.55; flex: 0 0 auto; }
+.skchip-book { background: none; border: 0; cursor: pointer; opacity: 0.3; font-size: 0.76rem; padding: 0; flex: 0 0 auto; }
+.skchip-book:hover { opacity: 0.95; }
+.skchip-bottom { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.skchip-pips { display: inline-flex; gap: 3px; flex: 0 0 auto; }
+.skchip-pips .pip { width: 7px; height: 7px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent); }
+.skchip-pips .pip.on { background: var(--gold); border-color: var(--gold); }
+.skchip-jet { display: inline-flex; align-items: center; gap: 1px; min-height: 1.1rem; }
+.skchip-jet .ffg-die { font-size: 1.05rem; }
+.skchip:not(.trained) .skchip-jet { opacity: 0.85; }
+.sk-rmsb { font-size: 0.72rem; color: #e07a7a; font-weight: 700; margin-left: 0.1rem; }
 
 /* Retrait de contrainte (talent) sur un jet de compétence */
 .sk-rmsb { font-size: 0.72rem; color: #e07a7a; font-weight: 700; margin-left: 0.1rem; vertical-align: super; }

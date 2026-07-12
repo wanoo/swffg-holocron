@@ -214,9 +214,13 @@ function deriveFFG(doc) {
   for (const [k, v] of Object.entries(item['Skill Rank'] || {})) skillMods[k] = (skillMods[k] || 0) + v;
   // effets de talents sur les JETS de compétence (dés boost ajoutés, contraintes retirées)
   const skillBoost = {}, skillSetback = {};
+  let forceRatingBonus = 0;
   for (const [name, cnt] of Object.entries(xp.talentRanks)) {
     for (const [sk, v] of Object.entries(tIdx[name]?.['Skill Boost'] || {})) skillBoost[sk] = (skillBoost[sk] || 0) + v * cnt;
     for (const [sk, v] of Object.entries(tIdx[name]?.['Skill Remove Setback'] || {})) skillSetback[sk] = (skillSetback[sk] || 0) + v * cnt;
+    // « Valeur de Force » / « Force Rating » : +1 niveau de Force par exemplaire (le
+    // système starwarsffg le gère par le NOM du talent, sans attribut mod → à part).
+    if (/valeur de force|force rating/i.test(name)) forceRatingBonus += cnt;
   }
   return {
     chars,
@@ -225,7 +229,13 @@ function deriveFFG(doc) {
     soak: chars.Brawn + stat('Soak') + armSoak,
     defenceRanged: stat('Defence-Ranged') + num(item.Stat?.Defence) + armDef,
     defenceMelee: stat('Defence-Melee') + num(item.Stat?.Defence) + armDef,
-    forceRating: stat('ForcePool'),
+    // niveau de Force = base espèce/carrière + 1 par « Valeur de Force » (compté par
+    // NOM, jamais via son attribut mod — sinon double comptage). Plancher 1 pour un
+    // utilisateur de la Force (posséder un pouvoir impose FR ≥ 1).
+    forceRating: Math.max(
+      num(species.Stat?.ForcePool) + num(item.Stat?.ForcePool) + forceRatingBonus,
+      itemsOf(doc, 'forcepower').length ? 1 : 0,
+    ),
     encumbrance: 5 + chars.Brawn + stat('Encumbrance'),
     skillMods, skillBoost, skillSetback, xpSkills: xp.skills, xp,
   };

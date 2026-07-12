@@ -72,19 +72,30 @@ Réglages du module (Foundry settings, monde) : `resFoodLabel`, `resFuelLabel`,
 4. Utiliser les **favoris MEJ** (pas de POI serveur). Ouvrir l'astronav via `api.open()` ;
    envoyer un monde via `api.setLeg` / `api.chooser`.
 5. Ne PAS ré-implémenter la carte / le calcul : tout vient de `swffg-astronavigation`.
-6. **« Vous êtes ici » (position du vaisseau)** — décidé : le vaisseau est un **POI MEJ**, et le
-   monde courant est mis en **relationship** MEJ. L'astronav doit dessiner un marqueur « position
-   actuelle » ; côté Holocron, alimenter cette position (API à ajouter côté astronav :
-   `api.setCurrentWorld(nom)` + marqueur, à faire). Objectif : afficher « vous êtes ici » sur la carte.
-7. **MEJ + import** — les fiches « Place » ne s'enrichissent (et ne se mettent en favori) que sur les
-   entrées **du monde** : le compendium sert de **base à importer dans les journaux**. Prévoir un
-   flux d'import (bouton/among Holocron) plutôt que de lire le compendium verrouillé.
+6. **« Vous êtes ici » (position du vaisseau)** — ✅ **livré côté astronav (v1.6.0)** :
+   `api.setCurrentWorld(nom)` pose un marqueur « position courante » sur la carte (réglage monde
+   `currentWorld`). **Côté Holocron : appeler `api.setCurrentWorld(mondeDuVaisseau)`** quand le
+   vaisseau bouge (le vaisseau = POI MEJ, monde courant en relationship).
+7. **MEJ + import** — ✅ **livré côté astronav (v1.6.0)** : au 1er lancement (MJ) l'Astronav propose
+   d'importer le compendium dans les journaux (`api.importToWorld()`, dossier « Planètes — Astronav »),
+   en droits **OBSERVER**. Les fiches « Place » ne s'enrichissent et ne se favorisent que sur ces
+   entrées **du monde**. **Côté Holocron : s'assurer que l'import a eu lieu** (ou l'appeler) avant
+   d'exploiter les fiches.
+8. **Suivre l'état des favoris + les droits de vue (Fav state & view rights)** — à faire côté Holocron :
+   - **Favoris** = flag par-utilisateur MEJ `game.user.getFlag("monks-enhanced-journal","bookmarks")`
+     (UUID). `api.favorites()` les résout en noms de mondes. Le Holocron doit **suivre/synchroniser
+     cet état** (par joueur) pour que joueurs **et** MJ s'en servent.
+   - **Droits de vue** : les journaux importés sont **OBSERVER par défaut** → joueurs peuvent voir +
+     favoriser. Le Holocron doit **respecter/maintenir ces droits** (ne pas les restreindre) pour que
+     tout le monde utilise l'atlas.
 
-## 7. Réglages / comportements récents du module (v1.5.3)
+## 8. Réglages / comportements récents du module (v1.6.0)
 
 - Réglage MJ **« Difficulté des voyages »** (Très facile ↔ Très difficile, milieu = règles FFG).
 - Factions hostiles = **menu à cases à cocher** (allégeances connues), plus un CSV.
 - Hyperdrive = **classe** (basse = rapide) ; la vitesse joue sur la durée (et les vivres), pas le carburant.
+- API ajoutée : `api.setCurrentWorld(nom)`, `api.currentWorld()`, `api.importToWorld()`, `api.favorites()`.
+- Compendium en droits **OBSERVER** (joueurs voient/favorisent).
 
 ## 6. Références
 
