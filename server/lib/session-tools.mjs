@@ -149,10 +149,12 @@ export async function createCombatScene({ title, map, combatants }, { store, con
     if (created) { r.actorId = created._id; r.img = created.img; worldByName.set(normName(created.name), created); }
   }
 
-  // 3. scène (fond = map si c'est un chemin de fichier Foundry)
+  // 3. scène (fond = map si c'est une image : chemin Foundry OU URL). On accepte
+  // accents/espaces/parenthèses/apostrophes ; on refuse seulement la traversée (..).
   const G = 100;
   const sceneName = `⚔️ ${String(title || 'Rencontre').slice(0, 80)}`;
-  const bg = map && /^\w[\w\-./ ]+\.(webp|png|jpg|jpeg)$/i.test(map) ? map : null;
+  const mapStr = String(map || '').trim();
+  const bg = mapStr && !mapStr.includes('..') && /\.(webp|png|jpg|jpeg|gif|avif|svg)(\?.*)?$/i.test(mapStr) ? mapStr : null;
   await mcpCall('create_document', { type: 'Scene', data: [{
     name: sceneName, width: 3000, height: 2000, padding: 0.1,
     grid: { type: 1, size: G }, tokenVision: false, globalLight: true,
@@ -194,5 +196,5 @@ export async function createCombatScene({ title, map, combatants }, { store, con
     }] });
   } catch { /* best-effort */ }
 
-  return { ok: true, sceneId: scene._id, sceneName, tokens: tokens.length, missing };
+  return { ok: true, sceneId: scene._id, sceneName, tokens: tokens.length, missing, bgSet: Boolean(bg), map: bg || null };
 }

@@ -32,7 +32,7 @@ export const CAMPAIGN_DEFAULTS = {
   packs: { adversaries: '', npcsExtra: null, rules: '', rulesNamePrefix: '^\\d+\\s*·\\s*', translations: [] },
   journals: {
     ship: '🚀 Vaisseau du groupe', codex: '🖥️ Codex du groupe',
-    poi: "🌍 Mondes d'intérêt", holonet: '📡 HoloNet — Actualités',
+    holonet: '📡 HoloNet — Actualités',
     gmNotes: '🗒️ Notes MJ (Holocron)', encounters: '⚔️ Bibliothèque de rencontres',
     dossiers: '🗂️ Dossiers MJ (Holocron)',
   },

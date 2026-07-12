@@ -272,30 +272,6 @@ export async function mountAstronav(container) {
     compute();
   })();
 
-  // Mondes d'intérêt flaggés depuis Foundry (macro ⭐) → épinglés pour les joueurs.
-  // Le serveur ne renvoie les épingles « vis: gm » qu'au MJ (session ou clé).
-  (async () => {
-    let poi = [];
-    try {
-      const r = await fetch('/api/astro/poi', { credentials: 'same-origin', headers: getGMKey() ? { 'x-gm-key': getGMKey() } : {} });
-      poi = (await r.json()).poi || [];
-    } catch { return; }
-    let changed = false;
-    for (const it of poi) {
-      const p = byName[it && it.name]; if (!p) continue;
-      p.poi = true;
-      p.poiVis = it.vis === 'gm' ? 'gm' : 'all';
-      const note = ((it.act ? `Acte ${it.act} — ` : '') + (it.note || '')).trim();
-      if (note) p.campaign = note;
-      if (!CAMPAIGN.has(it.name)) { CAMPAIGN.add(it.name); CAMPAIGN_ORDER.push(it.name); changed = true; }
-    }
-    if (!changed) return;
-    const ov = orig.value, dv = dest.value;   // préserve la sélection courante
-    fillSelects(); orig.value = ov; dest.value = dv;
-    renderLibrary();
-    compute();
-  })();
-
   function populateFilters() {
     const regs = REGION_ORDER.filter((r) => PLANETS.some((p) => p.region === r));
     wrap.querySelector('#f-region').insertAdjacentHTML('beforeend', regs.map((r) => `<option value="${esc(r)}">${esc(r)}</option>`).join(''));
@@ -772,7 +748,7 @@ export async function mountAstronav(container) {
   function thumb(p) { return p.img ? `<img src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy" referrerpolicy="no-referrer">` : `<div class="an-orb" style="--oc:${orbColor(p)}">${esc(p.name[0])}</div>`; }
   function cardHTML(p) {
     return `<button class="an-pcard" data-name="${esc(p.name)}">
-      <div class="an-thumb">${CAMPAIGN.has(p.name) ? `<span class="an-star">${p.poiVis === 'gm' ? '🔒' : '★'}</span>` : ''}${thumb(p)}</div>
+      <div class="an-thumb">${CAMPAIGN.has(p.name) ? '<span class="an-star">★</span>' : ''}${thumb(p)}</div>
       <div class="an-body"><h4>${esc(p.name)}</h4><div class="an-meta"><span class="an-coord">${esc(p.coord || '?')}</span>${p.sector ? `<span class="an-sectag">· ${esc(p.sector)}</span>` : ''}</div></div></button>`;
   }
   function renderLibrary() {
@@ -826,11 +802,6 @@ export async function mountAstronav(container) {
         ${pts}
         <div class="an-acts"><button class="an-o" type="button">Définir origine</button><button class="an-d" type="button">Définir destination</button>
           <button class="an-map" type="button" title="Centrer la carte sur ce monde">📍 Carte</button>
-          ${(Data.gm || getGMKey()) ? `<span class="an-poiseg" role="group" aria-label="Épingle du monde">
-            <button type="button" data-v="off" title="Non épinglé">☆ Off</button>
-            <button type="button" data-v="gm" title="Repérage privé — visible du MJ seulement">🔒 MJ</button>
-            <button type="button" data-v="all" title="Épinglé pour les joueurs (Astronav + carte)">⭐ Tous</button>
-          </span>` : ''}
         </div>
       </div>`;
     const ov = el('div', 'an-overlay');
@@ -840,48 +811,6 @@ export async function mountAstronav(container) {
     body.querySelector('.an-o').addEventListener('click', () => { orig.value = p.name; compute(); ov.remove(); });
     body.querySelector('.an-d').addEventListener('click', () => { dest.value = p.name; compute(); ov.remove(); });
     body.querySelector('.an-map').addEventListener('click', () => { ov.remove(); focusPlanet(p); });
-    // Épingle à 3 positions : ☆ off · 🔒 MJ seulement · ⭐ visible de tous.
-    const seg = body.querySelector('.an-poiseg');
-    const poiState = () => (!p.poi ? 'off' : (p.poiVis === 'gm' ? 'gm' : 'all'));
-    const paintPoi = () => seg.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.v === poiState()));
-    // Applique un état d'épingle localement (fiche + registre + sélecteurs + carte).
-    const applyPoi = (v, note) => {
-      p.poi = v !== 'off';
-      p.poiVis = v === 'off' ? undefined : v;
-      if (p.poi) { p.campaign = note || p.campaign; CAMPAIGN.add(p.name); if (!CAMPAIGN_ORDER.includes(p.name)) CAMPAIGN_ORDER.push(p.name); }
-      else if (!(Data.config?.campaignPlanets || []).includes(p.name)) { CAMPAIGN.delete(p.name); const i = CAMPAIGN_ORDER.indexOf(p.name); if (i >= 0) CAMPAIGN_ORDER.splice(i, 1); delete p.campaign; }
-      const ov2 = orig.value, dv2 = dest.value;
-      fillSelects(); orig.value = ov2; dest.value = dv2;
-      renderLibrary(); compute();
-      paintPoi();
-    };
-    // Optimiste : l'état s'affiche au clic, l'écriture Foundry part en fond
-    // (file séquentielle pour préserver l'ordre des clics), rollback si erreur.
-    let poiQueue = Promise.resolve();
-    if (seg) { paintPoi(); seg.addEventListener('click', (e) => {
-      const next = e.target.closest('button')?.dataset.v;
-      if (!next || next === poiState()) return;
-      let note = p.campaign || '';
-      if (poiState() === 'off') { note = window.prompt('Note (affichée avec l’épingle, optionnelle) :', note) ?? ''; }
-      const prev = { poi: p.poi, poiVis: p.poiVis, campaign: p.campaign };
-      applyPoi(next, note);
-      seg.classList.add('busy');
-      poiQueue = poiQueue.then(async () => {
-        try {
-          const r = await fetch('/api/astro/poi', {
-            method: 'PUT', credentials: 'same-origin',
-            headers: { 'Content-Type': 'application/json', ...(getGMKey() ? { 'x-gm-key': getGMKey() } : {}) },
-            body: JSON.stringify({ name: p.name, note, vis: next === 'gm' ? 'gm' : 'all', on: next !== 'off' }),
-          });
-          if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'échec');
-        } catch (err) {
-          Object.assign(p, prev);
-          applyPoi(prev.poi ? (prev.poiVis || 'all') : 'off', prev.campaign);
-          seg.classList.add('err'); seg.title = 'Écriture Foundry échouée : ' + String(err.message).slice(0, 80);
-          setTimeout(() => seg.classList.remove('err'), 3000);
-        } finally { seg.classList.remove('busy'); }
-      });
-    }); }
     document.body.appendChild(ov);
     const onKey = (e) => { if (e.key === 'Escape') { ov.remove(); document.removeEventListener('keydown', onKey); } };
     document.addEventListener('keydown', onKey);

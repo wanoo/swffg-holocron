@@ -94,13 +94,11 @@ export function createDashService({ journals }) {
     const codexJ = await one(journals.codex);
     const holoJ = await one(journals.holonet);
     const shipJ = await one(journals.ship);
-    const poiJ = await one(journals.poi);
     const pageHTML = (j) => (j && Array.isArray(j.pages) && j.pages[0] && j.pages[0].text ? j.pages[0].text.content || '' : '');
     const data = {
       codex: codexJ?.flags?.holocron?.codex || null,
       holonet: pageHTML(holoJ),
       ship: clampShip(shipJ?.flags?.holocron?.ship || {}),
-      poi: poiJ?.flags?.holocron?.poi || [],
     };
     cache = { t: now, data };
     return data;

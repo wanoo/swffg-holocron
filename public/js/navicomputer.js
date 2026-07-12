@@ -27,7 +27,7 @@ async function fetchDash() {
   } catch { /* réseau/pont indispo */ }
   let ship = null;
   try { ship = JSON.parse(localStorage.getItem('holocron-ship') || 'null'); } catch { /* noop */ }
-  return { codex: null, holonet: '', poi: [], ship, _src: 'local' };
+  return { codex: null, holonet: '', ship, _src: 'local' };
 }
 
 // Fiche planète (image + région) depuis planets.json (mis en cache, partagé avec l'Astronav).

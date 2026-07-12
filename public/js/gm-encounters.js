@@ -168,7 +168,9 @@ export async function mountEncounters(container) {
         const combatants = current.groups.flatMap((g) => g.rows.map((r) => ({ name: r.name, count: r.count || 1 }))).filter((c) => c.name);
         if (!combatants.length) throw new Error('aucun combattant');
         const out = await api('/gm/foundry/combat-scene', { method: 'POST', body: JSON.stringify({ title: current.title, map: current.map, combatants }) });
-        alert(`Scène « ${out.sceneName} » créée (${out.tokens} tokens)` + (out.missing?.length ? `\n⚠️ introuvables : ${out.missing.join(', ')}` : ''));
+        alert(`Scène « ${out.sceneName} » créée (${out.tokens} tokens)`
+          + (current.map && !out.bgSet ? `\n⚠️ fond non chargé (chemin d'image non reconnu : ${current.map})` : '')
+          + (out.missing?.length ? `\n⚠️ introuvables : ${out.missing.join(', ')}` : ''));
       }),
       mkBtn('🗑️ Supprimer', 'danger', async () => {
         if (!confirm('Supprimer cette rencontre de la bibliothèque ?')) return;
