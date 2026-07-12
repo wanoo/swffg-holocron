@@ -292,6 +292,15 @@ a.skill-name:hover { color: var(--holo); text-decoration: underline; }
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 40%, transparent) inset;
 }
 .tree-cell.unlearned { opacity: 0.6; }
+/* Arbres de la Force : vert (comme dans le jeu), pour les distinguer des spés (or). */
+.force-tree { --tree-accent: #4fbf7a; }
+.force-tree .tree-cell.learned {
+  border-color: var(--tree-accent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tree-accent) 18%, transparent), color-mix(in srgb, var(--tree-accent) 6%, transparent));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--tree-accent) 42%, transparent) inset;
+}
+.force-tree .tree-cell.learned .conn { background: var(--tree-accent); }
+.force-tree .tree-cost { color: color-mix(in srgb, var(--tree-accent) 70%, white); }
 .tree-cell .tree-name { font-size: 0.82rem; font-weight: 600; color: var(--fg); line-height: 1.2; }
 .tree-cell .tree-foot { display: flex; align-items: center; gap: 0.4rem; }
 .tree-cell .tree-rank { font-size: 0.66rem; color: var(--fg-muted); }
@@ -391,26 +400,39 @@ a.skill-name:hover { color: var(--holo); text-decoration: underline; }
 .dg-help-list .rich { display: inline; }
 .dg-help-list .rich p { display: inline; margin: 0; }
 
-/* Compétences — tableaux façon fiche officielle (2 colonnes) */
-.skill-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem 1.4rem; align-items: start; }
-.skill-groupbox { min-width: 0; }
+/* Compétences — tableaux façon fiche officielle (2 colonnes, design homogène) */
+.skill-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.1rem 1.5rem; align-items: start; }
+.skill-groupbox { min-width: 0; border: 1px solid color-mix(in srgb, var(--gold) 22%, transparent); border-radius: 10px; overflow: hidden; background: color-mix(in srgb, var(--gold) 3%, transparent); }
+.skill-groupbox .skill-group-title {
+  margin: 0; padding: 0.5rem 0.8rem; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--gold); background: color-mix(in srgb, var(--gold) 12%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--gold) 22%, transparent);
+}
 .skill-table { width: 100%; border-collapse: collapse; }
-.skill-table th { text-align: left; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.03em; opacity: 0.55; padding: 0.15rem 0.4rem; font-weight: 700; }
-.skill-table th.sk-cdc, .skill-table th.sk-rk { text-align: center; }
-.skill-table td { padding: 0.16rem 0.4rem; border-top: 1px solid color-mix(in srgb, var(--line) 60%, transparent); vertical-align: middle; }
+.skill-table thead th { text-align: left; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.5; padding: 0.35rem 0.7rem 0.2rem; font-weight: 700; }
+.skill-table th.sk-cdc, .skill-table th.sk-rk, .skill-table th.sk-jet { text-align: center; }
+.skill-table td { padding: 0.28rem 0.7rem; border-top: 1px solid color-mix(in srgb, var(--line) 45%, transparent); vertical-align: middle; }
 .skill-tr { cursor: pointer; }
-.skill-tr:hover td { background: var(--panel-2, rgba(255,255,255,0.03)); }
+.skill-tr:nth-child(even) td { background: color-mix(in srgb, white 2%, transparent); }
+.skill-tr:hover td { background: color-mix(in srgb, var(--gold) 10%, transparent); }
 .skill-tr.has-rank .sk-name { color: var(--fg); font-weight: 600; }
-.skill-tr.career .sk-name { }
-.sk-name { font-size: 0.9rem; }
-.sk-car { font-size: 0.72rem; opacity: 0.55; }
-.sk-cdc { text-align: center; width: 2.2rem; }
-.cdc-on { color: var(--gold); } .cdc-off { opacity: 0.3; }
-.sk-rk { text-align: center; width: 2.4rem; font-variant-numeric: tabular-nums; font-weight: 700; }
-.sk-jet { width: 40%; white-space: nowrap; }
+.skill-tr.has-rank { }
+.sk-name { font-size: 0.9rem; white-space: nowrap; }
+.sk-car { font-size: 0.7rem; opacity: 0.5; }
+.sk-cdc { text-align: center; width: 2.4rem; }
+.cdc-on { color: var(--gold); } .cdc-off { opacity: 0.28; }
+.sk-rk { text-align: center; width: 2.6rem; font-variant-numeric: tabular-nums; font-weight: 700; color: var(--gold); }
+.skill-tr:not(.has-rank) .sk-rk { color: var(--fg-muted); opacity: 0.5; }
+.sk-jet { width: 42%; white-space: nowrap; text-align: right; }
 .sk-jet .ffg-die { font-size: 1.05rem; }
-.skill-rules { background: none; border: 0; cursor: pointer; opacity: 0.4; font-size: 0.85rem; margin-left: 0.3rem; padding: 0; }
+.skill-rules { background: none; border: 0; cursor: pointer; opacity: 0.35; font-size: 0.8rem; margin-left: 0.25rem; padding: 0; }
 .skill-rules:hover { opacity: 0.9; }
+
+/* Encart repliable de description de spé + ligne « pouvoir de base » du récap */
+.spec-desc { margin-bottom: 1rem; border: 1px solid var(--line); border-radius: 8px; padding: 0.4rem 0.8rem; background: color-mix(in srgb, white 2%, transparent); }
+.spec-desc > summary { cursor: pointer; color: var(--gold); font-weight: 700; font-size: 0.85rem; }
+.spec-desc .rich { color: var(--fg-muted); font-size: 0.88rem; line-height: 1.5; margin-top: 0.5rem; }
+.talent-recap .tr-base td { background: color-mix(in srgb, var(--gold) 8%, transparent); }
+.talent-recap .tr-base .tr-name { color: var(--gold); font-weight: 700; }
 
 /* Portrait plein écran */
 .img-full { position: fixed; inset: 0; z-index: 200; background: rgba(4,6,10,0.92); display: flex; align-items: center; justify-content: center; cursor: zoom-out; padding: 2vh; }

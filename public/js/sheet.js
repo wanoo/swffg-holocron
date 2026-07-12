@@ -373,8 +373,13 @@ function treeCell(cell, extraClass, opts = {}) {
 // Arbre de talents d'une spécialisation (grille 4×5).
 function renderSpecTree(spec) {
   const wrap = el('div', 'spec-tree');
-  // Le nom est déjà porté par l'onglet — on ne montre ici que la description.
-  if (spec.description) { const head = el('div', 'spec-tree-head'); head.appendChild(renderRichHTML(spec.description)); wrap.appendChild(head); }
+  // Description dans un encart repliable (le nom est déjà porté par l'onglet).
+  if (spec.description) {
+    const det = el('details', 'spec-desc');
+    det.appendChild(el('summary', null, 'Description de la spécialisation'));
+    det.appendChild(renderRichHTML(spec.description));
+    wrap.appendChild(det);
+  }
 
   const byIndex = {};
   for (const c of spec.talents) byIndex[c.index] = c;
@@ -416,15 +421,15 @@ function tabs(entries) {
 
 // Tableau récapitulatif : Talent | Activation | Rang | Description (talents/améliorations
 // APPRIS). Le nom ouvre la carte détaillée au clic (réutilise openTreeCard).
-function talentRecap(rows) {
+function talentRecap(rows, col2 = 'Activation') {
   if (!rows.length) return null;
   const scroll = el('div', 'table-scroll');
   const table = el('table', 'sheet-table talent-recap');
-  table.innerHTML = '<thead><tr><th>Talent</th><th>Activation</th><th>Rang</th><th>Description</th></tr></thead>';
+  table.innerHTML = `<thead><tr><th>Talent</th><th>${escape(col2)}</th><th>Rang</th><th>Description</th></tr></thead>`;
   const tb = el('tbody');
   for (const r of rows) {
-    const tr = el('tr');
-    tr.innerHTML = `<td class="tr-name">${enrichDiceString(r.name)}</td><td>${escape(r.activation || '—')}</td><td class="tr-rank">${r.rank ? escape(String(r.rank)) : '—'}</td><td class="tr-desc">${enrichDiceString(plainFirst(r.description))}</td>`;
+    const tr = el('tr', r.base ? 'tr-base' : '');
+    tr.innerHTML = `<td class="tr-name">${r.base ? '★ ' : ''}${enrichDiceString(r.name)}</td><td>${escape(r.activation || '—')}</td><td class="tr-rank">${r.rank ? escape(String(r.rank)) : '—'}</td><td class="tr-desc">${enrichDiceString(plainFirst(r.description))}</td>`;
     if (r.cell) { tr.querySelector('.tr-name').classList.add('link'); tr.querySelector('.tr-name').addEventListener('click', () => openTreeCard(r.cell, [r.activation, r.rank ? `Rang ${r.rank}` : ''].filter(Boolean).join(' · '))); }
     tb.appendChild(tr);
   }
@@ -489,17 +494,19 @@ function forceTreesBlock(entity) {
   const powers = entity.forcepowers || [];
   if (!powers.length) return null;
   const sec = section('Pouvoirs de la Force');
-  // Récap des améliorations APPRISES, groupées par nom (colonne « Activation » = pouvoir).
+  // Récap groupé par POUVOIR : ligne « base » (le pouvoir lui-même) puis ses
+  // améliorations apprises. La colonne 2 identifie le pouvoir.
   const rows = [];
   for (const p of powers) {
+    rows.push({ name: p.name, activation: p.name, rank: 0, description: p.description, base: true });
     const seen = new Map();
-    for (const u of p.upgrades || []) {
+    for (const u of (p.upgrades || []).slice(1)) { // [0] = le pouvoir de base
       if (!u.learned || !u.name) continue;
       const g = seen.get(u.name);
       if (g) g.count += 1; else { const o = { name: u.name, activation: p.name, description: u.description, count: 1 }; seen.set(u.name, o); rows.push(o); }
     }
   }
-  const recap = talentRecap(rows.map((g) => ({ name: g.name, activation: g.activation, rank: g.count > 1 ? g.count : 0, description: g.description })));
+  const recap = talentRecap(rows.map((g) => ({ name: g.name, activation: g.activation, rank: g.count > 1 ? g.count : 0, description: g.description, base: g.base })), 'Pouvoir');
   if (recap) { const d = el('details', 'talent-recap-wrap'); d.open = true; d.appendChild(el('summary', null, `Améliorations apprises (${rows.length})`)); d.appendChild(recap); sec.appendChild(d); }
   sec.appendChild(tabs(powers.map((p) => ({ label: p.name, node: renderForceTree(p) }))));
   return sec;
@@ -536,7 +543,7 @@ function weaponsBlock(entity) {
     '<thead><tr><th>Arme</th><th>Compétence</th><th>Dégâts</th><th>Crit</th><th>Portée</th><th>Spécial</th></tr></thead>';
   const tb = el('tbody');
   for (const w of weapons) {
-    const special = w.special || (w.qualities && w.qualities.length ? w.qualities.join(', ') : '');
+    const special = [w.special, ...(w.qualities || [])].filter(Boolean).join(', ');
     const tr = el('tr');
     tr.innerHTML = `<td>${enrichDiceString(w.name)}</td><td>${escape(w.skill)}</td><td>${escape(String(w.damage))}</td><td>${escape(String(w.crit))}</td><td>${escape(w.range)}</td><td>${enrichDiceString(special)}</td>`;
     tb.appendChild(tr);
