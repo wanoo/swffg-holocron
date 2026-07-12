@@ -9,6 +9,7 @@ export function envConfig(env = process.env) {
     dataDir: env.HOLOCRON_DATA_DIR || './data',
     sessionSecret: env.SESSION_SECRET || '',
     foundryBaseUrl: (env.FOUNDRY_BASE_URL || '').replace(/\/$/, ''),
+    foundryWorld: env.FOUNDRY_WORLD || 'star-wars', // dossier worlds/<world>/ pour résoudre les assets relatifs
     foundryMcpUrl: env.FOUNDRY_MCP_URL || '',
     foundryCredentialsJson: env.FOUNDRY_CREDENTIALS_JSON || '',
     gmKey: env.GM_KEY || '',

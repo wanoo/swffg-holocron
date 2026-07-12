@@ -118,10 +118,15 @@ export function mountSidebar() {
   // Les stats d'adversaires/boss sont des spoilers : le groupe n'apparaît que
   // clé MJ présente (la sidebar est re-montée au déverrouillage).
   if (getGMKey() || Data.gm) {
+    // comptes depuis le manifest (connus au boot) ; les tableaux lazy priment une
+    // fois chargés — évite l'affichage « (0) » avant le lazy-load.
+    const cnt = Data.meta?.counts || {};
+    const nNpc = Data.worldNpcs.length || cnt.npcs || 0;
+    const nAdv = Data.adversaries.length || cnt.adversaries || 0;
     tree.appendChild(
-      makeGroup('PNJ & Bestiaire (MJ)', 'bestiary', Data.worldNpcs.length + Data.adversaries.length, [
-        { href: '#/npc', label: `PNJ du monde (${Data.worldNpcs.length})` },
-        { href: '#/bestiaire', label: `Adversaires (${Data.adversaries.length})` },
+      makeGroup('PNJ & Bestiaire (MJ)', 'bestiary', nNpc + nAdv, [
+        { href: '#/npc', label: `PNJ du monde (${nNpc})` },
+        { href: '#/bestiaire', label: `Adversaires (${nAdv})` },
       ])
     );
   }

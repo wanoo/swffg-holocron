@@ -121,12 +121,14 @@ export async function ensureCompendium() {
   return Data.compendium;
 }
 
-// Résout un chemin de fichier Foundry (worlds/…) vers une URL affichable.
+// Résout un chemin de fichier Foundry vers une URL affichable via le proxy d'assets
+// public (le serveur préfixe worlds/<world>/ pour les chemins relatifs monde et sert
+// depuis Foundry avec cache). Les URLs absolues (wiki, data:) passent telles quelles.
 export function foundryAsset(path) {
   if (!path) return path;
-  if (/^(https?:|data:|\/)/.test(path)) return path;
-  const base = Data.config?.foundryBaseUrl || '';
-  return base ? `${base}/${path}` : path;
+  if (/^(https?:|data:)/.test(path)) return path;
+  if (path.startsWith('/api/')) return path;
+  return `${API}/asset/${path.split('/').map(encodeURIComponent).join('/')}`;
 }
 
 export function compendiumEntry(ref) {

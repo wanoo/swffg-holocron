@@ -80,6 +80,36 @@ async function proxyAsset(req, res, rel, session) {
   res.end(buf);
 }
 
+// --- proxy assets PUBLIC (portraits PJ/PNJ/orga, images de module) ------------------
+// Résout les chemins relatifs monde (`assets/PJ/x.png` → `worlds/<world>/assets/PJ/x.png`),
+// sert depuis Foundry avec cache disque. Réservé aux images ; bloque les visuels MJ (gm-*)
+// pour ne pas faire du proxy une passerelle à spoilers (ceux-là passent par /api/gm/asset).
+const IMG_EXT = new Set(['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'avif']);
+async function proxyPublicAsset(req, res, rel) {
+  const clean = normalize(decodeURIComponent(rel)).replace(/^([./\\])+/, '').replace(/\\/g, '/');
+  if (clean.includes('..')) return sendJSON(res, 400, { error: 'chemin invalide' });
+  // Les chemins d'assets Foundry (assets/…, worlds/…, modules/…, systems/…) sont
+  // servis TELS QUELS sous FOUNDRY_BASE_URL (la base pointe déjà sur la racine du monde).
+  const ext = clean.split('.').pop().toLowerCase();
+  if (!IMG_EXT.has(ext)) return sendJSON(res, 400, { error: 'type non servi' });
+  if (/(^|\/)gm-/.test(clean)) return sendJSON(res, 403, { error: 'visuel réservé MJ' });
+  const cachePath = join(assetCacheDir, 'pub_' + clean.replace(/[^a-zA-Z0-9._-]/g, '_'));
+  try {
+    const buf = await readFile(cachePath);
+    res.writeHead(200, { 'Content-Type': MIME['.' + ext] || 'application/octet-stream', 'Cache-Control': 'public, max-age=86400' });
+    return res.end(buf);
+  } catch { /* pas en cache */ }
+  let upstream;
+  try { upstream = await fetch(`${ENV.foundryBaseUrl}/${clean}`); }
+  catch { return sendJSON(res, 502, { error: 'Foundry injoignable' }); }
+  if (!upstream.ok) return sendJSON(res, upstream.status === 404 ? 404 : 502, { error: 'asset introuvable' });
+  const buf = Buffer.from(await upstream.arrayBuffer());
+  await mkdir(assetCacheDir, { recursive: true });
+  writeFile(cachePath, buf).catch(() => {});
+  res.writeHead(200, { 'Content-Type': upstream.headers.get('content-type') || MIME['.' + ext] || 'application/octet-stream', 'Cache-Control': 'public, max-age=86400' });
+  res.end(buf);
+}
+
 /* =============================================================== routeur API == */
 async function handleApi(req, res, urlPath) {
   const parts = urlPath.replace(/^\/api\/?/, '').split('?')[0].split('/').filter(Boolean);
@@ -88,6 +118,11 @@ async function handleApi(req, res, urlPath) {
 
   if (req.method === 'OPTIONS') { cors(res); res.writeHead(204); return res.end(); }
   if (parts[0] === 'health') return sendJSON(res, 200, { ok: true, mode, collections: Object.fromEntries(store.status) });
+
+  // proxy d'assets public (portraits) — /api/asset/<chemin>
+  if (parts[0] === 'asset' && req.method === 'GET') {
+    return proxyPublicAsset(req, res, urlPath.replace(/^\/api\/asset\//, '').split('?')[0]);
+  }
 
   /* ---------------------------------------------------------------- auth ---- */
   if (parts[0] === 'login' && req.method === 'POST') {

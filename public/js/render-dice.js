@@ -104,6 +104,27 @@ export function enrichDice(root) {
   return root;
 }
 
+// Version chaîne HTML d'un glyphe (pour l'inclure dans un innerHTML de nom/titre).
+function glyphHTML(type) {
+  const d = DICE[type];
+  if (!d) return null;
+  const fr = d.fr.replace(/"/g, '&quot;');
+  return `<span class="ffg-die ffg-${d.kind} dt-${type}" role="img" aria-label="${fr}" title="${fr}">${d.glyph}</span>`;
+}
+const escHtml = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// Enrichit une CHAÎNE (nom d'arme, titre, cellule) en HTML sûr : convertit les tokens
+// de dés/symboles FFG en glyphes et retire le BBCode de mise en forme OggDude
+// ([B]/[P]/[H3]/[BR]…) qui n'a pas de sens dans un intitulé. Renvoie du HTML échappé.
+export function enrichDiceString(str) {
+  if (str == null || str === '') return '';
+  let s = escHtml(str);
+  s = s.replace(/\[\/?(?:B|I|U|H[1-4]|P|BR|LI|UL|OL)\]/gi, (m) => (/\[(?:P|BR)\]/i.test(m) ? ' ' : ''));
+  s = s.replace(new RegExp(BRACKET_RE.source, 'gi'), (m, code) => glyphHTML(BRACKET[String(code).toLowerCase()]) || m);
+  s = s.replace(new RegExp(COLON_RE.source, 'gi'), (m, name) => glyphHTML(COLON[String(name).toLowerCase()]) || m);
+  return s;
+}
+
 // Légende dés & symboles (panneau d'aide).
 export function legendHTML() {
   const row = (type) => {

@@ -389,6 +389,24 @@ a.skill-name:hover { color: var(--holo); text-decoration: underline; }
 .dg-help-list .rich { display: inline; }
 .dg-help-list .rich p { display: inline; margin: 0; }
 
+/* Onglets d'arbres (spé / pouvoirs de Force) */
+.sheet-tabs { display: flex; flex-wrap: wrap; gap: 0.3rem; border-bottom: 1px solid var(--line); margin-bottom: 0.9rem; }
+.sheet-tab { background: transparent; border: 1px solid transparent; border-bottom: none; color: var(--fg-muted); padding: 0.4rem 0.85rem; cursor: pointer; font-weight: 700; font-size: 0.9rem; border-radius: 0.4rem 0.4rem 0 0; }
+.sheet-tab:hover { color: var(--fg); }
+.sheet-tab.active { color: var(--gold); border-color: var(--line); border-bottom: 1px solid var(--bg, #0c1018); margin-bottom: -1px; background: color-mix(in srgb, var(--gold) 8%, transparent); }
+.sheet-tab-panel { display: none; }
+.sheet-tab-panel.active { display: block; }
+
+/* Tableau récapitulatif des talents / améliorations */
+.talent-recap-wrap { margin-bottom: 1rem; }
+.talent-recap-wrap > summary { cursor: pointer; color: var(--gold); font-weight: 700; font-size: 0.9rem; margin-bottom: 0.5rem; }
+.talent-recap th, .talent-recap td { text-align: left; vertical-align: top; }
+.talent-recap .tr-rank { text-align: center; font-variant-numeric: tabular-nums; }
+.talent-recap .tr-desc { color: var(--fg-muted); font-size: 0.85rem; }
+.talent-recap .tr-name { font-weight: 600; white-space: nowrap; }
+.talent-recap .tr-name.link { cursor: pointer; color: var(--gold); }
+.talent-recap .tr-name.link:hover { text-decoration: underline; }
+
 /* Progression XP */
 .xp-log { margin-top: 0.9rem; }
 .xp-log > summary { cursor: pointer; color: var(--gold); font-size: 0.9rem; font-weight: 700; }

@@ -15,11 +15,17 @@ export function createContentService({ store, config }) {
     const cc = config();
     const journals = store.get('journalsIndex') || [];
     const pcs = pcsRaw();
+    // comptes PNJ/bestiaire — calculés sans transform, pour la sidebar (le contenu
+    // lui-même reste lazy et gaté MJ). Évite les compteurs à 0 avant le lazy-load.
+    const actors = store.get('actors') || [];
+    const npcFid = actorFolderId(cc.npcsWorldFolder);
+    const npcCount = npcFid ? actors.filter((a) => a.folder === npcFid).length : 0;
+    const advCount = (store.get(`pack:${cc.packs.adversaries}`) || []).length;
     return {
       title: cc.meta.title,
       description: cc.meta.description,
       system: cc.meta.system,
-      counts: { journals: journals.length, pcs: pcs.length },
+      counts: { journals: journals.length, pcs: pcs.length, npcs: npcCount, adversaries: advCount },
       pcs: pcs.map((p) => ({ id: p._id, name: p.name })),
     };
   }
@@ -64,7 +70,7 @@ export function createContentService({ store, config }) {
   function versions() {
     const cc = config();
     return {
-      manifest: store.version('config') * 31 + store.version('actors') + store.version('journalsIndex'),
+      manifest: store.version('config') * 31 + store.version('actors') + store.version('journalsIndex') + store.version(`pack:${cc.packs.adversaries}`),
       journals: store.version('journalsIndex') * 31 + store.version('folders') + store.version('config'),
       pcs: store.version('actors') * 31 + store.version('folders'),
       npcs: store.version('actors') * 31 + store.version('folders') + 7,

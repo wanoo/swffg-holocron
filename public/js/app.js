@@ -1,5 +1,5 @@
 // app.js — bootstrap, routeur (hash), rendu des vues, modales, responsive.
-import { loadData, Data, compendiumEntry, ensureNpcs, ensureAdversaries, ensureCompendium } from './data.js';
+import { loadData, Data, compendiumEntry, ensureNpcs, ensureAdversaries, ensureCompendium, foundryAsset } from './data.js';
 import { mountLoginButton } from './login.js';
 import { mountSidebar, setActiveTreeLink } from './tree.js';
 import { initSearch, openPalette } from './search.js';
@@ -128,7 +128,7 @@ function pageHead(page, journalName) {
   if (page.img) {
     const img = document.createElement('img');
     img.className = 'portrait';
-    img.src = page.img;
+    img.src = foundryAsset(page.img);
     img.alt = page.name;
     img.loading = 'lazy';
     img.addEventListener('error', () => img.remove(), { once: true });

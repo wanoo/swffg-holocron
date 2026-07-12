@@ -327,6 +327,7 @@ export function transformAdversary(doc, packSource = '') {
     name: doc.name,
     type: str(flags.swa?.type || sys.adversarytype || doc.type),
     source: packSource,
+    img: str(doc.img || ''),
     book: str(flags.swa?.book || ''),
     tags: flags.swa?.tags || [],
     characteristics: {

@@ -1,5 +1,5 @@
 // sheet.js — vue « fiche » lisible pour PJ, PNJ du monde et adversaires.
-import { makeGlyph } from './render-dice.js';
+import { makeGlyph, enrichDiceString } from './render-dice.js';
 import { renderRichHTML } from './render-journal.js';
 import { openGenerator } from './dice-roller.js';
 import { openCard } from './modal.js';
@@ -301,7 +301,7 @@ function treeCell(cell, extraClass, opts = {}) {
   }
   if (cell.linkRight) div.appendChild(el('span', 'conn conn-right'));
 
-  const name = el('span', 'tree-name', escape(cell.name));
+  const name = el('span', 'tree-name', enrichDiceString(cell.name));
   div.appendChild(name);
   const foot = el('span', 'tree-foot');
   if (cell.ranked && cell.rank) foot.appendChild(el('span', 'tree-rank', `Rang ${cell.rank}`));
@@ -344,11 +344,64 @@ function renderSpecTree(spec) {
   return wrap;
 }
 
+// Composant onglets : une tuile par entrée, un panneau visible à la fois.
+function tabs(entries) {
+  const wrap = el('div', 'sheet-tabs-wrap');
+  const bar = el('div', 'sheet-tabs');
+  const panels = el('div', 'sheet-tab-panels');
+  entries.forEach((e, i) => {
+    const btn = el('button', 'sheet-tab' + (i === 0 ? ' active' : ''), enrichDiceString(e.label));
+    btn.type = 'button';
+    const panel = el('div', 'sheet-tab-panel' + (i === 0 ? ' active' : ''));
+    panel.appendChild(e.node);
+    btn.addEventListener('click', () => {
+      bar.querySelectorAll('.sheet-tab').forEach((b) => b.classList.remove('active'));
+      panels.querySelectorAll('.sheet-tab-panel').forEach((p) => p.classList.remove('active'));
+      btn.classList.add('active'); panel.classList.add('active');
+    });
+    bar.appendChild(btn); panels.appendChild(panel);
+  });
+  wrap.append(bar, panels);
+  return wrap;
+}
+
+// Tableau récapitulatif : Talent | Activation | Rang | Description (talents/améliorations
+// APPRIS). Le nom ouvre la carte détaillée au clic (réutilise openTreeCard).
+function talentRecap(rows) {
+  if (!rows.length) return null;
+  const scroll = el('div', 'table-scroll');
+  const table = el('table', 'sheet-table talent-recap');
+  table.innerHTML = '<thead><tr><th>Talent</th><th>Activation</th><th>Rang</th><th>Description</th></tr></thead>';
+  const tb = el('tbody');
+  for (const r of rows) {
+    const tr = el('tr');
+    tr.innerHTML = `<td class="tr-name">${enrichDiceString(r.name)}</td><td>${escape(r.activation || '—')}</td><td class="tr-rank">${r.rank ? escape(String(r.rank)) : '—'}</td><td class="tr-desc">${enrichDiceString(plainFirst(r.description))}</td>`;
+    if (r.cell) { tr.querySelector('.tr-name').classList.add('link'); tr.querySelector('.tr-name').addEventListener('click', () => openTreeCard(r.cell, [r.activation, r.rank ? `Rang ${r.rank}` : ''].filter(Boolean).join(' · '))); }
+    tb.appendChild(tr);
+  }
+  table.appendChild(tb); scroll.appendChild(table);
+  return scroll;
+}
+// Première phrase / texte court d'une description HTML, pour la colonne récap.
+function plainFirst(html) {
+  const t = String(html || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  return t.length > 160 ? t.slice(0, 157) + '…' : t;
+}
+
 function specTreesBlock(entity) {
   const specs = entity.specializations || [];
   const sec = section('Spécialisations & Talents');
   if (!specs.length) { sec.appendChild(el('p', 'muted', 'Non renseigné.')); return sec; }
-  for (const spec of specs) sec.appendChild(renderSpecTree(spec));
+  // Récap des talents appris (toutes spés), puis les arbres en onglets.
+  const rows = [];
+  for (const spec of specs) {
+    for (const t of spec.talents || []) {
+      if (t.learned && t.name) rows.push({ name: t.name, activation: t.activation, rank: t.ranked ? t.rank : 0, description: t.description, cell: t });
+    }
+  }
+  const recap = talentRecap(rows);
+  if (recap) { const d = el('details', 'talent-recap-wrap'); d.open = true; d.appendChild(el('summary', null, `Talents appris (${rows.length})`)); d.appendChild(recap); sec.appendChild(d); }
+  sec.appendChild(tabs(specs.map((s) => ({ label: s.name, node: renderSpecTree(s) }))));
   return sec;
 }
 
@@ -382,7 +435,17 @@ function forceTreesBlock(entity) {
   const powers = entity.forcepowers || [];
   if (!powers.length) return null;
   const sec = section('Pouvoirs de la Force');
-  for (const p of powers) sec.appendChild(renderForceTree(p));
+  // Récap des améliorations apprises (le transform ne fournit que les apprises),
+  // groupées par pouvoir, puis les arbres en onglets.
+  const rows = [];
+  for (const p of powers) {
+    for (const u of p.upgrades || []) {
+      if (u.name) rows.push({ name: u.name, activation: p.name, rank: 0, description: u.description });
+    }
+  }
+  const recap = talentRecap(rows);
+  if (recap) { const d = el('details', 'talent-recap-wrap'); d.open = true; d.appendChild(el('summary', null, `Améliorations apprises (${rows.length})`)); d.appendChild(recap); sec.appendChild(d); }
+  sec.appendChild(tabs(powers.map((p) => ({ label: p.name, node: renderForceTree(p) }))));
   return sec;
 }
 
@@ -394,13 +457,13 @@ function abilitiesBlock(entity) {
   const sec = section('Talents & Capacités');
   if (talents.length) {
     const tags = el('div', 'tag-list');
-    for (const t of talents) tags.appendChild(el('span', 'tag', escape(t)));
+    for (const t of talents) tags.appendChild(el('span', 'tag', enrichDiceString(t)));
     sec.appendChild(tags);
   }
   for (const a of abilities) {
     if (!a.name && !a.description) continue;
     const card = el('div', 'talent-card');
-    card.innerHTML = `<div class="talent-head"><span class="talent-name">${escape(a.name)}</span></div>`;
+    card.innerHTML = `<div class="talent-head"><span class="talent-name">${enrichDiceString(a.name)}</span></div>`;
     if (a.description) card.appendChild(renderRichHTML(a.description));
     sec.appendChild(card);
   }
@@ -419,7 +482,7 @@ function weaponsBlock(entity) {
   for (const w of weapons) {
     const special = w.special || (w.qualities && w.qualities.length ? w.qualities.join(', ') : '');
     const tr = el('tr');
-    tr.innerHTML = `<td>${escape(w.name)}</td><td>${escape(w.skill)}</td><td>${escape(String(w.damage))}</td><td>${escape(String(w.crit))}</td><td>${escape(w.range)}</td><td>${escape(special)}</td>`;
+    tr.innerHTML = `<td>${enrichDiceString(w.name)}</td><td>${escape(w.skill)}</td><td>${escape(String(w.damage))}</td><td>${escape(String(w.crit))}</td><td>${escape(w.range)}</td><td>${enrichDiceString(special)}</td>`;
     tb.appendChild(tr);
   }
   table.appendChild(tb);
