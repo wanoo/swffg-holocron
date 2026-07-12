@@ -62,16 +62,21 @@ SKILL_BY_EN[normKey('Knowledge: Xenology')] = SKILL_FR.XEN;
 SKILL_BY_EN[normKey('Sang-froid')] = SKILL_FR.COOL;
 SKILL_BY_EN[normKey('Corps à corps')] = SKILL_FR.MELEE;
 
-function transformSkills(sysSkills) {
+// rankBonus (dérivé) : { NomSkillEN normalisé → rangs offerts par espèce/talents }.
+function transformSkills(sysSkills, rankBonus = {}) {
+  const bonus = {};
+  for (const [k, v] of Object.entries(rankBonus || {})) bonus[normKey(k)] = num(v);
   const out = [];
   for (const [key, s] of Object.entries(sysSkills || {})) {
     if (!s || typeof s !== 'object') continue;
     const nk = normKey(s.value || key);
     const fr = SKILL_FR[nk] || SKILL_FR[normKey(key)] || SKILL_BY_EN[nk] || SKILL_BY_EN[normKey(key)] || null;
+    // bonus dérivés indexés par nom EN (mod « Resilience »…) ou clé système
+    const bonusRank = bonus[fr ? normKey(fr[1]) : nk] || bonus[nk] || bonus[normKey(key)] || 0;
     out.push({
       name: fr ? fr[0] : str(s.label || key),
       en: fr ? fr[1] : str(key),
-      rank: val(s.rank, 0),
+      rank: val(s.rank, 0) + bonusRank,
       characteristic: str(s.characteristic || (fr ? fr[2] : '')),
       career: Boolean(s.careerskill),
       type: str(s.type || (fr ? fr[3] : 'General')),
@@ -86,15 +91,70 @@ const itemsOf = (doc, type) => (doc.items || []).filter((i) => i && i.type === t
 const sysOf = (i) => i.system || i.data || {};
 const descOf = (i) => str(sysOf(i).description || '');
 
+// --- Dérivation FFG (starwarsffg) ------------------------------------------
+// Le MCP renvoie le document SOURCE : caractéristiques, seuils et rangs y valent 0
+// car le système les calcule au prepareData depuis les mods d'attributs portés par
+// l'espèce, les talents, l'équipement… (`system.attributes[*] = {mod, modtype, value}`).
+// On reproduit ce calcul : somme des mods par (modtype, mod) sur l'acteur + ses items.
+const CHARS = ['Brawn', 'Agility', 'Intellect', 'Cunning', 'Willpower', 'Presence'];
+function collectMods(doc) {
+  const sums = {}; // sums[modtype][mod] = total
+  const add = (attrs) => {
+    for (const v of Object.values(attrs || {})) {
+      if (!v || typeof v !== 'object' || !v.modtype || !v.mod) continue;
+      const n = Number(v.value);
+      if (!Number.isFinite(n) || n === 0) continue;
+      (sums[v.modtype] = sums[v.modtype] || {});
+      sums[v.modtype][v.mod] = (sums[v.modtype][v.mod] || 0) + n;
+    }
+  };
+  add((doc.system || doc.data || {}).attributes);
+  for (const it of doc.items || []) add(sysOf(it).attributes);
+  return sums;
+}
+// Valeurs de jeu dérivées (ce que Foundry affiche), à partir des mods + stockés.
+function deriveFFG(doc) {
+  const sys = doc.system || doc.data || {};
+  const m = collectMods(doc);
+  const ch = m.Characteristic || {};
+  const stat = m.Stat || {};
+  const stored = sys.characteristics || {};
+  const chars = {};
+  for (const c of CHARS) chars[c] = num(stored[c]?.value) + num(ch[c]);
+  // armures ÉQUIPÉES : soak/defence stockés en { value } → val(). equippable.value
+  // (ou equipped) doit être vrai ; à défaut d'info d'équipement, on compte l'armure.
+  const armour = itemsOf(doc, 'armour').concat(itemsOf(doc, 'armor')).filter((a) => {
+    const eq = sysOf(a).equippable;
+    return eq == null || (typeof eq === 'object' ? eq.value !== false : eq !== false);
+  });
+  const armSoak = armour.reduce((s, a) => s + val(sysOf(a).soak), 0);
+  const armDef = armour.reduce((s, a) => s + val(sysOf(a).defence ?? sysOf(a).defense), 0);
+  return {
+    chars,
+    // seuils = mod d'espèce/talents + caractéristique liée
+    wounds: num(stat.Wounds) + chars.Brawn,
+    strain: num(stat.Strain) + chars.Willpower,
+    soak: chars.Brawn + num(stat.Soak) + armSoak,
+    defenceRanged: num(stat['Defence-Ranged'] ?? stat.Defence) + armDef,
+    defenceMelee: num(stat['Defence-Melee'] ?? stat.Defence) + armDef,
+    forceRating: num(stat.ForcePool),
+    encumbrance: 5 + chars.Brawn + num(stat.Encumbrance),
+    skillRanks: m['Skill Rank'] || {}, // { NomSkillEN: bonus }
+  };
+}
+
 // Fiche complète (PJ / PNJ « character ») — même forme que pcs.json.
 export function transformCharacter(doc) {
   const sys = doc.system || doc.data || {};
-  const ch = sys.characteristics || {};
   const st = sys.stats || {};
   const species = itemsOf(doc, 'species')[0];
   const career = itemsOf(doc, 'career')[0];
   const specs = itemsOf(doc, 'specialization');
   const flagsH = doc.flags?.holocron || {};
+  // Document SOURCE (live) : les valeurs de jeu sont dérivées des mods d'attributs.
+  // Sur un ancien export plat, il n'y a pas de mods → d retombe sur le stocké.
+  const d = deriveFFG(doc);
+  const bestMax = (a, b) => Math.max(num(a), num(b)); // stocké (export plat) vs dérivé (live)
 
   return {
     id: doc._id,
@@ -105,19 +165,19 @@ export function transformCharacter(doc) {
     career: career ? career.name : str(sys.career?.value ?? sys.career ?? ''),
     specialisations: specs.map((s) => s.name),
     characteristics: {
-      Brawn: val(ch.Brawn), Agility: val(ch.Agility), Intellect: val(ch.Intellect),
-      Cunning: val(ch.Cunning), Willpower: val(ch.Willpower), Presence: val(ch.Presence),
+      Brawn: d.chars.Brawn, Agility: d.chars.Agility, Intellect: d.chars.Intellect,
+      Cunning: d.chars.Cunning, Willpower: d.chars.Willpower, Presence: d.chars.Presence,
     },
     stats: {
-      wounds: { value: val(st.wounds), max: num(st.wounds?.max) },
-      strain: { value: val(st.strain), max: num(st.strain?.max) },
-      soak: val(st.soak),
-      defence: { melee: val(st.defence?.melee ?? st.defence), ranged: val(st.defence?.ranged) },
-      encumbrance: { value: val(st.encumbrance), max: num(st.encumbrance?.max) },
-      forcePool: { value: val(st.forcePool), max: num(st.forcePool?.max) },
+      wounds: { value: val(st.wounds), max: bestMax(st.wounds?.max, d.wounds) },
+      strain: { value: val(st.strain), max: bestMax(st.strain?.max, d.strain) },
+      soak: bestMax(val(st.soak), d.soak),
+      defence: { melee: bestMax(val(st.defence?.melee ?? st.defence), d.defenceMelee), ranged: bestMax(val(st.defence?.ranged), d.defenceRanged) },
+      encumbrance: { value: val(st.encumbrance), max: bestMax(st.encumbrance?.max, d.encumbrance) },
+      forcePool: { value: val(st.forcePool), max: bestMax(st.forcePool?.max, d.forceRating) },
       credits: val(st.credits),
     },
-    skills: transformSkills(sys.skills),
+    skills: transformSkills(sys.skills, d.skillRanks),
     experience: {
       total: num(sys.experience?.total ?? st.experience?.total),
       available: num(sys.experience?.available ?? st.experience?.available),
