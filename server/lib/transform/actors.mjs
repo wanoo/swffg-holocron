@@ -62,21 +62,23 @@ SKILL_BY_EN[normKey('Knowledge: Xenology')] = SKILL_FR.XEN;
 SKILL_BY_EN[normKey('Sang-froid')] = SKILL_FR.COOL;
 SKILL_BY_EN[normKey('Corps à corps')] = SKILL_FR.MELEE;
 
-// rankBonus (dérivé) : { NomSkillEN normalisé → rangs offerts par espèce/talents }.
-function transformSkills(sysSkills, rankBonus = {}) {
-  const bonus = {};
-  for (const [k, v] of Object.entries(rankBonus || {})) bonus[normKey(k)] = num(v);
+// Rang final = max(rang stocké, rangs octroyés espèce/carrière, cible d'achat XP).
+// `skillMods`/`xpTargets` sont indexés par nom EN (« Lightsaber ») ou clé système.
+function transformSkills(sysSkills, skillMods = {}, xpTargets = {}) {
+  const idx = (map) => { const o = {}; for (const [k, v] of Object.entries(map || {})) o[normKey(k)] = num(v); return o; };
+  const mods = idx(skillMods), xps = idx(xpTargets);
   const out = [];
   for (const [key, s] of Object.entries(sysSkills || {})) {
     if (!s || typeof s !== 'object') continue;
     const nk = normKey(s.value || key);
     const fr = SKILL_FR[nk] || SKILL_FR[normKey(key)] || SKILL_BY_EN[nk] || SKILL_BY_EN[normKey(key)] || null;
-    // bonus dérivés indexés par nom EN (mod « Resilience »…) ou clé système
-    const bonusRank = bonus[fr ? normKey(fr[1]) : nk] || bonus[nk] || bonus[normKey(key)] || 0;
+    const lookups = [fr ? normKey(fr[1]) : null, nk, normKey(key)].filter(Boolean);
+    const modRank = Math.max(0, ...lookups.map((k) => mods[k] || 0));
+    const xpRank = Math.max(0, ...lookups.map((k) => xps[k] || 0));
     out.push({
       name: fr ? fr[0] : str(s.label || key),
       en: fr ? fr[1] : str(key),
-      rank: val(s.rank, 0) + bonusRank,
+      rank: Math.max(val(s.rank, 0), modRank, xpRank),
       characteristic: str(s.characteristic || (fr ? fr[2] : '')),
       career: Boolean(s.careerskill),
       type: str(s.type || (fr ? fr[3] : 'General')),
@@ -91,56 +93,128 @@ const itemsOf = (doc, type) => (doc.items || []).filter((i) => i && i.type === t
 const sysOf = (i) => i.system || i.data || {};
 const descOf = (i) => str(sysOf(i).description || '');
 
-// --- Dérivation FFG (starwarsffg) ------------------------------------------
+// --- Dérivation FFG (starwarsffg 2.0.3) ------------------------------------
 // Le MCP renvoie le document SOURCE : caractéristiques, seuils et rangs y valent 0
-// car le système les calcule au prepareData depuis les mods d'attributs portés par
-// l'espèce, les talents, l'équipement… (`system.attributes[*] = {mod, modtype, value}`).
-// On reproduit ce calcul : somme des mods par (modtype, mod) sur l'acteur + ses items.
+// (le système les calcule au prepareData, côté navigateur uniquement). On reproduit
+// le calcul depuis trois sources fidèles au modèle de fiche swffg :
+//   1) mods d'attributs `system.attributes[*] = {mod, modtype, value}` portés par
+//      l'espèce, les talents (y compris ceux APPRIS dans les arbres de spécialisation)
+//      et les attachements/modificateurs d'objets ;
+//   2) le journal d'XP `flags.starwarsffg.xpLog` (achats de caractéristiques et de
+//      rangs de compétence — seul endroit où vivent les achats de création) ;
+//   3) l'équipement (armures équipées pour l'encaissement/défense).
 const CHARS = ['Brawn', 'Agility', 'Intellect', 'Cunning', 'Willpower', 'Presence'];
-function collectMods(doc) {
-  const sums = {}; // sums[modtype][mod] = total
-  const add = (attrs) => {
+const learnedTalent = (t) => Boolean(t?.islearned ?? t?.isLearned ?? t?.learned);
+
+// Parcourt tous les porteurs de mods d'attributs ; `src` vaut 'species' pour l'item
+// d'espèce (sa contribution est la BASE, à ne pas cumuler avec les achats d'XP).
+function eachAttrSource(doc, fn) {
+  const sys = doc.system || doc.data || {};
+  fn(sys.attributes, 'actor');
+  for (const it of doc.items || []) {
+    const s = sysOf(it);
+    fn(s.attributes, it.type === 'species' ? 'species' : 'item');
+    if (it.type === 'specialization') {
+      for (const t of Object.values(s.talents || {})) {
+        if (t && typeof t === 'object' && learnedTalent(t)) fn(t.attributes, 'item');
+      }
+    }
+    for (const key of ['itemmodifier', 'itemattachment']) {
+      for (const mod of Object.values(s[key] || {})) {
+        if (mod && typeof mod === 'object') fn(sysOf(mod).attributes || mod.attributes, 'item');
+      }
+    }
+  }
+}
+
+// Somme des mods, en séparant la base d'espèce du reste : { species, other }[modtype][mod].
+function sumMods(doc) {
+  const species = {}, other = {};
+  eachAttrSource(doc, (attrs, src) => {
+    const bucket = src === 'species' ? species : other;
     for (const v of Object.values(attrs || {})) {
       if (!v || typeof v !== 'object' || !v.modtype || !v.mod) continue;
       const n = Number(v.value);
       if (!Number.isFinite(n) || n === 0) continue;
-      (sums[v.modtype] = sums[v.modtype] || {});
-      sums[v.modtype][v.mod] = (sums[v.modtype][v.mod] || 0) + n;
+      (bucket[v.modtype] = bucket[v.modtype] || {});
+      bucket[v.modtype][v.mod] = (bucket[v.modtype][v.mod] || 0) + n;
     }
-  };
-  add((doc.system || doc.data || {}).attributes);
-  for (const it of doc.items || []) add(sysOf(it).attributes);
-  return sums;
+  });
+  return { species, other };
 }
-// Valeurs de jeu dérivées (ce que Foundry affiche), à partir des mods + stockés.
+
+// Journal d'XP : cibles finales des achats de caractéristiques et de rangs de compétence.
+// Format système (EN) : « characteristic Brawn level 2 --> 4 », « skill rank Lightsaber 0 --> 4 ».
+export function parseXpLog(doc) {
+  const raw = doc.flags?.starwarsffg?.xpLog || [];
+  const chars = {}, skills = {};
+  for (const e of raw) {
+    const desc = String(e?.description || '');
+    let m = /characteristic\s+(\w+)\s+level\s+\d+\s*-+>\s*(\d+)/i.exec(desc);
+    if (m) chars[m[1]] = Math.max(chars[m[1]] || 0, +m[2]);
+    m = /skill rank\s+(.+?)\s+\d+\s*-+>\s*(\d+)/i.exec(desc);
+    if (m) { const k = m[1].trim(); skills[k] = Math.max(skills[k] || 0, +m[2]); }
+  }
+  return { chars, skills, raw };
+}
+
+// Valeurs de jeu dérivées (ce que Foundry affiche).
 function deriveFFG(doc) {
   const sys = doc.system || doc.data || {};
-  const m = collectMods(doc);
-  const ch = m.Characteristic || {};
-  const stat = m.Stat || {};
   const stored = sys.characteristics || {};
+  const { species, other } = sumMods(doc);
+  const xp = parseXpLog(doc);
+  const sCh = species.Characteristic || {}, oCh = other.Characteristic || {};
   const chars = {};
-  for (const c of CHARS) chars[c] = num(stored[c]?.value) + num(ch[c]);
-  // armures ÉQUIPÉES : soak/defence stockés en { value } → val(). equippable.value
-  // (ou equipped) doit être vrai ; à défaut d'info d'équipement, on compte l'armure.
+  for (const c of CHARS) {
+    // PNJ/droïde/export plat = caractéristique stockée directement (déjà finale, ne
+    // pas y ajouter les mods). PJ construit = stockée à 0 → base espèce ou achat d'XP
+    // (le plus haut), plus les mods hors-espèce (Dedication, attachements).
+    const s = num(stored[c]?.value);
+    chars[c] = s > 0 ? s : Math.max(num(sCh[c]), num(xp.chars[c])) + num(oCh[c]);
+  }
+  // armures ÉQUIPÉES : soak/defence stockés en { value } → val().
   const armour = itemsOf(doc, 'armour').concat(itemsOf(doc, 'armor')).filter((a) => {
     const eq = sysOf(a).equippable;
     return eq == null || (typeof eq === 'object' ? eq.value !== false : eq !== false);
   });
   const armSoak = armour.reduce((s, a) => s + val(sysOf(a).soak), 0);
   const armDef = armour.reduce((s, a) => s + val(sysOf(a).defence ?? sysOf(a).defense), 0);
+  const stat = (m) => num(species.Stat?.[m]) + num(other.Stat?.[m]);
+  // rangs de compétence octroyés (espèce + carrière/talents), indexés par nom EN / clé
+  const skillMods = { ...(species['Skill Rank'] || {}) };
+  for (const [k, v] of Object.entries(other['Skill Rank'] || {})) skillMods[k] = (skillMods[k] || 0) + v;
   return {
     chars,
-    // seuils = mod d'espèce/talents + caractéristique liée
-    wounds: num(stat.Wounds) + chars.Brawn,
-    strain: num(stat.Strain) + chars.Willpower,
-    soak: chars.Brawn + num(stat.Soak) + armSoak,
-    defenceRanged: num(stat['Defence-Ranged'] ?? stat.Defence) + armDef,
-    defenceMelee: num(stat['Defence-Melee'] ?? stat.Defence) + armDef,
-    forceRating: num(stat.ForcePool),
-    encumbrance: 5 + chars.Brawn + num(stat.Encumbrance),
-    skillRanks: m['Skill Rank'] || {}, // { NomSkillEN: bonus }
+    wounds: stat('Wounds') + chars.Brawn,
+    strain: stat('Strain') + chars.Willpower,
+    soak: chars.Brawn + stat('Soak') + armSoak,
+    defenceRanged: stat('Defence-Ranged') + num(other.Stat?.Defence) + armDef,
+    defenceMelee: stat('Defence-Melee') + num(other.Stat?.Defence) + armDef,
+    forceRating: stat('ForcePool'),
+    encumbrance: 5 + chars.Brawn + stat('Encumbrance'),
+    skillMods,          // { NomEN|clé : rangs octroyés }
+    xpSkills: xp.skills, // { NomEN : cible d'achat }
+    xp,
   };
+}
+
+// Vue du journal d'XP pour l'affichage « Progression » (catégorise chaque achat).
+function xpLogView(raw) {
+  const cat = (desc) => {
+    if (/^characteristic/i.test(desc)) return 'characteristic';
+    if (/^skill rank/i.test(desc)) return 'skill';
+    if (/force ?power|forcepower/i.test(desc)) return 'force';
+    if (/specialization|talent|upgrade/i.test(desc)) return 'talent';
+    return 'other';
+  };
+  return (raw || []).map((e) => ({
+    action: str(e?.action),
+    cost: num(e?.xp?.cost),
+    date: str(e?.date),
+    desc: str(e?.description),
+    category: e?.action === 'adjusted' ? 'adjust' : (e?.action === 'granted' ? 'grant' : cat(str(e?.description))),
+  }));
 }
 
 // Fiche complète (PJ / PNJ « character ») — même forme que pcs.json.
@@ -177,10 +251,12 @@ export function transformCharacter(doc) {
       forcePool: { value: val(st.forcePool), max: bestMax(st.forcePool?.max, d.forceRating) },
       credits: val(st.credits),
     },
-    skills: transformSkills(sys.skills, d.skillRanks),
+    skills: transformSkills(sys.skills, d.skillMods, d.xpSkills),
     experience: {
       total: num(sys.experience?.total ?? st.experience?.total),
       available: num(sys.experience?.available ?? st.experience?.available),
+      spent: num(sys.experience?.total ?? st.experience?.total) - num(sys.experience?.available ?? st.experience?.available),
+      log: xpLogView(d.xp.raw),
     },
     gauges: {
       morality: num(sys.morality?.value ?? st.morality?.value, 50),

@@ -467,6 +467,44 @@ function section(title) {
   return s;
 }
 
+// Progression XP : total/dispo/dépensé + journal des achats (groupé par Acte via les
+// entrées « adjusted »). Les descriptions viennent du système (EN) — traduites au vol.
+const XP_ICON = { characteristic: '💪', skill: '🎯', talent: '✦', force: '✧', adjust: '🎬', grant: '🎁', other: '•' };
+function xpDescFr(desc) {
+  return String(desc || '')
+    .replace(/^characteristic\s+(\w+)\s+level\s+(\d+)\s*-+>\s*(\d+)/i, (_, c, a, b) => `Caractéristique ${c} ${a} → ${b}`)
+    .replace(/^skill rank\s+(.+?)\s+(\d+)\s*-+>\s*(\d+)/i, (_, s, a, b) => `Compétence ${s} ${a} → ${b}`)
+    .replace(/^new specialization\s+/i, 'Nouvelle spécialisation ')
+    .replace(/^specialization\s+(.+?)\s+upgrade\s+/i, '$1 : ')
+    .replace(/^new forcepower\s+/i, 'Nouveau pouvoir de Force ')
+    .replace(/^force ?power\s+(.+?)\s+upgrade\s+/i, 'Force · $1 : ');
+}
+function xpBlock(entity) {
+  const e = entity.experience || {};
+  const log = e.log || [];
+  if (!e.total && !log.length) return null;
+  const sec = section('📈 Progression (XP)');
+  const row = el('div', 'stat-row');
+  row.appendChild(el('div', 'stat-cell', `<div class="stat-val">${e.total || 0}</div><div class="stat-name">Total</div>`));
+  row.appendChild(el('div', 'stat-cell', `<div class="stat-val">${e.spent ?? ((e.total || 0) - (e.available || 0))}</div><div class="stat-name">Dépensé</div>`));
+  row.appendChild(el('div', 'stat-cell', `<div class="stat-val">${e.available || 0}</div><div class="stat-name">Disponible</div>`));
+  sec.appendChild(row);
+  if (log.length) {
+    const det = el('details', 'xp-log');
+    det.appendChild(el('summary', null, `Journal des achats (${log.filter((l) => l.action === 'purchased').length})`));
+    const list = el('div', 'xp-log-list');
+    for (const l of log) {
+      if (l.category === 'adjust') { list.appendChild(el('div', 'xp-act', `🎬 ${escape(l.desc)} · +${l.cost} XP`)); continue; }
+      const line = el('div', 'xp-line');
+      line.innerHTML = `<span class="xp-ic">${XP_ICON[l.category] || '•'}</span><span class="xp-desc">${escape(xpDescFr(l.desc))}</span>${l.cost ? `<span class="xp-cost">${l.cost}</span>` : ''}`;
+      list.appendChild(line);
+    }
+    det.appendChild(list);
+    sec.appendChild(det);
+  }
+  return sec;
+}
+
 // Enveloppe une section : rend `node`, ou un état vide discret si absent.
 function orEmpty(title, node) {
   if (node) return node;
@@ -495,6 +533,7 @@ export function renderSheet(entity, kind) {
       orEmpty('Pouvoirs de la Force', forceTreesBlock(entity)),
       orEmpty('Armes', weaponsBlock(entity)),
       orEmpty('Équipement', gearBlock(entity)),
+      xpBlock(entity),
       bioBlock(entity),
     ];
   } else {

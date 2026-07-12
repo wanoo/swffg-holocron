@@ -389,6 +389,16 @@ a.skill-name:hover { color: var(--holo); text-decoration: underline; }
 .dg-help-list .rich { display: inline; }
 .dg-help-list .rich p { display: inline; margin: 0; }
 
+/* Progression XP */
+.xp-log { margin-top: 0.9rem; }
+.xp-log > summary { cursor: pointer; color: var(--gold); font-size: 0.9rem; font-weight: 700; }
+.xp-log-list { margin-top: 0.6rem; display: flex; flex-direction: column; gap: 0.1rem; }
+.xp-act { margin: 0.6rem 0 0.3rem; font-weight: 700; color: var(--gold); font-size: 0.85rem; border-top: 1px solid var(--line); padding-top: 0.5rem; }
+.xp-line { display: flex; align-items: baseline; gap: 0.5rem; padding: 0.15rem 0; font-size: 0.86rem; }
+.xp-ic { flex: 0 0 1.2em; text-align: center; }
+.xp-desc { flex: 1 1 auto; color: var(--fg-muted); }
+.xp-cost { flex: 0 0 auto; color: var(--gold); font-variant-numeric: tabular-nums; opacity: 0.85; }
+
 @media (max-width: 620px) {
   .char-row { grid-template-columns: repeat(3, 1fr); }
   .sheet-head { flex-direction: column; text-align: center; align-items: center; }
