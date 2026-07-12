@@ -19,12 +19,14 @@ const CHAR_FR = {
 const CHAR_ORDER = ['Brawn', 'Agility', 'Intellect', 'Cunning', 'Willpower', 'Presence'];
 
 const SKILL_GROUP_FR = {
-  Combat: 'Compétences de combat',
   General: 'Compétences générales',
+  Combat: 'Compétences de combat',
+  Social: 'Social',
   Knowledge: 'Connaissances',
-  Social: 'Compétences sociales',
   Magic: 'Compétences de Force',
 };
+// Abréviation de caractéristique (fiche officielle).
+const CHAR_ABBR = { Brawn: 'VIG', Agility: 'AG', Intellect: 'INT', Cunning: 'RU', Willpower: 'VOL', Presence: 'PRÉ' };
 
 function el(tag, cls, html) {
   const e = document.createElement(tag);
@@ -45,10 +47,13 @@ function initials(name) {
 function avatar(entity) {
   if (entity.img) {
     const img = el('img', 'sheet-portrait');
-    img.src = foundryAsset(entity.img);
+    const src = foundryAsset(entity.img);
+    img.src = src;
     img.alt = entity.name;
     img.loading = 'lazy';
+    img.title = 'Agrandir';
     img.addEventListener('error', () => img.replaceWith(fallbackAvatar(entity.name)), { once: true });
+    img.addEventListener('click', () => openImageFull(src, entity.name));
     return img;
   }
   return fallbackAvatar(entity.name);
@@ -58,6 +63,16 @@ function fallbackAvatar(name) {
   const hue = [...name].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
   d.style.setProperty('--h', hue);
   return d;
+}
+// Portrait en plein écran (clic sur l'avatar) — voir l'illustration entière.
+function openImageFull(src, alt) {
+  const ov = el('div', 'img-full');
+  const im = el('img'); im.src = src; im.alt = alt || '';
+  ov.appendChild(im);
+  ov.addEventListener('click', () => ov.remove());
+  const onKey = (e) => { if (e.key === 'Escape') { ov.remove(); document.removeEventListener('keydown', onKey); } };
+  document.addEventListener('keydown', onKey);
+  document.body.appendChild(ov);
 }
 
 // Pool de dés d'une compétence : min(rang,car) maîtrise + reste aptitude.
@@ -254,21 +269,57 @@ function skillsBlock(entity, kind) {
     return sec;
   }
 
-  // PJ / PNJ : groupés par type, pool de dés calculé.
+  // PJ / PNJ : tableaux par groupe (format de la fiche officielle :
+  // Compétence (CAR) | CdC | Rang | Jet), en 2 colonnes.
   const chars = entity.characteristics || {};
   const groups = {};
   for (const s of skills) (groups[s.type] || (groups[s.type] = [])).push(s);
-  const order = ['Combat', 'General', 'Social', 'Knowledge', 'Magic'];
+  const order = ['General', 'Combat', 'Social', 'Knowledge', 'Magic'];
   const keys = Object.keys(groups).sort((a, b) => order.indexOf(a) - order.indexOf(b));
 
+  const cols = el('div', 'skill-cols');
   for (const gk of keys) {
     const list = groups[gk].sort((a, b) => a.name.localeCompare(b.name, 'fr'));
-    sec.appendChild(el('h4', 'skill-group-title', SKILL_GROUP_FR[gk] || gk));
-    const grid = el('div', 'skill-grid');
-    for (const s of list) grid.appendChild(skillCell(s, chars[s.characteristic] ?? 0, kind));
-    sec.appendChild(grid);
+    const box = el('div', 'skill-groupbox');
+    box.appendChild(el('h4', 'skill-group-title', SKILL_GROUP_FR[gk] || gk));
+    const table = el('table', 'skill-table');
+    table.innerHTML = '<thead><tr><th>Compétence</th><th class="sk-cdc">CdC</th><th class="sk-rk">Rang</th><th class="sk-jet">Jet</th></tr></thead>';
+    const tb = el('tbody');
+    for (const s of list) tb.appendChild(skillRow(s, chars[s.characteristic] ?? 0, kind));
+    table.appendChild(tb);
+    box.appendChild(table);
+    cols.appendChild(box);
   }
+  sec.appendChild(cols);
   return sec;
+}
+
+// Une ligne de compétence : Compétence (CAR) | CdC | Rang | pool de dés. Cliquable → jet.
+function skillRow(s, charVal, kind) {
+  const tr = el('tr', 'skill-tr' + (s.rank > 0 ? ' has-rank' : '') + (s.career ? ' career' : ''));
+  const prof = kind === 'adversary' ? 0 : Math.min(s.rank, charVal);
+  const abil = kind === 'adversary' ? s.rank : Math.max(s.rank, charVal) - prof;
+  const abbr = CHAR_ABBR[s.characteristic] || '';
+  const nameCell = el('td', 'sk-name');
+  nameCell.innerHTML = `${enrichDiceString(s.name)}${abbr ? ` <span class="sk-car">(${abbr})</span>` : ''}`;
+  const rules = kind !== 'adversary' ? competencesPage(s.name) : null;
+  if (rules) {
+    const book = el('button', 'skill-rules', '📖'); book.type = 'button'; book.title = 'Règles de la compétence';
+    book.addEventListener('click', (e) => { e.stopPropagation(); openCard(rules.name, renderRichHTML(rules.html), 'Compétences'); });
+    nameCell.appendChild(book);
+  }
+  const cdc = el('td', 'sk-cdc'); cdc.innerHTML = s.career ? '<span class="cdc-on" title="Compétence de carrière">◼</span>' : '<span class="cdc-off">◻</span>';
+  const rank = el('td', 'sk-rk'); rank.textContent = String(s.rank);
+  const jet = el('td', 'sk-jet');
+  for (let i = 0; i < prof; i++) jet.appendChild(makeGlyph('proficiency'));
+  for (let i = 0; i < abil; i++) jet.appendChild(makeGlyph('ability'));
+  if (!prof && !abil) jet.textContent = '—';
+  tr.append(nameCell, cdc, rank, jet);
+  tr.tabIndex = 0; tr.setAttribute('role', 'button'); tr.title = 'Lancer cette compétence';
+  const roll = () => openGenerator({ proficiency: prof, ability: abil, skillKey: normSkillKey(s.en || s.name), skillName: s.name });
+  tr.addEventListener('click', roll);
+  tr.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); roll(); } });
+  return tr;
 }
 
 // Ouvre la modale d'explication d'une case (talent ou amélioration).
@@ -322,10 +373,8 @@ function treeCell(cell, extraClass, opts = {}) {
 // Arbre de talents d'une spécialisation (grille 4×5).
 function renderSpecTree(spec) {
   const wrap = el('div', 'spec-tree');
-  const head = el('div', 'spec-tree-head');
-  head.appendChild(el('h4', 'spec-name', escape(spec.name)));
-  if (spec.description) head.appendChild(renderRichHTML(spec.description));
-  wrap.appendChild(head);
+  // Le nom est déjà porté par l'onglet — on ne montre ici que la description.
+  if (spec.description) { const head = el('div', 'spec-tree-head'); head.appendChild(renderRichHTML(spec.description)); wrap.appendChild(head); }
 
   const byIndex = {};
   for (const c of spec.talents) byIndex[c.index] = c;
@@ -392,13 +441,18 @@ function specTreesBlock(entity) {
   const specs = entity.specializations || [];
   const sec = section('Spécialisations & Talents');
   if (!specs.length) { sec.appendChild(el('p', 'muted', 'Non renseigné.')); return sec; }
-  // Récap des talents appris (toutes spés), puis les arbres en onglets.
-  const rows = [];
+  // Récap des talents appris, GROUPÉ par nom (un talent classé/appris plusieurs fois
+  // — Endurci ×3 — devient une seule ligne dont le rang = le nombre d'exemplaires).
+  const byName = new Map();
   for (const spec of specs) {
     for (const t of spec.talents || []) {
-      if (t.learned && t.name) rows.push({ name: t.name, activation: t.activation, rank: t.ranked ? t.rank : 0, description: t.description, cell: t });
+      if (!t.learned || !t.name) continue;
+      const g = byName.get(t.name);
+      if (g) { g.count += 1; }
+      else byName.set(t.name, { name: t.name, activation: t.activation, ranked: t.ranked, description: t.description, cell: t, count: 1 });
     }
   }
+  const rows = [...byName.values()].map((g) => ({ name: g.name, activation: g.activation, rank: (g.ranked || g.count > 1) ? g.count : 0, description: g.description, cell: g.cell }));
   const recap = talentRecap(rows);
   if (recap) { const d = el('details', 'talent-recap-wrap'); d.open = true; d.appendChild(el('summary', null, `Talents appris (${rows.length})`)); d.appendChild(recap); sec.appendChild(d); }
   sec.appendChild(tabs(specs.map((s) => ({ label: s.name, node: renderSpecTree(s) }))));
@@ -435,15 +489,17 @@ function forceTreesBlock(entity) {
   const powers = entity.forcepowers || [];
   if (!powers.length) return null;
   const sec = section('Pouvoirs de la Force');
-  // Récap des améliorations apprises (le transform ne fournit que les apprises),
-  // groupées par pouvoir, puis les arbres en onglets.
+  // Récap des améliorations APPRISES, groupées par nom (colonne « Activation » = pouvoir).
   const rows = [];
   for (const p of powers) {
+    const seen = new Map();
     for (const u of p.upgrades || []) {
-      if (u.name) rows.push({ name: u.name, activation: p.name, rank: 0, description: u.description });
+      if (!u.learned || !u.name) continue;
+      const g = seen.get(u.name);
+      if (g) g.count += 1; else { const o = { name: u.name, activation: p.name, description: u.description, count: 1 }; seen.set(u.name, o); rows.push(o); }
     }
   }
-  const recap = talentRecap(rows);
+  const recap = talentRecap(rows.map((g) => ({ name: g.name, activation: g.activation, rank: g.count > 1 ? g.count : 0, description: g.description })));
   if (recap) { const d = el('details', 'talent-recap-wrap'); d.open = true; d.appendChild(el('summary', null, `Améliorations apprises (${rows.length})`)); d.appendChild(recap); sec.appendChild(d); }
   sec.appendChild(tabs(powers.map((p) => ({ label: p.name, node: renderForceTree(p) }))));
   return sec;

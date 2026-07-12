@@ -7,44 +7,46 @@ const num = (v, d = 0) => (Number.isFinite(+v) ? +v : d);
 const str = (v, d = '') => (v == null ? d : String(v));
 const val = (v, d = 0) => num(v && typeof v === 'object' ? v.value : v, d);
 
-// Noms FR des compétences FFG standard (clé = clé système EN normalisée).
+// Noms FR des compétences (traduction OggDude FR — `ffg-star-wars-traduction-fr-oggdude`,
+// celle du monde de l'utilisateur) : [FR, EN, caractéristique, groupe]. Clé = clé système
+// EN normalisée. Groupe : Combat | General | Social | Knowledge (ordre de la fiche officielle).
 const SKILL_FR = {
   ASTRO: ['Astrogation', 'Astrogation', 'Intellect', 'General'],
   ATHL: ['Athlétisme', 'Athletics', 'Brawn', 'General'],
   BRAWL: ['Pugilat', 'Brawl', 'Brawn', 'Combat'],
-  CHARM: ['Charme', 'Charm', 'Presence', 'General'],
-  COERC: ['Coercition', 'Coercion', 'Willpower', 'General'],
+  CHARM: ['Charme', 'Charm', 'Presence', 'Social'],
+  COERC: ['Coercition', 'Coercion', 'Willpower', 'Social'],
   COMP: ['Informatique', 'Computers', 'Intellect', 'General'],
-  COOL: ['Sang-froid', 'Cool', 'Presence', 'General'],
+  COOL: ['Calme', 'Cool', 'Presence', 'General'],
   COORD: ['Coordination', 'Coordination', 'Agility', 'General'],
-  CORE: ['Connaissances (Mondes du Noyau)', 'Core Worlds', 'Intellect', 'Knowledge'],
-  DECEP: ['Tromperie', 'Deception', 'Cunning', 'General'],
-  DISC: ['Discipline', 'Discipline', 'Willpower', 'General'],
-  EDU: ['Connaissances (Éducation)', 'Education', 'Intellect', 'Knowledge'],
+  CORE: ['Mondes du Noyau', 'Core Worlds', 'Intellect', 'Knowledge'],
+  DECEP: ['Tromperie', 'Deception', 'Cunning', 'Social'],
+  DISC: ['Sang-froid', 'Discipline', 'Willpower', 'General'],
+  EDU: ['Éducation', 'Education', 'Intellect', 'Knowledge'],
   GUNN: ['Artillerie', 'Gunnery', 'Agility', 'Combat'],
-  LEAD: ['Commandement', 'Leadership', 'Presence', 'General'],
+  LEAD: ['Commandement', 'Leadership', 'Presence', 'Social'],
   LTSABER: ['Sabre laser', 'Lightsaber', 'Brawn', 'Combat'],
-  LORE: ['Connaissances (Traditions)', 'Lore', 'Intellect', 'Knowledge'],
+  LORE: ['Culture', 'Lore', 'Intellect', 'Knowledge'],
   MECH: ['Mécanique', 'Mechanics', 'Intellect', 'General'],
   MED: ['Médecine', 'Medicine', 'Intellect', 'General'],
   MELEE: ['Corps à corps', 'Melee', 'Brawn', 'Combat'],
-  NEG: ['Négociation', 'Negotiation', 'Presence', 'General'],
-  OUTER: ['Connaissances (Bordure extérieure)', 'Outer Rim', 'Intellect', 'Knowledge'],
+  NEG: ['Négociation', 'Negotiation', 'Presence', 'Social'],
+  OUTER: ['Bordure Extérieure', 'Outer Rim', 'Intellect', 'Knowledge'],
   PERC: ['Perception', 'Perception', 'Cunning', 'General'],
-  PILOTPL: ['Pilotage (planétaire)', 'Piloting: Planetary', 'Agility', 'General'],
-  PILOTSP: ['Pilotage (spatial)', 'Piloting: Space', 'Agility', 'General'],
-  RANGHVY: ['Distance (armes lourdes)', 'Ranged: Heavy', 'Agility', 'Combat'],
-  RANGLGHT: ['Distance (armes légères)', 'Ranged: Light', 'Agility', 'Combat'],
-  RESIL: ['Vigueur', 'Resilience', 'Brawn', 'General'],
-  SKUL: ['Skulduggery / Système D', 'Skulduggery', 'Cunning', 'General'],
+  PILOTPL: ['Pilotage : Planétaire', 'Piloting: Planetary', 'Agility', 'General'],
+  PILOTSP: ['Pilotage : Spatial', 'Piloting: Space', 'Agility', 'General'],
+  RANGHVY: ['Armes lourdes', 'Ranged: Heavy', 'Agility', 'Combat'],
+  RANGLGHT: ['Armes légères', 'Ranged: Light', 'Agility', 'Combat'],
+  RESIL: ['Résistance', 'Resilience', 'Brawn', 'General'],
+  SKUL: ['Magouilles', 'Skulduggery', 'Cunning', 'General'],
   STEAL: ['Discrétion', 'Stealth', 'Agility', 'General'],
-  STREET: ['Débrouillardise', 'Streetwise', 'Cunning', 'General'],
+  STREET: ['Système D', 'Streetwise', 'Cunning', 'General'],
   SURV: ['Survie', 'Survival', 'Cunning', 'General'],
-  SW: ['Connaissances (Monde souterrain)', 'Underworld', 'Intellect', 'Knowledge'],
-  UND: ['Connaissances (Monde souterrain)', 'Underworld', 'Intellect', 'Knowledge'],
+  SW: ['Pègre', 'Underworld', 'Intellect', 'Knowledge'],
+  UND: ['Pègre', 'Underworld', 'Intellect', 'Knowledge'],
   VIGIL: ['Vigilance', 'Vigilance', 'Willpower', 'General'],
-  WARF: ['Connaissances (Guerre)', 'Warfare', 'Intellect', 'Knowledge'],
-  XEN: ['Connaissances (Xénologie)', 'Xenology', 'Intellect', 'Knowledge'],
+  WARF: ['Stratégie', 'Warfare', 'Intellect', 'Knowledge'],
+  XEN: ['Xénologie', 'Xenology', 'Intellect', 'Knowledge'],
   ZERO: ['Gravité zéro', 'Zero-G', 'Agility', 'General'],
 };
 const normKey = (k) => String(k).toUpperCase().replace(/[^A-Z]/g, '');
@@ -59,8 +61,6 @@ SKILL_BY_EN[normKey('Knowledge: Outer Rim')] = SKILL_FR.OUTER;
 SKILL_BY_EN[normKey('Knowledge: Underworld')] = SKILL_FR.UND;
 SKILL_BY_EN[normKey('Knowledge: Warfare')] = SKILL_FR.WARF;
 SKILL_BY_EN[normKey('Knowledge: Xenology')] = SKILL_FR.XEN;
-SKILL_BY_EN[normKey('Sang-froid')] = SKILL_FR.COOL;
-SKILL_BY_EN[normKey('Corps à corps')] = SKILL_FR.MELEE;
 
 // Rang final = max(rang stocké, rangs octroyés espèce/carrière, cible d'achat XP).
 // `skillMods`/`xpTargets` sont indexés par nom EN (« Lightsaber ») ou clé système.
@@ -294,11 +294,21 @@ export function transformCharacter(doc) {
       return { name: a.name, defence: val(s.defence), soak: val(s.soak), description: descOf(a) };
     }),
     gear: itemsOf(doc, 'gear').map((g) => ({ name: g.name, quantity: val(sysOf(g).quantity, 1), description: descOf(g) })),
-    forcepowers: itemsOf(doc, 'forcepower').map((f) => ({
-      name: f.name, description: descOf(f),
-      upgrades: Object.values(sysOf(f).upgrades || {}).filter((u) => u && (u.islearned ?? u.learned))
-        .map((u) => ({ name: str(u.name), description: str(u.description) })),
-    })),
+    forcepowers: itemsOf(doc, 'forcepower').map((f) => {
+      const fs = sysOf(f);
+      // toutes les cases VISIBLES de l'arbre (pour dessiner la grille + connecteurs),
+      // avec l'état appris. La 1re case = le pouvoir de base.
+      const upgrades = Object.values(fs.upgrades || {})
+        .filter((u) => u && u.visible !== false)
+        .map((u, i) => ({
+          index: i, name: str(u.name), description: str(u.description),
+          cost: num(u.cost), size: str(u.size || 'single'),
+          learned: Boolean(u.islearned ?? u.learned), visible: u.visible !== false,
+          linkTop: Boolean(u['links-top-1'] ?? u.links?.top),
+          linkRight: Boolean(u['links-right'] ?? u.links?.right),
+        }));
+      return { name: f.name, description: descOf(f), cost: num(fs.base_cost), forceRating: num(fs.required_force_rating), upgrades };
+    }),
     specializations: specs.map((s) => {
       const talents = Object.entries(sysOf(s).talents || {})
         .map(([tk, t], i) => ({
@@ -309,7 +319,10 @@ export function transformCharacter(doc) {
           learned: Boolean(t?.islearned ?? t?.learned),
           ranked: Boolean(t?.isRanked ?? t?.ranked), rank: num(t?.rank, 1),
           activation: str(t?.activation?.label || t?.activation),
-          linkTop: Boolean(t?.links?.top), linkRight: Boolean(t?.links?.right),
+          size: str(t?.size || 'single'),
+          // connecteurs d'arbre : les vraies clés du système sont links-top-1 / links-right
+          linkTop: Boolean(t?.['links-top-1'] ?? t?.links?.top),
+          linkRight: Boolean(t?.['links-right'] ?? t?.links?.right),
         }));
       return { name: s.name, description: descOf(s), talents };
     }),

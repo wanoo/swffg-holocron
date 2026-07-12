@@ -17,12 +17,14 @@
   margin-bottom: 1.1rem;
 }
 .sheet-portrait {
-  width: 92px;
-  height: 92px;
+  width: 104px;
+  height: 132px;
   border-radius: 12px;
   object-fit: cover;
+  object-position: center 15%; /* cadre le haut du portrait (visage), pas le centre */
   border: 2px solid var(--gold-soft);
   flex: 0 0 auto;
+  cursor: zoom-in;
 }
 .sheet-portrait.fallback {
   display: flex;
@@ -388,6 +390,31 @@ a.skill-name:hover { color: var(--holo); text-decoration: underline; }
 .dg-help-cost .ffg-die { font-size: 1rem; }
 .dg-help-list .rich { display: inline; }
 .dg-help-list .rich p { display: inline; margin: 0; }
+
+/* Compétences — tableaux façon fiche officielle (2 colonnes) */
+.skill-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem 1.4rem; align-items: start; }
+.skill-groupbox { min-width: 0; }
+.skill-table { width: 100%; border-collapse: collapse; }
+.skill-table th { text-align: left; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.03em; opacity: 0.55; padding: 0.15rem 0.4rem; font-weight: 700; }
+.skill-table th.sk-cdc, .skill-table th.sk-rk { text-align: center; }
+.skill-table td { padding: 0.16rem 0.4rem; border-top: 1px solid color-mix(in srgb, var(--line) 60%, transparent); vertical-align: middle; }
+.skill-tr { cursor: pointer; }
+.skill-tr:hover td { background: var(--panel-2, rgba(255,255,255,0.03)); }
+.skill-tr.has-rank .sk-name { color: var(--fg); font-weight: 600; }
+.skill-tr.career .sk-name { }
+.sk-name { font-size: 0.9rem; }
+.sk-car { font-size: 0.72rem; opacity: 0.55; }
+.sk-cdc { text-align: center; width: 2.2rem; }
+.cdc-on { color: var(--gold); } .cdc-off { opacity: 0.3; }
+.sk-rk { text-align: center; width: 2.4rem; font-variant-numeric: tabular-nums; font-weight: 700; }
+.sk-jet { width: 40%; white-space: nowrap; }
+.sk-jet .ffg-die { font-size: 1.05rem; }
+.skill-rules { background: none; border: 0; cursor: pointer; opacity: 0.4; font-size: 0.85rem; margin-left: 0.3rem; padding: 0; }
+.skill-rules:hover { opacity: 0.9; }
+
+/* Portrait plein écran */
+.img-full { position: fixed; inset: 0; z-index: 200; background: rgba(4,6,10,0.92); display: flex; align-items: center; justify-content: center; cursor: zoom-out; padding: 2vh; }
+.img-full img { max-width: 96vw; max-height: 96vh; border-radius: 8px; box-shadow: 0 10px 60px rgba(0,0,0,0.6); }
 
 /* Onglets d'arbres (spé / pouvoirs de Force) */
 .sheet-tabs { display: flex; flex-wrap: wrap; gap: 0.3rem; border-bottom: 1px solid var(--line); margin-bottom: 0.9rem; }
