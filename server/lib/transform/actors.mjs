@@ -114,9 +114,13 @@ function eachAttrSource(doc, fn) {
   const sys = doc.system || doc.data || {};
   fn(sys.attributes, 'item');
   for (const it of doc.items || []) {
-    if (it.type === 'specialization' || it.type === 'talent') continue;
+    if (it.type === 'talent') continue; // talents isolés gérés via l'xpLog/les arbres
     const s = sysOf(it);
+    // Les mods PROPRES de l'item comptent (y compris ceux d'une spécialisation : une spé
+    // octroie des rangs de compétence de carrière, ex « Ombre » → Streetwise+1). On NE
+    // descend PAS dans s.talents (comptés séparément via les achats xpLog).
     fn(s.attributes, it.type === 'species' ? 'species' : 'item');
+    if (it.type === 'specialization') continue;
     for (const key of ['itemmodifier', 'itemattachment']) {
       for (const mod of Object.values(s[key] || {})) {
         if (mod && typeof mod === 'object') fn(sysOf(mod).attributes || mod.attributes, 'item');

@@ -491,15 +491,15 @@ function talentRecapRows(entity) {
 function forceRecapRows(entity) {
   const rows = [];
   for (const p of entity.forcepowers || []) {
-    rows.push({ name: p.name, activation: p.name, rank: 0, description: p.description, base: true });
+    rows.push({ name: p.name, activation: p.name, rank: 0, description: p.description, base: true, cell: { name: p.name, description: p.description } });
     const seen = new Map();
     for (const u of (p.upgrades || []).slice(1)) {
       if (!u.learned || !u.name) continue;
       const g = seen.get(u.name);
-      if (g) g.count += 1; else { const o = { name: u.name, activation: p.name, description: u.description, count: 1 }; seen.set(u.name, o); rows.push(o); }
+      if (g) g.count += 1; else { const o = { name: u.name, activation: p.name, description: u.description, count: 1, cell: { name: u.name, description: u.description } }; seen.set(u.name, o); rows.push(o); }
     }
   }
-  return rows.map((g) => ({ name: g.name, activation: g.activation, rank: g.count > 1 ? g.count : 0, description: g.description, base: g.base }));
+  return rows.map((g) => ({ name: g.name, activation: g.activation, rank: g.count > 1 ? g.count : 0, description: g.description, base: g.base, cell: g.cell }));
 }
 
 // Synthèse (onglet Jeu) : tableaux récap Talents + Pouvoirs, sous les compétences.
