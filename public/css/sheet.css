@@ -292,6 +292,31 @@ a.skill-name:hover { color: var(--holo); text-decoration: underline; }
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 40%, transparent) inset;
 }
 .tree-cell.unlearned { opacity: 0.6; }
+/* Teinte d'activation : passif = bleu, actif = rouge (talents de spécialisation). */
+.tree-cell.act-passive:not(.learned) { border-left: 2px solid color-mix(in srgb, #5b8fd6 45%, transparent); }
+.tree-cell.act-active:not(.learned) { border-left: 2px solid color-mix(in srgb, #d67a5b 45%, transparent); }
+.tree-cell.learned.act-passive {
+  border-color: #5b8fd6;
+  background: linear-gradient(180deg, color-mix(in srgb, #5b8fd6 20%, transparent), color-mix(in srgb, #5b8fd6 6%, transparent));
+  box-shadow: 0 0 0 1px color-mix(in srgb, #5b8fd6 42%, transparent) inset;
+}
+.tree-cell.learned.act-active {
+  border-color: #d67a5b;
+  background: linear-gradient(180deg, color-mix(in srgb, #d67a5b 20%, transparent), color-mix(in srgb, #d67a5b 6%, transparent));
+  box-shadow: 0 0 0 1px color-mix(in srgb, #d67a5b 42%, transparent) inset;
+}
+.tree-cell.learned.act-passive .conn { background: #5b8fd6; }
+.tree-cell.learned.act-active .conn { background: #d67a5b; }
+/* Récap : liseré + nom teinté selon l'activation */
+.talent-recap tr.act-passive .tr-name { color: #7aa8e6; box-shadow: inset 3px 0 0 #5b8fd6; }
+.talent-recap tr.act-active .tr-name { color: #e69a7a; box-shadow: inset 3px 0 0 #d67a5b; }
+.talent-recap td.tr-name { padding-left: 0.7rem; }
+/* Légende passif/actif */
+.act-legend { display: inline-flex; gap: 0.9rem; font-size: 0.75rem; color: var(--fg-muted); margin: 0.2rem 0 0.6rem; }
+.act-legend b { font-weight: 700; }
+.act-legend .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; vertical-align: middle; margin-right: 0.25rem; }
+.act-legend .dot.p { background: #5b8fd6; } .act-legend .dot.a { background: #d67a5b; }
+
 /* Arbres de la Force : vert (comme dans le jeu), pour les distinguer des spés (or). */
 .force-tree { --tree-accent: #4fbf7a; }
 .force-tree .tree-cell.learned {

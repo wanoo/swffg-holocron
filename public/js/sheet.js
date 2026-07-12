@@ -364,8 +364,16 @@ const SIZE_N = { single: 1, double: 2, triple: 3, full: 4 };
 
 // Rend une case d'arbre (talent ou amélioration de Force).
 // opts.suppressTop : n'affiche pas les connecteurs vers le haut (rangée du haut).
+// Teinte selon l'activation FFG : passif → bleu, actif → rouge.
+function activationClass(activation) {
+  const a = String(activation || '').toLowerCase();
+  if (a.startsWith('passi')) return 'act-passive';
+  if (a.startsWith('activ')) return 'act-active';
+  return '';
+}
+
 function treeCell(cell, extraClass, opts = {}) {
-  const div = el('div', `tree-cell ${extraClass} ${cell.learned ? 'learned' : 'unlearned'}`);
+  const div = el('div', `tree-cell ${extraClass} ${cell.learned ? 'learned' : 'unlearned'} ${activationClass(cell.activation)}`);
   // Connecteurs (barres) — colorés si la case est apprise.
   if (!opts.suppressTop) {
     if (Array.isArray(cell.linkTop)) {
@@ -460,7 +468,7 @@ function talentRecap(rows, col2 = 'Activation') {
   table.innerHTML = `<thead><tr><th>Talent</th><th>${escape(col2)}</th><th>Rang</th><th>Description</th></tr></thead>`;
   const tb = el('tbody');
   for (const r of rows) {
-    const tr = el('tr', r.base ? 'tr-base' : '');
+    const tr = el('tr', (r.base ? 'tr-base ' : '') + activationClass(r.activation));
     tr.innerHTML = `<td class="tr-name">${r.base ? '★ ' : ''}${enrichDiceString(r.name)}</td><td>${escape(r.activation || '—')}</td><td class="tr-rank">${r.rank ? escape(String(r.rank)) : '—'}</td><td class="tr-desc">${enrichDiceString(plainFirst(r.description))}</td>`;
     if (r.cell) { tr.querySelector('.tr-name').classList.add('link'); tr.querySelector('.tr-name').addEventListener('click', () => openTreeCard(r.cell, [r.activation, r.rank ? `Rang ${r.rank}` : ''].filter(Boolean).join(' · '))); }
     tb.appendChild(tr);
@@ -502,22 +510,30 @@ function forceRecapRows(entity) {
   return rows.map((g) => ({ name: g.name, activation: g.activation, rank: g.count > 1 ? g.count : 0, description: g.description, base: g.base, cell: g.cell }));
 }
 
+// Petite légende passif/actif.
+function actLegend() {
+  return el('div', 'act-legend', '<span><span class="dot p"></span><b>Passif</b></span><span><span class="dot a"></span><b>Actif</b></span>');
+}
+
 // Synthèse (onglet Jeu) : tableaux récap Talents + Pouvoirs, sous les compétences.
 function talentSynthesis(entity) {
   const tr = talentRecapRows(entity), fr = forceRecapRows(entity);
   if (!tr.length && !fr.length) return null;
   const sec = section('Synthèse — Talents & Pouvoirs');
   const tRecap = talentRecap(tr);
-  if (tRecap) { sec.appendChild(el('h4', 'skill-group-title', `Talents appris (${tr.length})`)); sec.appendChild(tRecap); }
+  if (tRecap) { sec.appendChild(el('h4', 'skill-group-title', `Talents appris (${tr.length})`)); sec.appendChild(actLegend()); sec.appendChild(tRecap); }
   const fRecap = talentRecap(fr, 'Pouvoir');
   if (fRecap) { sec.appendChild(el('h4', 'skill-group-title', 'Pouvoirs de la Force')); sec.appendChild(fRecap); }
   return sec;
 }
-// Onglet « Spécialisations » : uniquement les arbres (sous-onglets par spé).
+// Onglet « Spécialisations » : uniquement les arbres (sous-onglets par spé) + légende.
 function specTreesOnly(entity) {
   const specs = entity.specializations || [];
   if (!specs.length) return null;
-  return tabs(specs.map((s) => ({ label: s.name, node: renderSpecTree(s) })));
+  const wrap = el('div');
+  wrap.appendChild(actLegend());
+  wrap.appendChild(tabs(specs.map((s) => ({ label: s.name, node: renderSpecTree(s) }))));
+  return wrap;
 }
 // Onglet « Pouvoirs de Force » : uniquement les arbres.
 function forceTreesOnly(entity) {
