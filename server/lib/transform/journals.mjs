@@ -16,9 +16,37 @@ function pageView(p) {
   };
 }
 
+// --- Monk's Enhanced Journal : métadonnées structurées portées par la page ----
+// (type person/place/organization…, role, location, attributes, relationships).
+// Le contenu texte reste dans page.text.content — on n'extrait ici que le méta.
+const MEJ_ROLE_STATUT = { ally: 'allié', enemy: 'ennemi', mentor: 'mentor', neutral: 'neutre', contact: 'contact' };
+const ID16 = /^[a-zA-Z0-9]{16}$/; // clés par-utilisateur (notes privées) à ignorer
+function mejView(doc, gm) {
+  const page = (doc.pages || []).find((p) => p.flags?.['monks-enhanced-journal']);
+  const jf = doc.flags?.['monks-enhanced-journal'];
+  if (!page && !jf) return null;
+  const mf = page?.flags?.['monks-enhanced-journal'] || {};
+  const attributes = {};
+  for (const [k, v] of Object.entries(mf.attributes || {})) {
+    if (typeof v === 'string' && v.trim() && !ID16.test(k)) attributes[k] = v.trim();
+  }
+  const relationships = Object.values(mf.relationships || {})
+    .filter((r) => r && r.id && (gm || !r.hidden))
+    .map((r) => ({ ref: r.id, rel: String(r.relationship || ''), ...(r.hidden ? { hidden: true } : {}) }));
+  const out = {
+    type: String(mf.type || jf?.pagetype || ''),
+    ...(mf.role ? { role: String(mf.role) } : {}),
+    ...(mf.location ? { location: String(mf.location) } : {}),
+    ...(mf.placetype ? { placetype: String(mf.placetype) } : {}),
+    ...(Object.keys(attributes).length ? { attributes } : {}),
+    ...(relationships.length ? { relationships } : {}),
+  };
+  return out.type || Object.keys(out).length > 1 ? out : null;
+}
+
 // journalsIndex + journaux complets (store) + pack règles → vue front.
 // `visibleFilter(doc)` applique l'ownership de la session (auth.canSee).
-export function buildJournalsView({ config, folders, journalsIndex, getJournal, rulesPack, visibleFilter }) {
+export function buildJournalsView({ config, folders, journalsIndex, getJournal, rulesPack, visibleFilter, gm = false }) {
   const cats = [];
   const journals = [];
   const folderByName = new Map((folders || []).filter((f) => f.type === 'JournalEntry').map((f) => [f.name, f]));
@@ -40,15 +68,36 @@ export function buildJournalsView({ config, folders, journalsIndex, getJournal, 
     const doc = getJournal(entry._id);
     if (!doc) continue; // pas encore synchronisé — apparaîtra au prochain tick
     const fh = entry.flags?.holocron || {};
+    const mej = mejView(doc, gm);
+    // statut/mort : flags holocron prioritaires, méta MEJ en repli (role → statut,
+    // attribut life/vie « mort » → pastille †) — MEJ devient la source native.
+    const statut = fh.statut || MEJ_ROLE_STATUT[String(mej?.role || '').toLowerCase()] || '';
+    const mort = Boolean(fh.mort) || /mort|décéd/i.test(String(mej?.attributes?.life || mej?.attributes?.vie || ''));
     journals.push({
       id: fh.legacyId || doc._id,
       foundryId: doc._id,
       name: doc.name,
       categoryId: entry.folder,
-      ...(fh.statut ? { statut: fh.statut } : {}),
-      ...(fh.mort ? { mort: true } : {}),
+      ...(statut ? { statut } : {}),
+      ...(mort ? { mort: true } : {}),
+      ...(mej ? { mej } : {}),
       pages: (doc.pages || []).filter((p) => p.type === 'text' || p.text).map(pageView),
     });
+  }
+
+  // Résout les relations MEJ vers les ids de vue (lien si la cible est visible,
+  // sinon nom seul depuis l'index ; les relations cachées ne sortent que MJ).
+  const byFoundryId = new Map(journals.map((j) => [j.foundryId, j]));
+  const idxName = new Map((journalsIndex || []).map((e) => [e._id, e.name]));
+  for (const j of journals) {
+    if (!j.mej?.relationships) continue;
+    j.mej.relationships = j.mej.relationships.map((r) => {
+      const t = byFoundryId.get(r.ref);
+      if (t) return { id: t.id, name: t.name, rel: r.rel, ...(r.hidden ? { hidden: true } : {}) };
+      if (idxName.has(r.ref)) return { name: idxName.get(r.ref), rel: r.rel, ...(r.hidden ? { hidden: true } : {}) };
+      return null;
+    }).filter(Boolean);
+    if (!j.mej.relationships.length) delete j.mej.relationships;
   }
 
   // Pack règles → catégorie dédiée (préfixe « NN · » retiré, ordre par préfixe).

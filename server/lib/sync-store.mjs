@@ -65,7 +65,7 @@ export function createStore({ dataDir, logger = console }) {
   }
 
   /* ------------------------------------------------------------- syncers -- */
-  const INDEX_FIELDS = ['_id', 'name', 'folder', 'sort', 'ownership', 'flags'];
+  const INDEX_FIELDS = ['_id', 'name', 'folder', 'sort', 'ownership', 'flags', '_stats'];
 
   async function syncConfig(configJournalName) {
     const list = await mcpCall('get_journals', { where: { name: configJournalName } });
@@ -138,13 +138,21 @@ export function createStore({ dataDir, logger = console }) {
         logger.error(`[store] sync ${name}: ${e.message}`);
       }
     }
-    // journaux dont l'index a changé depuis le cache (flags.holocron.rev ou sort)
+    // journaux dont l'index a changé depuis le cache. Signature de fraîcheur =
+    // rev.updatedAt (écritures Holocron) OU _stats.modifiedTime du journal
+    // (édition directe du document dans Foundry). Attention : le modifiedTime
+    // d'une PAGE ne remonte PAS sur le journal parent, et l'index léger n'a pas
+    // les pages — les métadonnées Monk's Enhanced Journal (portées par la page)
+    // sont donc invisibles ici. Les journaux MEJ (ensemble borné, ceux qu'on
+    // édite dans Foundry) sont donc re-pull à chaque tick.
+    const sig = (o) => o?.flags?.holocron?.rev?.updatedAt || o?._stats?.modifiedTime || null;
     const idx = get('journalsIndex') || [];
     for (const entry of idx) {
       const cached = mem.get(`journal:${entry._id}`)?.items;
-      const rev = entry.flags?.holocron?.rev?.updatedAt || null;
-      const cachedRev = cached?.flags?.holocron?.rev?.updatedAt || null;
-      if (!cached || (rev && rev !== cachedRev)) {
+      const isMej = Boolean(entry.flags?.['monks-enhanced-journal'] || cached?.flags?.['monks-enhanced-journal']);
+      const s = sig(entry);
+      const cachedS = sig(cached);
+      if (!cached || isMej || (s && s !== cachedS)) {
         try { await syncJournal(entry._id, entry.name); }
         catch (e) { logger.error(`[store] journal ${entry.name}: ${e.message}`); }
       }

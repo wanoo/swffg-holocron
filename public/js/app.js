@@ -141,6 +141,38 @@ function pageHead(page, journalName) {
   return head;
 }
 
+// Carte d'identité Monk's Enhanced Journal : type de fiche, attributs,
+// rattachement et relations (liens vers les journaux visibles).
+const MEJ_TYPES = { person: '👤 Personnage', place: '🌍 Lieu', organization: '🏛️ Organisation', shop: '🏪 Boutique', quest: '🎯 Quête', poi: '📍 Point d\'intérêt', event: '📅 Événement', loot: '💰 Butin' };
+const MEJ_ATTR_LABELS = { race: 'Espèce', gender: 'Genre', life: 'Vie', faction: 'Faction', age: 'Âge', size: 'Taille', government: 'Gouvernement', inhabitants: 'Habitants', districts: 'Districts', alignment: 'Alignement', ancestry: 'Origine', profession: 'Profession', voice: 'Voix' };
+const MEJ_ROLE_FR = { enemy: 'Ennemi', ally: 'Allié', neutral: 'Neutre', mentor: 'Mentor', contact: 'Contact', friend: 'Ami', rival: 'Rival' };
+function mejCard(journal) {
+  const m = journal.mej;
+  if (!m || (!m.role && !m.location && !m.placetype && !m.attributes && !m.relationships)) return null;
+  const box = document.createElement('section');
+  box.className = 'mej-card page-surface';
+  let html = '';
+  if (MEJ_TYPES[m.type]) html += `<span class="mej-type">${MEJ_TYPES[m.type]}</span>`;
+  const rows = [];
+  // Rôle traduit ; masqué s'il ne fait que répéter la pastille de statut.
+  if (m.role) {
+    const roleFr = MEJ_ROLE_FR[String(m.role).toLowerCase()] || m.role;
+    if (!journal.statut || roleFr.toLowerCase() !== journal.statut.toLowerCase()) rows.push(['Rôle', esc(roleFr)]);
+  }
+  if (m.location) rows.push(['Rattachement', esc(m.location)]);
+  if (m.placetype) rows.push(['Type', esc(m.placetype)]);
+  for (const [k, v] of Object.entries(m.attributes || {})) rows.push([MEJ_ATTR_LABELS[k] || k[0].toUpperCase() + k.slice(1), esc(v)]);
+  if (rows.length) html += `<dl class="mej-attrs">${rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
+  if (m.relationships?.length) {
+    html += `<div class="mej-rels"><span class="mej-rels-label">Relations</span>${m.relationships.map((r) => {
+      const label = `${esc(r.name)}${r.rel ? ` <small>· ${esc(r.rel)}</small>` : ''}${r.hidden ? ' 🔒' : ''}`;
+      return r.id ? `<a href="#/journal/${esc(r.id)}" class="mej-rel">${label}</a>` : `<span class="mej-rel">${label}</span>`;
+    }).join('')}</div>`;
+  }
+  box.innerHTML = html;
+  return box;
+}
+
 function viewJournal(jid, pid) {
   const journal = Data.journalById.get(jid);
   if (!journal) return viewNotFound('Journal introuvable');
@@ -157,6 +189,8 @@ function viewJournal(jid, pid) {
   const pill = statutPill(journal);
   if (pill) header.querySelector('h1').appendChild(pill);
   main.appendChild(header);
+  const mejBox = mejCard(journal);
+  if (mejBox) main.appendChild(mejBox);
 
   const editable = editableCategoryIds().has(journal.categoryId);
   const pagesWrap = document.createElement('div');

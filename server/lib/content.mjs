@@ -2,7 +2,7 @@
 // le chemin de requête). Formes = celles des anciens JSON statiques du front.
 import { transformCharacter, transformAdversary } from './transform/actors.mjs';
 import { buildJournalsView } from './transform/journals.mjs';
-import { canSee } from './auth.mjs';
+import { canSee, isGM } from './auth.mjs';
 
 export function createContentService({ store, config }) {
   const actorFolderId = (name) => {
@@ -41,6 +41,7 @@ export function createContentService({ store, config }) {
       getJournal: (id) => store.get(`journal:${id}`),
       rulesPack: rulesPackId ? store.get(`pack:${rulesPackId}`) : null,
       visibleFilter: (entry) => canSee(session, entry),
+      gm: isGM(session),
     });
   }
 

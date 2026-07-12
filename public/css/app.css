@@ -282,6 +282,23 @@ input:focus-visible { outline: 2px solid var(--holo); outline-offset: 2px; }
 .pnj-gm-volet { margin-top: 1.2rem; }
 .pnj-gm-links { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.6rem; }
 
+/* --- Carte d'identité Monk's Enhanced Journal (person/place/organization…) --- */
+.mej-card { margin: 0.4rem 0 1.2rem; padding: 0.9rem 1.1rem; display: flex; flex-direction: column; gap: 0.7rem;
+  border-left: 3px solid var(--gold, #d9b45b); border-radius: 0.4rem; }
+.mej-type { align-self: flex-start; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--gold, #d9b45b); }
+.mej-attrs { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.5rem 1.1rem; margin: 0; }
+.mej-attrs > div { display: flex; flex-direction: column; gap: 0.1rem; }
+.mej-attrs dt { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; opacity: 0.6; }
+.mej-attrs dd { margin: 0; font-size: 0.94rem; }
+.mej-rels { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; }
+.mej-rels-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; opacity: 0.6; margin-right: 0.2rem; }
+.mej-rel { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.2rem 0.6rem; border-radius: 999px;
+  font-size: 0.85rem; background: color-mix(in srgb, var(--gold, #d9b45b) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold, #d9b45b) 30%, transparent); text-decoration: none; color: inherit; }
+a.mej-rel:hover { background: color-mix(in srgb, var(--gold, #d9b45b) 24%, transparent); }
+.mej-rel small { opacity: 0.7; }
+
 /* --- Zone principale --- */
 .main {
   padding: 1.4rem clamp(0.8rem, 3vw, 2.2rem);
