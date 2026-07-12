@@ -72,6 +72,19 @@ Réglages du module (Foundry settings, monde) : `resFoodLabel`, `resFuelLabel`,
 4. Utiliser les **favoris MEJ** (pas de POI serveur). Ouvrir l'astronav via `api.open()` ;
    envoyer un monde via `api.setLeg` / `api.chooser`.
 5. Ne PAS ré-implémenter la carte / le calcul : tout vient de `swffg-astronavigation`.
+6. **« Vous êtes ici » (position du vaisseau)** — décidé : le vaisseau est un **POI MEJ**, et le
+   monde courant est mis en **relationship** MEJ. L'astronav doit dessiner un marqueur « position
+   actuelle » ; côté Holocron, alimenter cette position (API à ajouter côté astronav :
+   `api.setCurrentWorld(nom)` + marqueur, à faire). Objectif : afficher « vous êtes ici » sur la carte.
+7. **MEJ + import** — les fiches « Place » ne s'enrichissent (et ne se mettent en favori) que sur les
+   entrées **du monde** : le compendium sert de **base à importer dans les journaux**. Prévoir un
+   flux d'import (bouton/among Holocron) plutôt que de lire le compendium verrouillé.
+
+## 7. Réglages / comportements récents du module (v1.5.3)
+
+- Réglage MJ **« Difficulté des voyages »** (Très facile ↔ Très difficile, milieu = règles FFG).
+- Factions hostiles = **menu à cases à cocher** (allégeances connues), plus un CSV.
+- Hyperdrive = **classe** (basse = rapide) ; la vitesse joue sur la durée (et les vivres), pas le carburant.
 
 ## 6. Références
 

@@ -184,12 +184,13 @@ function gaugesBlock(entity) {
   const g = entity.gauges || {};
   const items = [];
   if (g.morality) items.push(['Moralité', g.morality]);
+  if (g.forceRating) items.push(['Niveau de Force', g.forceRating]);
   if (g.conflict) items.push(['Conflit', g.conflict]);
   if (g.obligation) items.push(['Obligation', g.obligation]);
   if (g.duty) items.push(['Devoir', g.duty]);
-  const m = entity.motivations || {};
-  const motiv = [m.m1, m.m2].filter(Boolean);
-  if (!items.length && !motiv.length && !g.moralityStrength) return null;
+  // Motivations = items typés (Force/Faiblesse/Désir/Peur/Défi…).
+  const motivs = Array.isArray(entity.motivations) ? entity.motivations : [];
+  if (!items.length && !motivs.length && !g.moralityStrength) return null;
 
   const sec = section('Profil narratif');
   const row = el('div', 'stat-row');
@@ -197,11 +198,18 @@ function gaugesBlock(entity) {
   if (items.length) sec.appendChild(row);
   const notes = el('div', 'gauge-notes');
   if (g.moralityStrength) notes.appendChild(labelRich('Force morale', g.moralityStrength));
-  if (g.moralityWeakness) notes.appendChild(labelRich('Faiblesse', g.moralityWeakness));
-  if (motiv.length) notes.appendChild(labelRich('Motivations', motiv.join(' — ')));
+  if (g.moralityWeakness) notes.appendChild(labelRich('Faiblesse morale', g.moralityWeakness));
+  for (const mo of motivs) {
+    if (!mo.name && !mo.description) continue;
+    const d = el('div', 'kv');
+    d.innerHTML = `<span class="kv-k">${escape(MOTIV_FR[mo.category] || mo.category || 'Motivation')} :</span> <b>${escape(mo.name)}</b> `;
+    if (mo.description) { const det = el('details', 'kv-desc'); det.appendChild(el('summary', null, 'détail')); det.appendChild(renderRichHTML(mo.description)); d.appendChild(det); }
+    notes.appendChild(d);
+  }
   if (notes.childNodes.length) sec.appendChild(notes);
   return sec;
 }
+const MOTIV_FR = { Strength: 'Force émotionnelle', Weakness: 'Faiblesse émotionnelle', Desire: 'Désir', Fear: 'Peur', Challenges: 'Défi', Challenge: 'Défi', Cause: 'Cause', Relationship: 'Relation', Emotion: 'Émotion' };
 function labelRich(label, html) {
   const d = el('div', 'kv');
   d.innerHTML = `<span class="kv-k">${label} :</span> `;
@@ -331,8 +339,9 @@ function openTreeCard(cell, metaText) {
   openCard(cell.name || 'Talent', renderRichHTML(html), metaText);
 }
 
-// Carte détaillée d'un objet (arme/armure/matériel) : caractéristiques + description.
-function openItemCard(name, rows, description) {
+// Carte détaillée d'un objet (arme/armure/matériel) : caractéristiques + qualités
+// (avec leurs règles) + description.
+function openItemCard(name, rows, description, qualities) {
   const node = el('div', 'item-card');
   const dl = el('dl', 'item-card-dl');
   for (const [k, v] of rows) {
@@ -340,8 +349,19 @@ function openItemCard(name, rows, description) {
     dl.innerHTML += `<dt>${escape(k)}</dt><dd>${enrichDiceString(String(v))}</dd>`;
   }
   if (dl.childNodes.length) node.appendChild(dl);
+  if (qualities && qualities.length) {
+    node.appendChild(el('h4', 'item-card-h', 'Qualités'));
+    const ul = el('ul', 'item-qual-list');
+    for (const q of qualities) {
+      const li = el('li');
+      li.innerHTML = `<b>${enrichDiceString(q.name)}${q.rank > 1 ? ` ${q.rank}` : ''}</b>`;
+      if (q.description) li.appendChild(renderRichHTML(q.description));
+      ul.appendChild(li);
+    }
+    node.appendChild(ul);
+  }
   if (description && String(description).trim()) node.appendChild(renderRichHTML(description));
-  else if (!dl.childNodes.length) node.appendChild(el('p', 'muted', 'Aucun détail.'));
+  else if (!dl.childNodes.length && !(qualities || []).length) node.appendChild(el('p', 'muted', 'Aucun détail.'));
   openCard(name, node);
 }
 
@@ -459,35 +479,67 @@ function plainFirst(html) {
   return t.length > 160 ? t.slice(0, 157) + '…' : t;
 }
 
-function specTreesBlock(entity) {
-  const specs = entity.specializations || [];
-  const sec = section('Spécialisations & Talents');
-  if (!specs.length) { sec.appendChild(el('p', 'muted', 'Non renseigné.')); return sec; }
-  // Récap des talents appris, GROUPÉ par nom (un talent classé/appris plusieurs fois
-  // — Endurci ×3 — devient une seule ligne dont le rang = le nombre d'exemplaires).
+// Lignes de synthèse des talents appris, GROUPÉES par nom (Endurci ×3 = une ligne,
+// rang = nb d'exemplaires).
+function talentRecapRows(entity) {
   const byName = new Map();
-  for (const spec of specs) {
+  for (const spec of entity.specializations || []) {
     for (const t of spec.talents || []) {
       if (!t.learned || !t.name) continue;
       const g = byName.get(t.name);
-      if (g) { g.count += 1; }
+      if (g) g.count += 1;
       else byName.set(t.name, { name: t.name, activation: t.activation, ranked: t.ranked, description: t.description, cell: t, count: 1 });
     }
   }
-  const rows = [...byName.values()].map((g) => ({ name: g.name, activation: g.activation, rank: (g.ranked || g.count > 1) ? g.count : 0, description: g.description, cell: g.cell }));
-  const recap = talentRecap(rows);
-  if (recap) { const d = el('details', 'talent-recap-wrap'); d.open = true; d.appendChild(el('summary', null, `Talents appris (${rows.length})`)); d.appendChild(recap); sec.appendChild(d); }
-  sec.appendChild(tabs(specs.map((s) => ({ label: s.name, node: renderSpecTree(s) }))));
+  return [...byName.values()].map((g) => ({ name: g.name, activation: g.activation, rank: (g.ranked || g.count > 1) ? g.count : 0, description: g.description, cell: g.cell }));
+}
+function forceRecapRows(entity) {
+  const rows = [];
+  for (const p of entity.forcepowers || []) {
+    rows.push({ name: p.name, activation: p.name, rank: 0, description: p.description, base: true });
+    const seen = new Map();
+    for (const u of (p.upgrades || []).slice(1)) {
+      if (!u.learned || !u.name) continue;
+      const g = seen.get(u.name);
+      if (g) g.count += 1; else { const o = { name: u.name, activation: p.name, description: u.description, count: 1 }; seen.set(u.name, o); rows.push(o); }
+    }
+  }
+  return rows.map((g) => ({ name: g.name, activation: g.activation, rank: g.count > 1 ? g.count : 0, description: g.description, base: g.base }));
+}
+
+// Synthèse (onglet Jeu) : tableaux récap Talents + Pouvoirs, sous les compétences.
+function talentSynthesis(entity) {
+  const tr = talentRecapRows(entity), fr = forceRecapRows(entity);
+  if (!tr.length && !fr.length) return null;
+  const sec = section('Synthèse — Talents & Pouvoirs');
+  const tRecap = talentRecap(tr);
+  if (tRecap) { sec.appendChild(el('h4', 'skill-group-title', `Talents appris (${tr.length})`)); sec.appendChild(tRecap); }
+  const fRecap = talentRecap(fr, 'Pouvoir');
+  if (fRecap) { sec.appendChild(el('h4', 'skill-group-title', 'Pouvoirs de la Force')); sec.appendChild(fRecap); }
   return sec;
+}
+// Onglet « Spécialisations » : uniquement les arbres (sous-onglets par spé).
+function specTreesOnly(entity) {
+  const specs = entity.specializations || [];
+  if (!specs.length) return null;
+  return tabs(specs.map((s) => ({ label: s.name, node: renderSpecTree(s) })));
+}
+// Onglet « Pouvoirs de Force » : uniquement les arbres.
+function forceTreesOnly(entity) {
+  const powers = entity.forcepowers || [];
+  if (!powers.length) return null;
+  return tabs(powers.map((p) => ({ label: p.name, node: renderForceTree(p) })));
 }
 
 // Arbre d'améliorations d'un pouvoir de la Force (flex, empans selon size).
 function renderForceTree(power) {
   const wrap = el('div', 'force-tree');
-  const head = el('div', 'force-tree-head');
-  head.appendChild(el('h4', 'force-name', escape(power.name)));
-  if (power.description) head.appendChild(renderRichHTML(power.description));
-  wrap.appendChild(head);
+  if (power.description) {
+    const det = el('details', 'spec-desc');
+    det.appendChild(el('summary', null, 'Description du pouvoir'));
+    det.appendChild(renderRichHTML(power.description));
+    wrap.appendChild(det);
+  }
 
   const grid = el('div', 'upgrade-tree');
   // Calcule la rangée visuelle (flex-wrap 4 colonnes, empans selon size) pour
@@ -560,14 +612,14 @@ function weaponsBlock(entity) {
     '<thead><tr><th>Arme</th><th>Compétence</th><th>Dégâts</th><th>Crit</th><th>Portée</th><th>Spécial</th></tr></thead>';
   const tb = el('tbody');
   for (const w of weapons) {
-    const special = [w.special, ...(w.qualities || [])].filter(Boolean).join(', ');
+    const qual = (w.qualities || []).map((q) => q.name + (q.rank > 1 ? ` ${q.rank}` : ''));
+    const special = [w.special, ...qual].filter(Boolean).join(', ');
     const tr = el('tr', 'clickable');
     tr.innerHTML = `<td>${enrichDiceString(w.name)}</td><td>${escape(w.skill)}</td><td>${escape(String(w.damage))}</td><td>${escape(String(w.crit))}</td><td>${escape(w.range)}</td><td>${enrichDiceString(special)}</td>`;
     tr.tabIndex = 0; tr.setAttribute('role', 'button'); tr.title = 'Détails de l\'arme';
     const open = () => openItemCard(w.name, [
       ['Compétence', w.skill], ['Dégâts', w.damage], ['Critique', w.crit], ['Portée', w.range],
-      ['Spécial', special],
-    ], w.description);
+    ], w.description, w.qualities);
     tr.addEventListener('click', open);
     tr.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
     tb.appendChild(tr);
@@ -676,44 +728,65 @@ function orEmpty(title, node) {
 }
 
 // Point d'entrée : construit la fiche complète.
+// PJ/PNJ : en-tête + caractéristiques + stats TOUJOURS visibles en haut, puis des
+// onglets de fiche (Jeu / Spécialisations / Pouvoirs / Progression / Bio) pour tout
+// avoir sous la main en jeu sans naviguer de haut en bas.
 export function renderSheet(entity, kind) {
   const root = el('article', 'sheet on-dark');
   root.appendChild(headerBlock(entity, kind));
   root.appendChild(charBlock(entity));
   root.appendChild(statsBlock(entity, kind));
 
-  let blocks;
   if (kind === 'adversary') {
-    blocks = [skillsBlock(entity, kind), weaponsBlock(entity), abilitiesBlock(entity), gearBlock(entity)];
-  } else if (kind === 'pc') {
-    // Les 3 fiches PJ : sections dans un ordre FIXE, avec états vides cohérents,
-    // pour qu'elles soient structurellement identiques.
-    blocks = [
-      gaugesBlock(entity),
-      orEmpty('Compétences', skillsBlock(entity, kind)),
-      specTreesBlock(entity),
-      orEmpty('Pouvoirs de la Force', forceTreesBlock(entity)),
-      orEmpty('Armes', weaponsBlock(entity)),
-      orEmpty('Équipement', gearBlock(entity)),
-      xpBlock(entity),
-      bioBlock(entity),
-    ];
-  } else {
-    // PNJ du monde : sections conditionnelles (pas d'états vides superflus).
-    blocks = [
-      gaugesBlock(entity),
-      skillsBlock(entity, kind),
-      entity.specializations?.length ? specTreesBlock(entity) : null,
-      forceTreesBlock(entity),
-      weaponsBlock(entity),
-      gearBlock(entity),
-      bioBlock(entity),
-    ];
+    for (const b of [skillsBlock(entity, kind), weaponsBlock(entity), abilitiesBlock(entity), gearBlock(entity)]) if (b) root.appendChild(b);
+    appendGmSections(root, entity, kind);
+    return root;
   }
 
-  for (const b of blocks) if (b) root.appendChild(b);
+  // Onglet « Jeu » : le nécessaire pour jouer (profil, compétences, synthèse, armes, équipement).
+  const jeu = el('div', 'sheet-tab-jeu');
+  const jeuBlocks = kind === 'pc'
+    ? [gaugesBlock(entity), orEmpty('Compétences', skillsBlock(entity, kind)), talentSynthesis(entity), orEmpty('Armes', weaponsBlock(entity)), orEmpty('Équipement', gearBlock(entity))]
+    : [gaugesBlock(entity), skillsBlock(entity, kind), talentSynthesis(entity), weaponsBlock(entity), gearBlock(entity)];
+  for (const b of jeuBlocks) if (b) jeu.appendChild(b);
+
+  const entries = [{ label: '🎲 Jeu', node: jeu }];
+  const specNode = specTreesOnly(entity); if (specNode) entries.push({ label: 'Spécialisations', node: wrapSection('Arbres de spécialisation', specNode) });
+  const forceNode = forceTreesOnly(entity); if (forceNode) entries.push({ label: 'Pouvoirs de Force', node: wrapSection('Arbres de pouvoirs', forceNode) });
+  const xp = xpBlock(entity); if (xp) entries.push({ label: '📈 Progression', node: xp });
+  const bio = bioBlock(entity); if (bio) entries.push({ label: 'Bio', node: bio });
+
+  root.appendChild(sheetTabs(entries));
   appendGmSections(root, entity, kind); // Dossier MJ + « Mentionné dans » — gated, async
   return root;
+}
+
+// Enveloppe un nœud dans une section titrée.
+function wrapSection(title, node) { const s = section(title); s.appendChild(node); return s; }
+
+// Onglets AU NIVEAU DE LA FICHE (persiste l'onglet actif en session).
+function sheetTabs(entries) {
+  const wrap = el('div', 'fiche-tabs-wrap');
+  const bar = el('div', 'fiche-tabs');
+  const panels = el('div', 'fiche-tab-panels');
+  const KEY = 'holocron-sheet-tab';
+  let want = 0; try { want = Math.max(0, entries.findIndex((e) => e.label === sessionStorage.getItem(KEY))); } catch { /* noop */ }
+  if (want < 0) want = 0;
+  entries.forEach((e, i) => {
+    const btn = el('button', 'fiche-tab' + (i === want ? ' active' : ''), enrichDiceString(e.label));
+    btn.type = 'button';
+    const panel = el('div', 'fiche-tab-panel' + (i === want ? ' active' : ''));
+    panel.appendChild(e.node);
+    btn.addEventListener('click', () => {
+      bar.querySelectorAll('.fiche-tab').forEach((b) => b.classList.remove('active'));
+      panels.querySelectorAll('.fiche-tab-panel').forEach((p) => p.classList.remove('active'));
+      btn.classList.add('active'); panel.classList.add('active');
+      try { sessionStorage.setItem(KEY, e.label); } catch { /* noop */ }
+    });
+    bar.appendChild(btn); panels.appendChild(panel);
+  });
+  wrap.append(bar, panels);
+  return wrap;
 }
 
 // Sections gated (Dossier MJ + back-links) — session MJ Foundry ou clé de secours.

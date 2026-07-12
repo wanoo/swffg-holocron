@@ -298,9 +298,13 @@ export function transformCharacter(doc) {
       conflict: num(sys.morality?.conflict),
       obligation: num(sys.obligationlist ? Object.values(sys.obligationlist).reduce((s, o) => s + num(o?.magnitude), 0) : st.obligation?.value),
       duty: num(sys.dutylist ? Object.values(sys.dutylist).reduce((s, o) => s + num(o?.magnitude), 0) : st.duty?.value),
-      forceRating: val(st.forcePool?.max ?? sys.forceRating),
+      forceRating: d.forceRating || val(st.forcePool?.max) || num(sys.forceRating), // niveau de Force (dérivé)
     },
-    motivations: flagsH.motivations || { m1: '', m2: '' },
+    // Motivations = items dédiés (type = Force/Faiblesse/Désir/Peur/Défis…).
+    motivations: itemsOf(doc, 'motivation').map((m) => ({
+      category: str(sysOf(m).type || sysOf(m).subtype),
+      name: m.name, description: descOf(m),
+    })),
     general: {
       age: str(sys.general?.age ?? sys.biographydata?.age),
       gender: str(sys.general?.gender ?? sys.biographydata?.gender),
@@ -314,12 +318,17 @@ export function transformCharacter(doc) {
       const s = sysOf(w);
       // les champs sont wrappés en { value } — unwrap systématique (sinon "[object Object]"
       // quand value est vide et qu'on retombe sur l'objet). + qualités (itemmodifier).
-      // qualités = itemmodifier « Qualité X » ; on ignore les mods génériques et les
-      // entrées descriptives longues (descriptions d'attachements, pas des qualités).
-      const quals = [...new Set(Object.values(s.itemmodifier || {})
-        .filter((m) => /^Qualité\s/i.test(str(m?.name)))
-        .map((m) => str(m?.name).replace(/^Qualité\s+/i, '').trim())
-        .filter((n) => n && n.length <= 28))];
+      // qualités d'arme (itemmodifier) : nom + rang + description (lisibles au clic).
+      // On garde les vraies qualités (nom court « Pierce », « Qualité Brèche »…) et
+      // écarte les mods génériques/attachements descriptifs.
+      const seenQ = new Set();
+      const quals = (Array.isArray(s.itemmodifier) ? s.itemmodifier : Object.values(s.itemmodifier || {}))
+        .map((m) => {
+          const ms = (m && m.system) || m || {};
+          const name = str(m?.name).replace(/^Qualité\s+/i, '').trim();
+          return { name, rank: num(ms.rank), description: str(ms.description) };
+        })
+        .filter((q) => q.name && q.name.length <= 26 && !/^Mod\s+(unique|générique|generic)/i.test(q.name) && !seenQ.has(q.name) && seenQ.add(q.name));
       const skEn = unwrap(s.skill);
       const skFr = (SKILL_FR[normKey(skEn)] || SKILL_BY_EN[normKey(skEn)] || null);
       return {
