@@ -89,6 +89,24 @@ export function createStore({ dataDir, logger = console }) {
     set('journalsIndex', (Array.isArray(idx) ? idx : []).filter((j) => j && j._id));
   }
 
+  // Barème de dépense FFG (journal « dice_helper ») — pullé par requête CIBLÉE
+  // (where name), jamais via le gros index (qui peut être tronqué et faire sauter
+  // ce journal). Stocké déjà parsé + re-clé SWFFG.SkillsNameX → X.
+  async function syncDiceHelper() {
+    const list = await mcpCall('get_journals', { where: { name: 'dice_helper' } });
+    const j = (Array.isArray(list) ? list : []).find((x) => x && x.name === 'dice_helper');
+    const page = (j?.pages || []).find((p) => p?.text?.content) || (j?.pages || [])[0];
+    const raw = String(page?.text?.content || '').replace(/^\s*<p>/i, '').replace(/<\/p>\s*$/i, '').trim();
+    const out = {};
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        for (const [k, v] of Object.entries(parsed)) out[k.replace(/^SWFFG\.SkillsName/, '')] = v;
+      }
+    } catch { /* journal absent ou non-JSON : barème vide, repli générique côté front */ }
+    set('diceHelper', out);
+  }
+
   // Pull d'un journal complet — appelé par la boucle quand l'index a bougé,
   // ou explicitement après une écriture ciblée.
   async function syncJournal(id, name) {
@@ -129,6 +147,7 @@ export function createStore({ dataDir, logger = console }) {
       ['users', () => syncUsers()],
       ['folders', () => syncFolders()],
       ['journalsIndex', () => syncJournalsIndex()],
+      ['diceHelper', () => syncDiceHelper()],
       ['actors', () => syncActors()],
     ];
     for (const [name, job] of jobs) {
@@ -181,6 +200,6 @@ export function createStore({ dataDir, logger = console }) {
 
   return {
     get, set, version, patch, boot, startLoop, status,
-    sync: { config: syncConfig, users: syncUsers, folders: syncFolders, journalsIndex: syncJournalsIndex, journal: syncJournal, actors: syncActors, pack: syncPack, tick },
+    sync: { config: syncConfig, users: syncUsers, folders: syncFolders, journalsIndex: syncJournalsIndex, diceHelper: syncDiceHelper, journal: syncJournal, actors: syncActors, pack: syncPack, tick },
   };
 }
