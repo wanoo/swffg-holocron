@@ -24,8 +24,10 @@ export const DICE = {
   failure: { glyph: 'f', color: '#111', fr: 'Échec', kind: 'symbol' },
   threat: { glyph: 't', color: '#111', fr: 'Menace', kind: 'symbol' },
   despair: { glyph: 'y', color: '#111', fr: 'Désespoir', kind: 'symbol' },
-  light: { glyph: 'Z', color: '#111', fr: 'Côté Lumineux', kind: 'symbol' },
-  dark: { glyph: 'z', color: '#111', fr: 'Côté Obscur', kind: 'symbol' },
+  // glyphes échangés : 'z' = pip PLEIN (Côté Lumineux, blanc), 'Z' = pip CREUX
+  // (Côté Obscur, cercle à bord blanc + intérieur sombre) — cf. dice.css.
+  light: { glyph: 'z', color: '#111', fr: 'Côté Lumineux', kind: 'symbol' },
+  dark: { glyph: 'Z', color: '#111', fr: 'Côté Obscur', kind: 'symbol' },
 };
 
 // code crochet -> type

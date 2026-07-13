@@ -38,19 +38,20 @@
 .dt-despair {
   color: #f4f1e8;
 }
-/* Glyphes « noirs » du jeu : SOMBRE à BORDURE blanche (comme le vrai dé/pip noir,
-   distinct des glyphes clairs). */
-.dt-setback,          /* dé d'Infortune (noir) */
-.dt-dark {            /* Point du Côté Obscur */
+/* Infortune = LE dé noir (glyphe PLEIN) : carré sombre à BORDURE blanche. */
+.dt-setback {
   color: #18181c;
   -webkit-text-stroke: 0.75px #ece9dd;
   text-shadow: none;
 }
-/* Glyphes « blancs » : dé de Force (hexagone) + Point du Côté Lumineux → blanc franc. */
+/* Force + Côtés lumineux/obscur = blancs. Lumineux = glyphe PLEIN (rond blanc) ;
+   Obscur = glyphe CREUX (rond à bord blanc, intérieur sombre) ; Force = hexagone.
+   La distinction lumineux/obscur vient donc de la FORME du glyphe (cf. render-dice.js). */
 .dt-force,
-.dt-light {
+.dt-light,
+.dt-dark {
   color: #ffffff;
-  text-shadow: 0 0 1px rgba(0, 0, 0, 0.5); /* léger liseré sombre pour détacher du fond clair éventuel */
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
 }
 
 /* Impression (fond blanc) : on repasse aux encres Foundry sombres. */
