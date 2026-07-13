@@ -44,11 +44,12 @@ let backdrop, body;
 const pool = { proficiency: 0, ability: 0, boost: 0, setback: 0, difficulty: 0, challenge: 0, force: 0 };
 let currentSkill = null; // { key, name } pour l'aide de dépense
 let lastResult = null; // dernier jet (pour l'envoi Foundry)
-let seedMine = false; // le pool provient-il de la fiche du joueur connecté ?
+let canFoundry = false; // peut-on lancer ce pool dans Foundry ? (sa fiche, ou MJ)
+let rollAs = null; // { name, actorId } — pour QUI on lance (MJ : n'importe quelle fiche)
 
 // --- Pont Foundry : le VRAI jet est évalué dans Foundry (moteur du système +
 // Dice So Nice), l'Holocron poste le pool puis récupère le résultat par polling.
-// Jets réservés au joueur connecté, depuis SA fiche (seedMine).
+// Jets réservés au joueur connecté (sa fiche) ou au MJ (n'importe quelle fiche).
 let foundryEnabled = null; // null = pas encore sondé
 export async function foundryAvailable() {
   if (foundryEnabled === null) {
@@ -57,8 +58,8 @@ export async function foundryAvailable() {
   }
   return foundryEnabled;
 }
-// Peut-on lancer dans Foundry ? Connecté (session) ET jet de son propre personnage.
-function canRollFoundry() { return Boolean(Data.me) && seedMine !== false; }
+// Peut-on lancer dans Foundry ? Connecté (session) ET jet autorisé (sa fiche, ou MJ).
+function canRollFoundry() { return Boolean(Data.me) && canFoundry; }
 
 async function pollRollResult(token, tries = 24, delayMs = 1000) {
   for (let i = 0; i < tries; i++) {
@@ -83,7 +84,13 @@ async function sendToFoundry(btn, slot) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'same-origin',
-      body: JSON.stringify({ description: currentSkill ? currentSkill.name : 'Jet libre', pool, skillName: currentSkill ? currentSkill.key : '' }),
+      body: JSON.stringify({
+        description: currentSkill ? currentSkill.name : 'Jet libre',
+        pool,
+        skillName: currentSkill ? currentSkill.key : '',
+        asName: rollAs ? rollAs.name : undefined,
+        asActorId: rollAs ? rollAs.actorId || undefined : undefined,
+      }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || !data.token) throw new Error(data.error || `HTTP ${res.status}`);
@@ -277,7 +284,7 @@ function rebuild() {
 
   const actions = el('div', 'dg-actions');
   // Bouton principal : le VRAI jet dans Foundry (si connecté + sa propre fiche).
-  const foundryBtn = el('button', 'dg-roll dg-foundry', '🎲 Lancer dans Foundry');
+  const foundryBtn = el('button', 'dg-roll dg-foundry', rollAs ? `🎲 Lancer dans Foundry · ${rollAs.name}` : '🎲 Lancer dans Foundry');
   foundryBtn.type = 'button';
   foundryBtn.title = 'Foundry lance les vrais dés (moteur du système) et l’Holocron affiche le résultat';
   foundryBtn.hidden = true;
@@ -333,7 +340,8 @@ export function initGenerator() {
 // Ouvre le générateur, éventuellement amorcé par une compétence.
 // seed = { proficiency, ability, skillKey, skillName } (facultatif)
 export function openGenerator(seed) {
-  seedMine = Boolean(seed && seed.mine);
+  canFoundry = Boolean(seed && seed.foundry);
+  rollAs = seed && seed.asName ? { name: seed.asName, actorId: seed.asActorId || null } : null;
   if (seed) {
     for (const k of Object.keys(pool)) pool[k] = 0;
     pool.proficiency = seed.proficiency || 0;

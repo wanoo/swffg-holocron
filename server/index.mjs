@@ -211,8 +211,13 @@ async function handleApi(req, res, urlPath) {
       if (rateLimited(req)) return sendJSON(res, 429, { error: 'trop de jets d’un coup — souffle un peu' });
       let body; try { body = JSON.parse(await readBody(req, 20_000)); } catch { return sendJSON(res, 400, { error: 'JSON invalide' }); }
       const token = 'h' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      // Le MJ peut lancer POUR n'importe quel personnage (asName/asActorId) ; un
+      // joueur lance toujours au nom de SON propre personnage (anti-usurpation).
+      const gm = gmOK(req, session);
+      const player = gm && body.asName ? String(body.asName).slice(0, 40) : session.name;
+      const characterId = gm && body.asActorId ? String(body.asActorId) : session.character;
       try {
-        await tools.requestRoll({ token, player: session.name, characterId: session.character, description: body.description, pool: body.pool, skillName: body.skillName });
+        await tools.requestRoll({ token, player, characterId, description: body.description, pool: body.pool, skillName: body.skillName });
         return sendJSON(res, 200, { ok: true, token });
       } catch (e) { return sendJSON(res, 502, { error: `pont Foundry : ${String(e.message || e).slice(0, 200)}` }); }
     }
