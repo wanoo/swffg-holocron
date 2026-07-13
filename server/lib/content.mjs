@@ -57,6 +57,29 @@ export function createContentService({ store, config }) {
 
   const pcsView = () => pcsRaw().map(transformCharacter);
 
+  // Aide de dépense (avantages/menaces/triomphes/désespoirs par compétence), lue
+  // du journal Foundry « dice_helper » (barème FFG maintenu côté MJ). Re-clé
+  // SWFFG.SkillsNameMelee → « Melee » pour matcher normSkillKey côté front.
+  function diceHelper() {
+    const idx = store.get('journalsIndex') || [];
+    const entry = idx.find((j) => j && j.name === 'dice_helper');
+    if (!entry) return {};
+    const full = store.get(`journal:${entry._id}`);
+    const page = (full?.pages || []).find((p) => p?.text?.content) || (full?.pages || [])[0];
+    let raw = page?.text?.content || '';
+    raw = raw.replace(/^\s*<p>/i, '').replace(/<\/p>\s*$/i, '').trim();
+    let data; try { data = JSON.parse(raw); } catch { return {}; }
+    if (!data || typeof data !== 'object') return {};
+    const out = {};
+    for (const [k, v] of Object.entries(data)) out[k.replace(/^SWFFG\.SkillsName/, '')] = v;
+    return out;
+  }
+  const diceHelperVersion = () => {
+    const idx = store.get('journalsIndex') || [];
+    const entry = idx.find((j) => j && j.name === 'dice_helper');
+    return entry ? store.version(`journal:${entry._id}`) : 0;
+  };
+
   function npcsView() {
     const cc = config();
     const fid = actorFolderId(cc.npcsWorldFolder);
@@ -80,8 +103,9 @@ export function createContentService({ store, config }) {
       pcs: S + store.version('actors') * 31 + store.version('folders'),
       npcs: S + store.version('actors') * 31 + store.version('folders') + 7,
       adversaries: S + store.version(`pack:${cc.packs.adversaries}`),
+      diceHelper: S + diceHelperVersion(),
     };
   }
 
-  return { manifest, journalsView, pcsView, npcsView, adversariesView, versions };
+  return { manifest, journalsView, pcsView, npcsView, adversariesView, diceHelper, versions };
 }

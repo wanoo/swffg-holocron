@@ -74,8 +74,11 @@ export async function loadData() {
     getCached('/content/pcs'),
     getCached('/content/config'),
   ]);
-  // spend-help : overlay optionnel déposé par l'instance (textes non libres)
-  try { Data.spendHelp = await (await fetch('overlay/spend-help.json')).json(); } catch { Data.spendHelp = {}; }
+  // aide de dépense : journal Foundry « dice_helper » (live), repli overlay statique
+  try { Data.spendHelp = await getCached('/content/dice-helper'); }
+  catch {
+    try { Data.spendHelp = await (await fetch('overlay/spend-help.json')).json(); } catch { Data.spendHelp = {}; }
+  }
 
   Data.meta = { title: manifest.title, description: manifest.description, counts: manifest.counts, pcs: manifest.pcs };
   Data.categories = journals.categories;

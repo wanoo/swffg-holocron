@@ -8,6 +8,10 @@ import { getGMKey, gmGetBackrefs, gmGetDossiers } from './collab.js';
 
 const normSkillKey = (en) => (en || '').replace(/[^A-Za-z]/g, '');
 
+// Vrai quand la fiche affichée est celle du personnage du joueur connecté :
+// active alors le « vrai jet » Foundry depuis les compétences (sinon aperçu local).
+let sheetMine = false;
+
 const CHAR_FR = {
   Brawn: 'Vigueur',
   Agility: 'Agilité',
@@ -252,7 +256,7 @@ function skillCell(s, charVal, kind) {
     cell.appendChild(book);
   }
 
-  const roll = () => openGenerator({ proficiency: prof, ability: abil, skillKey: normSkillKey(s.en || s.name), skillName: s.name });
+  const roll = () => openGenerator({ proficiency: prof, ability: abil, skillKey: normSkillKey(s.en || s.name), skillName: s.name, mine: sheetMine });
   cell.addEventListener('click', roll);
   cell.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); roll(); }
@@ -322,7 +326,7 @@ function skillChip(s, charVal, kind) {
   if (!prof && !abil && !boost) jet.textContent = '—';
   bottom.appendChild(jet);
   chip.append(head, bottom);
-  const roll = () => openGenerator({ proficiency: prof, ability: abil, boost, skillKey: normSkillKey(s.en || s.name), skillName: s.name });
+  const roll = () => openGenerator({ proficiency: prof, ability: abil, boost, skillKey: normSkillKey(s.en || s.name), skillName: s.name, mine: sheetMine });
   chip.addEventListener('click', roll);
   chip.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); roll(); } });
   return chip;
@@ -743,6 +747,7 @@ function orEmpty(title, node) {
 // onglets de fiche (Jeu / Spécialisations / Pouvoirs / Progression / Bio) pour tout
 // avoir sous la main en jeu sans naviguer de haut en bas.
 export function renderSheet(entity, kind) {
+  sheetMine = Boolean(Data.me && kind === 'pc' && entity && entity.id && entity.id === Data.me.character);
   const root = el('article', 'sheet on-dark');
   root.appendChild(headerBlock(entity, kind));
   root.appendChild(charBlock(entity));

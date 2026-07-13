@@ -44,8 +44,11 @@ let backdrop, body;
 const pool = { proficiency: 0, ability: 0, boost: 0, setback: 0, difficulty: 0, challenge: 0, force: 0 };
 let currentSkill = null; // { key, name } pour l'aide de dépense
 let lastResult = null; // dernier jet (pour l'envoi Foundry)
+let seedMine = false; // le pool provient-il de la fiche du joueur connecté ?
 
-// --- Pont Foundry joueurs : /api/foundry/roll (code de table, jamais la clé MJ)
+// --- Pont Foundry : le VRAI jet est évalué dans Foundry (moteur du système +
+// Dice So Nice), l'Holocron poste le pool puis récupère le résultat par polling.
+// Jets réservés au joueur connecté, depuis SA fiche (seedMine).
 let foundryEnabled = null; // null = pas encore sondé
 export async function foundryAvailable() {
   if (foundryEnabled === null) {
@@ -54,49 +57,56 @@ export async function foundryAvailable() {
   }
   return foundryEnabled;
 }
-export function playerIdentity() {
-  // session Foundry : identité automatique, jets signés du vrai compte
-  if (Data.me) return { name: Data.me.name, key: '' };
-  let name = localStorage.getItem('holocron-player-name') || '';
-  if (!name) {
-    name = (window.prompt('Ton nom de personnage (affiché dans le chat Foundry) :') || '').trim();
-    if (!name) return null;
-    localStorage.setItem('holocron-player-name', name);
+// Peut-on lancer dans Foundry ? Connecté (session) ET jet de son propre personnage.
+function canRollFoundry() { return Boolean(Data.me) && seedMine !== false; }
+
+async function pollRollResult(token, tries = 24, delayMs = 1000) {
+  for (let i = 0; i < tries; i++) {
+    await new Promise((r) => setTimeout(r, delayMs));
+    let data;
+    try { data = await (await fetch(`/api/foundry/roll-result?token=${encodeURIComponent(token)}`, { credentials: 'same-origin' })).json(); }
+    catch { continue; }
+    if (data && data.ready) return data.result || {};
   }
-  let key = localStorage.getItem('holocron-table-key') || '';
-  if (!key) {
-    key = (window.prompt('Code de table (demande au MJ) :') || '').trim();
-    if (!key) return null;
-    localStorage.setItem('holocron-table-key', key);
-  }
-  return { name, key };
+  return null;
 }
-async function sendToFoundry(btn) {
-  const id = playerIdentity();
-  if (!id) return;
+
+async function sendToFoundry(btn, slot) {
+  if (!Data.me) { btn.textContent = '✗ Connecte-toi'; return; }
   btn.disabled = true;
   const orig = btn.textContent;
+  btn.textContent = '⏳ Jet dans Foundry…';
+  slot.innerHTML = '';
+  slot.appendChild(el('div', 'dg-foundry-wait muted', '🎲 Foundry lance les dés…'));
   try {
     const res = await fetch('/api/foundry/roll', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(id.key ? { 'x-player-key': id.key } : {}) },
-      body: JSON.stringify({
-        player: id.name,
-        description: currentSkill ? currentSkill.name : 'Jet libre',
-        pool,
-        result: lastResult || undefined,
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ description: currentSkill ? currentSkill.name : 'Jet libre', pool, skillName: currentSkill ? currentSkill.key : '' }),
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      if (res.status === 401) localStorage.removeItem('holocron-table-key'); // code erroné → redemander
-      throw new Error(data.error || `HTTP ${res.status}`);
+    if (!res.ok || !data.token) throw new Error(data.error || `HTTP ${res.status}`);
+    const result = await pollRollResult(data.token);
+    slot.innerHTML = '';
+    if (!result) {
+      slot.appendChild(el('div', 'dg-outcome ko', 'Foundry n’a pas répondu'));
+      slot.appendChild(el('div', 'dg-net muted', 'Vérifie que le MJ a lancé la macro « Pont de jets Holocron » et que Foundry est ouvert.'));
+      btn.textContent = '✗ Pas de réponse';
+    } else {
+      lastResult = result;
+      const box = renderResult(result);
+      box.insertBefore(el('div', 'dg-foundry-tag', '✓ Résultat Foundry (vrais dés)'), box.firstChild);
+      slot.appendChild(box);
+      btn.textContent = '✓ Lancé dans Foundry';
     }
-    btn.textContent = '✓ Envoyé dans Foundry';
   } catch (e) {
-    btn.textContent = `✗ ${String(e.message).slice(0, 32)}`;
+    slot.innerHTML = '';
+    slot.appendChild(el('div', 'dg-outcome ko', 'Échec de l’envoi'));
+    slot.appendChild(el('div', 'dg-net muted', String(e.message).slice(0, 120)));
+    btn.textContent = '✗ Échec';
   }
-  setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 1600);
+  setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2200);
 }
 
 function randInt(n) {
@@ -197,17 +207,39 @@ function renderResult(r) {
   return out;
 }
 
+// Dépenses génériques FFG (repli pour toute compétence absente du dice_helper) :
+// guide surtout les succès et avantages, comme demandé.
+const GENERIC_SPEND = {
+  su: [
+    { text: 'Chaque succès net = l’action réussit ; les succès nets en plus augmentent l’ampleur (arme : +1 dégât par succès net).', required: 1 },
+  ],
+  ad: [
+    { text: 'Récupérer 1 stress ; ou +[bo] au prochain jet d’un allié ; ou un détail mineur en votre faveur.', required: 1 },
+    { text: 'Réaliser une manœuvre gratuite ; ou infliger +[se] au prochain jet de la cible.', required: 2 },
+  ],
+  tr: [
+    { text: 'Réussite spectaculaire : un effet narratif marquant, en plus d’un succès.', required: 1 },
+  ],
+  th: [
+    { text: 'Revers mineur : subir 1 stress, ou une petite complication.', required: 1 },
+  ],
+  de: [
+    { text: 'Revers majeur : blessure, panne d’arme, ou tournant défavorable de la scène.', required: 1 },
+  ],
+};
+
 // Panneau d'aide « que dépenser » pour la compétence amorçante.
 function renderSpendHelp() {
   if (!currentSkill) return null;
-  const table = (Data.spendHelp || {})[currentSkill.key];
-  if (!table) return null;
+  const table = (Data.spendHelp || {})[currentSkill.key] || GENERIC_SPEND;
+  const generic = table === GENERIC_SPEND;
   const wrap = el('div', 'dg-help');
-  wrap.appendChild(el('h4', 'dg-help-title', `Dépenses — ${currentSkill.name}`));
+  wrap.appendChild(el('h4', 'dg-help-title', `Dépenses — ${currentSkill.name}${generic ? ' (générique)' : ''}`));
   const buckets = [
+    ['su', 'success', 'Succès'],
     ['ad', 'advantage', 'Avantages'],
-    ['th', 'threat', 'Menaces'],
     ['tr', 'triumph', 'Triomphes'],
+    ['th', 'threat', 'Menaces'],
     ['de', 'despair', 'Désespoirs'],
   ];
   let any = false;
@@ -244,18 +276,18 @@ function rebuild() {
   body.appendChild(renderPoolSelector());
 
   const actions = el('div', 'dg-actions');
-  const rollBtn = el('button', 'dg-roll', 'Lancer les dés');
+  // Bouton principal : le VRAI jet dans Foundry (si connecté + sa propre fiche).
+  const foundryBtn = el('button', 'dg-roll dg-foundry', '🎲 Lancer dans Foundry');
+  foundryBtn.type = 'button';
+  foundryBtn.title = 'Foundry lance les vrais dés (moteur du système) et l’Holocron affiche le résultat';
+  foundryBtn.hidden = true;
+  // Aperçu local (secondaire) : simulation instantanée, ne touche pas Foundry.
+  const rollBtn = el('button', 'dg-reset dg-local', 'Aperçu local');
   rollBtn.type = 'button';
+  rollBtn.title = 'Simulation locale (n’envoie rien à Foundry)';
   const resetBtn = el('button', 'dg-reset', 'Réinitialiser');
   resetBtn.type = 'button';
-  actions.append(rollBtn, resetBtn);
-  const foundryBtn = el('button', 'dg-reset dg-foundry', '📡 → Foundry');
-  foundryBtn.type = 'button';
-  foundryBtn.title = 'Poste le jet dans le chat Foundry (résultat si déjà lancé, sinon le pool à lancer là-bas)';
-  foundryBtn.hidden = true;
-  foundryBtn.addEventListener('click', () => sendToFoundry(foundryBtn));
-  actions.append(foundryBtn);
-  foundryAvailable().then((on) => { foundryBtn.hidden = !on; });
+  actions.append(foundryBtn, rollBtn, resetBtn);
   body.appendChild(actions);
 
   const viewLabel = el('div', 'dg-pool-label muted', 'Pool :');
@@ -270,6 +302,13 @@ function rebuild() {
 
   const help = renderSpendHelp();
   if (help) body.appendChild(help);
+
+  // Visibilité du bouton Foundry : connecteur actif + joueur connecté sur SA fiche.
+  foundryAvailable().then((on) => {
+    if (on && canRollFoundry()) { foundryBtn.hidden = false; rollBtn.textContent = 'Aperçu local'; }
+    else { foundryBtn.hidden = true; rollBtn.textContent = 'Lancer les dés'; }
+  });
+  foundryBtn.addEventListener('click', () => sendToFoundry(foundryBtn, resultSlot));
 
   rollBtn.addEventListener('click', () => {
     fillPoolGlyphs(viewer);
@@ -294,6 +333,7 @@ export function initGenerator() {
 // Ouvre le générateur, éventuellement amorcé par une compétence.
 // seed = { proficiency, ability, skillKey, skillName } (facultatif)
 export function openGenerator(seed) {
+  seedMine = Boolean(seed && seed.mine);
   if (seed) {
     for (const k of Object.keys(pool)) pool[k] = 0;
     pool.proficiency = seed.proficiency || 0;

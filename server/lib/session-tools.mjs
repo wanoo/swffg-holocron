@@ -38,6 +38,50 @@ export async function postRoll({ player, description, pool = {}, result = null, 
   }] });
 }
 
+// Demande de jet « vrai Foundry » : on poste un message porteur du pool
+// (flags.starwarsffg.dicePool) marqué flags.holocron.req. La macro « Pont de jets
+// Holocron » (côté navigateur MJ) l'évalue avec le VRAI moteur du système et
+// réémet un message de résultat estampillé flags.holocron.resultFor=token, que
+// readRollResult() récupère par polling. Message chuchoté à l'auteur → pas de
+// bruit dans le chat public (la macro le supprime après évaluation).
+export async function requestRoll({ token, player, characterId, description, pool = {}, skillName = '' }) {
+  const cleanPool = {};
+  for (const k of Object.keys(GLYPH)) {
+    const v = Number(pool?.[k] || 0);
+    if (v > 0) cleanPool[k] = Math.min(v, 15);
+  }
+  const who = String(player || 'Joueur').slice(0, 40);
+  const desc = String(description || 'Jet').slice(0, 200);
+  const author = await mcpAuthorId();
+  const speaker = { alias: who };
+  if (ID_RE.test(String(characterId || ''))) speaker.actor = characterId;
+  const poolTxt = Object.entries(cleanPool).map(([k, v]) => GLYPH[k].repeat(v)).join('') || '—';
+  await mcpCall('create_document', { type: 'ChatMessage', data: [{
+    author,
+    speaker,
+    whisper: [author],
+    content: `<p style="opacity:.55;font-size:.85em">🎲 ${who} prépare un jet — ${desc} · ${poolTxt}</p>`,
+    flags: {
+      holocron: { req: true, token: String(token), skill: String(skillName || ''), description: desc },
+      starwarsffg: {
+        dicePool: cleanPool,
+        description: desc,
+        roll: { data: {}, skillName: String(skillName || desc).slice(0, 100), item: {}, flavor: '', sound: null },
+      },
+    },
+  }] });
+  return String(token);
+}
+
+// Récupère le résultat d'une demande de jet (posté par la macro Foundry).
+export async function readRollResult(token) {
+  const msgs = await mcpCall('get_messages', { requested_fields: ['flags'] });
+  const hit = (Array.isArray(msgs) ? msgs : []).find((m) => m?.flags?.holocron?.resultFor === String(token));
+  if (!hit) return { ready: false };
+  const h = hit.flags.holocron;
+  return { ready: true, result: h.result || null, at: h.at || null };
+}
+
 const ID_RE = /^[A-Za-z0-9]{16}$/;
 
 export async function listHandouts() {

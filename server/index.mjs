@@ -156,6 +156,7 @@ async function handleApi(req, res, urlPath) {
     if (kind === 'manifest') return sendVersioned(req, res, content.manifest(), v.manifest);
     if (kind === 'journals') return sendVersioned(req, res, content.journalsView(session), v.journals * 13 + (session ? 1 : 0) + (isGM(session) ? 7 : 0));
     if (kind === 'pcs') return sendVersioned(req, res, content.pcsView(), v.pcs);
+    if (kind === 'dice-helper') return sendVersioned(req, res, content.diceHelper(), v.diceHelper);
     if (kind === 'config') return sendVersioned(req, res, publicConfig(cc(), ENV.foundryBaseUrl), store.version('config'));
     if (kind === 'npcs') {
       if (!gmOK(req, session)) return sendJSON(res, 401, { error: 'réservé MJ' });
@@ -204,12 +205,23 @@ async function handleApi(req, res, urlPath) {
     if (!enabled) return sendJSON(res, 503, { error: 'connecteur Foundry non configuré' });
     if (!playerOK(req, session)) return sendJSON(res, 401, { error: 'connexion requise' });
     if (parts[1] === 'roll' && req.method === 'POST') {
+      // jets réservés aux comptes Foundry connectés (pas de clé de table) : le vrai
+      // jet est signé du personnage du joueur puis évalué côté Foundry.
+      if (!session) return sendJSON(res, 401, { error: 'connecte-toi avec ton compte Foundry pour lancer un jet' });
       if (rateLimited(req)) return sendJSON(res, 429, { error: 'trop de jets d’un coup — souffle un peu' });
       let body; try { body = JSON.parse(await readBody(req, 20_000)); } catch { return sendJSON(res, 400, { error: 'JSON invalide' }); }
+      const token = 'h' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
       try {
-        await tools.postRoll({ player: who(session, body), description: body.description, pool: body.pool, result: body.result, skillName: body.skillName });
-        return sendJSON(res, 200, { ok: true });
+        await tools.requestRoll({ token, player: session.name, characterId: session.character, description: body.description, pool: body.pool, skillName: body.skillName });
+        return sendJSON(res, 200, { ok: true, token });
       } catch (e) { return sendJSON(res, 502, { error: `pont Foundry : ${String(e.message || e).slice(0, 200)}` }); }
+    }
+    if (parts[1] === 'roll-result' && req.method === 'GET') {
+      if (!session) return sendJSON(res, 401, { error: 'connexion requise' });
+      const token = q.get('token');
+      if (!token) return sendJSON(res, 400, { error: 'token requis' });
+      try { return sendJSON(res, 200, await tools.readRollResult(token)); }
+      catch (e) { return sendJSON(res, 502, { error: `pont Foundry : ${String(e.message || e).slice(0, 200)}` }); }
     }
     if (parts[1] === 'dash' && req.method === 'GET') {
       try { return sendJSON(res, 200, await dashPayload()); }
