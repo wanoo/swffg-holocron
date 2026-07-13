@@ -136,6 +136,8 @@ export function mountSidebar() {
     { href: '#/navicomputer', label: '🖥️ Navi-Computer' },
     { href: '#/astronav', label: '🪐 Astronav' },
     { href: '#/aidejeu', label: '🎲 Symboles & dépenses' },
+    { href: '#/sabacc', label: '🎴 Sabacc' },
+    { href: '#/ateliers', label: '⚒️ Ateliers' },
   ];
   if (getGMKey() || Data.gm) tools.push({ href: '#/rencontres', label: '⚔️ Rencontres (MJ)' });
   tree.appendChild(makeGroup('Outils', 'misc', tools.length, tools));

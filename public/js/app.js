@@ -12,6 +12,7 @@ import { initGenerator, openGenerator } from './dice-roller.js';
 import { mountAstronav } from './astronav.js';
 import { mountSpendHelp } from './spendhelp.js';
 import { mountNaviComputer } from './navicomputer.js';
+import { mountSabacc, mountAteliers } from './games.js';
 import { mountEncounters } from './gm-encounters.js';
 import { openCard } from './modal.js';
 import { mountEditablePage } from './editor.js';
@@ -105,7 +106,9 @@ function viewHome() {
   wrap.insertAdjacentHTML('beforeend', '<h2 class="section-title">Outils</h2>');
   const tg = document.createElement('div');
   tg.className = 'home-grid';
-  tg.innerHTML = `<a class="home-card" href="#/astronav"><div class="hc-count">🪐</div><div class="hc-title">Astronav</div><div class="hc-sub">Calculateur d'astrogation · 6 750 systèmes</div></a>`;
+  tg.innerHTML = `<a class="home-card" href="#/astronav"><div class="hc-count">🪐</div><div class="hc-title">Astronav</div><div class="hc-sub">Calculateur d'astrogation · 6 750 systèmes</div></a>`
+    + `<a class="home-card" href="#/sabacc"><div class="hc-count">🎴</div><div class="hc-title">Sabacc</div><div class="hc-sub">Règles — Spike de Corellia & Kessel</div></a>`
+    + `<a class="home-card" href="#/ateliers"><div class="hc-count">⚒️</div><div class="hc-title">Ateliers</div><div class="hc-sub">Fabrication — sabre laser, mods, potions</div></a>`;
   wrap.appendChild(tg);
 
   // Bestiaire / PNJ — RÉSERVÉ AU MJ (stats/spoilers). Masqué côté joueur.
@@ -338,6 +341,8 @@ function route() {
   else if (a === 'astronav') { cleanupSpy(); cleanupSpy = () => {}; mountAstronav(content); }
   else if (a === 'aidejeu') { cleanupSpy(); cleanupSpy = () => {}; mountSpendHelp(content); }
   else if (a === 'navicomputer') { cleanupSpy(); cleanupSpy = () => {}; mountNaviComputer(content); }
+  else if (a === 'sabacc') { cleanupSpy(); cleanupSpy = () => {}; mountSabacc(content); }
+  else if (a === 'ateliers') { cleanupSpy(); cleanupSpy = () => {}; mountAteliers(content); }
   else if (a === 'rencontres') { cleanupSpy(); cleanupSpy = () => {}; if (isGm) mountEncounters(content); else viewGmOnly(); }
   else if (a === 'journal' && b) viewJournal(b, c);
   else if (a === 'pc' && b) viewSheet(Data.pcById.get(b), 'pc');

@@ -567,6 +567,20 @@ a.skill-name:hover { color: var(--holo); text-decoration: underline; }
 .sh-sym.good.active { color: #7ddc8f; }
 .sh-sym.bad.active { color: #e08363; }
 .sh-note { margin: 0 0 .8rem; }
+
+/* --- Weblets « Sabacc » & « Ateliers » (games.js) -------------------------- */
+.games-view { max-width: 960px; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
+.games-tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin: .2rem 0 1.1rem; }
+.games-tab {
+  cursor: pointer; background: var(--panel, #161c28); color: inherit;
+  border: 1px solid var(--line, #2a3446); border-radius: 999px;
+  padding: .35rem .9rem; font-size: .9rem; line-height: 1;
+}
+.games-tab:hover { border-color: var(--gold, #c9a54a); }
+.games-tab.active { background: var(--gold, #c9a54a); color: #10131a; border-color: var(--gold, #c9a54a); font-weight: 700; }
+.games-body { padding: 1.2rem 1.4rem; }
+.games-src { margin: 1rem 0 0; font-size: .85rem; }
+.games-src code { background: rgba(255,255,255,.08); padding: 0 .3em; border-radius: 4px; }
 .sh-bucket { border: 1px solid var(--line, #2a3446); border-radius: 12px; padding: .8rem 1rem; margin-bottom: .9rem; background: linear-gradient(160deg, rgba(255,255,255,.02), transparent); }
 .sh-bucket.good { border-left: 3px solid #7ddc8f; }
 .sh-bucket.bad { border-left: 3px solid #e08363; }
