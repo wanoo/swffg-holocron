@@ -91,19 +91,23 @@ Hooks.on("ffgDiceMessage", async (roll) => {
   } catch (e) { console.warn("swffg-holocron | application du voyage", e); }
 });
 
-/* Au chargement (MJ actif) : setup auto des ressources party-resources + cale le POI « vous êtes ici ». */
+/* Au chargement : setup auto des ressources party-resources + cale le POI « vous êtes ici ». */
 Hooks.once("ready", async () => {
+  // Setup/install automatique du pool du groupe : sur TOUT client MJ (idempotent).
+  // NE dépend PAS de « MJ actif » — le connecteur MCP headless peut être l'activeGM
+  // et ne lance jamais le code du module, donc les ressources ne se créaient jamais.
+  if (game.user.isGM) {
+    try {
+      if (!game.settings.get(MOD, "partyResSetup")) {
+        const ok = await ensurePartyResources({ silent: false });
+        if (ok) await game.settings.set(MOD, "partyResSetup", true);
+      } else {
+        await ensurePartyResources({ silent: true });   // idempotent : recrée seulement si supprimées
+      }
+    } catch (e) { console.warn("swffg-holocron | setup party-resources", e); }
+  }
+  // Marqueur « vous êtes ici » (un seul applicateur pour éviter les races).
   if (!isTripApplier()) return;
-  // Install/setup automatique du pool du groupe (crée les ressources manquantes, une fois).
-  try {
-    if (!game.settings.get(MOD, "partyResSetup")) {
-      const ok = await ensurePartyResources({ silent: false });
-      if (ok) await game.settings.set(MOD, "partyResSetup", true);
-    } else {
-      await ensurePartyResources({ silent: true });   // idempotent : recrée seulement si supprimées
-    }
-  } catch (e) { console.warn("swffg-holocron | setup party-resources", e); }
-  // Marqueur « vous êtes ici » calé sur la dernière position connue du vaisseau.
   try {
     if (!astronavApi()) return;
     const s = readShip(await shipJournal());

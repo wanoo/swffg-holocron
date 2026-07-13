@@ -1,48 +1,158 @@
 # SWFFG Holocron — Poste de commande de campagne
 
-Module [Foundry VTT](https://foundryvtt.com/) pour le système **Star Wars FFG** (`starwarsffg`).
-Le poste de commande de votre campagne, en une fenêtre :
+Module [Foundry VTT](https://foundryvtt.com/) pour le système **Star Wars FFG** (`starwarsffg`) :
+le **poste de commande** de votre campagne (vaisseau, tableau de bord holographique, boîte à
+outils MJ, pont vers l'astronav) **plus** une **structure de campagne prête à l'emploi**
+(dossiers, règles FR, macros, échantillon de test) et un **compagnon web optionnel**
+(l'« Archive Holocron ») qui affiche vos fiches/journaux hors de Foundry.
 
-- **🚀 Vaisseau du groupe** — vivres, carburant, usure adossés au **pool partagé
-  [fvtt-party-resources](https://foundryvtt.com/packages/fvtt-party-resources)** ; ravitaillement,
-  plein, révision et application de voyages en un clic. C'est un **POI Monk's Enhanced Journal**
-  dont la position pilote le marqueur « vous êtes ici » de l'astronav.
-- **🖥️ Tableau de bord holographique** — allégeance du groupe (éditable), position actuelle
-  (avec l'image de la planète si [swffg-astronavigation](https://github.com/wanoo/swffg-astronavigation) est
-  actif), équipage (les personnages assignés aux joueurs), **alignement des PNJ**
-  (alliés / neutres / ennemis, édité en jeu), panneau **HoloNet** (un journal au choix) et
-  **mondes d'intérêt = favoris Monk's Enhanced Journal** (clic → fiche, 🧭 → destination astronav).
-- **🧰 Boîte à outils MJ** — test de Peur, points de Destin (jet de début de séance), dégâts /
-  stress de groupe, blessures critiques (RollTables configurables), fin de rencontre,
-  initiative de groupe, **générateur de boutiques** (compendiums configurables).
-- **🪐 Pont Astronav** — un **jet d'Astrogation réussi** applique automatiquement le coût du
-  voyage au vaisseau (déduction du pool party-resources) **et déplace le POI** vers la destination.
-  Bouton **« Appliquer le trajet calculé »** pour appliquer sans jet. Le calculateur lit l'usure
-  réelle du vaisseau pour la difficulté du test.
+---
 
-## Installation
+## 1. Vue d'ensemble (l'architecture, en clair)
 
-Dans Foundry : **Add-on Modules → Install Module**, puis colle l'URL du manifeste :
+Trois briques, dont **une seule est obligatoire** :
+
+| Brique | Rôle | Obligatoire ? |
+|---|---|---|
+| **Module Foundry `swffg-holocron`** | Ce dépôt. Poste de commande + structure de campagne. | ✅ Oui |
+| **App web « Archive Holocron »** | Site compagnon (lecture des fiches/journaux/PNJ hors Foundry, jets, guide de dépense). | ⬜ Optionnel |
+| **Connecteur MCP (`foundry-mcp`)** | Le tuyau entre Foundry et l'app web. | ⬜ Seulement si l'app web |
+
+> **Tu veux juste jouer dans Foundry ?** Installe le module (partie 2) — c'est tout.
+> **Tu veux aussi l'app web (fiches consultables au téléphone, écran MJ, jets guidés) ?**
+> Ajoute le connecteur + l'app (partie 6).
+
+---
+
+## 2. Installation du module (pour tout le monde)
+
+Dans Foundry : **Add-on Modules → Install Module**, colle l'URL du manifeste :
 
 ```
 https://github.com/wanoo/swffg-holocron/releases/latest/download/module.json
 ```
 
-**Dépendances requises** (Foundry propose de les installer) :
-[swffg-astronavigation](https://github.com/wanoo/swffg-astronavigation) ·
-[fvtt-party-resources](https://foundryvtt.com/packages/fvtt-party-resources) ·
-[Monk's Enhanced Journal](https://foundryvtt.com/packages/monks-enhanced-journal).
+**Dépendances requises** — Foundry propose de les installer automatiquement :
+
+- [swffg-astronavigation](https://github.com/wanoo/swffg-astronavigation) (≥ 1.6.0) — astrogation, carte galactique, atlas MEJ des planètes, marqueur « vous êtes ici ».
+- [fvtt-party-resources](https://foundryvtt.com/packages/fvtt-party-resources) — pool partagé du groupe (vivres / carburant / usure).
+- [Monk's Enhanced Journal](https://foundryvtt.com/packages/monks-enhanced-journal) — fiches PNJ / organisations / lieux typées.
+- Système **Star Wars FFG** (`starwarsffg`).
 
 Active le module dans ton monde. Deux boutons apparaissent dans les contrôles de scène
-(groupe jetons) : **📡 Holocron** (tout le monde) et **🧰 Boîte à outils** (MJ).
+(groupe *jetons*) : **📡 Holocron** (tout le monde) et **🧰 Boîte à outils** (MJ).
 
-**Setup party-resources — automatique** : au 1er lancement (MJ), le module **crée tout seul** les
-trois ressources (Vivres, Carburant, Usure) dans Party Resources d'après l'état du vaisseau.
-Pour (ré)installer à la main : *Réglages du module → « Installer dans Party Resources »*.
-Les ids sont configurables (`resFoodId` / `resFuelId` / `resWearId`, défauts `vivres` / `carburant`
-/ `usure`). Sans Party Resources, le journal du vaisseau fait foi (dégradation gracieuse).
+### Ressources du vaisseau — 100 % automatique
+Au **premier lancement par le MJ**, le module **crée tout seul** les trois ressources dans
+Party Resources d'après l'état du vaisseau : **🥫 Vivres** (jours), **⛽ Carburant** (points),
+**🔧 Usure** (%). Rien à configurer. Pour (ré)installer à la main :
+*Configurer les réglages → Réglages du module → « Installer dans Party Resources »*.
+Les identifiants sont réglables (`resFoodId` / `resFuelId` / `resWearId`). Sans Party Resources,
+le journal du vaisseau prend le relais (dégradation gracieuse).
 
-## API
+---
+
+## 3. Ce que le module apporte à votre monde (compendiums)
+
+> Bundlés dans le module, à **importer dans le monde** au besoin (glisser depuis les
+> compendiums, ou via les macros d'installation).
+
+- **📖 Règles & Références (FR)** — l'aide de jeu traduite : mécanique de base, compétences,
+  combat, Force & Moralité, équipement, vaisseaux, fabrication, plus les fiches d'aide
+  (dés & symboles, dépense d'avantages/menaces, etc.).
+- **⚙️ Structure de campagne** — les **dossiers** de journaux et d'acteurs prêts à l'emploi
+  (voir §4) + le journal **⚙️ Holocron Config** (paramètre l'app web).
+- **🎲 Macros MJ** — voir §5.
+- **🧪 Échantillon de test** — un mini-set (1 scène, quelques PNJ, un vaisseau) pour vérifier
+  l'installation d'un coup d'œil.
+
+*(Ces compendiums sont en cours d'intégration au module ; d'ici là, la structure ci-dessous
+décrit le format attendu.)*
+
+---
+
+## 4. Structure de campagne (dossiers)
+
+Le module et l'app web s'appuient sur une **convention de dossiers** (renommables via les
+réglages / le journal de config). Recréer cette arborescence suffit à tout faire fonctionner.
+
+**Dossiers de JOURNAUX**
+- `🎬 Campagne — Actes` — la trame jouée (un journal par Acte).
+- `🏛️ Organisations` — fiches **MEJ *organization*** (factions, corporations).
+- `🎭 Personnages rencontrés` — fiches **MEJ *person*** (PNJ ; le *rôle* MEJ pilote la
+  pastille Allié / Ennemi / Mentor / Neutre / Contact, l'attribut *Vie* = « mort » → †).
+- `📓 Notes des joueurs` — notes libres par joueur.
+- `🎲 MJ — Bible de campagne` — le **contenu MJ** (voir §6), non exposé aux joueurs.
+- Journaux **nommés** (réglables) : `🚀 Vaisseau du groupe`, `🖥️ Codex du groupe`,
+  `📡 HoloNet — Actualités`, `🌍 Mondes d'intérêt`.
+
+**Dossiers d'ACTEURS**
+- `👥 Personnages joueurs` — les PJ (assignés aux comptes joueurs).
+- `🎭 PNJ de campagne` — les PNJ à statistiques (bestiaire du MJ).
+- `⚔️ Rencontres` — acteurs/tokens montés par la boîte à outils pour les combats.
+
+Chaque fiche **MEJ** (person/organization/place) est la **source de vérité** : type, rôle,
+attributs, **relations** (personne ↔ organisation, etc.) sont lus tels quels par l'app web.
+
+---
+
+## 5. Macros MJ (compendium)
+
+Bundlées et rangées par thème :
+
+- **⚔️ Combat & Table** — 🎲 Pool rapide, 😱 Test de Peur, 🩹 Dégâts-Stress de groupe,
+  ☠️ Blessure critique, 🔄 Fin de rencontre, ⚡ Initiative de groupe, ⭐ Points de Destin.
+- **🎲📡 Pont de jets Holocron** — à lancer une fois par séance (poste MJ) : évalue avec le
+  vrai moteur FFG les jets envoyés depuis l'app web et renvoie le résultat.
+- **🧭 Astronav** — Vaisseau / Itinéraire (via l'API `swffg-astronavigation`).
+- **🛒 Boutique**, **⚒️ Artisanat**, **🎴/🎲 Sabacc** (si les modules correspondants sont là).
+
+La plupart sont aussi accessibles sans macro via la **🧰 Boîte à outils** (bouton de scène MJ).
+
+---
+
+## 6. Structures clés du mode MJ
+
+- **⚙️ Holocron Config** (journal, `flags.holocron.config`) — LE centre de configuration lu par
+  l'app web : `categories` (dossiers → catégories affichées), `gmBibleFolder`, `packs`
+  (règles/adversaires), `journals` (ship/codex/holonet/poi), `npcsWorldFolder`, `registry`
+  (nom → acteur), `campaignPlanets`. Édite-le pour adapter les noms de dossiers.
+- **🎲 MJ — Bible de campagne** — les chapitres MJ (vérités, PNJ & fronts, suivi XP, visions,
+  cockpit de table…). Réservé au MJ (ownership), non exposé aux joueurs.
+- **Dossiers narratifs** (`flags.holocron.dossiers`) — couche MJ « par fiche » (rôle, ce qu'il
+  veut, attitude, réplique) superposée aux PNJ, éditable depuis l'app web.
+- **Statut / allégeance des PNJ** — porté par la fiche **MEJ** (rôle + attribut Vie) ; repli
+  `flags.holocron.statut` / `.mort` (écrit par la macro « 🎭 Statut PNJ »).
+- **Vaisseau / Codex / HoloNet** — vivent dans des `flags` de module sur leurs journaux liés ;
+  le pool de ressources vit dans **fvtt-party-resources** quand présent, sinon dans le flag.
+
+---
+
+## 7. (Optionnel) App web « Archive Holocron » + connecteur MCP
+
+Le compagnon web laisse joueurs et MJ consulter fiches, journaux, bestiaire, lancer des jets
+guidés, etc., **sans ouvrir Foundry**. Il **ne modifie jamais** vos données : Foundry reste la
+seule source de vérité, l'app **synchronise** via le connecteur.
+
+**En clair, pour un non-technicien :**
+1. **Le connecteur `foundry-mcp`** est un petit programme qui se connecte à ton monde Foundry
+   (avec un compte dédié, ex. `MCP_Bot`, de rôle Assistant/MJ) et expose ses données.
+2. **L'app Holocron** (un petit serveur Node, déployable sur [Clever Cloud](clever-tools) ou en
+   Docker) embarque ce connecteur et sert le site. Tu lui donnes :
+   - `FOUNDRY_BASE_URL` — l'adresse de ton Foundry (`https://…/ton-monde`) ;
+   - les **identifiants** du compte connecteur (`FOUNDRY_CREDENTIALS`, un JSON) ;
+   - `SESSION_SECRET` — une phrase secrète pour signer les sessions ;
+   - *(option)* un **FS Bucket** monté sur `HOLOCRON_DATA_DIR` pour garder le cache entre
+     déploiements.
+3. Les joueurs se connectent au site **avec leur compte Foundry** — ils ne voient que ce que
+   leur *ownership* Foundry autorise.
+
+> Détails d'exploitation, sécurité et déploiement : dépôt de l'app web (`swffg-holocron`,
+> serveur zéro-dépendance). Le module Foundry, lui, est **autonome** — l'app web est un plus.
+
+---
+
+## 8. API & hooks (intégrateurs)
 
 ```js
 const api = game.modules.get("swffg-holocron").api;
@@ -54,6 +164,7 @@ await api.setShipWorld("Tatooine");          // déplace le vaisseau + POI « vo
 await api.ship();                            // état courant du vaisseau
 await api.favorites();                       // favoris MEJ (noms de mondes)
 api.importAtlas();                           // importe le compendium des planètes dans le monde
+api.setupPartyResources({ force: true });    // (ré)installe les ressources du groupe
 api.lastCost();                              // dernier coût d'astrogation reçu
 ```
 
@@ -62,19 +173,15 @@ Hooks émis : `swffgHolocron.shipUpdated(ship)` · `swffgHolocron.codexUpdated(c
 Hooks écoutés (astronav) : `swffgAstronav.cost({from, to, days, fuel, usure})` (mémorisé) et
 `ffgDiceMessage` (jet d'Astrogation réussi → application du voyage + déplacement du POI).
 
-## Données & compatibilité
+---
 
-Le **pool de ressources** (vivres/carburant/usure) vit dans **fvtt-party-resources** quand il est
-présent ; sinon dans un **flag de module** du journal vaisseau. Codex et HoloNet vivent dans des
-flags de module sur des journaux liés (noms configurables). Les mondes issus de l'ancien
-`swffg-command-deck` (ou des macros « holocron » historiques) sont **migrés automatiquement**.
+## 9. Règle maison — ressources du vaisseau
 
-## Règle maison — ressources du vaisseau
+Vivres 1/jour de voyage · carburant 1/case (+50 % hors réseau) · l'usure monte avec la durée et
+le hors-piste ; > 50 % : +1 difficulté d'Astrogation, > 80 % : +2 (appliqué par
+swffg-astronavigation).
 
-Vivres 1/jour de voyage · carburant 1/case (+50 % hors réseau) · l'usure monte avec la durée
-et le hors-piste ; > 50 % : +1 difficulté d'Astrogation, > 80 % : +2 (appliqué par swffg-astronavigation).
-
-## Licence
+## 10. Licence
 
 Contenu de module sous licence MIT. Star Wars et les marques associées appartiennent à leurs
 ayants droit ; ce module est un outil de fans, non affilié.
