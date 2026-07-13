@@ -5,6 +5,13 @@
 
 const RULES_CAT_ID = '__rules__';
 
+// Pages techniques à NE JAMAIS afficher brut : le barème « dice_helper » (JSON
+// machine SWFFG.SkillsName…, parfois glissé comme page dans « Mécanique de base »).
+// Il est servi joliment ailleurs (weblet #/aidejeu) ; ici on le masque.
+const isRawHelperPage = (p) =>
+  /^dice_helper$/i.test(String(p?.name || '').trim()) ||
+  /^\s*<p>\s*\{\s*&quot;SWFFG\.SkillsName|^\s*<p>\s*\{\s*"SWFFG\.SkillsName/i.test(String(p?.text?.content || ''));
+
 function pageView(p) {
   return {
     id: p._id,
@@ -90,7 +97,7 @@ export function buildJournalsView({ config, folders, journalsIndex, getJournal, 
       ...(statut ? { statut } : {}),
       ...(mort ? { mort: true } : {}),
       ...(mej ? { mej } : {}),
-      pages: (doc.pages || []).filter((p) => p.type === 'text' || p.text).map(pageView),
+      pages: (doc.pages || []).filter((p) => (p.type === 'text' || p.text) && !isRawHelperPage(p)).map(pageView),
     });
   }
 
@@ -120,7 +127,7 @@ export function buildJournalsView({ config, folders, journalsIndex, getJournal, 
         foundryId: doc._id,
         name: doc.name.replace(prefixRe, ''),
         categoryId: RULES_CAT_ID,
-        pages: (doc.pages || []).filter((p) => p.type === 'text' || p.text).map(pageView),
+        pages: (doc.pages || []).filter((p) => (p.type === 'text' || p.text) && !isRawHelperPage(p)).map(pageView),
       });
     }
   }
