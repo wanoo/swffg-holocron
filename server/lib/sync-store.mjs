@@ -10,7 +10,7 @@
 //   journal:<id>   document complet, pullé seulement si l'index a bougé
 //   pcs            acteurs du dossier PJ (fiches complètes)
 //   pack:<id>      compendium paginé par chunks d'ids (_id__in)
-import { readFile, writeFile, mkdir, rename } from 'node:fs/promises';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { mcpCall } from './mcp.mjs';
 
@@ -29,9 +29,9 @@ export function createStore({ dataDir, logger = console }) {
     const entry = mem.get(name);
     if (!entry) return;
     await mkdir(cacheDir, { recursive: true });
-    const tmp = join(cacheDir, safe(name) + '.tmp');
-    await writeFile(tmp, JSON.stringify(entry));
-    await rename(tmp, join(cacheDir, safe(name) + '.json'));
+    // Écriture DIRECTE (sans tmp+rename) : le FS Bucket Clever (FUSE réseau) ne
+    // supporte pas rename() de façon fiable → le cache ne se persistait pas.
+    await writeFile(join(cacheDir, safe(name) + '.json'), JSON.stringify(entry));
   }
 
   async function restore(name) {

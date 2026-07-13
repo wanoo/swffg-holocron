@@ -29,24 +29,28 @@
 .dt-proficiency { color: #f2c811; }
 .dt-difficulty { color: #b07ae0; }
 .dt-challenge { color: #e5544b; }
-.dt-force,
 .dt-forcepoint,
 .dt-success,
 .dt-advantage,
 .dt-triumph,
 .dt-failure,
 .dt-threat,
-.dt-despair,
-.dt-light,
-.dt-dark {
+.dt-despair {
   color: #f4f1e8;
 }
-/* Infortune = LE dé noir : carré SOMBRE à BORDURE blanche (le distingue nettement du
-   dé de Fortune bleu, sans le rendre invisible sur fond sombre). */
-.dt-setback {
+/* Glyphes « noirs » du jeu : SOMBRE à BORDURE blanche (comme le vrai dé/pip noir,
+   distinct des glyphes clairs). */
+.dt-setback,          /* dé d'Infortune (noir) */
+.dt-dark {            /* Point du Côté Obscur */
   color: #18181c;
   -webkit-text-stroke: 0.75px #ece9dd;
   text-shadow: none;
+}
+/* Glyphes « blancs » : dé de Force (hexagone) + Point du Côté Lumineux → blanc franc. */
+.dt-force,
+.dt-light {
+  color: #ffffff;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.5); /* léger liseré sombre pour détacher du fond clair éventuel */
 }
 
 /* Impression (fond blanc) : on repasse aux encres Foundry sombres. */
@@ -66,7 +70,7 @@
   .dt-despair,
   .dt-light,
   .dt-dark { color: #111; text-shadow: none; }
-  .dt-setback { color: #111; -webkit-text-stroke: 0; }
+  .dt-setback, .dt-dark { color: #111; -webkit-text-stroke: 0; }
   .dt-boost, .dt-proficiency { text-shadow: 0 0 1px rgba(0, 0, 0, 0.55); }
 }
 

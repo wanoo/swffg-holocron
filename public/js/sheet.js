@@ -169,12 +169,12 @@ function statsBlock(entity, kind) {
   const st = s.strain || {};
   if (kind === 'adversary') {
     cells.push(['Blessures', s.wounds ?? 0]);
-    if (s.strain) cells.push(['Tension', s.strain]);
+    if (s.strain) cells.push(['Stress', s.strain]);
     cells.push(['Encaissement', s.soak ?? 0]);
     cells.push(['Défense M/D', `${s.defence?.melee ?? 0} / ${s.defence?.ranged ?? 0}`]);
   } else {
     cells.push(['Blessures', `${w.value ?? 0} / ${w.max ?? 0}`]);
-    cells.push(['Tension', `${st.value ?? 0} / ${st.max ?? 0}`]);
+    cells.push(['Stress', `${st.value ?? 0} / ${st.max ?? 0}`]);
     cells.push(['Encaissement', s.soak ?? 0]);
     cells.push(['Défense M/D', `${s.defence?.melee ?? 0} / ${s.defence?.ranged ?? 0}`]);
     if (s.forcePool?.max) cells.push(['Réserve de Force', `${s.forcePool.value} / ${s.forcePool.max}`]);
