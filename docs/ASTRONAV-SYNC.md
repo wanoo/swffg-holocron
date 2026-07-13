@@ -97,6 +97,13 @@ Réglages du module (Foundry settings, monde) : `resFoodLabel`, `resFuelLabel`,
 - API ajoutée : `api.setCurrentWorld(nom)`, `api.currentWorld()`, `api.importToWorld()`, `api.favorites()`.
 - Compendium en droits **OBSERVER** (joueurs voient/favorisent).
 
+> 🛰️ **Travail parallèle** — l'état du **frontend/carte de l'Astronav** (toggles, tracé, POI, usure)
+> et les **zones à ne pas se marcher dessus** sont notés dans
+> `swffg-astronavigation/docs/STATUS-FRONTEND.md` (repo astronav). Résumé : `scripts/astronav.mjs`
+> est « possédé » par le Claude frontend ; les **fonctions MJ** (gm-tools/deck) sont libres, à éditer
+> **ici** (`foundry/`, source canonique), pas dans la copie `star-wars JDR/swffg-holocron/`.
+> Versions publiées : astronav **1.7.5**, holocron **1.2.2**.
+
 ## 7. État au 2026-07-13 — module Foundry **`swffg-holocron`** livré (v1.2.0)
 
 Le module Foundry Holocron **existe désormais** : `~/Documents/Dev/star-wars JDR/swffg-holocron`
