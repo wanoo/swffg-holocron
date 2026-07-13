@@ -7,6 +7,15 @@ campaign site, and writes back (GM bible editor, player notes, dice rolls, ship 
 
 *Interface in French (FFG FR terminology) — contributions for i18n welcome.*
 
+## Screenshots
+
+|  |  |
+|---|---|
+| ![Player home](docs/screenshots/home.png)<br>**Player home** — journals, PCs, tools (Astronav, Sabacc, Workshops) | ![Character sheet](docs/screenshots/PC.png)<br>**Character sheet** — stats, skills with dice pools, talents, weapons, gear |
+| ![Specialization trees](docs/screenshots/PC2.png)<br>**Specialization trees** — passive/active talents | ![Force power tree](docs/screenshots/PC3.png)<br>**Force power tree** — purchased nodes highlighted |
+| ![NPC dossier](docs/screenshots/NPC.png)<br>**NPC dossier** — role/faction, relations, portrait, GM panel | ![GM cockpit](docs/screenshots/GM1.png)<br>**GM cockpit** — Foundry bridge (send a roll, handouts, ambiances), fronts |
+| ![GM bible chapter](docs/screenshots/GM2.jpg)<br>**GM bible chapter** — mind map, secrets diagram, act scenario |  |
+
 ## Features
 
 - 📖 **Player archive** — rules compendium, campaign acts, organizations, encountered NPCs,
@@ -47,12 +56,14 @@ Foundry (SSOT) ⇄ connector (foundry-mcp fork, stdio child or HTTP gateway)
 
 ## Quick start
 
-Requirements: Node ≥ 20, a FoundryVTT server (v12/13, system `starwarsffg`), and a
-dedicated **GM-role bot user** in your world (the connector logs in as this user).
+Requirements: Node ≥ 20, a FoundryVTT server (v12/13, system `starwarsffg`), the
+**MCP connector [wanoo/foundry-vtt-mcp](https://github.com/wanoo/foundry-vtt-mcp)**
+(embedded as an optional dependency, or run as an external gateway), and a dedicated
+**GM-role bot user** in your world (the connector logs in as this user).
 
 ```bash
 git clone https://github.com/wanoo/swffg-holocron && cd swffg-holocron
-npm install                     # pulls the connector fork (optional dependency)
+npm install                     # pulls the MCP connector fork (optional dependency)
 cp .env.example .env            # fill in FOUNDRY_BASE_URL, credentials, secrets
 npm start
 ```
