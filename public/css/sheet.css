@@ -546,3 +546,35 @@ a.skill-name:hover { color: var(--holo); text-decoration: underline; }
   .browser-count { margin-left: 0; width: 100%; }
   .stat-row { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* --- Weblet « Symboles & dépenses » (spendhelp.js) ------------------------- */
+.spendhelp { max-width: 960px; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
+.sh-title { font-size: 1.7rem; margin: 0 0 .3rem; }
+.sh-intro { margin: 0 0 1.1rem; max-width: 60ch; }
+.sh-intro code { background: rgba(255,255,255,.08); padding: 0 .3em; border-radius: 4px; }
+.sh-skills, .sh-syms { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .9rem; }
+.sh-chip, .sh-sym {
+  display: inline-flex; align-items: center; gap: .4rem; cursor: pointer;
+  background: var(--panel, #161c28); color: inherit;
+  border: 1px solid var(--line, #2a3446); border-radius: 999px;
+  padding: .35rem .8rem; font-size: .9rem; line-height: 1;
+}
+.sh-chip:hover, .sh-sym:hover { border-color: var(--gold, #c9a54a); }
+.sh-chip.active { background: var(--gold, #c9a54a); color: #10131a; border-color: var(--gold, #c9a54a); font-weight: 700; }
+.sh-syms { border-top: 1px solid var(--line, #2a3446); padding-top: .8rem; }
+.sh-sym .ffg-die { font-size: 1.15rem; }
+.sh-sym.active { border-color: currentColor; box-shadow: inset 0 0 0 1px currentColor; font-weight: 700; }
+.sh-sym.good.active { color: #7ddc8f; }
+.sh-sym.bad.active { color: #e08363; }
+.sh-note { margin: 0 0 .8rem; }
+.sh-bucket { border: 1px solid var(--line, #2a3446); border-radius: 12px; padding: .8rem 1rem; margin-bottom: .9rem; background: linear-gradient(160deg, rgba(255,255,255,.02), transparent); }
+.sh-bucket.good { border-left: 3px solid #7ddc8f; }
+.sh-bucket.bad { border-left: 3px solid #e08363; }
+.sh-bucket-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; }
+.sh-bucket-head .ffg-die { font-size: 1.6rem; }
+.sh-bucket-name { font-weight: 700; font-size: 1.05rem; }
+.sh-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .45rem; }
+.sh-item { display: flex; align-items: flex-start; gap: .6rem; font-size: .95rem; line-height: 1.35; }
+.sh-cost { flex: none; white-space: nowrap; padding-top: .05rem; }
+.sh-cost .ffg-die { font-size: 1.1rem; }
+.sh-item p { margin: 0; }

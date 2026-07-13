@@ -10,6 +10,7 @@ import { renderBestiary, renderNpcList } from './bestiary.js';
 import { legendHTML } from './render-dice.js';
 import { initGenerator, openGenerator } from './dice-roller.js';
 import { mountAstronav } from './astronav.js';
+import { mountSpendHelp } from './spendhelp.js';
 import { mountNaviComputer } from './navicomputer.js';
 import { mountEncounters } from './gm-encounters.js';
 import { openCard } from './modal.js';
@@ -332,6 +333,7 @@ function route() {
   const isGm = Data.gm || Boolean(getGMKey());
   if (!a) viewHome();
   else if (a === 'astronav') { cleanupSpy(); cleanupSpy = () => {}; mountAstronav(content); }
+  else if (a === 'aidejeu') { cleanupSpy(); cleanupSpy = () => {}; mountSpendHelp(content); }
   else if (a === 'navicomputer') { cleanupSpy(); cleanupSpy = () => {}; mountNaviComputer(content); }
   else if (a === 'rencontres') { cleanupSpy(); cleanupSpy = () => {}; if (isGm) mountEncounters(content); else viewGmOnly(); }
   else if (a === 'journal' && b) viewJournal(b, c);

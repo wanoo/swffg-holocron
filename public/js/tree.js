@@ -135,6 +135,7 @@ export function mountSidebar() {
   const tools = [
     { href: '#/navicomputer', label: '🖥️ Navi-Computer' },
     { href: '#/astronav', label: '🪐 Astronav' },
+    { href: '#/aidejeu', label: '🎲 Symboles & dépenses' },
   ];
   if (getGMKey() || Data.gm) tools.push({ href: '#/rencontres', label: '⚔️ Rencontres (MJ)' });
   tree.appendChild(makeGroup('Outils', 'misc', tools.length, tools));
