@@ -84,9 +84,31 @@ export function createStore({ dataDir, logger = console }) {
     set('folders', (Array.isArray(folders) ? folders : []).filter((f) => f && f._id));
   }
 
+  // Index léger de TOUS les journaux. On NE fait PAS un dump global avec `flags` :
+  // il dépasse la limite de la passerelle (~Mo, à cause des gros flags dossiers) et
+  // se fait tronquer → des dossiers entiers (PNJ/Org) disparaissent. On pull donc
+  // PAR DOSSIER (réponses petites, flags inclus), puis les journaux hors-dossier via
+  // une liste légère sans flags (complète) + pull ciblé par id.
   async function syncJournalsIndex() {
-    const idx = await mcpCall('get_journals', { requested_fields: INDEX_FIELDS });
-    set('journalsIndex', (Array.isArray(idx) ? idx : []).filter((j) => j && j._id));
+    const jFolders = (get('folders') || []).filter((f) => f && f.type === 'JournalEntry').map((f) => f._id);
+    const seen = new Map();
+    for (const fid of jFolders) {
+      try {
+        const part = await mcpCall('get_journals', { where: { folder: fid }, requested_fields: INDEX_FIELDS });
+        for (const j of (Array.isArray(part) ? part : [])) if (j && j._id) seen.set(j._id, j);
+      } catch (e) { logger.error(`[store] index dossier ${fid}: ${e.message}`); }
+    }
+    // hors-dossier : liste légère (sans flags → jamais tronquée) puis flags ciblés
+    try {
+      const light = await mcpCall('get_journals', { requested_fields: ['_id', 'folder'] });
+      for (const r of (Array.isArray(light) ? light : [])) {
+        if (!r || !r._id || seen.has(r._id)) continue;
+        const one = await mcpCall('get_journals', { where: { _id: r._id }, requested_fields: INDEX_FIELDS });
+        const j = (Array.isArray(one) ? one : []).find((x) => x && x._id === r._id);
+        if (j) seen.set(j._id, j);
+      }
+    } catch (e) { logger.error(`[store] index hors-dossier: ${e.message}`); }
+    if (seen.size) set('journalsIndex', [...seen.values()]);
   }
 
   // Barème de dépense FFG (journal « dice_helper ») — pullé par requête CIBLÉE
