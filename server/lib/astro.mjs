@@ -157,24 +157,31 @@ export function createAstroService({ publicDir, config, store, logger = console 
     return uniq;
   }
 
-  // Ajoute/retire un favori MEJ (marque-page) pour un utilisateur — écrit le flag bookmarks.
-  // Forme du bookmark strictement identique à MEJ (apps/enhanced-journal.js addBookmark).
-  async function toggleFavorite(userId, name, on) {
-    if (!userId) throw Object.assign(new Error('utilisateur inconnu'), { code: 400 });
+  async function allUsers() {
+    const res = await mcpCall('get_users', { requested_fields: ['_id', 'name', 'flags'] });
+    return Array.isArray(res) ? res : (res?.users || res?.results || res?.documents || []);
+  }
+
+  // Ajoute/retire un favori MEJ (marque-page) — PARTAGÉ : écrit le flag bookmarks de
+  // TOUS les utilisateurs (joueurs + MJ). Forme du bookmark identique à MEJ (addBookmark).
+  async function toggleFavorite(name, on) {
     if (!name) throw Object.assign(new Error('nom de monde requis'), { code: 400 });
     const uuid = await planetUuid(name);
     if (!uuid) throw Object.assign(new Error(`fiche MEJ absente pour « ${name} » — importe l'atlas dans Foundry`), { code: 404 });
-    const u = await userDoc(userId);
-    if (!u) throw Object.assign(new Error('utilisateur Foundry introuvable'), { code: 404 });
-    const bm = readBookmarks(u);
-    const present = bm.some((b) => b?.entityId === uuid);
-    let next = bm;
-    if (on && !present) next = [...bm, { id: makeId16(), entityId: uuid, text: name, icon: 'fa-place-of-worship' }];
-    else if (!on && present) next = bm.filter((b) => b?.entityId !== uuid);
-    else { favCache.delete(userId); return { ok: true, name, on: present, changed: false }; }
-    await mcpCall('modify_document', { type: 'User', _id: userId, updates: [{ 'flags.monks-enhanced-journal.bookmarks': next }] });
-    favCache.delete(userId);
-    return { ok: true, name, on: !!on, changed: true };
+    const users = await allUsers();
+    let changed = 0;
+    for (const u of users) {
+      const bm = readBookmarks(u);
+      const present = bm.some((b) => b?.entityId === uuid);
+      let next = null;
+      if (on && !present) next = [...bm, { id: makeId16(), entityId: uuid, text: name, icon: 'fa-place-of-worship' }];
+      else if (!on && present) next = bm.filter((b) => b?.entityId !== uuid);
+      if (!next) continue;
+      await mcpCall('modify_document', { type: 'User', _id: u._id, updates: [{ 'flags.monks-enhanced-journal.bookmarks': next }] });
+      favCache.delete(u._id);
+      changed++;
+    }
+    return { ok: true, name, on: !!on, changed, users: users.length };
   }
 
   return { astroData, route, fiche, favorites, toggleFavorite, planetUuid };

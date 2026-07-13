@@ -15,7 +15,7 @@ import {
 } from './astro-core.js';
 
 let PLANETS = null, byName = null;
-// planètes de campagne : fournies par la config (⚙️ Holocron Config → campaignPlanets)
+// Legacy retiré (ex-« planètes de campagne ») : conservé vide pour compat, remplacé par les favoris MEJ.
 const CAMPAIGN_ORDER = [];
 const CAMPAIGN = new Set(CAMPAIGN_ORDER);
 // Favoris = marque-pages Monk's Enhanced Journal du MJ connecté (chargés depuis Foundry).
@@ -206,10 +206,8 @@ export async function mountAstronav(container) {
   let bridgeReady = false;       // pont joueur disponible mais pas encore connecté
   let hasGmBridge = false;       // clé MJ + MCP configuré → canal MJ dispo
   // planètes de campagne depuis la config (épinglées + marqueurs carte)
-  CAMPAIGN_ORDER.length = 0;
-  CAMPAIGN_ORDER.push(...((Data.config?.campaignPlanets) || []));
-  CAMPAIGN.clear();
-  for (const n of CAMPAIGN_ORDER) CAMPAIGN.add(n);
+  // Legacy « planètes de campagne » retiré : les favoris MEJ (partagés à tous) sont le seul système.
+  CAMPAIGN_ORDER.length = 0; CAMPAIGN.clear();
   let shipState = loadShip();    // copie de travail (localStorage par défaut)
   let lastCtx = null;            // { o, dst, chk } du dernier calcul, pour le jet
   let avoidHostile = false;      // mode « itinéraire discret »
@@ -257,7 +255,7 @@ export async function mountAstronav(container) {
     renderLibrary();
   });
   compute();
-  if (Data.gm) loadFavorites();   // favoris MEJ du MJ connecté (marque-pages Foundry)
+  loadFavorites();   // favoris MEJ partagés (marque-pages Foundry) — visibles par tous
 
   // Détection du pont Foundry (sans prompt : on ne demande l'identité qu'au clic).
   (async () => {
@@ -327,15 +325,15 @@ export async function mountAstronav(container) {
   function fillSelects() {
     const groups = {};
     for (const p of PLANETS) (groups[p.region] = groups[p.region] || []).push(p);
-    let html = '<optgroup label="★ Campagne">' + CAMPAIGN_ORDER.filter((n) => byName[n]).map((n) => `<option value="${esc(n)}">★ ${esc(n)}</option>`).join('') + '</optgroup>';
+    let html = '';
     for (const r of REGION_ORDER) {
-      const list = (groups[r] || []).filter((p) => !CAMPAIGN.has(p.name)).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+      const list = (groups[r] || []).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
       if (!list.length) continue;
       html += `<optgroup label="${esc(r)}">` + list.map((p) => `<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('') + '</optgroup>';
     }
     orig.innerHTML = html; dest.innerHTML = html;
     orig.value = byName['Coruscant'] ? 'Coruscant' : PLANETS[0].name;
-    dest.value = CAMPAIGN_ORDER.find((n) => byName[n] && n !== orig.value) || PLANETS[1].name;
+    dest.value = (PLANETS.find((p) => p.name !== orig.value) || PLANETS[1]).name;
   }
 
   function compute() {
@@ -793,7 +791,7 @@ export async function mountAstronav(container) {
   // --- favoris MEJ (MJ) : lecture + bascule, synchronisés avec les marque-pages Foundry ---
   async function loadFavorites() {
     try {
-      const r = await fetch('/api/gm/astro/favorites', { credentials: 'same-origin' });
+      const r = await fetch('/api/astro/favorites', { credentials: 'same-origin' });
       if (!r.ok) return;
       const { names } = await r.json();
       FAV.clear(); for (const n of names || []) FAV.add(n);

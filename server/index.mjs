@@ -287,6 +287,11 @@ async function handleApi(req, res, urlPath) {
         const f = await astro.fiche(q.get('name') || '', isGM(session));
         return f ? sendJSON(res, 200, { fiche: f }) : sendJSON(res, 404, { error: 'fiche MEJ absente' });
       }
+      // Favoris MEJ (partagés à tous) — lecture ouverte à toute session connectée.
+      if (parts[1] === 'favorites' && req.method === 'GET') {
+        if (!session?.userId) return sendJSON(res, 200, { names: [] });
+        return sendJSON(res, 200, { names: await astro.favorites(session.userId) });
+      }
     } catch (e) { return sendJSON(res, 500, { error: 'astro : ' + String(e.message || e).slice(0, 200) }); }
     return sendJSON(res, 404, { error: 'action astro inconnue' });
   }
@@ -305,7 +310,7 @@ async function handleApi(req, res, urlPath) {
         if (req.method === 'POST') {
           const body = JSON.parse(await readBody(req));
           if (!body.name) return sendJSON(res, 400, { error: 'name requis' });
-          return sendJSON(res, 200, await astro.toggleFavorite(session.userId, String(body.name), body.on !== false));
+          return sendJSON(res, 200, await astro.toggleFavorite(String(body.name), body.on !== false));
         }
       } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
       return sendJSON(res, 405, { error: 'méthode non supportée' });
