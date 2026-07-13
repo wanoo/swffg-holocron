@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.2 — Usure via le contrat propre de l'astronav
+
+- L'usure du vaisseau est poussée à l'astronav via la nouvelle API **`api.setUsure(pct)`**
+  (astronav ≥ 1.7.2) au lieu d'écrire le réglage brut ; la difficulté d'astrogation se
+  **recalcule en direct**. Repli sur le réglage si une ancienne astronav est installée.
+
 ## 1.2.1 — Usure = pourcentage qui monte, relié à la difficulté
 
 - **Usure du vaisseau = ressource % dans Party Resources** : créée en `Usure du vaisseau (%)`

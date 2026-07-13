@@ -101,7 +101,13 @@ export async function writeShip(j, ship, logHTML = null) {
   // miroir du pool vers party-resources (si présent) — la barre de statut se rafraîchit d'elle-même
   prSet("vivres", s.vivres); prSet("fuel", s.fuel); prSet("usure", s.usure);
   // l'usure accumulée pilote la difficulté d'astrogation de l'astronav (>50 % : +1 ; >80 % : +2)
-  if (game.user.isGM) { try { if (astronavActive()) await game.settings.set("swffg-astronavigation", "usure", s.usure); } catch (e) { console.warn("swffg-holocron | sync usure→astronav", e); } }
+  if (game.user.isGM) {
+    try {
+      const api = astronavApi();
+      if (api?.setUsure) await api.setUsure(s.usure);                                   // contrat propre (astronav ≥1.7.2)
+      else if (astronavActive()) await game.settings.set("swffg-astronavigation", "usure", s.usure); // repli
+    } catch (e) { console.warn("swffg-holocron | sync usure→astronav", e); }
+  }
   const pct = (v, m) => Math.round((v / m) * 100);
   const pg = j.pages.contents[0];
   if (pg) await pg.update({ "text.content":
