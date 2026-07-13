@@ -84,25 +84,37 @@ export function createStore({ dataDir, logger = console }) {
     set('folders', (Array.isArray(folders) ? folders : []).filter((f) => f && f._id));
   }
 
-  // Index léger de TOUS les journaux. On NE fait PAS un dump global avec `flags` :
-  // il dépasse la limite de la passerelle (~Mo, à cause des gros flags dossiers) et
-  // se fait tronquer → des dossiers entiers (PNJ/Org) disparaissent. On pull donc
-  // PAR DOSSIER (réponses petites, flags inclus), puis les journaux hors-dossier via
-  // une liste légère sans flags (complète) + pull ciblé par id.
+  // Dossiers de journaux que l'Holocron affiche/utilise réellement : catégories
+  // déclarées + Bible MJ + dossiers MJ/outils connus. On EXCLUT tout le reste — en
+  // particulier les milliers de journaux hors-scope (planètes MEJ de la nouvelle
+  // astronav, gérées par leur propre module), qui sinon submergent la synchro.
+  const GM_FOLDER_NAMES = ['🎭 PNJ & fronts', '🖥️ Poste de commande', '🧰 Ressources MJ', '🎬 Actes & scénarios', '🛠️ Ateliers', '🎴 Sabacc', 'Boutiques'];
+  function relevantJournalFolderIds() {
+    const cfg = get('config') || {};
+    const names = new Set(GM_FOLDER_NAMES);
+    for (const c of (cfg.categories || [])) if (c && c.folder) names.add(c.folder);
+    if (cfg.gmBibleFolder) names.add(cfg.gmBibleFolder);
+    const folders = (get('folders') || []).filter((f) => f && f.type === 'JournalEntry');
+    return new Set(folders.filter((f) => names.has(f.name)).map((f) => f._id));
+  }
+
+  // Index léger, construit PAR DOSSIER (réponses petites, flags inclus, jamais
+  // tronquées contrairement au dump global) et LIMITÉ aux dossiers pertinents. Les
+  // journaux sans dossier (Config, Dossiers/Notes MJ, Mondes…) sont récupérés à part.
   async function syncJournalsIndex() {
-    const jFolders = (get('folders') || []).filter((f) => f && f.type === 'JournalEntry').map((f) => f._id);
+    const relevant = relevantJournalFolderIds();
     const seen = new Map();
-    for (const fid of jFolders) {
+    for (const fid of relevant) {
       try {
         const part = await mcpCall('get_journals', { where: { folder: fid }, requested_fields: INDEX_FIELDS });
         for (const j of (Array.isArray(part) ? part : [])) if (j && j._id) seen.set(j._id, j);
       } catch (e) { logger.error(`[store] index dossier ${fid}: ${e.message}`); }
     }
-    // hors-dossier : liste légère (sans flags → jamais tronquée) puis flags ciblés
+    // journaux SANS dossier uniquement (on ignore les foldered hors-scope, ex. planètes)
     try {
       const light = await mcpCall('get_journals', { requested_fields: ['_id', 'folder'] });
       for (const r of (Array.isArray(light) ? light : [])) {
-        if (!r || !r._id || seen.has(r._id)) continue;
+        if (!r || !r._id || r.folder || seen.has(r._id)) continue;
         const one = await mcpCall('get_journals', { where: { _id: r._id }, requested_fields: INDEX_FIELDS });
         const j = (Array.isArray(one) ? one : []).find((x) => x && x._id === r._id);
         if (j) seen.set(j._id, j);
