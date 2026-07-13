@@ -4,34 +4,29 @@
 // non listées comme collection lisible → seule voie : get_world (lourd → caché).
 import { mcpCall } from './mcp.mjs';
 
-// On exclut les grosses collections : on ne veut que `settings` (+ modules/world).
-const HEAVY = ['actors', 'items', 'journal', 'scenes', 'macros', 'playlists',
-  'tables', 'cards', 'messages', 'combats', 'drawings', 'lights', 'sounds', 'walls', 'notes', 'packs'];
 const PR = 'fvtt-party-resources';
 const num = (v) => (v == null || v === '' ? null : Number(v));
 
 export function createPartyResources({ config, logger = console } = {}) {
   let cache = null; // { t, map }
 
-  // Aplatit les settings du monde en map { key: value } (valeurs JSON-décodées).
+  // Aplatit les world settings Foundry en map { key: value } (valeurs JSON-décodées).
+  // Lecture via le tool `get_settings` du connecteur (socket "get" sur les documents Setting).
   async function settingsMap() {
     if (cache && Date.now() - cache.t < 30_000) return cache.map;
     const map = {};
-    let worldKeys = [];
     try {
-      const w = await mcpCall('get_world', { excludeCollections: HEAVY });
-      worldKeys = w && typeof w === 'object' ? Object.keys(w) : [];
-      const raw = w?.settings ?? w?.world?.settings ?? [];
-      const arr = Array.isArray(raw) ? raw : Object.values(raw || {});
+      const res = await mcpCall('get_settings', { requested_fields: ['key', 'value'] });
+      const arr = Array.isArray(res) ? res : (res?.settings || res?.results || res?.documents || []);
       for (const s of arr) {
-        const key = s?.key ?? s?.name;
+        const key = s?.key;
         if (key == null) continue;
         let v = s.value;
         if (typeof v === 'string') { try { v = JSON.parse(v); } catch { /* garde la string */ } }
         map[key] = v;
       }
-    } catch (e) { logger.warn?.('[party-resources] get_world', String(e.message || e)); }
-    cache = { t: Date.now(), map, worldKeys };
+    } catch (e) { logger.warn?.('[party-resources] get_settings', String(e.message || e)); }
+    cache = { t: Date.now(), map };
     return map;
   }
 
@@ -72,7 +67,7 @@ export function createPartyResources({ config, logger = console } = {}) {
     catch { return ship; }
   }
 
-  const debug = async () => { await settingsMap(); return { worldKeys: cache?.worldKeys || [], settingKeys: Object.keys(cache?.map || {}).filter((k) => k.startsWith(PR) || k.startsWith('swffg-holocron')).slice(0, 40) }; };
+  const debug = async () => { await settingsMap(); const keys = Object.keys(cache?.map || {}); return { total: keys.length, prKeys: keys.filter((k) => k.startsWith(PR) || k.startsWith('swffg-holocron')).slice(0, 40) }; };
 
   return { list, shipPool, overlayShip, invalidate: () => { cache = null; }, debug };
 }
