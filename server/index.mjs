@@ -20,6 +20,7 @@ import { createContentService } from './lib/content.mjs';
 import { createWriteService, createEncounterService } from './lib/write.mjs';
 import { createShipService, createDashService } from './lib/ship.mjs';
 import { createAstroService } from './lib/astro.mjs';
+import { createPartyResources } from './lib/party-resources.mjs';
 import * as tools from './lib/session-tools.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -49,6 +50,7 @@ const encounters = createEncounterService({ store, config: cc });
 const dashPayload = createDashService({ journals: campaignConfig(store).journals });
 const shipSvc = () => createShipService({ journalName: cc().journals.ship });
 const astro = createAstroService({ publicDir: PUBLIC_DIR, config: cc, store });
+const partyRes = createPartyResources({ config: cc });   // le web suit le pool fvtt-party-resources
 const serveStatic = makeStatic(PUBLIC_DIR);
 
 // --- auth helpers ------------------------------------------------------------------
@@ -244,12 +246,19 @@ async function handleApi(req, res, urlPath) {
       catch (e) { return sendJSON(res, 502, { error: `pont Foundry : ${String(e.message || e).slice(0, 200)}` }); }
     }
     if (parts[1] === 'dash' && req.method === 'GET') {
-      try { return sendJSON(res, 200, await dashPayload()); }
+      try { const d = await dashPayload(); return sendJSON(res, 200, { ...d, ship: await partyRes.overlayShip(d.ship) }); }
       catch (e) { return sendJSON(res, 502, { error: String(e.message || e).slice(0, 200) }); }
+    }
+    // Pool partagé fvtt-party-resources (le web le suit en direct depuis Foundry).
+    if (parts[1] === 'party-resources' && req.method === 'GET') {
+      try {
+        if (q.get('debug') === '1' && gmOK(req, session)) return sendJSON(res, 200, await partyRes.debug());
+        return sendJSON(res, 200, { resources: await partyRes.list() });
+      } catch (e) { return sendJSON(res, 502, { error: String(e.message || e).slice(0, 200) }); }
     }
     if (parts[1] === 'ship') {
       try {
-        if (req.method === 'GET') return sendJSON(res, 200, { ship: await shipSvc().applyShip('get') });
+        if (req.method === 'GET') return sendJSON(res, 200, { ship: await partyRes.overlayShip(await shipSvc().applyShip('get')) });
         if (req.method === 'POST') {
           if (rateLimited(req)) return sendJSON(res, 429, { error: 'trop d’actions d’un coup' });
           const body = JSON.parse(await readBody(req, 20_000));
@@ -413,9 +422,9 @@ async function handleApi(req, res, urlPath) {
             { title: body.title, map: body.map, combatants }, { store, config: cc });
           return sendJSON(res, 200, out);
         }
-        if (action === 'dash' && req.method === 'GET') return sendJSON(res, 200, await dashPayload());
+        if (action === 'dash' && req.method === 'GET') { const d = await dashPayload(); return sendJSON(res, 200, { ...d, ship: await partyRes.overlayShip(d.ship) }); }
         if (action === 'ship') {
-          if (req.method === 'GET') return sendJSON(res, 200, { ship: await shipSvc().applyShip('get') });
+          if (req.method === 'GET') return sendJSON(res, 200, { ship: await partyRes.overlayShip(await shipSvc().applyShip('get')) });
           if (req.method === 'POST') {
             const body = JSON.parse(await readBody(req));
             const act = String(body.action || '');
