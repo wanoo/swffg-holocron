@@ -29,7 +29,6 @@
 .dt-proficiency { color: #f2c811; }
 .dt-difficulty { color: #b07ae0; }
 .dt-challenge { color: #e5544b; }
-.dt-setback,
 .dt-force,
 .dt-forcepoint,
 .dt-success,
@@ -42,8 +41,13 @@
 .dt-dark {
   color: #f4f1e8;
 }
-/* L'infortune (dé noir) garde un cerne clair pour rester identifiable. */
-.dt-setback { text-shadow: 0 0 1px rgba(255, 255, 255, 0.35); }
+/* Infortune = LE dé noir : carré SOMBRE à BORDURE blanche (le distingue nettement du
+   dé de Fortune bleu, sans le rendre invisible sur fond sombre). */
+.dt-setback {
+  color: #18181c;
+  -webkit-text-stroke: 0.75px #ece9dd;
+  text-shadow: none;
+}
 
 /* Impression (fond blanc) : on repasse aux encres Foundry sombres. */
 @media print {
@@ -62,6 +66,7 @@
   .dt-despair,
   .dt-light,
   .dt-dark { color: #111; text-shadow: none; }
+  .dt-setback { color: #111; -webkit-text-stroke: 0; }
   .dt-boost, .dt-proficiency { text-shadow: 0 0 1px rgba(0, 0, 0, 0.55); }
 }
 
