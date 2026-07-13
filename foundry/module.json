@@ -1,0 +1,33 @@
+{
+  "id": "swffg-holocron",
+  "title": "SWFFG Holocron — Poste de commande de campagne",
+  "description": "Le poste de commande de votre campagne Star Wars FFG : vaisseau partagé du groupe (vivres, carburant, usure — voyages appliqués depuis l'Astronav), tableau de bord holographique (allégeance, équipage, alignement des PNJ, HoloNet, mondes d'intérêt) et boîte à outils MJ (test de Peur, points de Destin, dégâts de groupe, blessures critiques, fin de rencontre, initiative, générateur de boutiques). Your Star Wars FFG campaign command deck: shared party ship, holographic dashboard and GM toolbox.",
+  "version": "1.2.0",
+  "authors": [
+    { "name": "wanoo" }
+  ],
+  "compatibility": {
+    "minimum": "12",
+    "verified": "13"
+  },
+  "relationships": {
+    "systems": [
+      { "id": "starwarsffg", "type": "system", "compatibility": {} }
+    ],
+    "requires": [
+      { "id": "swffg-astronavigation", "type": "module", "reason": "Calculateur d'astrogation, carte galactique, atlas MEJ des mondes et marqueur « vous êtes ici » du vaisseau.", "compatibility": { "minimum": "1.6.0" } },
+      { "id": "fvtt-party-resources", "type": "module", "reason": "Pool de ressources partagé du groupe (vivres, carburant, usure) alimenté par les voyages.", "manifest": "https://github.com/davelens/fvtt-party-resources/releases/latest/download/module.json", "compatibility": {} },
+      { "id": "monks-enhanced-journal", "type": "module", "reason": "Fiches de mondes et système de favoris (marque-pages) utilisés comme mondes d'intérêt.", "compatibility": {} }
+    ]
+  },
+  "esmodules": [
+    "scripts/main.mjs"
+  ],
+  "languages": [
+    { "lang": "en", "name": "English", "path": "lang/en.json" },
+    { "lang": "fr", "name": "Français", "path": "lang/fr.json" }
+  ],
+  "url": "https://github.com/wanoo/swffg-holocron",
+  "manifest": "https://github.com/wanoo/swffg-holocron/releases/latest/download/module.json",
+  "download": "https://github.com/wanoo/swffg-holocron/releases/latest/download/swffg-holocron.zip"
+}

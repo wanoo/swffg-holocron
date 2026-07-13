@@ -97,6 +97,29 @@ Réglages du module (Foundry settings, monde) : `resFoodLabel`, `resFuelLabel`,
 - API ajoutée : `api.setCurrentWorld(nom)`, `api.currentWorld()`, `api.importToWorld()`, `api.favorites()`.
 - Compendium en droits **OBSERVER** (joueurs voient/favorisent).
 
+## 7. État au 2026-07-13 — module Foundry **`swffg-holocron`** livré (v1.2.0)
+
+Le module Foundry Holocron **existe désormais** : `~/Documents/Dev/star-wars JDR/swffg-holocron`
+(rename de `swffg-command-deck`, qui fond ici comme décidé). Le contrat §5 est **rempli** :
+
+- ✅ **Dépendances** déclarées : `swffg-astronavigation` (≥1.6.0), `fvtt-party-resources` (≥1.8.0),
+  `monks-enhanced-journal`.
+- ✅ **Vaisseau ↔ party-resources** : pool live via `window.pr.api.get/set` (ids `resFoodId`/
+  `resFuelId`/`resWearId`). La valeur PR prime sur le flag ; `writeShip` met PR à jour. Repli journal
+  si PR absent. → **plus besoin de brancher `swffgAstronav.cost` côté web** pour la déduction : c'est
+  fait dans le module.
+- ✅ **POI vaisseau** : journal vaisseau = POI MEJ ; `setShipWorld(nom)` écrit `lastTo` **et** appelle
+  `astronav.setCurrentWorld(nom)` (marqueur « vous êtes ici »). Seed au `ready` depuis `ship.lastTo`.
+- ✅ **Réception des voyages** : le pont mort `swffgAstronav.route` est remplacé par
+  `swffgAstronav.cost` (mémorisé) + `ffgDiceMessage` (jet réussi ⇒ `applyTrip` + déplacement POI).
+  Garde « MJ actif unique » anti-doublon. Bouton deck « Appliquer le trajet calculé ».
+- ✅ **Favoris MEJ** : panneau « Mondes d'intérêt » alimenté par `api.favorites()` (marque-pages MEJ),
+  clic → fiche / 🧭 → destination. Bouton « Importer l'atlas » (`api.importToWorld`).
+
+**Reste côté web (`swffg-holocron` app)** : rien d'obligatoire pour l'intégration Foundry. Optionnel :
+si le SSOT web veut refléter la position/ressources du vaisseau, lire les mêmes sources (flag du
+journal vaisseau `flags.swffg-holocron.ship` + pool party-resources). Le module Foundry est autonome.
+
 ## 6. Références
 
 - Module : https://github.com/wanoo/swffg-astronavigation (v1.5.2) — install : manifeste `releases/latest`.

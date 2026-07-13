@@ -1,0 +1,114 @@
+{
+ "SWH": {
+  "common": {
+   "rollBtn": "Lancer (obstacle dans le pool)", "edit": "modifier", "add": "Ajouter", "remove": "Retirer",
+   "open": "ouvrir", "close": "Fermer", "cancel": "Annuler", "apply": "Appliquer", "save": "Enregistrer",
+   "send": "Envoyer aux joueurs", "name": "Nom"
+  },
+  "diff": { "1": "Facile", "2": "Moyen", "3": "Difficile", "4": "Intimidant", "5": "Exceptionnel" },
+  "ship": {
+   "pageName": "État du vaisseau", "provisions": "Vivres", "fuel": "Carburant", "wear": "Usure",
+   "hyperdrive": "Hyperdrive", "lastTrip": "Dernier voyage : {from} → {to}.",
+   "noJournal": "Journal du vaisseau introuvable (le MJ doit ouvrir le Holocron une fois).",
+   "tripLog": "Voyage : −{days}j vivres · −{fuel} carburant · +{usure}% usure → 🥫 {v}/{vm} · ⛽ {f}/{fm} · 🔧 {u}%",
+   "refuel": "Ravitailler (vivres au max)", "refill": "Faire le plein", "repair": "Réviser (usure à 0)",
+   "manualTrip": "Appliquer un voyage (manuel)",
+   "applyPlanned": "Appliquer le trajet calculé : {from} → {to} (−{days} j · −{fuel} carb. · +{usure} % usure)",
+   "noPlanned": "Aucun trajet calculé dans l'Astronav.",
+   "form": { "days": "Jours (−vivres)", "tripFuel": "Carburant (−)", "tripWear": "Usure (+%)" },
+   "log": { "refuel": "Ravitaillement : vivres au maximum.", "fuel": "Plein de carburant effectué.", "repair": "Révision complète : usure à 0 %." }
+  },
+  "deck": {
+   "title": "Holocron — Poste de commande", "allegiance": "Allégeance du groupe",
+   "allegianceEmpty": "— à définir —", "openAstronav": "Astronav",
+   "position": "Position actuelle", "positionUnknown": "Inconnue",
+   "crew": "Équipage", "crewEmpty": "Assigne un personnage à chaque joueur (Configurer les joueurs).",
+   "alignment": "Alignement des personnages", "allies": "Alliés", "neutrals": "Neutres", "enemies": "Ennemis",
+   "holonet": "HoloNet", "holonetEmpty": "Crée ou édite le journal « {name} » pour alimenter ce panneau.",
+   "poi": "Mondes d'intérêt", "poiEmpty": "Aucun monde marqué.",
+   "favorites": "Favoris (marque-pages MEJ)",
+   "favEmpty": "Aucun favori. Épingle un monde depuis sa fiche (étoile Monk's Enhanced Journal).",
+   "favOpen": "Ouvrir la fiche", "favToAstronav": "Définir comme destination dans l'Astronav",
+   "import": "Importer l'atlas", "importHint": "Importer le compendium des planètes dans les journaux du monde (requis pour les fiches MEJ et les favoris).",
+   "npcAdd": "Ajouter un personnage au codex", "npcStatus": "Alignement",
+   "poiAdd": "Marquer un monde d'intérêt", "poiNote": "Note (visible des joueurs)"
+  },
+  "codex": { "pageName": "Codex du groupe" },
+  "toolbox": {
+   "title": "Boîte à outils MJ", "fear": "Test de Peur", "destiny": "Points de Destin",
+   "groupDamage": "Dégâts / Stress de groupe", "critical": "Blessure critique",
+   "encounterEnd": "Fin de rencontre", "groupInitiative": "Initiative de groupe", "shop": "Générer une boutique"
+  },
+  "tools": {
+   "diff": "Difficulté", "ffgOnly": "Nécessite le système Star Wars FFG.",
+   "fear": {
+    "title": "Test de Peur", "upgrades": "Améliorations (◆→◆ rouge)", "source": "Source (affichée aux joueurs)",
+    "sourceDefault": "Quelque chose remue dans l'ombre…",
+    "rules": "Lancez <strong>Sang-froid</strong> ou <strong>Discipline</strong>.<br><span style=\"font-size:.9em\">Échec : 1 stress + dé d'infortune jusqu'à la fin de la rencontre · 3 menaces ou 1 désespoir : le personnage cède à la panique (le MJ tranche) · triomphe : immunisé à cette source pour la scène.</span>",
+    "skill": "Peur"
+   },
+   "damage": {
+    "title": "Dégâts / Stress de groupe", "noTokens": "Sélectionne d'abord des tokens.",
+    "mode": "Type", "wounds": "Blessures", "strain": "Stress", "healW": "Soin (blessures)", "healS": "Récup (stress)",
+    "amount": "Montant", "soak": "Retirer l'encaissement (blessures seulement)", "over": "seuil dépassé !"
+   },
+   "crit": {
+    "title": "Blessure critique", "table": "Table", "character": "Personnage", "vehicle": "Véhicule / vaisseau",
+    "prev": "Critiques déjà subis (+10 chacun)", "bonus": "Bonus (Sanguinaire ×10, talents…)", "draw": "Tirer",
+    "noTable": "Table introuvable : {name} (réglable dans les paramètres du module)."
+   },
+   "end": {
+    "title": "Fin de rencontre",
+    "rules": "<strong>Récupération du stress</strong> : test de <strong>Calme</strong> ou <strong>Sang-froid</strong> (difficulté Simple) — chaque succès élimine 1 stress, chaque avantage peut soigner 1 stress d'un allié.<br><span style=\"font-size:.9em\">Pensez aussi : soins médicaux (1 test/rencontre), rechargement des armes à Munitions limitées, récupération des points de Force engagés.</span>",
+    "skill": "Calme / Sang-froid"
+   },
+   "init": { "noTokens": "Sélectionne les tokens à engager." },
+   "destiny": {
+    "title": "Points de Destin", "current": "Réserve actuelle : <strong>{light} lumineux · {dark} obscurs</strong>",
+    "n": "Jet de début de séance — dés de Force (1/PJ)", "remind": "Poster le rappel des usages",
+    "roll": "Lancer & mettre à jour", "flavor": "Jet de Destin — début de séance",
+    "new": "Nouvelle réserve : <strong>{light} lumineux · {dark} obscurs</strong>",
+    "rules": "<strong>Joueurs (lumineux)</strong> : améliorer 1 dé de son pool · dégrader 1 dé de difficulté adverse · activer certains talents · coup de pouce narratif validé par le MJ.<br><strong>MJ (obscurs)</strong> : améliorer la difficulté d'un test de PJ · améliorer le pool d'un PNJ · déclencher une complication narrative.<br><span style=\"font-size:.9em\">Un point dépensé bascule de l'autre côté de la réserve.</span>"
+   },
+   "shop": {
+    "title": "Générer une boutique", "type": "Type", "place": "Lieu", "count": "Nombre d'articles",
+    "show": "Montrer aux joueurs à la création", "generate": "Générer",
+    "noPacks": "Aucun compendium d'objets configuré (paramètres du module).",
+    "rarityMod": "modificateur de rareté local", "item": "Article", "price": "Prix", "rarity": "Rareté",
+    "folder": "Boutiques",
+    "t": { "armurier": "Armurier", "bazar": "Bazar & équipement", "noir": "Marché noir", "droides": "Droïdiste & tech", "apothicaire": "Apothicaire" },
+    "pm2": "Noyau (Coruscant…)", "pm1": "Planète du Noyau / axe commercial", "p0": "Colonie / Bordure intérieure",
+    "p1": "Bordure, planète isolée", "p2": "Bordure extérieure", "p3": "Espace sauvage", "p4": "Planète primitive",
+    "names": {
+     "armurier0": "La Crosse Fumante", "armurier1": "Arsenal Denal", "armurier2": "Chez Krieg", "armurier3": "Le Canon Court",
+     "bazar0": "Le Comptoir de l'Étoile", "bazar1": "Bazar Ryloth", "bazar2": "Chez Maz", "bazar3": "L'Entrepôt du Secteur",
+     "noir0": "L'Arrière-salle", "noir1": "Le Silencieux", "noir2": "Cargo Fantôme", "noir3": "Chez Vessk (sur invitation)",
+     "droides0": "Circuits & Rouages", "droides1": "Le Ferrailleur", "droides2": "Atelier R-7", "droides3": "Doc Circuit",
+     "apothicaire0": "L'Alambic Vert", "apothicaire1": "Remèdes de Jashwik", "apothicaire2": "La Cuve", "apothicaire3": "Herbes & Hypos"
+    }
+   }
+  },
+  "pr": {
+   "absent": "Le module « Party Resources » n'est pas actif : le pool du groupe reste dans le journal du vaisseau.",
+   "noApi": "API Party Resources indisponible — ouvre-le une fois puis relance l'installation.",
+   "done": "Ressources du groupe installées dans Party Resources ({n} créée(s))."
+  },
+  "bridge": {
+   "title": "Astronav → vaisseau",
+   "body": "Itinéraire {from} → {to} : −{days}j vivres · −{fuel} carburant · +{usure}% usure.",
+   "apply": "Appliquer au vaisseau", "applied": "appliqué", "gmOnly": "Réservé au MJ."
+  },
+  "settings": {
+   "shipJournal": { "name": "Journal du vaisseau", "hint": "Nom du journal qui porte l'état du vaisseau du groupe (créé automatiquement)." },
+   "codexJournal": { "name": "Journal du codex", "hint": "Nom du journal qui porte l'allégeance, l'alignement des PNJ et les mondes d'intérêt." },
+   "holonetJournal": { "name": "Journal HoloNet", "hint": "Nom du journal affiché dans le panneau HoloNet du Holocron." },
+   "critTableCharacter": { "name": "Table critiques (personnages)", "hint": "Nom de la RollTable d100 des blessures critiques." },
+   "critTableVehicle": { "name": "Table critiques (véhicules)", "hint": "Nom de la RollTable d100 des avaries critiques." },
+   "shopPacks": { "name": "Compendiums de boutique", "hint": "Ids de compendiums d'objets, séparés par des virgules (ex. world.oggdudegear)." },
+   "resFoodId": { "name": "Ressource — Vivres (id party-resources)", "hint": "Id de la ressource fvtt-party-resources qui suit les vivres du groupe." },
+   "resFuelId": { "name": "Ressource — Carburant (id party-resources)", "hint": "Id de la ressource fvtt-party-resources qui suit le carburant." },
+   "resWearId": { "name": "Ressource — Usure (id party-resources)", "hint": "Id de la ressource fvtt-party-resources qui suit l'usure du vaisseau (%)." },
+   "partyResMenu": { "name": "Ressources du groupe", "label": "Installer dans Party Resources", "hint": "Crée (ou réinitialise) les ressources Vivres / Carburant / Usure dans Party Resources d'après l'état du vaisseau." }
+  }
+ }
+}

@@ -1,0 +1,121 @@
+/** SWFFG Holocron — entry point: settings, API, scene buttons, astronav ↔ ship bridge. */
+import { MOD, t, applyTrip, shipJournal, readShip, setShipWorld, astronavApi, favoriteWorlds, ensurePartyResources } from "./util.mjs";
+import { HolocronApp } from "./deck.mjs";
+import { openToolbox, TOOLS } from "./gm-tools.mjs";
+
+/** Menu de réglage : (ré)installe les ressources party-resources du groupe. */
+class PartyResSetupMenu extends foundry.applications.api.ApplicationV2 {
+  async render() { await ensurePartyResources({ force: true }); return this; }
+}
+
+/** Dernier coût d'astrogation calculé par l'astronav (hook swffgAstronav.cost). */
+let LAST_COST = null;
+/** Seul le MJ « actif » applique un voyage (évite la double déduction à plusieurs MJ). */
+const isTripApplier = () => {
+  if (!game.user.isGM) return false;
+  const gm = game.users.activeGM ?? game.users.find((u) => u.isGM && u.active);
+  return !gm || gm.id === game.user.id;
+};
+
+Hooks.once("init", () => {
+  const S = (key, def, extra = {}) => game.settings.register(MOD, key, {
+    name: `SWH.settings.${key}.name`, hint: `SWH.settings.${key}.hint`,
+    scope: "world", config: true, type: String, default: def, ...extra,
+  });
+  S("shipJournal", "🚀 Vaisseau du groupe");
+  S("codexJournal", "🖥️ Codex du groupe");
+  S("holonetJournal", "📡 HoloNet — Actualités");
+  S("critTableCharacter", "🩸 Blessures critiques (d100)");
+  S("critTableVehicle", "🔥 Avaries critiques — véhicules (d100)");
+  S("shopPacks", "world.oggdudeweapons, world.oggdudearmor, world.oggdudegear");
+  // fvtt-party-resources : id des ressources partagées mappées aux trois jauges du vaisseau.
+  S("resFoodId", "vivres");
+  S("resFuelId", "carburant");
+  S("resWearId", "usure");
+  // marqueur d'installation auto (une seule proposition automatique).
+  game.settings.register(MOD, "partyResSetup", { scope: "world", config: false, type: Boolean, default: false });
+  game.settings.registerMenu(MOD, "partyResMenu", {
+    name: "SWH.settings.partyResMenu.name", label: "SWH.settings.partyResMenu.label",
+    hint: "SWH.settings.partyResMenu.hint", icon: "fa-solid fa-gauge-high", type: PartyResSetupMenu, restricted: true,
+  });
+
+  game.modules.get(MOD).api = {
+    open: () => new HolocronApp().render(true),
+    toolbox: openToolbox,
+    tools: TOOLS,
+    applyTrip,
+    setShipWorld,
+    ship: async () => readShip(await shipJournal()),
+    favorites: favoriteWorlds,
+    importAtlas: () => astronavApi()?.importToWorld?.({ confirm: true }),
+    setupPartyResources: ensurePartyResources,
+    lastCost: () => LAST_COST,
+    HolocronApp,
+  };
+});
+
+/* Scene controls: Holocron for everyone, GM toolbox for the GM. */
+Hooks.on("getSceneControlButtons", (controls) => {
+  const tools = controls.tokens?.tools ?? controls.find?.((c) => c.name === "token")?.tools;
+  if (!tools) return;
+  const add = (name, title, icon, fn, order) => {
+    const btn = { name, title, icon, button: true, visible: true, onChange: fn, onClick: fn };
+    Array.isArray(tools) ? tools.push(btn) : (tools[name] = { ...btn, order });
+  };
+  add("holocron", "SWH.deck.title", "fa-solid fa-satellite-dish", () => new HolocronApp().render(true), 97);
+  if (game.user.isGM) add("holotoolbox", "SWH.toolbox.title", "fa-solid fa-toolbox", () => openToolbox(), 98);
+});
+
+/* Astronav → Holocron : mémorise le dernier coût calculé (« appliquer le trajet » du deck). */
+Hooks.on("swffgAstronav.cost", (cost) => {
+  LAST_COST = cost || null;
+  foundry.applications.instances.get("swffg-holocron-app")?.render();
+});
+
+/* Réception d'un voyage : un jet d'Astrogation RÉUSSI applique le coût au vaisseau et déplace le POI.
+   (L'astronav bouge déjà son marqueur ; ici on déduit le pool party-resources + met à jour le journal.) */
+Hooks.on("ffgDiceMessage", async (roll) => {
+  if (!isTripApplier()) return;
+  try {
+    const trip = roll?.data?.astronavTrip;
+    const txt = [roll?.flavorText, roll?.data?.description, roll?.data?.skillName].filter(Boolean).join(" | ");
+    if (!trip && !/astrogation/i.test(txt)) return;            // pas un jet d'astrogation
+    const net = (roll?.ffg?.success || 0) - (roll?.ffg?.failure || 0);
+    if (net <= 0) return;                                       // échec : ni coût ni déplacement
+    const to = trip?.to || LAST_COST?.to;
+    if (!to) return;
+    const from = trip?.from || LAST_COST?.from || "";
+    // coût calculé pour CE trajet s'il correspond, sinon simple déplacement (déduction nulle)
+    const c = (LAST_COST && LAST_COST.to === to) ? LAST_COST : { days: 0, fuel: 0, usure: 0 };
+    await applyTrip({ days: c.days || 0, fuel: c.fuel || 0, usure: c.usure || 0, from, to });
+  } catch (e) { console.warn("swffg-holocron | application du voyage", e); }
+});
+
+/* Au chargement (MJ actif) : setup auto des ressources party-resources + cale le POI « vous êtes ici ». */
+Hooks.once("ready", async () => {
+  if (!isTripApplier()) return;
+  // Install/setup automatique du pool du groupe (crée les ressources manquantes, une fois).
+  try {
+    if (!game.settings.get(MOD, "partyResSetup")) {
+      const ok = await ensurePartyResources({ silent: false });
+      if (ok) await game.settings.set(MOD, "partyResSetup", true);
+    } else {
+      await ensurePartyResources({ silent: true });   // idempotent : recrée seulement si supprimées
+    }
+  } catch (e) { console.warn("swffg-holocron | setup party-resources", e); }
+  // Marqueur « vous êtes ici » calé sur la dernière position connue du vaisseau.
+  try {
+    if (!astronavApi()) return;
+    const s = readShip(await shipJournal());
+    if (s?.lastTo && !astronavApi()?.currentWorld?.()) await astronavApi()?.setCurrentWorld?.(s.lastTo);
+  } catch (e) { console.warn("swffg-holocron | seed POI", e); }
+});
+
+/* Keep the Holocron fresh when the ship, codex, or position change (any client). */
+for (const h of ["swffgHolocron.shipUpdated", "swffgHolocron.codexUpdated", "swffgHolocron.shipMoved"]) {
+  Hooks.on(h, () => foundry.applications.instances.get("swffg-holocron-app")?.render());
+}
+Hooks.on("updateJournalEntry", (doc) => {
+  const bound = [game.settings.get(MOD, "shipJournal"), game.settings.get(MOD, "codexJournal"), game.settings.get(MOD, "holonetJournal")];
+  if (bound.includes(doc.name)) foundry.applications.instances.get("swffg-holocron-app")?.render();
+});
