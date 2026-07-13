@@ -1,0 +1,96 @@
+{
+  "name": "15 · Aide — Attributs d'armes & armures",
+  "pages": [
+    {
+      "name": "Actifs (coût [ad][ad] sauf indication)",
+      "sort": 0,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><tbody><tr><td>Automatique</td><td>+[ad] déclenche un coup supplémentaire (dégâts de base + [su]) ; déclare les cibles avant le test</td></tr><tr><td>Briseur</td><td>Inflige un niveau de dommage à un objet (léger → modéré → HS)</td></tr><tr><td>Choc</td><td>Victime étourdie (pas d'action) 1 round par niveau</td></tr><tr><td>Désorientation</td><td>Victime désorientée (+[se]) N rounds</td></tr><tr><td>Enchevêtrement</td><td>Cible immobilisée N rounds (Athlétisme Moyen ([di][di]) pour se libérer)</td></tr><tr><td>Étourdissement</td><td>Les dégâts deviennent du stress</td></tr><tr><td>Incendiaire</td><td>Dégâts de base/round pendant N rounds (Coordination pour éteindre)</td></tr><tr><td>Jumelé</td><td>[ad][ad] : tir additionnel sur la même cible (jusqu'à N coups)</td></tr><tr><td>Projectile guidé</td><td>Sur un raté, [ad][ad][ad] pour retenter (difficulté selon gabarits)</td></tr><tr><td>Renversement</td><td>[ad] (+1 [ad] par point de gabarit) : cible à terre</td></tr><tr><td>Souffle</td><td>[ad][ad] : tout le monde au contact de la cible encaisse dégâts de base + [su]</td></tr></tbody></table>",
+        "format": 1
+      },
+      "_id": "QWHgBJGzJ4c07zJS",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "name": "Passifs",
+      "sort": 10,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><tbody><tr><td>Bonne qualité</td><td>+[ad] aux tests (arme : +1 dégât · armure : +1 encaissement et défense)</td></tr><tr><td>Mauvaise qualité</td><td>+[th] automatique aux tests</td></tr><tr><td>Brèche</td><td>Ignore 1 blindage (= 10 encaissement) par niveau</td></tr><tr><td>Perforant</td><td>Ignore 1 encaissement par niveau</td></tr><tr><td>Cadence lente</td><td>N rounds entre deux tirs</td></tr><tr><td>Cortosis</td><td>Arme : immunisée à Briseur · armure : immunisée à Brèche et Perforant</td></tr><tr><td>Déflexion</td><td>+1 défense à distance par niveau</td></tr><tr><td>Dégâts étourdissants</td><td>Bascule létal/étourdissant en broutille (portée courte max)</td></tr><tr><td>Déploiement</td><td>N manœuvres d'installation avant de tirer</td></tr><tr><td>Encombrant</td><td>Vigueur minimale requise ; +1 [di] par point manquant</td></tr><tr><td>Imprécis</td><td>+[se] par niveau aux attaques</td></tr><tr><td>Précis</td><td>+[bo] par niveau aux attaques</td></tr><tr><td>Ionique</td><td>Inflige du stress mécanique (droïdes, engins)</td></tr><tr><td>Munitions limitées</td><td>N attaques puis rechargement</td></tr><tr><td>Parade</td><td>+1 défense de mêlée par niveau</td></tr><tr><td>Sanguinaire</td><td>+10× niveau aux jets de critiques</td></tr><tr><td>Tracteur</td><td>Sur une touche, la cible doit réussir Pilotage ([di] = niveau) pour fuir</td></tr></tbody></table>",
+        "format": 1
+      },
+      "_id": "HNVKHyggahtmMZND",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    }
+  ],
+  "_id": "Ddmssc87FSjukyK7",
+  "folder": null,
+  "categories": [],
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_stats": {
+    "coreVersion": "13.351",
+    "systemId": "starwarsffg",
+    "systemVersion": "2.0.3",
+    "createdTime": 1783614187604,
+    "modifiedTime": 1783614187604,
+    "lastModifiedBy": "ZlIotMp24V8C0Wao",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!journalentry!Ddmssc87FSjukyK7"
+}

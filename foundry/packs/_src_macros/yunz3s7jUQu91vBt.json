@@ -1,0 +1,17 @@
+{
+  "name": "⚡ Initiative de groupe",
+  "type": "script",
+  "scope": "global",
+  "img": "icons/svg/combat.svg",
+  "command": "const tokens = canvas.tokens.controlled;\nif (!tokens.length) return ui.notifications.warn(\"Sélectionne les tokens à engager.\");\nlet combat = game.combat;\nif (!combat) combat = await Combat.create({ scene: canvas.scene.id, active: true });\nfor (const t of tokens) if (!t.inCombat) await t.document.toggleCombatant();\nconst ids = combat.combatants.filter(c => c.initiative === null).map(c => c.id);\nif (ids.length) await combat.rollInitiative(ids);",
+  "_id": "yunz3s7jUQu91vBt",
+  "author": "ZlIotMp24V8C0Wao",
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_key": "!macros!yunz3s7jUQu91vBt"
+}

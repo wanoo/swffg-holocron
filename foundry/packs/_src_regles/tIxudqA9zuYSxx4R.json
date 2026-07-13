@@ -1,0 +1,166 @@
+{
+  "name": "16 · Aide — Kits & mods",
+  "pages": [
+    {
+      "name": "Principe",
+      "sort": 0,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p>Installer un <strong>kit</strong> : quelques minutes, aucun test. Installer un <strong>mod</strong> : quelques heures, une trousse à outils, 100 crédits et un test de Mécanique Difficile ([di][di][di]) ; chaque mod supplémentaire coûte +100 crédits et +1 [di]. Pour son propre sabre laser, un sensible à la Force réduit la difficulté de 2 (min Simple) et peut ajouter [fo] au pool.</p>",
+        "format": 1
+      },
+      "_id": "2sj3EmXH4kqOafTv",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "name": "Kits d'armes (sélection)",
+      "sort": 10,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><tbody><tr><th>Kit</th><th>Prix · rareté — effet</th></tr><tr><td>Viseur télescopique</td><td>250 cr · R1 — retire 1 [di] à portée longue/extrême</td></tr><tr><td>Mire retirée</td><td>25 cr · R0 — dissimulation ; +1 [di] à portée moyenne+</td></tr><tr><td>Crosse équilibrée</td><td>1 500 cr · R5 — Précis +1</td></tr><tr><td>Canon long</td><td>1 200 cr · R4 — +1 portée, Encombrant 2</td></tr><tr><td>Canon court</td><td>250 cr · R4 — -1 portée, facile à cacher</td></tr><tr><td>Poignée frontale</td><td>250 cr · R1 — armes lourdes au contact : Difficile ([di][di][di]) → Moyen ([di][di])</td></tr><tr><td>Générateur de choc</td><td>250 cr · R4 — Étourdissement 2</td></tr><tr><td>Lame crantée</td><td>50 cr · R1 — Sanguinaire +1</td></tr><tr><td>Lame monomoléculaire</td><td>1 000 cr · R5 — critique -1, mod Perforant</td></tr><tr><td>Bipied / trépied</td><td>100/250 cr — réduit Encombrant de 2/3 en position stable</td></tr><tr><td>Sangle / harnais</td><td>100/500 cr — encombrement -1/-2</td></tr></tbody></table>",
+        "format": 1
+      },
+      "_id": "B4Xlq3CVlbzoKU7L",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "name": "Kits d'armures (sélection)",
+      "sort": 20,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><tbody><tr><th>Kit</th><th>Prix · rareté — effet</th></tr><tr><td>Armure en cortosis</td><td>10 000 cr · R8 — attribut Cortosis</td></tr><tr><td>Camouflage optique</td><td>5 500 cr · R6 — améliore 2 [ab] de Discrétion</td></tr><tr><td>Renfort musculaire</td><td>5 500 cr · R4 — Vigueur +1 (hors encaissement/seuil)</td></tr><tr><td>Optique améliorée</td><td>1 750 cr · R3 — retire [se][se] (fumée, obscurité…)</td></tr><tr><td>Scanner tête haute</td><td>750 cr · R4 — détecteur universel, retire [se] d'obscurité</td></tr><tr><td>Hermétique</td><td>1 000 cr · R3 — vide/atmosphère toxique 10 min</td></tr><tr><td>Isolation froid / bouclier thermique</td><td>1 000 cr · R3 — retire 1 [di] et [se][se] en froid/chaleur extrême</td></tr><tr><td>Système biofeedback</td><td>3 300 cr · R5 — +4 stress</td></tr><tr><td>Dispersion énergétique</td><td>500 cr · R4 — +2 encaissement contre attaques visant le stress</td></tr></tbody></table>",
+        "format": 1
+      },
+      "_id": "NzgUxnmo1TlTGoWO",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "name": "Kits de vaisseaux (sélection)",
+      "sort": 30,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><tbody><tr><th>Kit</th><th>Prix · rareté — effet</th></tr><tr><td>Blindage renforcé</td><td>gabarit ×2 000 cr · R3 — Blindage +1, Maniabilité -1</td></tr><tr><td>Renfort de coque</td><td>gabarit ×2 500 cr · R4 — +2 coque</td></tr><tr><td>Générateur de bouclier amélioré</td><td>3 800 cr · R5 — +1 défense sur une zone</td></tr><tr><td>Générateur hyperdrive</td><td>6 400 cr · R4 — classe d'hyperdrive -1 (min 1)</td></tr><tr><td>Turbine ionique haut rendement</td><td>5 300 cr · R5 — +1 vitesse, -1 seuil de SM</td></tr><tr><td>Système de visée amélioré</td><td>4 000 cr · R4 — +1 dé d'Artillerie</td></tr><tr><td>Contre-mesures électroniques</td><td>3 000 cr · R6 — voir ER p287</td></tr><tr><td>Emplacement astromech</td><td>3 000 cr · R5 — accueille un droïde astromech</td></tr><tr><td>Circuits renforcés</td><td>4 500 cr · R5 — +2 stress mécanique</td></tr></tbody></table>",
+        "format": 1
+      },
+      "_id": "LEukgqI0UwrYCNh5",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    }
+  ],
+  "_id": "tIxudqA9zuYSxx4R",
+  "folder": null,
+  "categories": [],
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_stats": {
+    "coreVersion": "13.351",
+    "systemId": "starwarsffg",
+    "systemVersion": "2.0.3",
+    "createdTime": 1783614187660,
+    "modifiedTime": 1783614187660,
+    "lastModifiedBy": "ZlIotMp24V8C0Wao",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!journalentry!tIxudqA9zuYSxx4R"
+}

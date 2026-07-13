@@ -1,0 +1,17 @@
+{
+  "name": "☠️ Blessure critique",
+  "type": "script",
+  "scope": "global",
+  "img": "icons/svg/skull.svg",
+  "command": "const fd = await foundry.applications.api.DialogV2.wait({\n  window: { title: \"Blessure critique\" },\n  content: `\n    <div class=\"form-group\"><label>Table</label>\n      <select name=\"table\"><option value=\"perso\">Personnage</option><option value=\"veh\">Véhicule / vaisseau</option></select></div>\n    <div class=\"form-group\"><label>Critiques déjà subis (+10 chacun)</label><input type=\"number\" name=\"prev\" value=\"0\" min=\"0\"/></div>\n    <div class=\"form-group\"><label>Bonus (Sanguinaire ×10, talents…)</label><input type=\"number\" name=\"bonus\" value=\"0\"/></div>`,\n  buttons: [{ action: \"ok\", label: \"Tirer\", default: true,\n    callback: (event, button) => new (foundry.applications.ux?.FormDataExtended ?? FormDataExtended)(button.form).object }],\n});\nif (!fd) return;\nconst name = fd.table === \"veh\" ? \"🔥 Avaries critiques — véhicules (d100)\" : \"🩸 Blessures critiques (d100)\";\nconst table = game.tables.getName(name);\nif (!table) return ui.notifications.error(`Table introuvable : ${name}`);\nconst mod = Number(fd.prev) * 10 + Number(fd.bonus);\nconst roll = new Roll(`1d100 + ${mod}`);\nawait table.draw({ roll });",
+  "_id": "FX7026IsLMltXgZS",
+  "author": "ZlIotMp24V8C0Wao",
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_key": "!macros!FX7026IsLMltXgZS"
+}

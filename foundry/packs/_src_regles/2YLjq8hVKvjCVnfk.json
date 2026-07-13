@@ -1,0 +1,697 @@
+{
+  "_id": "2YLjq8hVKvjCVnfk",
+  "name": "03 · Combat",
+  "pages": [
+    {
+      "_id": "OBIsMBuXfL0SHoQ9",
+      "name": "Initiative",
+      "sort": 0,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<ul><li><p><span style=\"font-family:sans-serif\">si préparé au combat : test de <strong>calme</strong></span></p></li><li><p><span style=\"font-family:sans-serif\">si combat non prévu : test de <strong>vigilance</strong></span></p></li></ul><p><span style=\"font-family:sans-serif\"><span style=\"text-decoration:underline\">ex-aequo :</span> départagé par [ad], puis PJ &gt; NPJ</span></p><ul><li><p><span style=\"font-family:sans-serif\">[tr] = +1 manœuvre au PJ au 1er round</span></p></li><li><p><span style=\"font-family:sans-serif\">[de] = -1 manœuvre au PJ au 1er round</span></p></li></ul><p><span style=\"font-family:sans-serif\">l’ordre d’initiative détermine des slots PJ / PNJ</span></p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "ZGKNgQ66VG1ww86I",
+      "name": "Tour",
+      "sort": 10,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<ul><li><p><span style=\"font-family:sans-serif\"><strong>Broutille :</strong> illimité dans le tour</span></p></li><li><p><span style=\"font-family:sans-serif\"><strong>Action :</strong> 1 par tour</span></p></li><li><p><span style=\"font-family:sans-serif\"><strong>Manœuvre :</strong> 1 gratuite par tour</span></p></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "9ApNGsuyrJFj8JzE",
+      "name": "Portée",
+      "sort": 20,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table border=\"0\"><thead><tr style=\"border-top:1px dotted #aaa\"><th><p>Portée</p></th><th>Description</th></tr></thead><tbody><tr style=\"border-top:1px dotted #aaa\"><td><p>Au contact</p></td><td>Combat de mêlée / utiliser un objet</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><p>Courte</p></td><td>Quelques mètres</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><p>Moyenne</p></td><td>Quelques dizaines de mètres</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><p>Longue</p></td><td>Plus d’une centaine de mètres</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><p>Extrême</p></td><td>portée limite d’interaction physique entre deux personnes</td></tr></tbody></table>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "UXUwY9nO4Uypu2RZ",
+      "name": "Broutilles",
+      "sort": 30,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<ul><li><p><span style=\"font-family:sans-serif\">Parler</span></p></li><li><p><span style=\"font-family:sans-serif\">Lâcher un objet</span></p></li><li><p><span style=\"font-family:sans-serif\">Lâcher sa prise sur quelqu'un</span></p></li><li><p><span style=\"font-family:sans-serif\">Changer de position / coup d’œil dans un coin</span></p></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "ImS7NoWUBf1Hcl9g",
+      "name": "Actions",
+      "sort": 40,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<ul><li><p><span style=\"font-family:sans-serif\">Exécuter une manœuvre en plus</span></p></li><li><p><span style=\"font-family:sans-serif\">Activer une capacité</span></p></li><li><p><span style=\"font-family:sans-serif\">Activer un pouvoir de la Force</span></p></li><li><p><span style=\"font-family:sans-serif\">Test de compétence</span></p></li><li><p><span style=\"font-family:sans-serif\">Test de combat</span></p></li><li><p><span style=\"font-family:sans-serif\">Autres tâches complexes</span></p></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "cTQZd0IPxZTOTIVG",
+      "name": "Manoeuvres",
+      "sort": 50,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<blockquote><p><strong>2 stress = +1 manœuvre (</strong><span style=\"text-decoration:underline\"><strong><span style=\"text-decoration:underline\">max. 2 manœuvres par tour</span></strong></span><strong>)</strong></p></blockquote><h2>Viser (distance &amp; mêlée) avec <strong>1 manœuvre</strong></h2><ul><li><p><span style=\"font-family:sans-serif\">+[bo] au prochain test de combat ; ou</span></p></li><li><p><span style=\"font-family:sans-serif\">permet de viser un objet ou une partie de l’adversaire mais : +[se][se] au prochain test de combat</span></p></li></ul><h2><br />Viser (distance &amp; mêlée) avec <strong>2 manœuvres</strong></h2><ul><li><p><span style=\"font-family:sans-serif\">+[bo][bo] au prochain test de combat ; ou</span></p></li><li><p><span style=\"font-family:sans-serif\">permet de viser un objet ou une partie de l’adversaire mais : +[se] au prochain test de combat</span></p></li></ul><h2><span style=\"font-family:sans-serif\">Assister quelqu'un</span></h2><ul><li><p>+[bo] au test du personnage assisté</p></li></ul><h2>Posture défensive : jusqu’à la fin de son prochain tour</h2><ul><li><p><span style=\"font-family:sans-serif\">+1 en défense de mêlée</span></p></li><li><p><span style=\"font-family:sans-serif\">+[se] à ses propres attaques</span></p></li></ul><h2>Se mettre à couvert : le couvert protège avec (par ex.)</h2><ul><li><p><span style=\"font-family:sans-serif\">+1 en défense à distance</span></p></li><li><p><span style=\"font-family:sans-serif\">+[SE] aux tests de perception adverses</span></p></li></ul><h2>Interagir avec l’environnement</h2><ul><li><p><span style=\"font-family:sans-serif\">bouger un gros item</span></p></li><li><p><span style=\"font-family:sans-serif\">ouvrir / fermer une porte...</span></p></li></ul><h2>Gérer l’équipement</h2><ul><li><p><span style=\"font-family:sans-serif\">dé/rengainer une arme, utiliser un stimpack</span></p></li><li><p><span style=\"font-family:sans-serif\">préparer / charger une arme</span></p></li><li><p><span style=\"font-family:sans-serif\">prendre / jeter qqch de son équipement</span></p></li></ul><h2>Monter/Descendre</h2><ul><li><p><span style=\"font-family:sans-serif\">un animal sauvage : action test de survie [di][di]</span></p></li></ul><h2>Se déplacer</h2><div><table border=\"0\"><thead><tr><th><p>Nb. manœuvre</p></th><th>Déplacement possible</th></tr></thead><tbody><tr><td><p>1</p></td><td>au sein de portée courte</td></tr><tr><td><p>1</p></td><td>entre au contact et courte</td></tr><tr><td><p>1</p></td><td>entre courte et moyenne</td></tr><tr><td><p>2</p></td><td>entre moyenne et longue</td></tr><tr><td><p>2</p></td><td>entre longue et extrême</td></tr></tbody></table></div><h2>Se préparer</h2><p><span style=\"font-family:sans-serif\">temps requis pour activer certains talents</span></p><h2>Se lever / Se mettre à terre</h2><p><span style=\"font-family:sans-serif\">Une personne à terre ajoute:</span></p><ul><li><p><span style=\"font-family:sans-serif\">+[se] pour ses attaques de mêlée</span></p></li><li><p><span style=\"font-family:sans-serif\">+[se] quand il est visé par une attaque à distance</span></p></li><li><p><span style=\"font-family:sans-serif\">+[bo] quand il est visé par une attaque de mêlée</span></p></li></ul><p></p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950044939
+      }
+    },
+    {
+      "_id": "pYA5I9DbS123Ardk",
+      "name": "Test de Combat",
+      "sort": 60,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h2>Distance</h2><ul><li><p><span style=\"font-family:sans-serif\">Test d’<strong>armes légères</strong>, <strong>lourdes</strong> ou <strong>artillerie</strong></span></p></li></ul><h2>Contact </h2><ul><li><p><span style=\"font-family:sans-serif\">Test de <strong>corps à corps</strong>, <strong>pugilat</strong> ou <strong>sabreLaser</strong></span></p></li></ul><h2>Difficulté</h2><div><table style=\"text-align:center\"><thead><tr style=\"border-top:1px dotted #aaa\"><th>Portée</th><th>Difficulté</th></tr></thead><tbody><tr style=\"border-top:1px dotted #aaa\"><td><p>Contact</p></td><td>[di][di]</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><p>Contact avec armes légères*</p></td><td>[di][di]</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><p>Contact avec armes lourdes*</p></td><td>[di][di][di]</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><p>Contact avec artillerie*</p></td><td>Impossible</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><p>Courte</p></td><td>[di]</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><p>Moyenne</p></td><td>[di][di]</td></tr><tr style=\"border-top:1px dotted #aaa\"><td>Longue</td><td>[di][di][di]</td></tr><tr style=\"border-top:1px dotted #aaa\"><td>Extrême</td><td>[di][di][di][di]</td></tr></tbody></table></div><h2>Défense</h2><p><span style=\"font-family:sans-serif\">+[se] par valeur de défense (à distance / mêlée) de la cible</span></p><h2>Tir à distance sur cible au contact avec une autre</h2><p>Améliorer 1 [di] (devient [ch]) du test à distance</p><blockquote><p>[de] Touche la mauvaise personne</p></blockquote><h2>Nombre de Blessure</h2><p>Dommage de l'arme + [su] - Encaissement</p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "BNOOvJ4H25B2lRoE",
+      "name": "Seuil de blessures",
+      "sort": 70,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p><strong>Point de stress &gt; seuil de stress :</strong> </p><p>neutralisé </p><p><strong>Point de blessure &gt; seuil de blessure :</strong> </p><p>neutralisé + blessure critique </p><p><strong>max. blessure recevable:</strong></p><p>Seuil de blessure × 2 </p><p><strong>blessure critique :</strong> </p><p>1d100 + 10 × nb. blessure critique déjà présente + 10 × nb. mod \"Critique\" sur l'arme</p><p><em>une blessure critique reste présente tant qu’elle n’est pas soignée (même si ses « effets » ont disparu)</em></p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "l1bsSIFpLaQrcZhi",
+      "name": "Combats à deux Armes",
+      "sort": 80,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h2>Test combiné de compétence des deux armes</h2><p><strong>Difficulté :</strong></p><ul><li><p>+[di] si même compétence</p></li><li><p>+[di][di] sinon</p></li></ul><blockquote><p>[su] = l’arme principale atteint la cible</p><p>[ad][ad] / [tr] = l’arme secondaire aussi</p></blockquote>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "oA4n1O70DUHLKgA0",
+      "name": "Combat sans Armes",
+      "sort": 90,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h2>Test de pugilat</h2><p>Dommages = Vigueur</p><blockquote><p>Critique de : 5</p><p><span style=\"text-decoration:underline\">Capacités</span> : Désorientation 1 ; Renversement</p></blockquote>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "jMnJy8FukkBPBJiA",
+      "name": "Armes Improvisée",
+      "sort": 100,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h2>Test de corps à corps ( +[th] automatique )</h2><p>Dommages = vigueur + bonus (cf. ci-dessous)</p><blockquote><p>critique de : 5<br />sur [th][th] / [de] l’arme improvisée casse</p></blockquote><div><table><thead><tr style=\"border-top:1px dotted #aaa\"><th>Taille</th><th>Dommage</th><th>Encombrement</th><th>Spécial</th><th>Exemples</th></tr></thead><tbody><tr style=\"border-top:1px dotted #aaa\"><td><p>Petite</p></td><td>Pugilat +1</td><td>1</td><td>-</td><td>Bouteille, pierre (taille poing), hydrocompresseur</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><p>Moyen</p></td><td>Pugilat +2</td><td>3</td><td>Encombrant 2</td><td>Pierre (deux mains), chaise, écran holo-vidéo</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><p>Grand</p></td><td>Pugilat +3</td><td>4</td><td>Encombrant 4</td><td>Pelle, grosse branche d’arbre, table, caisse</td></tr></tbody></table></div>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "b6dt9eCTKjkyb3Xx",
+      "name": "Gabarits des personnages",
+      "sort": 110,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<ul><li><p>Plus grand de 2 = <strong>-</strong>[di] pour toucher</p></li><li><p>Plus petit de 2 = <strong>+</strong>[di] pour toucher</p></li></ul><div><table><thead><tr style=\"border-top:1px dotted #aaa\"><th>Gabarit</th><th>Exemples</th></tr></thead><tbody><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\"><p>0</p></td><td>Jawa, Ewok, droïde astromech, petite créature</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\"><p>1</p></td><td>Humains et la plupart des humanoïdes</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\"><p>2</p></td><td>Dewback, tauntaun, la plupart des montures</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\"><p>3</p></td><td>Rancor, dragon krayt, grosses créatures</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\"><p>4</p></td><td>Encore plus grosses créatures</td></tr></tbody></table></div>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783949990664
+      }
+    },
+    {
+      "_id": "DwOKLuVGnIEuusss",
+      "name": "Couvert",
+      "sort": 120,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table border=\"0\"><thead><tr style=\"border-top:1px dotted #aaa\"><th>Dés</th><th>Exemples</th></tr></thead><tbody><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">+[se]</td><td>Brume, ombre, hautes herbes (hauteur de hanches)</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">+[se][se]</td><td>Brouillard, pénombre du matin / du soir, hautes herbes (allant jusqu’aux épaules)</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">+[se][se][se]</td><td>Épais brouillard, fumée épaisse, obscurité profonde, brousse (allant jusqu’à la tête)</td></tr></tbody></table>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "dixcz5T30Va86dTZ",
+      "name": "Adversaires",
+      "sort": 130,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h2>SBIRES</h2><ul><li><p>Pas de stress (non « dépensable » avec des blessures)</p></li><li><p>Pas de rang de compétence</p></li><li><p>Si blessure critique = neutralisé ou mort</p></li><li><p>Groupes de sbires :</p></li></ul><blockquote><p>ex : 3 stormTrooper de seuil 5</p></blockquote><ul><li><p>Encaissement compte pour tout le groupe</p></li><li><p>Seuil total de blessure = seuil × nombre de sbires</p></li><li><p>Si seuil atteint ; </p></li></ul><p>1 sbire neutralisé ou mort</p><blockquote><p>ex : seuil total à 15 ;</p><ul><li><p><strong>1</strong>er mort à <strong>6</strong> blessures</p></li><li><p><strong>2</strong>e à <strong>11</strong></p></li><li><p><strong>3</strong>e à <strong>16</strong></p></li></ul></blockquote><ul><li><p>Si possède une compétence :</p></li></ul><p>+1 rang de compétence par sbire au-delà du 1er</p><blockquote><p>ex : compétence arme lourde (agilité 3) : [pr][pr][ab]</p></blockquote><h2>RIVAUX</h2><ul><li><p>Pas de stress (mais « dépensable » avec des blessures)</p></li><li><p>Ont des compétences</p></li><li><p>Si seuil de blessure atteint = neutralisé ou mort</p></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "diKRpji6BfZWs7gD",
+      "name": "Voler",
+      "sort": 140,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h2>Survoler :</h2><ul><li><p>Ignore la difficulté du terrain</p></li><li><p>Doit rester à portée moyenne du sol</p></li></ul><h2>Vol aérodynamique :</h2><ul><li><p>Utilise une manœuvre par tour pour maintenir le vol</p></li><li><p>Peut aller de portée longue à courte en une manœuvre</p></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783949963596
+      }
+    },
+    {
+      "_id": "mgoQPS1UTDg9XN49",
+      "name": "Effets Continus",
+      "sort": 150,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<blockquote><p>Les effets continus peuvent se cumuler</p></blockquote><ul><li><p><strong>Désorienté (disoriented) :</strong> +[se] à tous les tests</p></li><li><p><strong>immobilisé (immobilized) :</strong> ne peut plus faire de manœuvre</p></li><li><p><strong>Étourdi (staggered) :</strong> ne peut plus faire d’actions jusqu’à la fin du prochain tour</p></li><li><p><strong>Neutralisé :</strong> tombe inconscient et ne peut plus agir. Le personnage reste neutralisé tant qu’il n’est pas soigné</p></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783949977056
+      }
+    },
+    {
+      "_id": "KdPdCO6PSJ8imYWw",
+      "name": "Récupérations",
+      "sort": 160,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h3>Fin de la rencontre : </h3><p>Test de calme / sang-froid</p><p>• Chaque [su] = -1 point de stress</p><h3>Repos naturel :</h3><ul><li><p>1 fois / nuit : guérit 1 blessure + tout le stress</p></li><li><p>1 fois / semaine : test de résistance vs. gravité de la</p></li></ul><p><em>Blessure critique : [su], guérison de la blessure critique</em></p><h3>Cuve de bacta :</h3><ul><li><p>Blessé : guérit 1 blessure / heure</p></li><li><p>Neutralisé : guérit 1 blessure / 6 heures</p></li><li><p>1 fois / jour : test de résistance vs. gravité de la</p></li></ul><p><em>Blessure critique : [su], guérison de la blessure critique</em></p><h3>Bain d’huile :</h3><p>• Idem cuve à bacta mais valable pour les droïdes</p><p>• N’enlève pas les blessures critiques</p><h3>Stimpack :</h3><p> guérit 5 blessures pour un personnage</p><p>(-1 blessure par stimpack utilisé dans la journée avant repos)</p><h3>Trousse de réparation d’urgence : </h3><p>Guérit 3 blessures pour un droïde (5 fois par jour max.)</p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950006105
+      }
+    },
+    {
+      "_id": "zLtAL5LRW2mtk1fx",
+      "name": "Soin Médecine/Mécanique",
+      "sort": 170,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<ul><li><p>[su] : Guérit 1 blessure</p></li><li><p>[ad] : 1 stress</p></li><li><p>[tr] : Guérit 1 blessure supplémentaire ou 1 blessure critique</p></li><li><p>[th]: +1 stress</p></li><li><p>[de] : +1 blessure</p></li><li><p><strong>Se guérir soi-même :</strong> humain +[di][di] ; droid +[di]</p></li><li><p><strong>Sans outils :</strong> +[di]</p></li></ul><h3>Difficulté</h3><div><table style=\"text-align:center\"><thead><tr><th><p>Blessures</p></th><th>Difficulté</th></tr></thead><tbody><tr><td><p>Points de blessure ≤ ½ Seuil</p></td><td>[di]</td></tr><tr><td><p>Points de blessure &gt; ½ Seuil</p></td><td>[di][di]</td></tr><tr><td><p>Points de blessure ≥ Seuil</p></td><td>[di][di][di]</td></tr><tr><td colspan=\"2\"><p><strong>max. 1 test / personnage / rencontre</strong></p></td></tr><tr><td><p>Soin d’une blessure critique</p></td><td>Gravité de la blessure ([di] ~ [di][di][di][di])</td></tr><tr><td colspan=\"2\"><p><strong>max. 1 test / semaine / blessure critique</strong></p></td></tr></tbody></table></div>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "zMhURRzGoTjb3qmz",
+      "name": "Blessures Critiques",
+      "sort": 180,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table class=\"results\"><thead><tr><th></th><th><span>Détail du résultat</span></th></tr></thead><tbody><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">1 - 5</td><td>@UUID[Compendium.world.critical-injury-list.a6eF2mmvbkwIRlT3]{Petite entaille}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">6 - 10</td><td>@UUID[Compendium.world.critical-injury-list.PZ8wnUqzCUxeTXs5]{Ralentissement}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">11 - 15</td><td>@UUID[Compendium.world.critical-injury-list.hNCcRGizyyvsnjRf]{Choc}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">16 - 20</td><td>@UUID[Compendium.world.critical-injury-list.pU4yvW7gZFI9jZ3R]{Distraction}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">21 - 25</td><td>@UUID[Compendium.world.critical-injury-list.1a6cCoewPujULOKF]{Déséquilibré}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">26 - 30</td><td>@UUID[Compendium.world.critical-injury-list.ovSZaGu83H2bS9j3]{Blessure accablante}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">31 - 35</td><td>@UUID[Compendium.world.critical-injury-list.a6kcRhYlq1J5CeXQ]{Etourdissement}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">36 - 40</td><td>@UUID[Compendium.world.critical-injury-list.eMWyqcapmrLe2KTE]{Piqûre}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">41 - 45</td><td>@UUID[Compendium.world.critical-injury-list.UnjqvbwRAafYqxQe]{Renversement}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">46 - 50</td><td>@UUID[Compendium.world.critical-injury-list.cb49gH9W3waLmRHl]{Mal au crâne}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">51 - 55</td><td>@UUID[Compendium.world.critical-injury-list.SqwOPAJdXR24wIRE]{Blessure effroyable}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">56 - 60</td><td>@UUID[Compendium.world.critical-injury-list.YUfwyiCQILZukM2M]{Blessure lancinante}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">61 - 65</td><td>@UUID[Compendium.world.critical-injury-list.y0KDANEDegzkiJrD]{Hébétement}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">66 - 70</td><td>@UUID[Compendium.world.critical-injury-list.Fw0wzgrrvbckdHB5]{Confusion}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">71 - 75</td><td>@UUID[Compendium.world.critical-injury-list.jb5vTHeQBNQLio3c]{Paralysé}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">76 - 80</td><td>@UUID[Compendium.world.critical-injury-list.uxodhGlWa8Jz1XE6]{Aux abois}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">81 - 85</td><td>@UUID[Compendium.world.critical-injury-list.CYMIPnHgmaI8XNYj]{Hors d’haleine}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">86 - 90</td><td>@UUID[Compendium.world.critical-injury-list.550vqbqxWqyUwVhU]{A mal}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">91 - 95</td><td>@UUID[Compendium.world.critical-injury-list.yiUf8nHqeMlyffTD]{Exténuation}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">96 - 100</td><td>@UUID[Compendium.world.critical-injury-list.q6t26jRxNfvVfwyd]{Infirmité}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">101 - 105</td><td>@UUID[Compendium.world.critical-injury-list.7cpKtBULVBT4H8wu]{Mutilation}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">106 - 110</td><td>@UUID[Compendium.world.critical-injury-list.l99oD9ZRRYP4zbgH]{Blessure épouvantable}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">111 - 115</td><td>@UUID[Compendium.world.critical-injury-list.726LqH73qxMn59kO]{Invalidité}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">116 - 120</td><td>@UUID[Compendium.world.critical-injury-list.Z5od7yEFrY91gOHu]{Aveuglé}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">121 - 125</td><td>@UUID[Compendium.world.critical-injury-list.Wmndq1julEkvipbU]{Perte de connaissance}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">126 - 130</td><td>@UUID[Compendium.world.critical-injury-list.W49gpHj6l7CD089B]{Blessure de cauchemar}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">131 - 140</td><td>@UUID[Compendium.world.critical-injury-list.xXUqkUJBVv6v5wkT]{Hémorragie}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">141 - 150</td><td>@UUID[Compendium.world.critical-injury-list.YNuAjshVLzDdj36a]{La fin est proche}</td></tr><tr><td style=\"text-align:center\" title=\" TABLE.ResultWeight: 1\">151 - 500</td><td>@UUID[Compendium.world.critical-injury-list.rLh1Vs2EfAYPbNZp]{Mort}</td></tr></tbody></table><h2>Caractéristique Aléatoire</h2><table><thead><tr><td><strong>1d10</strong></td><td><strong>Caractéristique</strong></td></tr></thead><tbody><tr><td>1-3</td><td>VIGUEUR</td></tr><tr><td>4-6</td><td>AGILITE</td></tr><tr><td>7</td><td>INTELLIGENCE</td></tr><tr><td>8</td><td>RUSE</td></tr><tr><td>9</td><td>PRESENCE</td></tr><tr><td>10</td><td>VOLONTE</td></tr></tbody></table>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950174091
+      }
+    }
+  ],
+  "folder": null,
+  "categories": [],
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_stats": {
+    "coreVersion": "13.351",
+    "systemId": "starwarsffg",
+    "systemVersion": "2.0.3",
+    "createdTime": 1783614117563,
+    "modifiedTime": 1783614117563,
+    "lastModifiedBy": "ZlIotMp24V8C0Wao",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!journalentry!2YLjq8hVKvjCVnfk"
+}

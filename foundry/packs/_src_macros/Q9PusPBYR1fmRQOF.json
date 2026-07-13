@@ -1,0 +1,21 @@
+{
+  "name": "🎴 Sabacc — Nouvelle manche",
+  "type": "script",
+  "img": "icons/svg/card-joker.svg",
+  "folder": null,
+  "command": "game.modules.get(\"swffg-sabacc\").api.run(\"spike-new-round\");",
+  "ownership": {
+    "default": 2,
+    "bTpHpbvEEXuoga8Z": 3
+  },
+  "flags": {
+    "swffg-sabacc": {
+      "role": "spike-new-round"
+    }
+  },
+  "_id": "Q9PusPBYR1fmRQOF",
+  "author": "bTpHpbvEEXuoga8Z",
+  "scope": "global",
+  "sort": 0,
+  "_key": "!macros!Q9PusPBYR1fmRQOF"
+}

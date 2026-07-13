@@ -1,0 +1,41 @@
+{
+  "_id": "y7dOzY8aZGNW4o6H",
+  "name": "📁 Structure de campagne",
+  "pages": [
+    {
+      "_id": "MGj5NEHvY78xSrGz",
+      "name": "Structure de campagne",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "image": {},
+      "text": {
+        "format": 1,
+        "content": "<p>Convention de dossiers recommandée pour tirer parti de l'Holocron. Créez ces dossiers et journaux dans votre monde (les noms — emoji compris — sont utilisés par les macros et la synchronisation).</p>\n<h2>Dossiers de journaux</h2>\n<ul>\n<li><strong>🎬 Campagne — Actes</strong> — le déroulé de la campagne, acte par acte.</li>\n<li><strong>🏛️ Organisations</strong> — factions, cartels, guildes (fiches MEJ <em>organization</em>).</li>\n<li><strong>🎭 Personnages rencontrés</strong> — PNJ croisés par le groupe (fiches MEJ <em>person</em>) ; alimenté par la macro « 🎭 Statut PNJ ».</li>\n<li><strong>📓 Notes des joueurs</strong> — notes partagées, comptes rendus de séance.</li>\n<li><strong>🎲 MJ — Bible de campagne</strong> — préparation et secrets du MJ (non visible des joueurs).</li>\n</ul>\n<h2>Journaux uniques (à la racine)</h2>\n<ul>\n<li><strong>🚀 Vaisseau du groupe</strong> — vivres, carburant, usure ; alimenté par les voyages de l'Astronav.</li>\n<li><strong>🖥️ Codex du groupe</strong> — tableau de bord holographique du groupe.</li>\n<li><strong>📡 HoloNet — Actualités</strong> — dépêches et rumeurs de la galaxie.</li>\n<li><strong>🌍 Mondes d'intérêt</strong> — planètes marquées comme points d'intérêt (favoris MEJ).</li>\n</ul>\n<h2>Dossiers d'acteurs</h2>\n<ul>\n<li><strong>👥 Personnages joueurs</strong> — les PJ.</li>\n<li><strong>🎭 PNJ de campagne</strong> — PNJ récurrents et figurants.</li>\n<li><strong>⚔️ Rencontres</strong> — adversaires et groupes de combat prêts à l'emploi.</li>\n</ul>\n<p style=\"font-size:.9em;opacity:.8\">Astuce : respectez exactement les noms (emoji inclus) pour que les macros et l'Holocron retrouvent automatiquement le bon dossier.</p>",
+        "markdown": ""
+      },
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "system": {},
+      "sort": 0,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {}
+    }
+  ],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_stats": {},
+  "_key": "!journalentry!y7dOzY8aZGNW4o6H"
+}

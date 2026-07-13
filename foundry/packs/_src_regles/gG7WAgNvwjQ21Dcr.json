@@ -1,0 +1,169 @@
+{
+  "_id": "gG7WAgNvwjQ21Dcr",
+  "name": "04 · Force & Moralité",
+  "pages": [
+    {
+      "_id": "C1t3xfpTbqjOhqjP",
+      "name": "Force",
+      "sort": 0,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h3>Rang de Force</h3><p>nombre. de dés de Force [FO] utilisables</p><h3>Engager un dé de Force [FO]</h3><p>(pour activer des effets continus)</p><p>réduit le rang de Force du nb. de [FO] engagé</p><h2>Test de pouvoir</h2><p>jet de [FO] (nb. = rang de Force)</p><h3>Perso du côté clair</h3><ul><li><p>[li] = génère 1 point de Force</p></li><li><p>[da] = peut (choix) générer 1 point de Force + stress + conflit et flip 1 destin de son camp</p></li></ul><h3>Perso du côté obscur :</h3><ul><li><p>[da] = génère 1 point de Force et conflit</p></li><li><p>[li] = peut (choix) générer 1 point de Force + stress + flip 1 destin de son camp</p></li></ul><h2>Test de pouvoir et compétence combinés</h2><ul><li><p>test de compétence normale avec jet de [FO]</p></li><li><p>le test de compétence doit réussir avec suffisamment de points de Force générés</p></li></ul><h2>Résister à un pouvoir</h2><p>faire un test (de pouvoir ou combiné) en opposition avec la cible</p><p>(résister avec sang-froid ou calme pour les attaques mentales)</p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "2G70CKE2ARNo2Djz",
+      "name": "Moralité",
+      "sort": 10,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h2>Conflit</h2><p>Recevoir du conflit :</p><ul><li><p>Utilisant des [DA] (ou [li] si adepte du côté obscur) pour générer des points de Force</p></li><li><p>Faisant des actions (narratives) mauvaises</p></li><li><p>Echouant à certains tests de peur</p></li></ul><h3>Exemples</h3><div><table border=\"0\"><thead><tr style=\"border-top:1px dotted #aaa\"><th><p>Conflit reçu</p></th><th>Action</th></tr></thead><tbody><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\" rowspan=\"3\"><p>1</p></td><td><strong>Rester passif :</strong> Choisir de ne pas intervenir sachant qu’un PNJ ou PJ fait qqch de mauvais</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><strong>Mentir pour gain personnel :</strong> mentir pour des raisons égoïstes</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><strong>Avoir recours à la violence :</strong> choisir une solution violente alors que d’autres options existent</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\" rowspan=\"2\"><p>2</p></td><td><strong>Coercition :</strong> Menacer qqn avec violence</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><strong>Faire souffrir émotionnellement :</strong> Dire / faire qqch de cruel pour causer des dégâts émotionnels</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\"><p>2-3</p></td><td><strong>Voler :</strong> cela va encore si on vole un malhonnête, aggravé si on vole un démuni</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">3-4</td><td><strong>Destruction inutile :</strong> d’objets, de biens, ...</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">4-5</td><td><strong>Violence inutile :</strong> attaquer, frapper, PNJ ou PJ sans raison</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">6-7</td><td><strong>Cruauté inutile sur animal :</strong> Animaux ou I.A. basique</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">10</td><td><strong>Torture</strong></td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">10</td><td><strong>Meurtre</strong> : tuer qqn sans défense et non menaçant</td></tr></tbody></table><div><h2>Calcul de la moralité en fin de session</h2><p>moralité = moralité + (1d10 – conflit)</p><h2>Adepte du côté obscur (moralité &lt; 30)</h2><ul><li><p>Reste du côté obscur tant que moralité &lt; 70</p></li><li><p>Génère des points de Force avec [DA]</p></li><li><p><strong>Moralité &lt; 20 :</strong> -1 au seuil de stress, +1 au seuil de blessure</p></li><li><p><strong>Moralité &lt; 10 :</strong> -2 au seuil de stress, +2 au seuil de blessure</p></li></ul><h2>Parangon du côté clair (moralité &gt; 70)</h2><p><strong>moralité &gt; 80 :</strong> +1 au seuil de stress</p><p><strong>moralité &gt; 90 :</strong> +2 au seuil de stress</p></div></div>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950282685
+      }
+    },
+    {
+      "_id": "ajytkbzVDVPGJajK",
+      "name": "Déclencher la Moralité",
+      "sort": 20,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<ol><li><p>Jet de 1d100 au début de la session</p></li><li><p>La moralité est « déclenchée » sur le(s) PJ(s) avec la moralité la plus proche du score :</p><ul><li><p>Solliciter leurs émotions et faiblesses pendant la partie</p></li><li><p>Leurs gains ou pertes de moralité sont doublés</p></li></ul></li></ol><p></p><h3>Forces &amp; Faiblesse</h3><table border=\"0\"><thead><tr style=\"border-bottom:1px solid #666\"><th style=\"border-right:1px solid #333\"><strong>d100</strong></th><th style=\"border-right:1px solid #333\"><strong>Force émotionnelle</strong></th><th style=\"border-right:1px solid #333\"><strong>Faiblesse émotionnelle</strong></th></tr></thead><tbody><tr style=\"border-bottom:1px solid #666\"><td style=\"padding:0.25em;border-right:1px solid #333;text-align:center\">01-08</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.bliABAlWd2PAdd44]{Bravoure}</strong> la bravoure du personnage est remarquable. Qu’il charge un rancor en furie ou qu’il s’engouffre dans un immeuble en flammes pour sauver des innocents il est toujours prêt à prendre des risques pour sauver autrui.</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.XPecEJ1cfPpUUhUH]{Colère}</strong>il n’est pas toujours bon d’avoir le sang chaud. Le personnage est prompt à se fâcher et quand il ne peut pas résoudre un problème de manière directe la frustration peut le rendre fou de rage.</td></tr><tr style=\"border-bottom:1px solid #666\"><td style=\"padding:0.25em;border-right:1px solid #333;text-align:center\">09-16</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.rL4V87wSy5GOUYTv]{Amour}</strong> le personnage a un coeur immense. Ses amis et ses amours y tiennent une place toute particulière, mais il apprécie la plupart des gens qu’il rencontre. Son amour des autres le rend charmant, affable et tolérant.</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.SgTkovkbq3aufBNF]{Jalousie}</strong> lorsqu’il n’est pas donné de manière altruiste l’amour risque de tourner à la jalousie. Si ses sentiments ne lui sont pas rendus, l’amour du PJ tourne à l’envie, à moins qu’il ne jalouse simplement les succès ou les biens des autres.</td></tr><tr style=\"border-bottom:1px solid #666\"><td style=\"padding:0.25em;border-right:1px solid #333;text-align:center\">17-24</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.fM5jLAhJ8ELyWwSq]{Prudence}</strong> le personnage fait preuve d’une prudence admirable. Il préfère toujours examiner une situation nouvelle sous tous les angles avant de prendre une décision. Ce goût de la réflexion a sans doute sauvé ses amis à de nombreuses reprises.</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.aT4zntVhyOdslaVs]{Peur}</strong> la ligne qui sépare la prudence de la peur est mince. Parfois, le personnage passe tellement de temps à évaluer les risques qu’il en oublie d’agir. A d’autres moments, la prudence le pousse à fuir avant que le danger ne se présente, alors qu’une action plus déterminée aurait été récompensée.</td></tr><tr style=\"border-bottom:1px solid #666\"><td style=\"padding:0.25em;border-right:1px solid #333;text-align:center\">25-32</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.5jBfMHWaBwRDwF2P]{Enthousiasme}</strong>le personnage est toujours prêt à essayer quelque chose de nouveau. Il approche toutes les tâches mêmes banales, avec passion. Il n’est pas du genre à se perdre en analyses de peur de rater une formidable opportunité.</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.UJj8jWft6gKoHNzq]{Témérité}</strong> bien sûr, parfois, cinq minutes de réflexion vous évitent de commettre une grosse erreur. Le personnage a eu l’occasion de s’en apercevoir dans la douleur. A force d’être téméraire, il s’est retrouvé dans des situations dangereuses ou à la merci d’individus plus calculateurs.</td></tr><tr style=\"border-bottom:1px solid #666\"><td style=\"padding:0.25em;border-right:1px solid #333;text-align:center\">33-40</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.Dsce9JsUupSBxpnm]{Compassion}</strong> pour le personnage les souffrances d’autrui sont importantes et il souhaite aider ceux qu’il rencontre. Sa compassion peut le pousser à se sacrifier afin d’aider ceux qui en ont besoin.</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.JtsfEQ9LSoxhBAuK]{Haine}</strong> dans une galaxie cruelle et impitoyable, la compassion risque de se changer en haine envers les gens ou les situations qui font souffrir autrui. Un personnage dont l’esprit est dévoré par la haine risque de mettre du temps à redevenir lui même.</td></tr><tr style=\"border-bottom:1px solid #666\"><td style=\"padding:0.25em;border-right:1px solid #333;text-align:center\">41-48</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.XLULZVzCdDj7dStj]{Pitié}</strong> le personnage se montre miséricordieux envers ses ennemis. Il les traite de manière juste et honorable. Il épargne ceux qui sont sans défense, aide un ennemi impuissant et n’abuse pas de la situation lorsqu’il est en position de force.</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.cJKCbSLe1rtJRo52]{Faiblesse}</strong> où s'arrête la pitié et où commence le refus de s’engager dans la lutte contre le mal ? Le personnage risque de laisser de mauvaises choses se produire parce qu’il lui était trop difficile de prendre position.</td></tr><tr style=\"border-bottom:1px solid #666\"><td style=\"padding:0.25em;border-right:1px solid #333;text-align:center\">49-56</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.8jhzYPhB1mIqLexA]{Curiosité}</strong> le personnage se sent poussé à apprendre des choses nouvelles, à chercher et à découvrir des informations inédites, à mieux connaître et comprendre ce qui l’intéresse.</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.troZhVAXD1QawM2h]{Obsession}</strong> parfois, s’il n’est pas tempéré par la raison, un centre d’intérêt menace de tourner à l’obsession. Le personnage se laisse emporter par son besoin de découvrir des informations, de remplir un objectif ou même de vaincre un rival. Il risque d’ignorer tout le reste tant qu’il n’y sera pas parvenu.</td></tr><tr style=\"border-bottom:1px solid #666\"><td style=\"padding:0.25em;border-right:1px solid #333;text-align:center\">57-64</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.98iEGowLwr9lkQzw]{Fierté}</strong> la fierté peut être une émotion puissante, qui pousse le personnage à accomplir des actions impressionnantes. Il cherche à être le meilleur et prend plaisir dans ce qu’il sait faire.</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.LZHrFM9W3Z7eF45n]{Arrogance}</strong> de toutes les émotions, la fierté est peut-être celle qui bascule le plus facilement vers une forme plus sombre. L’arrogance ressemble à la fierté, mais la satisfaction devant ses propres succès est remplacée par le mépris devant les échecs des autres. Réussir ne suffit pas le personnage s’attend aussi à ce que les autres échouent.</td></tr><tr style=\"border-bottom:1px solid #666\"><td style=\"padding:0.25em;border-right:1px solid #333;text-align:center\">65-72</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.CxypmITvw6jZOyDu]{Indépendance}</strong> le personnage veut être autonome. Il ne compte pas sur les autres pour agir en son nom. Refusant d’être un fardeau pour autrui, il veut être capable de faire face à tout ce qu’il rencontre.</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.o5sDUi2DgI5cZhug]{Froideur}</strong>: si le personnage n’est pas prudent, son indépendance peut tourner à l’isolement. Dans ce cas il ne désire plus seulement agir par lui même, il en vient à se désintéresser des autres. S’ils ne peuvent pas s’aider eux-mêmes, pourquoi les aiderait-il ?</td></tr><tr style=\"border-bottom:1px solid #666\"><td style=\"padding:0.25em;border-right:1px solid #333;text-align:center\">73-80</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.Ldvp5mb7UMqhJDyk]{Ambition}</strong> un personnage ambitieux se fixe un but élevé et s’acharne à l’atteindre. Plus la tâche est difficile, plus le personnage est désireux de l’accomplir et plus le triomphe est grand quand il finit par y arriver.</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.MmpamHHkMBkPaG70]{Cupidité}</strong> un personnage ambitieux est exactement aussi altruiste que ses objectifs. Ceux qui recherchent les plaisirs de ce monde, la richesse, le pouvoir ou de simples conforts personnels risquent de voir leur ambition se ternir et se changer en cupidité.</td></tr><tr style=\"border-bottom:1px solid #666\"><td style=\"padding:0.25em;border-right:1px solid #333;text-align:center\">81-88</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.luBuF80uewDtozjO]{Justice}</strong> le personnage souhaite se montrer juste et réfléchi dans sa vie et dans ses interactions avec autrui. A chaque occasion, il tente de faire le choix le plus objectif, sachant que la justice a plus de chance d’entraîner des conséquences positives que la sympathie ou toute autre réponse émotionnelle.</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.d9jgqFm6N1YNN0LB]{Cruauté}</strong> très souvent, les gens cruels justifient leurs actes par la justice. Si le personnage cesse de tempérer la justice par l’empathie et la compréhension, il fera beaucoup de mal aux autres… et se sentira en droit de la faire. Tôt ou tard, il en arrivera à savourer la souffrance d’autrui, tout en conservant l’illusion de faire des choix « justes ».</td></tr><tr style=\"border-bottom:1px solid #666\"><td style=\"padding:0.25em;border-right:1px solid #333;text-align:center\">89-96</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.Y18dI1XU0p2m4akI]{Discipline}</strong> une rigoureuse discipline physique et mentale vient naturellement au personnage. Ses choix ne sont jamais improvisés et toutes ses actions sont précises et réfléchies. Ceux qui pensent qu’il est possible de le pousser à agir de manière imprudente se trompent lourdement</td><td style=\"padding:0.25em;border-right:1px solid #333\"><strong>@UUID[Compendium.world.oggdudeweaknessandstrength.eBYv3VmuilrGOn5q]{Obstination}</strong> s’ils ne se méfient pas, les personnages disciplinés risquent de tomber dans le piège de l’obstination. Un obstiné refuse de considérer une autre action que celle qu’il a choisie et refuse d'admettre que quelqu’un d’autre a peut-être trouvé une meilleure solution.</td></tr><tr style=\"border-bottom:1px solid #666\"><td style=\"padding:0.25em;border-right:1px solid #333;text-align:center\">97-100</td><td style=\"padding:0.25em;border-right:1px solid #333\" colspan=\"2\">Tirez deux fois sur la table. Le personnage a plusieurs forces et faiblesses émotionnelles</td></tr></tbody></table>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950470911
+      }
+    },
+    {
+      "_id": "wkxULKoQ4UEzbkVN",
+      "name": "Peur",
+      "sort": 30,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h2>Test de peur</h2><blockquote><p><strong>sang-froid</strong> ou <strong>calme</strong> (si mentalement préparé)</p></blockquote><ul><li><p>[fa] = +[se] à toutes actions jusqu’à la fin de la rencontre</p></li><li><p>[th] = +1 stress par [fa]</p></li><li><p>[th][th][th] = étourdi pour 1 tour</p></li><li><p>[de] = +[di] à toutes actions jusqu’à la fin de la rencontre</p></li></ul><hr /><p>• [ad] = +[bo] à un prochain test de peur d’un allié</p><p>• [tr] = annule les pénalités d’un précédent test de peur</p><p>• [tr] = pas de test de peur jusqu’à la fin de la rencontre</p><h2>Effet sur la moralité</h2><p>• [fa] = +1 conflit par dés de [di] du test au lieu des autres effets négatifs (option du MJ)</p><p>• [de] = +1 conflit par dés de [di] du test en plus des autres effets négatifs</p><p>• le conflit ne peut être diminué par [tr]</p><h3>Difficulté</h3><div><table border=\"0\"><thead><tr style=\"border-top:1px dotted #aaa\"><th><p>Peur</p></th><th>Difficulté</th><th>Exemple</th></tr></thead><tbody><tr style=\"border-top:1px dotted #aaa\"><td><p>Minime</p></td><td style=\"text-align:center\">[di]</td><td>Bagarre mineure, petite créature dangereuse, menace mineure pour la sécurité</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><p>Moyenne</p></td><td style=\"text-align:center\">[di][di]</td><td>Combat de rues, créature dangereuse et agressive, menace pour la sécurité, menace vitale mineure</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><p>Très effrayant</p></td><td style=\"text-align:center\">[di][di][di]</td><td>Champ de bataille, meute de créatures dangereuses, menace de sécurité majeure, menace vitale</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><p>Mortellement effrayant</p></td><td style=\"text-align:center\">[di][di][di][di]</td><td>Combat intense terrifiant, grande créature dangereuse, menace de mort</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><p>Totalement terrifiant</p></td><td style=\"text-align:center\">[di][di][di][di][di]</td><td>Situation désespérée, combat vs. ennemis inconnus, attaqué par une meute de wampas, peur rendant fou</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><p>Qqch terrifiant et dangereux de réputation</p></td><td style=\"text-align:center\">+[di]</td><td>S’échapper d’un vaisseau en désintégration, négocier sous la menace de violence</td></tr><tr style=\"border-top:1px dotted #aaa\"><td>Qqch connu comme dangereux et très rare</td><td style=\"text-align:center\">+[di][di]</td><td>Se confronter à un guerrier Sith ou un Inquisiteur</td></tr><tr style=\"border-top:1px dotted #aaa\"><td>Qqch connu comme très dangereux et unique</td><td style=\"text-align:center\">+[di][di][di]</td><td>Dark Vador</td></tr></tbody></table></div>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950309320
+      }
+    }
+  ],
+  "folder": null,
+  "categories": [],
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_stats": {
+    "coreVersion": "13.351",
+    "systemId": "starwarsffg",
+    "systemVersion": "2.0.3",
+    "createdTime": 1783614117656,
+    "modifiedTime": 1783614117656,
+    "lastModifiedBy": "ZlIotMp24V8C0Wao",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!journalentry!gG7WAgNvwjQ21Dcr"
+}

@@ -1,0 +1,272 @@
+{
+  "_id": "pNbSnRH3IGUXzUai",
+  "name": "07 · Environnement",
+  "pages": [
+    {
+      "_id": "fxWIptHTJyn4gMjo",
+      "name": "Terrain Difficile",
+      "sort": 0,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p>Nécessite <strong>2×</strong> plus de manœuvres</p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "P2E2go1u1DdtbZdq",
+      "name": "Tomber",
+      "sort": 10,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p><span style=\"text-decoration:underline\"><span style=\"text-decoration:underline\">Test d’</span><strong><span style=\"text-decoration:underline\">Athlétisme</span></strong><span style=\"text-decoration:underline\"> / </span><strong><span style=\"text-decoration:underline\">Coordination</span></strong><span style=\"text-decoration:underline\"> ([di][di]) :</span></span></p><ul><li><p>Chaque [su] = -1 dommage</p></li><li><p>Chaque [ad] = -1 stress</p></li><li><p>[tr] = Réduit la chute d’un niveau de portée</p></li></ul><table style=\"text-align:center\"><thead><tr style=\"border-bottom:1px solid #999\"><th>Portée</th><th>Dommage</th><th>Stress</th></tr></thead><tbody><tr style=\"border-bottom:1px solid #999\"><td>Courte</td><td>10</td><td>10</td></tr><tr style=\"border-bottom:1px solid #999\"><td>Moyenne</td><td>30</td><td>20</td></tr><tr style=\"border-bottom:1px solid #999\"><td>Longue</td><td>Neutralisé, 1 blessure critique <strong>+50</strong></td><td>30</td></tr><tr style=\"border-bottom:1px solid #999\"><td>Extrême</td><td>Neutralisé, 1 blessure critique <strong>+75</strong></td><td>40</td></tr></tbody></table>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "hVsLQNwPneSk4UID",
+      "name": "Feu / Acide / Atmosphère Corrosive",
+      "sort": 20,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<ul><li><p>Certaines atmosphères corrosives font des dommages seulement si on les inhale</p></li><li><p>Étouffer un feu : test d’<strong>Athlétisme</strong> / <strong>Coordination</strong></p><ul><li><p>Surface dure : [di][di]</p></li><li><p>Herbe / sol meuble : [di]</p></li></ul></li><li><p>Dommage reçu = +degré (cf. ci-dessous) par round</p><p></p></li></ul><table style=\"text-align:center\"><thead><tr style=\"border-bottom:1px solid #999\"><th style=\"padding:0 1em\">Degré</th><th>Exemples</th></tr></thead><tbody><tr style=\"border-bottom:1px solid #999\"><td>1-2</td><td>Feu de camp, substance moyennement caustique (nettoyant industriel), aire emplie de cendres venant d’un feu important</td></tr><tr style=\"border-bottom:1px solid #999\"><td>3-5</td><td>Liquide / projection inflammable, acide industriel, aire emplie de produit chimique</td></tr><tr style=\"border-bottom:1px solid #999\"><td>6-9</td><td>Torche de soudure, acide de guerre, atmosphère d’ammoniac ou chlore</td></tr><tr style=\"border-bottom:1px solid #999\"><td>10+</td><td>Lave, hauts fourneaux, atmosphère de gaz mortels</td></tr></tbody></table>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950926875
+      }
+    },
+    {
+      "_id": "grf9K39jlRK2HjNr",
+      "name": "Gravité",
+      "sort": 30,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p>Test de <strong>Coordination</strong> et compétences de <strong>vigueur</strong> (sauf résistance)</p><ul><li><p>Forte gravité : +1 à 3 [se]</p></li><li><p>Faible gravité : +1 à 3 [bo]</p></li><li><p>Gravité zéro : tout mouvement = terrain difficile</p></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "sIPNyPqNzQ9hK1kS",
+      "name": "Nager",
+      "sort": 40,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<ul><li><p>Courant / Mer agitée : test d'<strong>Athlétisme</strong></p></li></ul><p>                   <em>(difficulté à la discrétion du MJ)</em></p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "VHNHmUqSyt2i8ruR",
+      "name": "Suffocation",
+      "sort": 50,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<ul><li><p><span style=\"text-decoration:underline\">Temps d’apnée :</span> nombre de rounds = <strong>vigueur</strong>, puis :</p><ul><li><p>+3 stress par round</p></li><li><p>+1 blessure critique par round après neutralisé</p></li></ul></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "D5ds0tfv8HGFTNU9",
+      "name": "Vide",
+      "sort": 60,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p>@UUID[Compendium.world.regles.ecghwCLM35vxEL8Y.JournalEntryPage.VHNHmUqSyt2i8ruR]{Suffocation} et +3 blessures par round</p><ul><li><p>+1 blessure critique par round après neutralisé</p></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    }
+  ],
+  "folder": null,
+  "categories": [],
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_stats": {
+    "coreVersion": "13.351",
+    "systemId": "starwarsffg",
+    "systemVersion": "2.0.3",
+    "createdTime": 1783614117882,
+    "modifiedTime": 1783950914621,
+    "lastModifiedBy": "ZlIotMp24V8C0Wao",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!journalentry!pNbSnRH3IGUXzUai"
+}

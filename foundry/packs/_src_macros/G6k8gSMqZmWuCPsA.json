@@ -1,0 +1,21 @@
+{
+  "name": "🎩 Sabacc — Le Croupier",
+  "type": "script",
+  "img": "icons/svg/cowled.svg",
+  "folder": null,
+  "command": "game.modules.get(\"swffg-sabacc\").api.run(\"croupier\");",
+  "ownership": {
+    "default": 0,
+    "bTpHpbvEEXuoga8Z": 3
+  },
+  "flags": {
+    "swffg-sabacc": {
+      "role": "croupier"
+    }
+  },
+  "_id": "G6k8gSMqZmWuCPsA",
+  "author": "bTpHpbvEEXuoga8Z",
+  "scope": "global",
+  "sort": 0,
+  "_key": "!macros!G6k8gSMqZmWuCPsA"
+}

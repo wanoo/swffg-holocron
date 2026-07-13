@@ -1,0 +1,21 @@
+{
+  "name": "🃏 Kessel — Ma main",
+  "type": "script",
+  "img": "icons/svg/card-hand.svg",
+  "folder": null,
+  "command": "game.modules.get(\"swffg-sabacc\").api.run(\"kessel-my-hand\");",
+  "ownership": {
+    "default": 2,
+    "bTpHpbvEEXuoga8Z": 3
+  },
+  "flags": {
+    "swffg-sabacc": {
+      "role": "kessel-my-hand"
+    }
+  },
+  "_id": "N6ABvGDdB1ciNh3k",
+  "author": "bTpHpbvEEXuoga8Z",
+  "scope": "global",
+  "sort": 0,
+  "_key": "!macros!N6ABvGDdB1ciNh3k"
+}

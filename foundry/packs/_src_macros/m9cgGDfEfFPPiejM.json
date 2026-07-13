@@ -1,0 +1,17 @@
+{
+  "name": "🔄 Fin de rencontre",
+  "type": "script",
+  "scope": "global",
+  "img": "icons/svg/heal.svg",
+  "command": "await ChatMessage.create({\n  content: `<h3>🔄 Fin de rencontre</h3>\n    <p><strong>Récupération du stress</strong> : test de <strong>Calme</strong> ou <strong>Sang-froid</strong>\n    (difficulté Simple) — chaque [su] élimine 1 stress, chaque [ad] peut soigner 1 stress d'un allié.</p>\n    <p style=\"font-size:.9em\">Pensez aussi : soins médicaux (1 test/rencontre), rechargement des armes\n    à Munitions limitées, récupération des points de Force engagés.</p>\n    <button class=\"ffg-pool-to-player\">🎲 Test de récupération</button>`,\n  flags: { starwarsffg: { dicePool: {}, description: \"Récupération de stress\", roll: { data: {}, skillName: \"Calme / Sang-froid\", item: {}, flavor: \"\", sound: null } } },\n});",
+  "_id": "m9cgGDfEfFPPiejM",
+  "author": "ZlIotMp24V8C0Wao",
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_key": "!macros!m9cgGDfEfFPPiejM"
+}

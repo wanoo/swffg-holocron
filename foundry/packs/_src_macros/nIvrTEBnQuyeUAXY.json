@@ -1,0 +1,21 @@
+{
+  "name": "🎲 Kessel — Nouvelle partie",
+  "type": "script",
+  "img": "icons/svg/card-joker.svg",
+  "folder": null,
+  "command": "game.modules.get(\"swffg-sabacc\").api.run(\"kessel-new-game\");",
+  "ownership": {
+    "default": 2,
+    "bTpHpbvEEXuoga8Z": 3
+  },
+  "flags": {
+    "swffg-sabacc": {
+      "role": "kessel-new-game"
+    }
+  },
+  "_id": "nIvrTEBnQuyeUAXY",
+  "author": "bTpHpbvEEXuoga8Z",
+  "scope": "global",
+  "sort": 0,
+  "_key": "!macros!nIvrTEBnQuyeUAXY"
+}

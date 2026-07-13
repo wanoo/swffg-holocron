@@ -1,0 +1,21 @@
+{
+  "name": "🎲 Sabacc — Dés de Spike",
+  "type": "script",
+  "img": "icons/svg/dice-target.svg",
+  "folder": null,
+  "command": "game.modules.get(\"swffg-sabacc\").api.run(\"spike-dice\");",
+  "ownership": {
+    "default": 2,
+    "bTpHpbvEEXuoga8Z": 3
+  },
+  "flags": {
+    "swffg-sabacc": {
+      "role": "spike-dice"
+    }
+  },
+  "_id": "34X69HvTwYsz5itJ",
+  "author": "bTpHpbvEEXuoga8Z",
+  "scope": "global",
+  "sort": 0,
+  "_key": "!macros!34X69HvTwYsz5itJ"
+}

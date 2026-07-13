@@ -1,0 +1,554 @@
+{
+  "_id": "wb3YKWod9xHwZoeo",
+  "name": "01 · Mécanique de base",
+  "pages": [
+    {
+      "_id": "9TGYLXBwe6dIYRRp",
+      "name": "Test en Opposition",
+      "sort": 0,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><tbody><tr><td>nb. [ab] = <strong>plus haute</strong> comp. ou carac.</td><td style=\"padding:1em\" rowspan=\"2\"><em><strong>VS</strong></em></td><td>nb. [di] = <strong>plus haute</strong> comp. ou carac. opposée</td></tr><tr><td>nb. [pr] = <strong>plus basse</strong> comp. ou carac.</td><td>nb. [ch] = <strong>plus basse comp.</strong> ou carac. opposée</td></tr></tbody></table><h3>Compétence Social</h3><p>Ajuster suivant la relation : +[bo] ou [se]</p><div><table style=\"text-align:center\" border=\"0\"><thead><tr style=\"border-top:1px dotted #aaa\"><th><p>Compétences</p></th><th>S’opposent à</th></tr></thead><tbody><tr style=\"border-top:1px dotted #aaa\"><td><p>coercition ; tromperie ; commandement</p></td><td>sang-froid</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><p>charme</p></td><td>calme</td></tr><tr style=\"border-top:1px dotted #aaa\"><td><p>négociation</p></td><td>négociation ou calme</td></tr></tbody></table></div>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "GmBCP1OIo9NSQiwW",
+      "name": "Test Assisté",
+      "sort": 10,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<ul><li><p><span style=\"font-family:sans-serif\">assistance qualifiée (l’assistant a la comp.) : <strong>utiliser le meilleur</strong> couple comp. / carac. des PJs</span></p></li><li><p><span style=\"font-family:sans-serif\">assistance non qualifiée (sinon) : +[bo]</span></p></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "yabatrstWNxdmSR3",
+      "name": "Dés",
+      "sort": 20,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h3>Type de dés</h3><ul><li><p>Fortune [BO]</p></li><li><p>Capacité [ab]</p></li><li><p>Maitrise [pr]</p><hr /></li><li><p>Infortune [SE]</p></li><li><p>Difficulté [di]</p></li><li><p>Défi [ch]</p></li></ul><h3>Résultat</h3><ul><li><p>Succès [SU]</p></li><li><p>Avantage [ad]</p></li><li><p>Triomphe [TR]</p><hr /></li><li><p>Echec [fa]</p></li><li><p>Menace [th]</p></li><li><p>Désastre [de]</p></li></ul><h3>Force</h3><ul><li><p>Force [fo]</p><hr /></li><li><p>Points de Force [FP]</p></li><li><p>Point côté clair [LI]</p></li><li><p>Point côté obscur [DA]</p></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "kjbu22MgSolzsHXY",
+      "name": "Terminologie",
+      "sort": 30,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h3>Améliorer compétence :</h3><p>[ab] devient [pr]<br />si pas de [ab] disponible : ajouter [ab] (puis devient [pr], etc.)</p><h3>Améliorer difficulté :</h3><p>[di] devient [ch]<br />si pas de [di] disponible, ajouter [di] (puis devient [ch], etc.)</p><h3>Dégrader compétence / difficulté :</h3><p>inverse d’améliorer<br />ignorer si pas de [pr] ou [ch] disponible</p><h3>Amélioration VS Augmentation</h3><ul><li><p>2 Améliorations : [di] =&gt; [ch][di]</p></li><li><p>2 Augmentations : [di]=&gt; [di][di][di]</p></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "BH6ryUMKKwaLvpy1",
+      "name": "Construire un jet de dés",
+      "sort": 40,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<ol><li><p>nb. [ab] = plus <strong>haute</strong> comp. ou carac.</p></li><li><p>nb. [pr] = plus <strong>basse</strong> comp. ou carac. <em>(remplace les [ab])</em></p></li><li><p>nb. [di]([ch]) = difficulté <em>(définie par le MJ)</em></p></li><li><p>nb. [bo] = fortune (avantages) <strong>RolePlay</strong></p></li><li><p>nb. [se] = infortune (désavantages) <strong>RolePlay</strong></p></li></ol>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "V6jUqQ7HdUMqZkxq",
+      "name": "Résultats",
+      "sort": 50,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p style=\"text-align:center\">[fa]<span style=\"text-decoration:underline\"><strong><span style=\"text-decoration:underline\"> annule</span></strong><span style=\"text-decoration:underline\"> [su]</span></span></p><p style=\"text-align:center\"><em>[su] = succès</em></p><p style=\"text-align:center\"><em>[fa] = échec</em></p><hr /><p style=\"text-align:center\"><span style=\"text-decoration:underline\"><span style=\"text-decoration:underline\">[ad] </span><strong><span style=\"text-decoration:underline\">annule</span></strong><span style=\"text-decoration:underline\"> [th]</span></span></p><p style=\"text-align:center\"><em>[ad] = avantage (même sur un échec)</em></p><p style=\"text-align:center\"><em>[th] = désavantage (même sur un succès)</em></p><hr /><p style=\"text-align:center\">[tr] = 1 [su] + <strong>effet du triomphe</strong></p><p style=\"text-align:center\">[de] = 1 [fa] + <strong>effet du désespoir</strong></p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "Rr2tAfAVqQu1YnvI",
+      "name": "dice_helper",
+      "sort": 60,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p>{\"SWFFG.SkillsNameMelee\":{\"su\":[],\"ad\":[{\"text\":\"Infliger une blessure critique (selon le nombre de critique requis par l'arme)\",\"required\":1},{\"text\":\"Éliminer un point de stress (plusieurs fois possibles)\",\"required\":1},{\"text\":\"+[bo] au jet de l'allié suivant\",\"required\":1},{\"text\":\"Réaliser une manoeuvre gratuite\",\"required\":2},{\"text\":\"+[se] au prochain jet de la cible\",\"required\":2},{\"text\":\"+[bo] au prochain jet de n'importe quel allié\",\"required\":2},{\"text\":\"Annule les bonus de défense de la cible jusqu'au prochain tour\",\"required\":3},{\"text\":\"Ignore les pénalités dues à l'environnement jusqu'à la fin du prochain tour\",\"required\":3},{\"text\":\"Neutralise la cible au lieu de subir des blessures/stress\",\"required\":3},{\"text\":\"+1 en défense (cac ou dist.) jusqu'à le fin du prochain tour\",\"required\":3},{\"text\":\"La cible lâche une arme tenue\",\"required\":3}],\"tr\":[{\"text\":\"Améliore la difficulté du prochain test de la cible\",\"required\":1},{\"text\":\"Améliore le prochain test de n'importe quel allié\",\"required\":1},{\"text\":\"Détruit une pièce d'équipement de la cible\",\"required\":2}],\"fa\":[],\"th\":[{\"text\":\"Subit 1 stress\",\"required\":1},{\"text\":\"Perds le bénéfice d'une précédente manoeuvre (abri, défense)\",\"required\":1},{\"text\":\"Un adversaire exécute immédiatement une maneouvre gratuite\",\"required\":2},{\"text\":\"+[bo] au prochain test du personnage visé\",\"required\":2},{\"text\":\"+[se] au prochain test d'un allié\",\"required\":2},{\"text\":\"Le personnage tombe à terre\",\"required\":3},{\"text\":\"Le slot utilisé passe en dernier dans l'ordre d'initiative\",\"required\":3}],\"de\":[{\"text\":\"L'attaque à distance touche un personnage au contact avec la cible\",\"required\":1},{\"text\":\"L'arme à distance est à court de munition\",\"required\":1},{\"text\":\"Améliore la difficulté du prochain teste d'un allié\",\"required\":1},{\"text\":\"L'outil ou l'arme utilisée est endommagée\",\"required\":1}]},\"SWFFG.SkillsNameBrawl\":{\"su\":[],\"ad\":[{\"text\":\"Infliger une blessure critique (selon le nombre de critique requis par l'arme)\",\"required\":1},{\"text\":\"Éliminer un point de stress (plusieurs fois possibles)\",\"required\":1},{\"text\":\"+[bo] au prochain jet d'un allié\",\"required\":1},{\"text\":\"Réaliser une manoeuvre gratuite\",\"required\":2},{\"text\":\"+[se] au prochain jet de la cible\",\"required\":2},{\"text\":\"+[bo] au prochain jet de n'importe quel allié\",\"required\":2},{\"text\":\"Annule les bonus de défense de la cible jusqu'au prochain tour\",\"required\":3},{\"text\":\"Ignore les pénalités dues à l'environnement jusqu'à la fin du prochain tour\",\"required\":3},{\"text\":\"Neutralise la cible au lieu de subir des blessures/stress\",\"required\":3},{\"text\":\"+1 en défense (cac ou dist.) jusqu'à le fin du prochain tour\",\"required\":3},{\"text\":\"La cible lâche une arme tenue\",\"required\":3}],\"tr\":[{\"text\":\"Améliore la difficulté du prochain test de la cible\",\"required\":1},{\"text\":\"Améliore le prochain test de n'importe quel allié\",\"required\":1},{\"text\":\"Détruit une pièce d'équipement de la cible\",\"required\":2}],\"fa\":[],\"th\":[{\"text\":\"Subit 1 stress\",\"required\":1},{\"text\":\"Perds le bénéfice d'une précédente manoeuvre (abri, défense)\",\"required\":1},{\"text\":\"Un adversaire exécute immédiatement une maneouvre gratuite\",\"required\":2},{\"text\":\"+[bo] au prochain jet de la cible\",\"required\":2},{\"text\":\"+[se] au prochain test d'un allié\",\"required\":2},{\"text\":\"Le personnage tombe à terre\",\"required\":3},{\"text\":\"Le slot utilisé passe en dernier dans l'ordre d'initiative\",\"required\":3}],\"de\":[{\"text\":\"L'attaque à distance touche un personnage au contact avec la cible\",\"required\":1},{\"text\":\"L'arme à distance est à court de munition\",\"required\":1},{\"text\":\"Améliore la difficulté du prochain teste d'un allié\",\"required\":1},{\"text\":\"L'outil ou l'arme utilisée est endommagée\",\"required\":1}]},\"SWFFG.SkillsNameLightsaber\":{\"su\":[],\"ad\":[{\"text\":\"Infliger une blessure critique (selon le nombre de critique requis par l'arme)\",\"required\":1},{\"text\":\"Éliminer un point de stress (plusieurs fois possibles)\",\"required\":1},{\"text\":\"+[bo] au prochain jet d'un allié\",\"required\":1},{\"text\":\"Réaliser une manoeuvre gratuite\",\"required\":2},{\"text\":\"+[se] au prochain jet de la cible\",\"required\":2},{\"text\":\"+[bo] au prochain jet de n'importe quel allié\",\"required\":2},{\"text\":\"Annule les bonus de défense de la cible jusqu'au prochain tour\",\"required\":3},{\"text\":\"Ignore les pénalités dues à l'environnement jusqu'à la fin du prochain tour\",\"required\":3},{\"text\":\"Neutralise la cible au lieu de subir des blessures/stress\",\"required\":3},{\"text\":\"+1 en défense (cac ou dist.) jusqu'à le fin du prochain tour\",\"required\":3},{\"text\":\"La cible lâche une arme tenue\",\"required\":3}],\"tr\":[{\"text\":\"Améliore la difficulté du prochain test de la cible\",\"required\":1},{\"text\":\"Améliore le prochain test de n'importe quel allié\",\"required\":1},{\"text\":\"Détruit une pièce d'équipement de la cible\",\"required\":2}],\"fa\":[],\"th\":[{\"text\":\"Subit 1 stress\",\"required\":1},{\"text\":\"Perds le bénéfice d'une précédente manoeuvre (abri, défense)\",\"required\":1},{\"text\":\"Un adversaire exécute immédiatement une maneouvre gratuite\",\"required\":2},{\"text\":\"+[bo] au prochain jet de la cible\",\"required\":2},{\"text\":\"+[se] au prochain test d'un allié\",\"required\":2},{\"text\":\"Le personnage tombe à terre\",\"required\":3},{\"text\":\"Le slot utilisé passe en dernier dans l'ordre d'initiative\",\"required\":3}],\"de\":[{\"text\":\"L'attaque à distance touche un personnage au contact avec la cible\",\"required\":1},{\"text\":\"L'arme à distance est à court de munition\",\"required\":1},{\"text\":\"Améliore la difficulté du prochain teste d'un allié\",\"required\":1},{\"text\":\"L'outil ou l'arme utilisée est endommagée\",\"required\":1}]},\"SWFFG.SkillsNameRangedLight\":{\"su\":[],\"ad\":[{\"text\":\"Infliger une blessure critique (selon le nombre de critique requis par l'arme)\",\"required\":1},{\"text\":\"Éliminer un point de stress (plusieurs fois possibles)\",\"required\":1},{\"text\":\"+[bo] au prochain jet d'un allié\",\"required\":1},{\"text\":\"Réaliser une manoeuvre gratuite\",\"required\":2},{\"text\":\"+[se] au prochain jet de la cible\",\"required\":2},{\"text\":\"+[bo] au prochain jet de n'importe quel allié\",\"required\":2},{\"text\":\"Annule les bonus de défense de la cible jusqu'au prochain tour\",\"required\":3},{\"text\":\"Ignore les pénalités dues à l'environnement jusqu'à la fin du prochain tour\",\"required\":3},{\"text\":\"Neutralise la cible au lieu de subir des blessures/stress\",\"required\":3},{\"text\":\"+1 en défense (cac ou dist.) jusqu'à le fin du prochain tour\",\"required\":3},{\"text\":\"La cible lâche une arme tenue\",\"required\":3}],\"tr\":[{\"text\":\"Améliore la difficulté du prochain test de la cible\",\"required\":1},{\"text\":\"Améliore le prochain test de n'importe quel allié\",\"required\":1},{\"text\":\"Détruit une pièce d'équipement de la cible\",\"required\":2}],\"fa\":[],\"th\":[{\"text\":\"Subit 1 stress\",\"required\":1},{\"text\":\"Perds le bénéfice d'une précédente manoeuvre (abri, défense)\",\"required\":1},{\"text\":\"Un adversaire exécute immédiatement une maneouvre gratuite\",\"required\":2},{\"text\":\"+[bo] au prochain jet de la cible\",\"required\":2},{\"text\":\"+[se] au prochain test d'un allié\",\"required\":2},{\"text\":\"Le personnage tombe à terre\",\"required\":3},{\"text\":\"Le slot utilisé passe en dernier dans l'ordre d'initiative\",\"required\":3}],\"de\":[{\"text\":\"L'attaque à distance touche un personnage au contact avec la cible\",\"required\":1},{\"text\":\"L'arme à distance est à court de munition\",\"required\":1},{\"text\":\"Améliore la difficulté du prochain teste d'un allié\",\"required\":1},{\"text\":\"L'outil ou l'arme utilisée est endommagée\",\"required\":1}]},\"SWFFG.SkillsNameRangedHeavy\":{\"su\":[],\"ad\":[{\"text\":\"Infliger une blessure critique (selon le nombre de critique requis par l'arme)\",\"required\":1},{\"text\":\"Éliminer un point de stress (plusieurs fois possibles)\",\"required\":1},{\"text\":\"+[bo] au prochain jet d'un allié\",\"required\":1},{\"text\":\"Réaliser une manoeuvre gratuite\",\"required\":2},{\"text\":\"+[se] au prochain jet de la cible\",\"required\":2},{\"text\":\"+[bo] au prochain jet de n'importe quel allié\",\"required\":2},{\"text\":\"Annule les bonus de défense de la cible jusqu'au prochain tour\",\"required\":3},{\"text\":\"Ignore les pénalités dues à l'environnement jusqu'à la fin du prochain tour\",\"required\":3},{\"text\":\"Neutralise la cible au lieu de subir des blessures/stress\",\"required\":3},{\"text\":\"+1 en défense (cac ou dist.) jusqu'à le fin du prochain tour\",\"required\":3},{\"text\":\"La cible lâche une arme tenue\",\"required\":3}],\"tr\":[{\"text\":\"Améliore la difficulté du prochain test de la cible\",\"required\":1},{\"text\":\"Améliore le prochain test de n'importe quel allié\",\"required\":1},{\"text\":\"Détruit une pièce d'équipement de la cible\",\"required\":2}],\"fa\":[],\"th\":[{\"text\":\"Subit 1 stress\",\"required\":1},{\"text\":\"Perds le bénéfice d'une précédente manoeuvre (abri, défense)\",\"required\":1},{\"text\":\"Un adversaire exécute immédiatement une maneouvre gratuite\",\"required\":2},{\"text\":\"+[bo] au prochain jet de la cible\",\"required\":2},{\"text\":\"+[se] au prochain test d'un allié\",\"required\":2},{\"text\":\"Le personnage tombe à terre\",\"required\":3},{\"text\":\"Le slot utilisé passe en dernier dans l'ordre d'initiative\",\"required\":3}],\"de\":[{\"text\":\"L'attaque à distance touche un personnage au contact avec la cible\",\"required\":1},{\"text\":\"L'arme à distance est à court de munition\",\"required\":1},{\"text\":\"Améliore la difficulté du prochain teste d'un allié\",\"required\":1},{\"text\":\"L'outil ou l'arme utilisée est endommagée\",\"required\":1}]},\"SWFFG.SkillsNameGunnery\":{\"su\":[],\"ad\":[{\"text\":\"Infliger une blessure critique (selon le nombre de critique requis par l'arme)\",\"required\":1},{\"text\":\"Éliminer un point de stress (plusieurs fois possibles)\",\"required\":1},{\"text\":\"+[bo] au prochain jet d'un allié\",\"required\":1},{\"text\":\"Réaliser une manoeuvre gratuite\",\"required\":2},{\"text\":\"+[se] au prochain jet de la cible\",\"required\":2},{\"text\":\"+[bo] au prochain jet de n'importe quel allié\",\"required\":2},{\"text\":\"Annule les bonus de défense de la cible jusqu'au prochain tour\",\"required\":3},{\"text\":\"Ignore les pénalités dues à l'environnement jusqu'à la fin du prochain tour\",\"required\":3},{\"text\":\"Neutralise la cible au lieu de subir des blessures/stress\",\"required\":3},{\"text\":\"+1 en défense (cac ou dist.) jusqu'à le fin du prochain tour\",\"required\":3},{\"text\":\"La cible lâche une arme tenue\",\"required\":3}],\"tr\":[{\"text\":\"Améliore la difficulté du prochain test de la cible\",\"required\":1},{\"text\":\"Améliore le prochain test de n'importe quel allié\",\"required\":1},{\"text\":\"Détruit une pièce d'équipement de la cible\",\"required\":2}],\"fa\":[],\"th\":[{\"text\":\"Subit 1 stress\",\"required\":1},{\"text\":\"Perds le bénéfice d'une précédente manoeuvre (abri, défense)\",\"required\":1},{\"text\":\"Un adversaire exécute immédiatement une maneouvre gratuite\",\"required\":2},{\"text\":\"+[bo] au prochain jet de la cible\",\"required\":2},{\"text\":\"+[se] au prochain test d'un allié\",\"required\":2},{\"text\":\"Le personnage tombe à terre\",\"required\":3},{\"text\":\"Le slot utilisé passe en dernier dans l'ordre d'initiative\",\"required\":3}],\"de\":[{\"text\":\"L'attaque à distance touche un personnage au contact avec la cible\",\"required\":1},{\"text\":\"L'arme à distance est à court de munition\",\"required\":1},{\"text\":\"Améliore la difficulté du prochain teste d'un allié\",\"required\":1},{\"text\":\"L'outil ou l'arme utilisée est endommagée\",\"required\":1}]},\"SWFFG.SkillsNameKnowledgeCoreWorlds\":{\"su\":[{\"text\":\"connaissance sup. / se rappeler plus vite\",\"required\":1}],\"ad\":[{\"text\":\"détails secondaire utiles.\",\"required\":1}],\"tr\":[{\"text\":\"détails extrêmement important (i.e. faiblesse de l’adversaire)\",\"required\":1}],\"fa\":[],\"th\":[{\"text\":\"omettre un détail important pour le contexte\",\"required\":1}],\"de\":[{\"text\":\"désinformer / mentir sur toute la ligne\",\"required\":1}]},\"SWFFG.SkillsNameKnowledgeEducation\":{\"su\":[{\"text\":\"connaissance sup. / se rappeler plus vite\",\"required\":1}],\"ad\":[{\"text\":\"détails secondaire utiles.\",\"required\":1}],\"tr\":[{\"text\":\"détails extrêmement important (i.e. faiblesse de l’adversaire)\",\"required\":1}],\"th\":[{\"text\":\"omettre un détail important pour le contexte\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"désinformer / mentir sur toute la ligne\",\"required\":1}]},\"SWFFG.SkillsNameKnowledgeLore\":{\"su\":[{\"text\":\"connaissance sup. / se rappeler plus vite\",\"required\":1}],\"ad\":[{\"text\":\"détails secondaire utiles.\",\"required\":1}],\"tr\":[{\"text\":\"détails extrêmement important (i.e. faiblesse de l’adversaire)\",\"required\":1}],\"th\":[{\"text\":\"omettre un détail important pour le contexte\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"désinformer / mentir sur toute la ligne\",\"required\":1}]},\"SWFFG.SkillsNameKnowledgeOuterRim\":{\"su\":[{\"text\":\"connaissance sup. / se rappeler plus vite\",\"required\":1}],\"ad\":[{\"text\":\"détails secondaire utiles.\",\"required\":1}],\"tr\":[{\"text\":\"détails extrêmement important (i.e. faiblesse de l’adversaire)\",\"required\":1}],\"th\":[{\"text\":\"omettre un détail important pour le contexte\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"désinformer / mentir sur toute la ligne\",\"required\":1}]},\"SWFFG.SkillsNameKnowledgeUnderworld\":{\"su\":[{\"text\":\"connaissance sup. / se rappeler plus vite\",\"required\":1}],\"ad\":[{\"text\":\"détails secondaire utiles.\",\"required\":1}],\"tr\":[{\"text\":\"détails extrêmement important (i.e. faiblesse de l’adversaire)\",\"required\":1}],\"th\":[{\"text\":\"omettre un détail important pour le contexte\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"désinformer / mentir sur toute la ligne\",\"required\":1}]},\"SWFFG.SkillsNameKnowledgeWarfare\":{\"su\":[{\"text\":\"connaissance sup. / se rappeler plus vite\",\"required\":1}],\"ad\":[{\"text\":\"détails secondaire utiles.\",\"required\":1}],\"tr\":[{\"text\":\"détails extrêmement important (i.e. faiblesse de l’adversaire)\",\"required\":1}],\"th\":[{\"text\":\"omettre un détail important pour le contexte\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"désinformer / mentir sur toute la ligne\",\"required\":1}]},\"SWFFG.SkillsNameKnowledgeXenology\":{\"su\":[{\"text\":\"connaissance sup. / se rappeler plus vite\",\"required\":1}],\"ad\":[{\"text\":\"détails secondaire utiles.\",\"required\":1}],\"tr\":[{\"text\":\"détails extrêmement important (i.e. faiblesse de l’adversaire)\",\"required\":1}],\"th\":[{\"text\":\"omettre un détail important pour le contexte\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"désinformer / mentir sur toute la ligne\",\"required\":1}]},\"SWFFG.SkillsNameAthletics\":{\"su\":[{\"text\":\"réduit le temps / augmente la distance parcourue\",\"required\":1}],\"ad\":[{\"text\":\"+[bo] sur un prochain test physique\",\"required\":1},{\"text\":\"+1 manœuvre de mouvement\",\"required\":2}],\"fa\":[],\"tr\":[],\"th\":[{\"text\":\"+1 stress\",\"required\":1},{\"text\":\"tombe au sol \",\"required\":2},{\"text\":\"+1 blessure\",\"required\":3}],\"de\":[{\"text\":\"+1 blessure critique\",\"required\":1}]},\"SWFFG.SkillsNameCool\":{\"ad\":[{\"text\":\"indice sup. sur la situation\",\"required\":1}],\"tr\":[{\"text\":\"-3 stress\",\"required\":1}],\"fa\":[],\"su\":[],\"th\":[{\"text\":\"loupe un important détail\",\"required\":1}],\"de\":[{\"text\":\"état étourdi (pas d’action) pour 1 round\",\"required\":1}]},\"SWFFG.SkillsNameCharm\":{\"su\":[{\"text\":\"augmente la durée du soutien d’une scène\",\"required\":1}],\"ad\":[{\"text\":\"affecte des cibles supplémentaires\",\"required\":1}],\"tr\":[{\"text\":\"la cible devient un allié récurrent\",\"required\":1}],\"th\":[{\"text\":\"réduit le nombre de personne influencée\",\"required\":1},{\"text\":\"retourne contre soi d’autres personnes que la cible\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"la cible / autre PNJ devient un adversaire récurrent\",\"required\":1}]},\"SWFFG.SkillsNameCoercion\":{\"su\":[{\"text\":\"+1 stress à la cible\",\"required\":2}],\"ad\":[{\"text\":\"révèle des infos sup. par rapport à la cible\",\"required\":2}],\"tr\":[{\"text\":\"la cible devient un allié soumis\",\"required\":1}],\"th\":[{\"text\":\"le PNJ aura de la rancœur suite à l’interrogatoire\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"l’interrogateur révèle qqch (bourde)\",\"required\":1}]},\"SWFFG.SkillsNameLeadership\":{\"su\":[{\"text\":\"augmente la durée de l’influence\",\"required\":1}],\"ad\":[{\"text\":\"affecte des cibles en plus de la 1re\",\"required\":1}],\"tr\":[{\"text\":\"le PNJ devient un soutient récurrent\",\"required\":1}],\"th\":[{\"text\":\"suivre les ordres dure plus longtemps ou les actions exécutées sont finalement mal faites\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"+[di]aux prochains tests de commandement\",\"required\":1},{\"text\":\"La cible devient un opposant régulier, conteste les ordres en face des autres\",\"required\":2}]},\"SWFFG.SkillsNameCoordination\":{\"su\":[{\"text\":\"augmente la distance de 25% / diminue le temps\",\"required\":1}],\"ad\":[{\"text\":\"+1 manœuvre\",\"required\":2}],\"fa\":[],\"tr\":[],\"th\":[{\"text\":\"le PJ perd sa manœuvre gratuite ce tour (ou prochain)\",\"required\":1}],\"de\":[{\"text\":\"+1 blessure / perd une pièce d’équipement\",\"required\":1}]},\"SWFFG.SkillsNameStealth\":{\"su\":[{\"text\":\"transfère [su] aux alliés du personnage\",\"required\":1}],\"ad\":[{\"text\":\"réduit le temps requis\",\"required\":1}],\"tr\":[{\"text\":\"méthode pour distraire les adversaires dans une scène\",\"required\":1}],\"th\":[{\"text\":\"augmente le temps de 25%\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"traces laissées derrière / perte d’un équipement\",\"required\":1}]},\"SWFFG.SkillsNameComputers\":{\"su\":[{\"text\":\"réduit le temps requis\",\"required\":1}],\"ad\":[{\"text\":\"découvre des infos sup. (indices, journal personnel, défenses bien dissimulées)\",\"required\":1}],\"tr\":[{\"text\":\"dissimule le hack du système\",\"required\":1}],\"th\":[{\"text\":\"le système de sécurité est alerté, les autres slicers gagnent +[bo] contre le PJ\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"le PJ peut être identifié / tracé, +[bo] contre les prochains tests ciblant le slicer\",\"required\":1}]},\"SWFFG.SkillsNameSkulduggery\":{\"ad\":[{\"text\":\"gagne un item additionnel / identifie une cible sup.\",\"required\":1}],\"tr\":[{\"text\":\"gagne un pass permanent / astuce permanent\",\"required\":1},{\"text\":\"gagne une information / un objet de valeur sup.\",\"required\":1}],\"th\":[{\"text\":\"l’adversaire a l’occasion d’attraper le PJ après l’acte\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"PJ laisse des traces derrière lui / perte d’équipement\",\"required\":1}]},\"SWFFG.SkillsNameMechanics\":{\"su\":[{\"text\":\"réduit le temps requis de 10-20%\",\"required\":1},{\"text\":\"guérit 1 blessure\",\"required\":1}],\"ad\":[{\"text\":\"Réparation supérieure : +[bo] aux tests liés à l’item pour la session\",\"required\":1},{\"text\":\"Réparation supérieure : l’item gagne la qualité supérieure pour la session\",\"required\":1},{\"text\":\"-1 stress\",\"required\":1}],\"tr\":[{\"text\":\"ajoute une fonction à l’item\",\"required\":1},{\"text\":\"guérit 1 blessure sup. ou 1 blessure critique\",\"required\":1}],\"th\":[{\"text\":\"l’item dysfonctionnera dans un futur proche\",\"required\":1},{\"text\":\"+1 stress\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"dommages à l’item / composant dysfonctionne\",\"required\":1},{\"text\":\"+1 blessure\",\"required\":1}]},\"SWFFG.SkillsNameNegotiation\":{\"su\":[{\"text\":\"augment le temps du contrat / les profits de 5%\",\"required\":1}],\"ad\":[{\"text\":\"gagne une faveur / concession de la cible\",\"required\":1}],\"tr\":[{\"text\":\"PNJ devient un client / vendeur régulier\",\"required\":1}],\"th\":[{\"text\":\"augmente le coût / diminue la valeur / le contrat\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"le contrat contient de sérieuses failles pour les PJs\",\"required\":1}]},\"SWFFG.SkillsNamePerception\":{\"su\":[{\"text\":\"la perception révèle des détails sup.\",\"required\":1}],\"ad\":[{\"text\":\"se souvenir de détails sup. au sujet des objets perçus\",\"required\":1}],\"tr\":[{\"text\":\"remarquer un détail important, +[bo] aux prochains tests\",\"required\":1}],\"th\":[{\"text\":\"ratte un détail vital\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"le PJ perçoit de fausses informations\",\"required\":1}]},\"SWFFG.SkillsNamePilotingPlanetary\":{\"su\":[],\"ad\":[{\"text\":\"+[bo] pour contrer le test de pilotage d’un adversaire\",\"required\":1}],\"tr\":[{\"text\":\"+1 manœuvre de véhicule\",\"required\":1}],\"th\":[{\"text\":\"l’adversaire gagne +[bo] contre le PJ\",\"required\":2}],\"fa\":[],\"de\":[{\"text\":\"endommage le véhicule\",\"required\":1}]},\"SWFFG.SkillsNamePilotingSpace\":{\"su\":[],\"ad\":[{\"text\":\"+[bo] pour contrer le test de pilotage d’un adversaire\",\"required\":1}],\"tr\":[{\"text\":\"+1 manœuvre de véhicule\",\"required\":1}],\"th\":[{\"text\":\"l’adversaire gagne +[bo] contre le PJ\",\"required\":2}],\"fa\":[],\"de\":[{\"text\":\"endommage le véhicule\",\"required\":1}]},\"SWFFG.SkillsNameResilience\":{\"su\":[{\"text\":\"augmente le temps avant le prochain test de résistance\",\"required\":1}],\"ad\":[{\"text\":\"identifier une méthode pour gagner +[bo] aux prochains tests de résistance (aussi pour les alliés)\",\"required\":1}],\"tr\":[{\"text\":\"-3 stress\",\"required\":1}],\"th\":[{\"text\":\"+[bo] au prochain test de résistance\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"+1 blessure ou 1 blessure critique mineure\",\"required\":1}]},\"SWFFG.SkillsNameDiscipline\":{\"su\":[{\"text\":\"permet de dégrader c de la prochaine action\",\"required\":1}],\"ad\":[{\"text\":\"indice sup. sur la situation\",\"required\":1}],\"tr\":[{\"text\":\"+[bo] aux tests de sang-froid allié pour un round\",\"required\":1}],\"th\":[{\"text\":\"+[di]à la prochaine action, volonté du PJ miné\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"état étourdit (pas d’action) au prochain round\",\"required\":1}]},\"SWFFG.SkillsNameSurvival\":{\"su\":[{\"text\":\"ajoute [su] aux tests des alliés\",\"required\":1},{\"text\":\"gagne des rations / ressources sup.\",\"required\":1}],\"ad\":[{\"text\":\"identifie une méthode pour gagner +[bo] aux prochains tests de survie (aussi pour les alliés)\",\"required\":1},{\"text\":\"(traque) : apprend des détails sur les cibles (nombre ; espèces, âges...)\",\"required\":1}],\"tr\":[{\"text\":\"(traque) : apprend des détails autours de la cible (destination ; disposition, présence de prisonniers / cargo)\",\"required\":1},{\"text\":\"(dressage) : l’animal devient un compagnon permanent\",\"required\":1}],\"th\":[],\"fa\":[],\"de\":[]},\"SWFFG.SkillsNameStreetwise\":{\"su\":[{\"text\":\"réduit le temps requis / coût\",\"required\":1}],\"ad\":[{\"text\":\"découvre une rumeur sup. / d’autres sources d’infos\",\"required\":1}],\"tr\":[{\"text\":\"gagne un contact récurrent\",\"required\":1}],\"th\":[{\"text\":\"les infos comportent des mensonges\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"les questions / intentions du PJ attirent l’attention\",\"required\":1}]},\"SWFFG.SkillsNameDeception\":{\"su\":[{\"text\":\"augmente la durée de la tromperie\",\"required\":1}],\"ad\":[{\"text\":\"augmente la valeur du bien / du service gagné\",\"required\":1}],\"tr\":[{\"text\":\"la cible fait confiance au PJ, pas de tests en opposition pour les futurs mensonges (MJ définit une difficulté)\",\"required\":1}],\"th\":[{\"text\":\"la cible voit claire dans le mensonge\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"la cible fait mauvaise réputation au PJ\",\"required\":1},{\"text\":\"la cible tire avantage du mensonge (fausse info / bien défectueux)\",\"required\":1}]},\"SWFFG.SkillsNameVigilance\":{\"su\":[{\"text\":\"le PJ apprends des informations importante sup.\",\"required\":1}],\"ad\":[{\"text\":\"révèle des avantages de l’environnement (couvert, échappatoire ou +[bo])\",\"required\":1}],\"tr\":[],\"th\":[{\"text\":\"loupe des informations sur la situation / environnement\",\"required\":1}],\"fa\":[],\"de\":[]},\"SWFFG.SkillsNameAstrogation\":{\"su\":[{\"text\":\"Meilleur vecteur de sortie / temps de calcul\",\"required\":1}],\"ad\":[{\"text\":\"Réduit le temps de voyage\",\"required\":1}],\"tr\":[{\"text\":\"Temps de calcul minimum\",\"required\":1},{\"text\":\"Temps de voyage réduit au minimum\",\"required\":1}],\"th\":[{\"text\":\"Mauvaise précision / voyage plus long\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"Idem à [th] ou effet désastreux\",\"required\":1}]},\"SWFFG.SkillsNameMedicine\":{\"su\":[{\"text\":\"guérit 1 blessure\",\"required\":1}],\"ad\":[{\"text\":\"-1 stress\",\"required\":1}],\"tr\":[{\"text\":\"guérit 1 blessure sup. ou 1 blessure critique\",\"required\":1}],\"th\":[{\"text\":\"+1 stress\",\"required\":1}],\"fa\":[],\"de\":[{\"text\":\"+1 blessure\",\"required\":1}]}}</p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "zMtuFAAVIbnECGk6",
+      "name": "Test Combiné",
+      "sort": 70,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p><span style=\"text-decoration:underline\"><span style=\"text-decoration:underline\">Définir les 2 compétences (principale et secondaire), puis test avec :</span></span></p><p><strong>plus basse</strong> compétences. &amp; <strong>plus basse</strong> caractéristique. vs. <strong>plus haute</strong> difficulté.</p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "omx5zdkCDPs4Ii04",
+      "name": "Test Concurrentiel",
+      "sort": 80,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p>Le personnage avec le plus de [su] gagne les égalités sont départagées par [tr], puis par [ad] (<strong><span style=\"text-decoration:underline\">ex-aequo :</span></strong> le MJ tranche ou on recommence le test)</p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783948920319
+      }
+    },
+    {
+      "_id": "F2wGxynULKagxZ1b",
+      "name": "Caractéristique",
+      "sort": 90,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h2>Définitions</h2><div><table border=\"1\"><thead><tr><th>Caractéristique</th><th>Définit le ...</th></tr></thead><tbody><tr><td>Vigueur</td><td rowspan=\"2\">Physique</td></tr><tr><td>Agilité</td></tr><tr><td>Intelligence</td><td rowspan=\"2\">raisonnement</td></tr><tr><td>Ruse</td></tr><tr><td>Volonté</td><td rowspan=\"2\">mental</td></tr><tr><td>Présence</td></tr></tbody></table></div><h2>Représentation</h2><div><table border=\"1\"><thead><tr><th>Valeur</th><th>Représentation</th></tr></thead><tbody><tr><td>1</td><td>Faible</td></tr><tr><td>2</td><td>Moyen</td></tr><tr><td>3</td><td rowspan=\"2\">au-dessus de la moyenne</td></tr><tr><td>4</td></tr><tr><td>5</td><td rowspan=\"2\">exceptionnel</td></tr><tr><td>6</td></tr></tbody></table></div>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783949211202
+      }
+    },
+    {
+      "_id": "rkJFiQkwqpFvHp5g",
+      "name": "Points de Destin",
+      "sort": 100,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h2>Constituer la réserve</h2><p><span style=\"font-family:sans-serif\">Chaque joueur et MJ fait un jet de [FO]</span><br /><span style=\"font-family:sans-serif\">[LI] = +1 point de destin clair (dest. PJ</span><span style=\"font-family:monospace\">)</span><br /><span style=\"font-family:sans-serif\">[DA] = +1 point de destin obscur (dest. MJ</span><span style=\"font-family:monospace\">)</span><br /><span style=\"font-family:sans-serif\"><em>retourner 1 dest. PJ en dest. MJ par adepte du côté obscur</em></span><em><br /></em><span style=\"font-family:sans-serif\"><em>ajouter 1 dest. PJ par parangon du côté clair à la réserve</em></span></p><h2>Utilisation</h2><ul><li><p>Améliore [ab] en (pr] ou [di] en [ch] si MJ</p></li><li><p>Deus ex machina</p></li></ul><p><sub><span style=\"font-family:sans-serif\">limitée à 1 dest. PJ et 1 dest. MJ par test</span></sub></p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "INoDzvX7pJy6sheZ",
+      "name": "Difficulté",
+      "sort": 110,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<div><table><thead><tr style=\"border-top:1px solid #999\"><th style=\"width:20%\">Difficulté</th><th style=\"width:20%\">Difficulté</th><th style=\"width:60%\">Exemples</th></tr></thead><tbody><tr style=\"border-top:1px solid #999\"><td>Simple</td><td style=\"text-align:center !important\">-</td><td>Tâche de routine ; l’issue est très rarement incertaine</td></tr><tr style=\"border-top:1px solid #999\"><td>Facile</td><td style=\"text-align:center !important\">[di]</td><td>Crocheter une serrure primitive, soigner des égratignures, trouver de la nourriture / abri sur une planète luxuriante</td></tr><tr style=\"border-top:1px solid #999\"><td>Moyen</td><td style=\"text-align:center !important\">[di][di]</td><td>Crocheter une serrure normale, recoudre une petite plaie, trouver de la nourriture / abri sur une planète au climat tempéré</td></tr><tr style=\"border-top:1px solid #999\"><td>Difficile</td><td style=\"text-align:center !important\">[di][di][di]</td><td>Crocheter une serrure compliquée, réduire une fracture/une vilaine plaie, trouver de la nourriture / abri sur une planète hostile</td></tr><tr style=\"border-top:1px solid #999\"><td>Intimidant</td><td style=\"text-align:center !important\">[di][di][di][di]</td><td>Crocheter une serrure très sophistiquée, faire une opération chirurgicale/implant, trouver de la nourriture / abri sur une planète désertique</td></tr><tr style=\"border-top:1px solid #999\"><td>Exceptionnel</td><td style=\"text-align:center !important\">[di][di][di][di][di]</td><td>Crocheter une serrure sans mécanisme apparent, cloner un corps, trouver de la nourriture / abri sur une planète sans atmosphère</td></tr><tr style=\"border-top:1px solid #999\"><td>Impossible</td><td style=\"text-align:center !important\"><p>[di][di][di][di][di]</p><p><strong>+1 flip Point de Destin</strong></p></td><td>A la discrétion du MJ. <strong>Aucun point de destin ne peut être dépensé pour améliorer ce genre de test</strong></td></tr></tbody></table></div>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "PsvvhUCow75Twak7",
+      "name": "Compétences",
+      "sort": 120,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<div><table><thead><tr style=\"border-top:1px solid #999\"><th><strong>Compétences</strong></th><th><strong>Caractéristique</strong></th><th><strong>Utile pour …</strong></th></tr></thead><tbody><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.oSfWoTDsXmKk3nYe]{Artillerie}</td><td>Vigueur</td><td>Attaquer avec une arme lourde, comme un lance roquettes ou l'équipement d'un vaisseau</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.EoK8VDcM7lov9Ydi]{Astrogation}</td><td>Intelligence</td><td>Calculer les Itinéraires en hyperespace et naviguer dans la galaxie.</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.8gyD8lDoGmpCKoJx]{Athlétisme}</td><td>Vigueur</td><td>Escalader, sauter, nager et autres démonstrations de force physique</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.HItlI8lV2pAe48bV]{Calme}</td><td>Présence</td><td>Garder son calme dans une situation tendue, rester imperturbable, déterminer l'Initiative quand on n’est pas surpris</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.iyvBeT0ff85HteWw]{Charme}</td><td>Présence</td><td>Embobiner, faire appel aux bons sentiments ou persuader quelqu’un de vous aider</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.uTk7GJ1uJj27i8la]{Coercition}</td><td>Volonté</td><td>Menacer, intimider, interroger, etc</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.eOzxRXflRXWx3jXI]{Commandement}</td><td>Présence</td><td>Aider des alliés à vaincre leur peur, rallier une foule à sa cause, organiser un groupe</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td><p>Connaissance</p><ul><li>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.u1T8xSg8kMw51sUn]{Bordure Extérieur}</li><li>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.vhl92Y6wYlOFPYDC]{Culture}</li><li>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.xXrXQFpvLtLzrj8l]{Education}</li><li>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.eBuXruGdyX5aleGZ]{Mondes du Noyau}</li><li>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.YtkJe7JwMxqlRUgl]{Pègre}</li><li>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.K44HbJrXyc1R4eUX]{Stratégie}</li><li>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.yDtSEi6m0J6rZeor]{Xénologie}</li></ul></td><td>Intelligence</td><td>Se souvenir de détails obscurs et d'informations de toutes sortes.</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.cs6QCykpv4LkmVLk]{Coordination}</td><td>Agilité</td><td>Garder son équilibre, se débarrasser d'entraves, retomber sur ses pieds, faire preuve de souplesse</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.VYcrfpuJ0D2t7hjs]{Corps à Corps}</td><td>Vigueur</td><td>Attaquer avec un poignard, une vibrohache et autres armes de corps à corps.</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.bhmyTcWQ5g7Xtzfn]{Discrétion}</td><td>Agilité</td><td>Se déplacer sans se faire remarquer, échapper à des poursuivants</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.Wv1APvQxJV27IjIs]{Distance : Armes légères}</td><td>Agilité</td><td>Attaquer avec un pistolet blaster, un pistolet blaster lourd ou une autre arme à distance légère.</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.pMhyzgc9F7EC0tRf]{Distance : Armes lourdes}</td><td>Agilité</td><td>Attaquer avec un fusil blaster, une carabine blaster ou une autre arme à distance lourde</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.QSzIJhPnSByB8FCI]{Informatique}</td><td>Intelligence</td><td>Accéder à un système Informatique s'en servir ou le contourner.</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.0ys6R1jhPHHyVgFq]{Magouilles}</td><td>Ruse</td><td>Crocheter une serrure, fouiller les poches escamoter de petits objets, Identifier les failles d'un système de sécurité</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.0NF9ZZfBXhbEyJ0A]{Mécanique}</td><td>Intelligence</td><td>Identifier la panne d'une machine, réparer une machine. \"soigner\" un droïde.</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.0NF9ZZfBXhbEyJ0A]{Mécanique}</td><td>Intelligence</td><td>Diagnostiquer une maladie soigner une maladie ou une plaie, soigner les blessures d'un être organique.</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.AEul3iVqXuKvuTug]{Négociation}</td><td>Présence</td><td>Conclure une affaire, obtenir un meilleur prix, négocier les termes d'un contrat.</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.PUaDzRFgJk4d8y8O]{Perception}</td><td>Ruse</td><td>Remarquer un détail caché ou subtil, chercher un indice, percer un déguisement.</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td><p>Pilotage</p><ul><li>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.IM4JTcgZWYy2Vlo8]{Espace}</li><li>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.yqwEsGaFxW2OsBdG]{Planétaire}</li></ul></td><td>Agilité</td><td>Conduire ou piloter un véhicule</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.tCwROBCyuya8VG5J]{Pugilat}</td><td>Vigueur</td><td>Attaquer à mains nues, avec un coup-de-poing ou avec d'autres armes similaires</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.Jl9eW5o1heBNCy2E]{Résistance}</td><td>Vigueur</td><td>Repousser ses limites physiques, résister au poison, à la maladie, à la chaleur et au froid, etc</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.ADwSTy2PvBJWJG4x]{Sabre Laser}</td><td>Variable</td><td>Effectuer une attaque avec un sabre laser ou une autre lame ancienne</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.tv15O66u4jEccP6G]{Sang-froid}</td><td>Volonté</td><td>Surmonter sa peur, ne pas perdre de vue son objectif quand on est distrait ou dupé.</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.bthmKQtMH7CT8q9J]{Survie}</td><td>Ruse</td><td>Trouver de la nourriture et un abri en milieu sauvage, pister quelqu'un, gérer un animal domestique.</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.2lUp9x6Z3IQjZFaQ]{Système D}</td><td>Ruse</td><td>Trouver des objets sur le marché noir, avoir vent de rumeurs, rester en lieu sûr dans un environnement urbain.</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.jTZOepk3x1kyTAch]{Tromperie}</td><td>Ruse</td><td>Mentir, lancer une fausse piste, distraire un adversaire au combat.</td><th></th><th></th></tr><tr style=\"border-top:1px solid #999\"><td>@UUID[Compendium.world.regles-and-references-fr.JournalEntry.gMg1z9qrDAbOM7Mo.JournalEntryPage.Xp6FjCOC2EvaUVZO]{Vigilance}</td><td>Volonté</td><td>Se préparer à une situation de crise rester sur le qui-vive, déterminer l'Initiative quand on est surpris.</td><th></th><th></th></tr></tbody></table></div>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783949307597
+      }
+    },
+    {
+      "_id": "zHzpjsd5S8aJHZ2A",
+      "name": "Test de Force",
+      "sort": 130,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p>jet de [FO] (nb. = rang de Force)</p><h3>Perso du côté clair</h3><ul><li><p>[li] = génère 1 point de Force</p></li><li><p>[da] = peut (choix) générer 1 point de Force + stress + conflit et flip 1 destin de son camp</p></li></ul><h3>Perso du côté obscur :</h3><ul><li><p>[da] = génère 1 point de Force et conflit</p></li><li><p>[li] = peut (choix) générer 1 point de Force + stress + flip 1 destin de son camp</p></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "GWtI27krQklEuLmH",
+      "name": "Idéaux",
+      "sort": 140,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h2>Jedi</h2><p><em>Il n'y a pas d'émotion, il y a la paix.</em></p><p><em>Il n'y a pas d'ignorance, il y a la connaissance.</em></p><p><em>Il n'y a pas de passion, il y a la sérénité.</em></p><p><em>Il n'y a pas de chaos, il y a l'harmonie.</em></p><p><em>Il n'y a pas de mort, il y a la Force.</em></p><p></p><h2>Sith</h2><p><em>La paix est un mensonge, il n'y a que la passion.</em></p><p><em>Par la passion, j'ai la puissance.</em></p><p><em>Par la puissance, j'ai le pouvoir.</em></p><p><em>Par le pouvoir, j'ai la victoire.</em></p><p><em>Par la victoire, je brise mes chaînes.</em></p><p><em>La Force me libérera.</em></p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    }
+  ],
+  "folder": null,
+  "categories": [],
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_stats": {
+    "coreVersion": "13.351",
+    "systemId": "starwarsffg",
+    "systemVersion": "2.0.3",
+    "createdTime": 1783614117273,
+    "modifiedTime": 1783614117273,
+    "lastModifiedBy": "ZlIotMp24V8C0Wao",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!journalentry!wb3YKWod9xHwZoeo"
+}

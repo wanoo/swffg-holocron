@@ -1,0 +1,8 @@
+{
+  "name": "swffg-holocron-build",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@foundryvtt/foundryvtt-cli": "^1.0.0"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "💰 Sabacc — Pots",
+  "type": "script",
+  "img": "icons/svg/coins.svg",
+  "folder": null,
+  "command": "game.modules.get(\"swffg-sabacc\").api.run(\"spike-pots\");",
+  "ownership": {
+    "default": 2,
+    "bTpHpbvEEXuoga8Z": 3
+  },
+  "flags": {
+    "swffg-sabacc": {
+      "role": "spike-pots"
+    }
+  },
+  "_id": "c5GCmvhmaQajnt9L",
+  "author": "bTpHpbvEEXuoga8Z",
+  "scope": "global",
+  "sort": 0,
+  "_key": "!macros!c5GCmvhmaQajnt9L"
+}

@@ -1,0 +1,17 @@
+{
+  "name": "🎲 Pool rapide",
+  "type": "script",
+  "scope": "global",
+  "img": "icons/svg/d20-black.svg",
+  "command": "const pool = new DicePoolFFG({});\nawait game.ffg.DiceHelpers.displayRollDialog({ data: game.user.system ?? {} }, pool, \"Jet libre\", \"\");",
+  "_id": "EVoRCweInL82fKbk",
+  "author": "ZlIotMp24V8C0Wao",
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_key": "!macros!EVoRCweInL82fKbk"
+}

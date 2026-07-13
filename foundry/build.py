@@ -30,9 +30,14 @@ if "--zip" in sys.argv:
     z = ROOT / f"dist/{manifest['id']}.zip"
     z.parent.mkdir(exist_ok=True)
     with zipfile.ZipFile(z, "w", zipfile.ZIP_DEFLATED) as zf:
+        # exclus du zip de release : outils de build (jamais expédiés), sources de packs
+        # (packs/_src_*), et le LOCK LevelDB (transitoire). On GARDE packs/<name>/ (LevelDB).
+        SKIP_TOP = ("dist", ".git", "build.py", "node_modules", "package.json",
+                    "package-lock.json", "build_pack.mjs", "build_macros.mjs")
         for p in ROOT.rglob("*"):
             rel = p.relative_to(ROOT)
-            if rel.parts[0] in ("dist", ".git", "build.py") or rel.name == ".DS_Store": continue
+            if rel.parts[0] in SKIP_TOP or rel.name in (".DS_Store", "LOCK"): continue
+            if len(rel.parts) >= 2 and rel.parts[0] == "packs" and rel.parts[1].startswith("_src"): continue
             if p.is_file(): zf.write(p, pathlib.Path(manifest["id"]) / rel)
     # manifeste à côté du zip (install par URL)
     json.dump(manifest, open(ROOT / "dist/module.json", "w"), ensure_ascii=False, indent=2)

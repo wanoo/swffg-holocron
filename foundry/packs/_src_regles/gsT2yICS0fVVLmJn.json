@@ -1,0 +1,595 @@
+{
+  "_id": "gsT2yICS0fVVLmJn",
+  "name": "06 · Vaisseaux & Véhicules",
+  "pages": [
+    {
+      "_id": "3yLdMwWKE17CBiSz",
+      "name": "Vaisseaux : Les Bases",
+      "sort": 0,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p style=\"text-align:center\">1 <strong>manœuvre</strong> et 1 <strong>action</strong> de pilote par tour : affectent le <strong>déplacement du vaisseau</strong></p><blockquote><p style=\"text-align:center\">Les personnages ont toujours la possibilité de faire des manœuvres et actions de personnage à l’intérieur des vaisseaux</p></blockquote><p></p><h3>Gabarit ≤ 4</h3><ul><li><p>2 zones de défense :</p><ul><li><p>Avant</p></li><li><p>Arrière</p></li></ul></li><li><p>1 manœuvre de pilote gratuite par round</p></li><li><p>+2 stress mécanique = 2e manœuvre de pilote (<strong>max. 2</strong>)</p><p>Le pilote encaisse <strong>2 stress</strong> également (sauf si plusieurs pilotes)</p></li></ul><h3>Gabarit 5+</h3><ul><li><p>4 zones de défense :</p><ul><li><p>Avant</p></li><li><p>Arrière</p></li><li><p>Tribord</p></li><li><p>Bâbord</p></li></ul></li><li><p>1 manœuvre de pilote gratuite par round (<strong>max. 1</strong>)</p></li></ul><h2>Arcs de Tir</h2><ul><li><p>avant</p></li><li><p>arrière</p></li><li><p>tribord</p></li><li><p>bâbord</p></li></ul><h2>Munitions Limitées</h2><p>impossible de recharger</p><p>(même pas pour une manœuvre), doit retourner à la base</p><h2>Vaisseaux vs. Perso</h2><p>les dommages et blindages de vaisseaux sont 10 × plus forts,</p><p>les blessures critiques éventuellement à +50</p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950622664
+      }
+    },
+    {
+      "_id": "X0uI3ZizZc1LIc67",
+      "name": "Portées Planétaires",
+      "sort": 10,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table style=\"text-align:center\"><thead><tr style=\"border-bottom:1px solid #999\"><th style=\"text-align:right;padding:0 1em\">Portée</th><th>Planète</th><th>Espace</th></tr></thead><tbody><tr style=\"border-bottom:1px solid #999\"><td style=\"text-align:right;padding:0 1em\"><strong>Proche</strong></td><td style=\"padding:0 1em\">Au sein de la portée des personnages (jusqu’à extrême, qqs kms)</td><td style=\"padding:0 1em\">Portée des combats (combat tournoyant)</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"text-align:right;padding:0 1em\"><strong>Courte</strong></td><td style=\"padding:0 1em\">Qqs douzaines de kms, pas à portée des armes</td><td style=\"padding:0 1em\">Juste après la portée des combats</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"text-align:right;padding:0 1em\"><strong>Moyenne</strong></td><td style=\"padding:0 1em\">50 kilomètres</td><td style=\"padding:0 1em\">Qqs centaines de kms</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"text-align:right;padding:0 1em\"><strong>Longue</strong></td><td style=\"padding:0 1em\">100 à 200 kms</td><td style=\"padding:0 1em\">Qqs milliers de kms</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"text-align:right;padding:0 1em\"><strong>Extrême</strong></td><td style=\"padding:0 1em\">Au-delà de la portée des scanners</td><td style=\"padding:0 1em\">Au-delà de la portée des armes des vaisseaux de guerre</td></tr></tbody></table>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950641118
+      }
+    },
+    {
+      "_id": "amdhODmZcw1Hv73A",
+      "name": "Vaisseaux Sbire",
+      "sort": 20,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h2>Multiples Vaisseaux </h2><p>Utiliser les règles normales des sbires</p><h2>artilleurs sbires </h2><p>Groupe constitué des sbires tirant d’un même vaisseau et du même arc de tir (Améliorer le test s’ils ont la compétence artillerie)</p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950656414
+      }
+    },
+    {
+      "_id": "YlVOHF3jHMpYbdle",
+      "name": "Course Poursuite",
+      "sort": 30,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h2>En véhicule</h2><p>test de <strong>pilotage</strong> en opposition</p><p>[su] : se rapprocher / s’éloigner d’une portée +1 portée par différence de vitesse </p><h2>Fin de la poursuite</h2><p>Cible à portée proche ou courte</p><h2>À pied</h2><p>Test d’<strong>athlétisme</strong></p><p>(difficulté à la discrétion du MJ)</p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950719055
+      }
+    },
+    {
+      "_id": "1R5pFGMfnbapEQGQ",
+      "name": "Manoeuvres",
+      "sort": 40,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h2>Accélérer / Décélérer</h2><ul><li><p><span style=\"font-family:sans-serif\">Augmente / Diminue la vitesse du véhicule de 1 (min. 0, max. = rang de vitesse)</span></p></li></ul><h2>Voler / Conduire</h2><table style=\"text-align:center\"><thead><tr style=\"border-bottom:1px solid #999\"><th>Vitesse</th><th>Nb. manœuvre</th><th>Déplacement possible</th></tr></thead><tbody><tr style=\"border-bottom:1px solid #999\"><td>0</td><td>1</td><td>manœuvre accélérer nécessaire...</td></tr><tr style=\"border-bottom:1px solid #999\"><td rowspan=\"2\">1</td><td>1</td><td>au sein de portée proche</td></tr><tr style=\"border-bottom:1px solid #999\"><td>2</td><td>entre proche et courte</td></tr><tr style=\"border-bottom:1px solid #999\"><td rowspan=\"3\">2 - 4</td><td>1</td><td>au sein de portée proche</td></tr><tr style=\"border-bottom:1px solid #999\"><td>1</td><td>entre proche et courte</td></tr><tr style=\"border-bottom:1px solid #999\"><td>2</td><td>entre proche et moyenne</td></tr><tr style=\"border-bottom:1px solid #999\"><td rowspan=\"3\">5 - 6</td><td>1</td><td>au sein de portée proche</td></tr><tr style=\"border-bottom:1px solid #999\"><td>1</td><td>entre proche et moyenne</td></tr><tr style=\"border-bottom:1px solid #999\"><td>2</td><td>entre proche et longue</td></tr></tbody></table><h2>Manoeuvre d'évasion</h2><blockquote><p>Pilote, gabarit <strong>1-4</strong>, vitesse <strong>3+</strong></p></blockquote><ul><li><p>Améliore [di] sur les attaques ciblant le vaisseau</p></li><li><p>Améliore [di] sur les attaques du vaisseau</p></li><li><p>Dure jusqu’à la fin du prochain tour du pilote</p></li></ul><h2>Coller la Cible</h2><blockquote><p>Pilote, gabarit <strong>1-4</strong>, vitesse <strong>3+</strong></p></blockquote><ul><li><p>Améliore [ab] sur les attaques du vaisseau</p></li><li><p>Améliore [ab] sur les attaques ciblant le vaisseau</p></li><li><p>Dure jusqu’à la fin du prochain tour du pilote</p></li></ul><h2>Mettre la Gomme (Chewwwwiiiiiieeee)</h2><blockquote><p> (Pilote, gabarit <strong>1-4</strong>)</p></blockquote><ul><li><p>Aller immédiatement à la vitesse max.</p></li><li><p>Subit 1 stress par point de vitesse augmenté</p></li></ul><h2>Régler les écrans</h2><ul><li><p>Réassigne 1 [se] d’une zone de défense vers une autre</p></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950705511
+      }
+    },
+    {
+      "_id": "6oj7SmZPS2AN2KxT",
+      "name": "Actions",
+      "sort": 50,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h2>Prendre l'Avantage</h2><blockquote><p>Pilote, gabarit 1-4, vitesse 4+, pilotage</p></blockquote><ul><li><p>[su] = ignore les malus des manœuvres évasives (soi/adversaire), choisit la zone de défense touchée par la prochaine attaque</p></li><li><p>Dure jusqu’à la fin du prochain tour du pilote</p></li><li><p>Pour résister et prendre l’avantage : la cible fait le test précédent avec +[di] par essai et ainsi de suite...</p></li></ul><table style=\"text-align:center\"><thead><tr style=\"border-bottom:1px solid #999\"><th>Différence de vitesse</th><th>Difficulté</th></tr></thead><tbody><tr style=\"border-bottom:1px solid #999\"><td style=\"text-align:right\">Même vitesse</td><td>[di][di]</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"text-align:right\">Assaillant plus rapide</td><td>[di]</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"text-align:right\">Assaillant moins rapide de 1 / de 2+</td><td>[di][di][di]/[di][di][di][di]</td></tr></tbody></table><h2>Tirer avec une Arme de Véhicule</h2><ul><li><p>Voir test <strong>Artillerie</strong> de combat de véhicule</p></li></ul><h2>Assister le Pilotage</h2><blockquote><p>Test de <strong>Pilotage</strong></p><p>Difficulté [di][di]</p></blockquote><ul><li><p>Chaque [su] = dégrade d au prochain test de pilotage du pilote</p></li></ul><h2>Booster les Écrans</h2><blockquote><p>Test de <strong>Mécanique</strong></p><p>Difficulté [di][di][di]</p></blockquote><ul><li><p>[su] = +1 stress mécanique, +1 à une zone de défense jusqu’au prochain tour</p></li><li><p>Chaque [su] supplémentaires. = +1 tour</p></li></ul><h2>Scanner l'Ennemi</h2><blockquote><p>Test de <strong>Perception</strong></p><p>Difficulté [di][di][di]</p></blockquote><ul><li><p><span style=\"font-family:sans-serif\">[su] = révèle les armes, mods, seuil de stress et coque</span></p></li><li><p><span style=\"font-family:sans-serif\">[ad][ad] = révèle les dégâts courant de stress et coque</span></p></li></ul><h2>Contre-Mesures</h2><blockquote><p>Test de <strong>Informatique/Perception</strong></p><p>Difficulté [di][di]/[di][di][di]</p></blockquote><ul><li><p>[su] = améliore [di] vs.projectiles guidés jusqu’au prochain tour</p></li><li><p>[ad][ad] = +[di] sup. vs. projectiles guidés</p></li></ul><h2>Brouillage</h2><blockquote><p>Test de <strong>Informatique</strong></p><p>Difficulté [di][di]</p></blockquote><ul><li><p>[su] = la cible doit faire un test d’informatique ([di][di]) pour utiliser ses communications</p></li><li><p>[su][su] = +[di] aux tests d’informatique de la cible</p></li><li><p>[ad] = +1 cible supplémentaire affectée par le brouillage</p></li></ul><h2>Pirater un Systèmes</h2><blockquote><p>Test de <strong>Informatique</strong></p><p>Difficulté [di][di][di]</p></blockquote><ul><li><p>[su] = -1 en défense (sur une zone de défense) de la cible pdt un round</p></li><li><p>[ad][ad] = +1 stress mécanique à la cible</p></li><li><p>[tr] = désactive une arme de la cible pendant 1 round</p></li></ul><h2>Discipline de Tir</h2><blockquote><p>Test de <strong>Sang-Froid/Commandement</strong></p><p>Difficulté [di][di][di]</p></blockquote><ul><li><p>[su] = +[bo] au prochain tir de membre de l’équipage</p></li><li><p>[su][su] = le bonus s’applique à un membre supplémentaire</p></li><li><p>[ad][ad][ad] = +1 stress à la cible touchée</p></li></ul><h2>Tracer la Voie</h2><blockquote><p>Test de <strong>Astrogation/Perception</strong></p><p>Difficulté [di][di]/[di][di][di]</p></blockquote><p>C<span style=\"font-family:sans-serif\">haque [su] = -[SE] à la dif. du terrain pour le prochain test de <strong>Pilotage</strong></span></p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950797578
+      }
+    },
+    {
+      "_id": "XQ5H8TrYmdFB61WN",
+      "name": "Test de Combats",
+      "sort": 60,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p>Test d'<strong>Artillerie</strong></p><table style=\"text-align:center\"><thead><tr style=\"border-bottom:1px solid #999\"><th>Gabarit de la cible</th><th>Difficulté</th></tr></thead><tbody><tr style=\"border-bottom:1px solid #999\"><td style=\"text-align:right\">Plus grand de 2</td><td>[di]</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"text-align:right\">Plus grand de 1</td><td>[di][di]</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"text-align:right\">Même taille</td><td>[di][di]</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"text-align:right\">Moins grand de 1</td><td>[di][di]</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"text-align:right\">Moins grand de 2</td><td>[di][di][di]</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"text-align:right\">Moins grand de 3</td><td>[di][di][di][di]</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"text-align:right\">Moins grand de 4</td><td>[di][di][di][di][di]</td></tr></tbody></table><h2>Dégâts</h2><ul><li><p><span style=\"font-family:sans-serif\">Dommage d’arme + nombre de [su] - <em>blindage</em></span></p></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "J0U4IDRcbhkdXAVo",
+      "name": "Dommages",
+      "sort": 70,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h2>Stress mécanique &gt; seuil de stress</h2><p>hors-service = dérive, vit. 0, déf. 0, armes inutilisables</p><h2>Dégâts de coque &gt; seuil de dégât de coque</h2><p>dégât critique + véhicule hors-service</p><p>(gabarit ≤ 3 = le véhicule explose)</p><h2>Dégât critique</h2><p>1d100 + 10 × dégât critique déjà présent + 10 × nombres de critiques</p><p>un dégât critique reste présent tant qu’il n’est pas réparé (même si ses « effets » ont disparu)</p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "rGdPoRTFnwlHwSJ1",
+      "name": "Actions d'Astromechs",
+      "sort": 80,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<blockquote><p>Un astromech peut : contrôler les dégâts, tracer la voie, assister le pilotage, booster les écrans, scanner l’ennemi, contre-mesures et tirer avec une arme (cf @UUID[Compendium.world.regles.UkzZMNTDXXRX2oy0.JournalEntryPage.1R5pFGMfnbapEQGQ]{Manoeuvres} &amp; @UUID[Compendium.world.regles.UkzZMNTDXXRX2oy0.JournalEntryPage.6oj7SmZPS2AN2KxT]{Actions})</p></blockquote><h2>Assurer les Arrières</h2><blockquote><p>Test de <strong>Informatique</strong></p><p>Difficulté [di][di]</p></blockquote><ul><li><p><span style=\"font-family:sans-serif\">Ajuster la difficulté du test de [se] à [se][se][se] suivant l’intensité du combat</span></p></li><li><p><span style=\"font-family:sans-serif\">Chaque [su] = +1 à une zone de défense jusqu’au prochain tour</span></p></li></ul><h2>Verrouiller la Cible</h2><blockquote><p>Test de <strong>Informatique</strong></p><p>Difficulté [di]+</p></blockquote><ul><li><p><span style=\"font-family:sans-serif\">Faire un test de combat sur la cible mais avec <strong>informatique</strong></span></p></li><li><p><span style=\"font-family:sans-serif\">Ajuster la difficulté du test de [se] à [se][se][se] suivant l’intensité du combat</span></p></li><li><p><span style=\"font-family:sans-serif\">[su] = +[su] au prochain tir de membre de l’équipage</span></p></li><li><p><span style=\"font-family:sans-serif\">Chaque [su][su] au-delà du 1er = +[bo] sup.</span></p></li><li><p><span style=\"font-family:sans-serif\">[ad][ad] = le verrouillage dure un tour de plus</span></p></li><li><p><span style=\"font-family:sans-serif\">[th] = attente d’1 tour avant nouveau verrouillage nécessaire</span></p></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950817368
+      }
+    },
+    {
+      "_id": "CuSN7quBkb4Vv0rv",
+      "name": "Actions de Réparation",
+      "sort": 90,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h2>Contrôler les Dégâts</h2><ul><li><p>Si on répare le stress</p><ul><li><p>[su] : -1 stress mécanique (max. 1 test / <strong>tour</strong>)</p></li></ul></li><li><p>Si on répare la coque (soumis à autorisation du MJ)</p><ul><li><p>[su] : -1 dégât de coque (max. 1 test / <strong>rencontre</strong>)</p></li></ul></li></ul><table style=\"text-align:Center\"><thead><tr><th>Stress mécanique ou dégât de coque</th><th>Difficulté</th></tr></thead><tbody><tr><td>Nb. &lt; 1/2 Seuil</td><td>[di]</td></tr><tr><td>Nb. ≥ 1/2 Seuil</td><td>[di][di]</td></tr><tr><td>Nb. ≥ Seuil</td><td>[di][di][di]</td></tr><tr><td>Réparation d’un dégât critique</td><td>Gravité dégât critique</td></tr></tbody></table><h2>Réparations Manuelles</h2><blockquote><p>Test de <strong>Athlétisme</strong></p><p>Difficulté [di][di][di]</p></blockquote><ul><li><p><span style=\"font-family:sans-serif\">[su] = -1 dégât de coque</span></p></li><li><p><span style=\"font-family:sans-serif\">Chaque [su][su] = -1 dégât de coque sup. (max. <strong>1 test / rencontre</strong>)</span></p></li></ul><h2>Réparations d'Urgence</h2><blockquote><p>Test de <strong>Athlétisme</strong></p><p>(pour redémarrer un vaisseau hors-service)</p><p>Difficulté [di][di][di]</p></blockquote><ul><li><p><span style=\"font-family:sans-serif\">[su] = vit. 1, -3 maniabilité, armes désactivées</span></p></li><li><p><span style=\"font-family:sans-serif\">Tout dégât de coque sup. = 1 dégât critique à +30</span></p></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "oQXNJO8ZFNznBHun",
+      "name": "Coût Réparation Coque",
+      "sort": 100,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h2>cale sèche / hangar</h2><p>500 crédits par dégât</p><h2>réparation temporaire</h2><p>Test de <strong>Mécanique</strong> [di][di][di], [di][di][di][di]</p><p>(MJ peut appliquer des complications additionnelles)</p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "UQKK59ynOeL1riiZ",
+      "name": "Navigation Périlleuse",
+      "sort": 110,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<blockquote><p>Test de Pilotage</p></blockquote><h2>Difficulté</h2><ul><li><p>Nombre de [di] = plus grand nb. entre gabarit × 1/2 et vitesse</p></li><li><p>Améliorer [ch] = plus petit nb. entre gabarit × 1/2 et vitesse</p></li><li><p>+Nombre [se] : dangers de navigation (cf. ci-dessous)</p></li></ul><table><thead><tr style=\"border-bottom:1px solid #999\"><th>Danger</th><th>Malus</th><th>Exemple planétaire</th><th>Exemple spatial</th></tr></thead><tbody><tr style=\"border-bottom:1px solid #999\"><td><strong>Léger</strong></td><td>-</td><td>Sol plat dégagé. Route, champs / plaines herbeuses. Ciel dégagé, beau temps, faible trafic</td><td>Orbite, champ d'astéroïdes très clairsemé</td></tr><tr style=\"border-bottom:1px solid #999\"><td><strong>Moyen</strong></td><td>+[se]</td><td>Boue, eau calme, arbres, broussaille dense, dune de sable. Temps venteux. Trafic intense</td><td>Voler au-dessus des montagnes d’une lune, champ d'astéroïde, nébuleuse</td></tr><tr style=\"border-bottom:1px solid #999\"><td><strong>Dangereux</strong></td><td>+[se][se]</td><td>Forêt dense, eau turbulente, collines rocheuses. Ouragan violent. (Les véhicules à roues ne peuvent en général pas manœuvrer dans ces terrains)</td><td>Comète en fracturation, système annulaire de géantes gazeuses, champ d'astéroïde dense et chaotique</td></tr><tr style=\"border-bottom:1px solid #999\"><td><strong>Très risqué</strong></td><td>+[se][se][se]+</td><td>Falaises abruptes, marais, lave en refroidissement, canyon étroit</td><td>La gueule (The Maw), près d’un pulsar, tunnel d’astéroïde</td></tr></tbody></table><h2>Interprétation</h2><ul><li><p>Chaque [fa] = -1 vitesse et n’atteint pas la destination</p></li><li><p>Échec + [de] = le véhicule s'écrase</p></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950881280
+      }
+    },
+    {
+      "_id": "gdJBVf3yNRoMtnMz",
+      "name": "Temps de Voyage SubSpatiaux",
+      "sort": 120,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><thead><tr><th>Durée du voyage</th><th>Exemple</th></tr></thead><tbody><tr><td>5-15 minutes</td><td>Aller de l’orbite d’une planète à un point sûr pour sauter en hyperespace</td></tr><tr><td>30-90 minutes</td><td>Aller d’une planète à sa lune</td></tr><tr><td>6-12 heures</td><td>Aller d’une planète à une autre dans le même système</td></tr><tr><td>12-72 heures</td><td>Aller de l’étoile d’un système à ses limites</td></tr></tbody><tfoot><tr><td></td></tr></tfoot><tbody><tr></tr></tbody></table>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "sx17zH09YXzVXcyY",
+      "name": "Calcul d'Astrogation",
+      "sort": 130,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><thead><tr><th>Astrogation</th><th>Description</th></tr></thead><tbody><tr><td style=\"text-align:center\">[di]</td><td>Route connue d’un système voisin</td></tr><tr><td style=\"text-align:center\">+[di][di][di]</td><td>Pas d’astromech ou de navordinateur</td></tr><tr><td style=\"text-align:center\">+[di]</td><td>Calculs rapides faits sous pression</td></tr><tr><td style=\"text-align:center\">+[di]</td><td>Vaisseau légèrement endommagé</td></tr><tr><td style=\"text-align:center\">+[di][di]</td><td>Vaisseau gravement endommagé</td></tr><tr><td style=\"text-align:center\">+[di]</td><td>Cartes / données de navigation dépassées, corrompues ou contrefaites</td></tr></tbody></table>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950897373
+      }
+    },
+    {
+      "_id": "5mu9ll4w0kWA8BG3",
+      "name": "Temps en HyperEspace",
+      "sort": 140,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table style=\"text-align:center\"><thead><tr><th>Distance</th><th>Durée moyenne (Class 1)</th></tr></thead><tbody><tr><td>Même secteur</td><td>10-24 heures</td></tr><tr><td>Même région</td><td>10-72 heures</td></tr><tr><td>Entre régions</td><td>3 jours à 1 semaine</td></tr><tr><td>Dans la galaxie</td><td>1-3 semaines</td></tr></tbody></table><p style=\"text-align:center\"><strong>(Multiplier par la classe de l’Hyperdrive)</strong></p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "1kw8NVuOPE2EJ1c1",
+      "name": "Dégâts Critique",
+      "sort": 150,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><thead><tr><th></th><th><span>Détail du résultat</span></th></tr></thead><tbody><tr><td class=\"range\" title=\" TABLE.ResultWeight: 1\">1 - 9</td><td>@UUID[Compendium.world.critical-hit-list.xUyz85mxq82VoCMc]{Stress mécanique}</td></tr><tr><td class=\"range\" title=\" TABLE.ResultWeight: 1\">10 - 18</td><td>@UUID[Compendium.world.critical-hit-list.LPSAKQIyypCt9nxE]{Bousculé}</td></tr><tr><td class=\"range\" title=\" TABLE.ResultWeight: 1\">19 - 27</td><td>@UUID[Compendium.world.critical-hit-list.rsdgk0r3789dM2p6]{Perte d’alimentation des boucliers}</td></tr><tr><td class=\"range\" title=\" TABLE.ResultWeight: 1\">28 - 36</td><td>@UUID[Compendium.world.critical-hit-list.G5ZTtKsEAedIz1hF]{Dévié}</td></tr><tr><td class=\"range\" title=\" TABLE.ResultWeight: 1\">37 - 45</td><td>@UUID[Compendium.world.critical-hit-list.rn0Kvh8WQfoMel1K]{Culbuté}</td></tr><tr><td class=\"range\" title=\" TABLE.ResultWeight: 1\">46 - 54</td><td>@UUID[Compendium.world.critical-hit-list.xWz6yOjo1pjWsPNG]{Composant touché}</td></tr><tr><td class=\"range\" title=\" TABLE.ResultWeight: 1\">55 - 63</td><td>@UUID[Compendium.world.critical-hit-list.3ig6oQMDJEDMeSCY]{Panne des boucliers}</td></tr><tr><td class=\"range\" title=\" TABLE.ResultWeight: 1\">64 - 72</td><td>@UUID[Compendium.world.critical-hit-list.OjNsSFKq0f9QQ30s]{Panne du navordinateur / unité R2}</td></tr><tr><td class=\"range\" title=\" TABLE.ResultWeight: 1\">73 - 81</td><td>@UUID[Compendium.world.critical-hit-list.zb8rHmq0LGp27hFe]{Fluctuations énergétiques}</td></tr><tr><td class=\"range\" title=\" TABLE.ResultWeight: 1\">82 - 90</td><td>@UUID[Compendium.world.critical-hit-list.TiWxUiXOrdknMsYg]{Boucliers désactivés}</td></tr><tr><td class=\"range\" title=\" TABLE.ResultWeight: 1\">91 - 99</td><td>@UUID[Compendium.world.critical-hit-list.XTe96KKlOVweMdyf]{Moteur endommagé}</td></tr><tr><td class=\"range\" title=\" TABLE.ResultWeight: 1\">100 - 108</td><td>@UUID[Compendium.world.critical-hit-list.RLsX92LveBiMzuwH]{Boucliers surchargés}</td></tr><tr><td class=\"range\" title=\" TABLE.ResultWeight: 1\">109 - 117</td><td>@UUID[Compendium.world.critical-hit-list.GCaXxWi1fwPS6UKi]{Arrêt moteur}</td></tr><tr><td class=\"range\" title=\" TABLE.ResultWeight: 1\">118 - 126</td><td>@UUID[Compendium.world.critical-hit-list.YTOhXdzwpcIrVWaH]{Panne système majeure}</td></tr><tr><td class=\"range\" title=\" TABLE.ResultWeight: 1\">127 - 133</td><td>@UUID[Compendium.world.critical-hit-list.MY1QbE6h4lrNVYKp]{Brèche majeure dans la coque}</td></tr><tr><td class=\"range\" title=\" TABLE.ResultWeight: 1\">134 - 138</td><td>@UUID[Compendium.world.critical-hit-list.dp8BDWF0ahozXPlw]{Déstabilisé}</td></tr><tr><td class=\"range\" title=\" TABLE.ResultWeight: 1\">139 - 144</td><td>@UUID[Compendium.world.critical-hit-list.ICal7Tbumuhagct5]{Au feu !}</td></tr><tr><td class=\"range\" title=\" TABLE.ResultWeight: 1\">145 - 153</td><td>@UUID[Compendium.world.critical-hit-list.84oYPJDDh9LmKzhy]{Dislocation}</td></tr><tr><td class=\"range\" title=\" TABLE.ResultWeight: 1\">154 - 500</td><td>@UUID[Compendium.world.critical-hit-list.2eFAdFTWwXPtYSpk]{Désintégré}</td></tr></tbody></table>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    }
+  ],
+  "folder": null,
+  "categories": [],
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_stats": {
+    "coreVersion": "13.351",
+    "systemId": "starwarsffg",
+    "systemVersion": "2.0.3",
+    "createdTime": 1783614117799,
+    "modifiedTime": 1783950601588,
+    "lastModifiedBy": "ZlIotMp24V8C0Wao",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!journalentry!gsT2yICS0fVVLmJn"
+}

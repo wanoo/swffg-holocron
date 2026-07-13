@@ -1,0 +1,21 @@
+{
+  "name": "🃏 Sabacc — Ma main",
+  "type": "script",
+  "img": "icons/svg/card-hand.svg",
+  "folder": null,
+  "command": "game.modules.get(\"swffg-sabacc\").api.run(\"spike-my-hand\");",
+  "ownership": {
+    "default": 2,
+    "bTpHpbvEEXuoga8Z": 3
+  },
+  "flags": {
+    "swffg-sabacc": {
+      "role": "spike-my-hand"
+    }
+  },
+  "_id": "L2ImdJFvEFKUOtz0",
+  "author": "bTpHpbvEEXuoga8Z",
+  "scope": "global",
+  "sort": 0,
+  "_key": "!macros!L2ImdJFvEFKUOtz0"
+}

@@ -1,0 +1,21 @@
+{
+  "name": "⚗️ Fabrication — Potions & Talismans",
+  "type": "script",
+  "img": "icons/consumables/potions/bottle-round-corked-red.webp",
+  "folder": null,
+  "command": "game.modules.get(\"swffg-workshops\").api.run(\"potions\");",
+  "ownership": {
+    "default": 2,
+    "bTpHpbvEEXuoga8Z": 3
+  },
+  "flags": {
+    "swffg-workshops": {
+      "role": "potions"
+    }
+  },
+  "_id": "JyOw41ncNFb6ffNo",
+  "author": "bTpHpbvEEXuoga8Z",
+  "scope": "global",
+  "sort": 0,
+  "_key": "!macros!JyOw41ncNFb6ffNo"
+}

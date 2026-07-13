@@ -1,0 +1,204 @@
+{
+  "_id": "90WEmffiykm2oWXS",
+  "name": "09 · Fabrication: Potions & Talismans",
+  "pages": [
+    {
+      "_id": "jV5H1xdnwt1bD2rX",
+      "name": "Étape 1 : Choisir Un Schéma",
+      "sort": 0,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p>Voir listes de potions et talismans plus loin. </p><p>L’acquisition des schémas n’est pas un problème pour un jdr narrativiste, surtout pour des objets simples, des techniques simples, etc. Que ce soit dans un atelier, une boutique de mécanique, auprès d’un droïde, etc. il existe de nombreux plans disponibles et faciles d’accès.</p><p>Pour d’autres plus délicats, ce sera l’objet d’une récompense ou d’une aventure.</p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "E5Y8k81BX5HWZ0pe",
+      "name": "Étape 2 : Récupérer Les Matériaux",
+      "sort": 10,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p>La liste indique le coût et la rareté des matériaux, le MJ peut s’inspirer des listes d’équipements dans les règles, s’il souhaite en profiter pour animer cette phase.</p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "QoVqSERjkuLWRyG0",
+      "name": "Étape 3 : Élaboration",
+      "sort": 20,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p>La liste donne le temps, la difficulté et les compétences correspondantes (<strong>Sang-froid</strong> ou <strong>Connaissance (Culture)</strong>).</p><p>Chaque [su] peut être utilisé pour réduire le temps de confection de 2 heures, jusqu’à un minimum de 1 h.</p><p>L’encombrement final de la potion ou du talisman est de 0.</p><p>La fabrication alchimique faisant appel à la Force, seuls ceux sensibles à celle-ci peuvent être des artisans. C’est seulement à ces occasions-là que les [li] et [da] sont utilisés en même temps par le joueur et le MJ. Ils servent à générer [ad][th][su][fa][tr][de], en suivant les indications des tables appropriées.</p><h2>Interprétation</h2><table><thead><tr style=\"border-bottom:1px solid #999\"><th style=\"width:10%\">Nécessaire</th><th style=\"width:45%\">Potions</th><th style=\"width:45\">Talismans</th></tr></thead><tbody><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0 1em;text-align:center\">[ad] Ou [tr] Ou [li]</td><td style=\"padding:0 1em\"><ul><li><strong>Fortification :</strong> si la potion est bénéfique, la cible soigne 1 point de blessure lorsqu’elle la consomme.</li><li><strong>Revigorante :</strong> si la potion est bénéfique, la cible soigne 2 points de stress lorsqu’elle la consomme.</li><li><strong>Néfaste :</strong> si la potion est néfaste, la cible souffre 2 points de stress lorsqu’elle la consomme.</li></ul></td><td style=\"padding:0 1em\"><ul><li><strong>Fortification :</strong> si le talisman est néfaste et cible un autre personnage, la cible perd 1 point de stress après la résolution des effets du talisman.</li><li><strong>Objectif caché :</strong> ajoute [se] à tous les tests visant à déterminer les vraies fonctions du talisman.</li></ul></td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0 1em;text-align:center\">[ad][ad] Ou [tr] Ou [li][li]</td><td style=\"padding:0 1em\"><ul><li><strong>Durée :</strong> si la potion a une durée d’effet, augmentez d’une heure (ou un round si elle est exploitable en combat).</li><li><strong>Minutie :</strong> 50 % des ingrédients (et donc du prix) ne sont pas utilisés. Cet effet ne peut être sélectionné qu’une seule fois.</li></ul></td><td style=\"padding:0 1em\"><ul><li><strong>Puissance augmentée :</strong> si le talisman est utilisé lors d’un test d’opposition avec un adversaire ou lorsque un test d’un ennemi conditionne l’activation du talisman, la difficulté du test est améliorée de 1.</li><li><strong>Revigorant :</strong> l’utilisateur du talisman récupère 1 point de stress après avoir utilisé le talisman.</li><li><strong>Fabrication pondérée :</strong> lors de la fabrication, seuls 50 % des matériaux (et donc du prix) ont été utilisés. Cet effet ne peut être sélectionné qu’une seule fois</li></ul></td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0 1em;text-align:center\">[ad][ad][ad] Ou [tr] Ou [li][li][li]</td><td style=\"padding:0 1em\"><ul><li><strong>Lot :</strong> lors de la fabrication, deux doses sont fabriquées au lieu d’une.</li><li><strong>Puissance :</strong> si une potion est néfaste, augmentez la difficulté pour y résister de 1 (pour un maximum d’Exceptionnel ([di][di][di][di][di])).</li></ul></td><td style=\"padding:0 1em\"><ul><li><strong>Pouvoir supplémentaire :</strong> si le talisman est utilisé pour infliger ou réduire des dommages, l’effet est amplifié de 2.</li><li><strong>Construction ingénieuse :</strong> le personnage fut inspiré lors de la fabrication et, bien qu’il utilisa la même quantité de matériaux que prévu, il créa deux talismans au lieu d’un.</li></ul></td></tr><tr><td style=\"padding:0 1em;text-align:center\">[ad][ad][ad][ad] Ou [tr] Ou [li][li][li][li]</td><td style=\"padding:0 1em\"><ul><li><strong>Formule :</strong> crée une nouvelle formule, diminuant la difficulté de fabrication de 1 (pour un minimum de Simple (-)).</li><li><strong>Virulence :</strong> si une potion est néfaste, augmentez la difficulté pour y résister de 1.</li></ul></td><td style=\"padding:0 1em\"><ul><li><strong>Formule :</strong> crée une nouvelle formule, diminuant la difficulté de fabrication de 1 (pour un minimum de Simple (-)).</li><li><strong>Énergie redirigée :</strong> si le talisman réduit les dommages ou résiste à une influence ennemie, l’utilisateur peut effectuer une simple manœuvre, même en dehors de son tour d’action, pour résister aux effets.</li></ul></td></tr><tr style=\"border-bottom:1px solid #000;border-top:1px solid #000\"><td style=\"padding:0 1em;text-align:center\">[tr][tr] Ou [li][li][li][li][li]</td><td style=\"padding:0 1em\"><ul><li><strong>Dynamiser :</strong> si la potion est bénéfique, il reste dans le système de la cible et il bénéficie des mêmes effets le round suivant.</li></ul></td><td style=\"padding:0 1em\"><ul><li><strong>Dynamiser :</strong> si le talisman ne peut être utilisé qu’une fois par cession ou s’il est détruit après usage, il peut être utilisé deux fois par cession ou une fois de plus avant d’être détruit. Cet effet ne peut être choisi qu’une fois.</li><li><strong>Puissance :</strong> si le talisman ajoute ou enlève des dés à un test, l’effet est amplifié d’un dé. Cet effet ne peut être choisi qu’une fois.</li></ul></td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0 1em;text-align:center\">[th] Ou [de] Ou [da]</td><td style=\"padding:0 1em\"><ul><li><strong>Goût fétide :</strong> si la potion est bénéfique, la cible souffre de la perte de 2 points de stress lorsqu’elle la consomme.</li><li><strong>Odeur nauséabonde :</strong> si la potion est néfaste, la cible ajoute [bo] à tous ses tests pour se nourrir ou utiliser une arme.</li></ul></td><td style=\"padding:0 1em\"><ul><li><strong>Encombrant :</strong> le talisman est maladroitement façonné, son encombrement augmente de 1.</li><li><strong>Perceptible :</strong> les utilisateurs de la Force ajoutent [bo] à tous leurs tests pour déterminer que ce talisman est un objet alchimique et non un simple bijou décoratif ou un souvenir ornemental.</li></ul></td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0 1em;text-align:center\">[th][th] Ou [de] Ou [da][da]</td><td style=\"padding:0 1em\"><ul><li><strong>Éphémère :</strong> si la potion a une durée d’effet, diminuez d’une heure (pour une durée minimum de une demi-heure) ou d’un round si elle est exploitable en combat (pour une durée minimum de 1 round).</li><li><strong>Bâclé :</strong> 25 % d’ingrédients supplémentaires sont nécessaires, augmentant d’autant le prix.</li></ul></td><td style=\"padding:0 1em\"><ul><li><strong>Mauvaise sensation :</strong> l’utilisateur du talisman souffre d’un point de conflit après l’avoir utilisé.</li><li><strong>Bâclé :</strong> 25 % d’ingrédients supplémentaires sont nécessaires, augmentant d’autant le prix.</li></ul></td></tr><tr><td style=\"padding:0 1em;text-align:center\">[th][th][th] Ou [de] Ou [da][da][da]</td><td style=\"padding:0 1em\"><ul><li><strong>Néfaste :</strong> si la potion est néfaste, réduisez la difficulté pour y résister de 1 (pour un minimum de Simple (-)).</li><li><strong>Touché par le mal :</strong> la cible souffre de 2 points de conflit au moment de consommer la potion.</li></ul></td><td style=\"padding:0 1em\"><ul><li><strong>Contrôle difficile :</strong> l’utilisateur du talisman doit effectuer un test de Sang-froid ([di][di][di]) pour activer le talisman. Ce test compte comme une broutille et peut être effectué en dehors de son tour d’action.</li><li><strong>Touché par le mal :</strong> la cible souffre de 2 points de conflit après avoir utilisé le talisman.</li></ul></td></tr><tr style=\"border-bottom:1px solid #000;border-top:1px solid #000\"><td style=\"padding:0 1em;text-align:center\">[de][de] Ou [da][da][da][da]</td><td style=\"padding:0 1em\"><ul><li><strong>Effets secondaires inattendus :</strong> après que la potion a été consommée et les effets appliqués, le MJ choisit des effets dans les différentes potions qui existent et les applique à la cible. Les effets sont bénéfiques ou néfastes, de façon opposée aux effets initiaux.</li></ul></td><td style=\"padding:0 1em\"><ul><li><strong>Sombre destin :</strong> l’utilisateur doit dépenser un point de Destin pour activer le talisman.</li><li><strong>Défaillance en l’activant :</strong> le talisman est maudit et est enclin à mal fonctionner. Le MJ dépense 2 points de Destin pour provoquer l’effet de défaillance qu’il souhaite.</li></ul></td></tr></tbody></table>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783951078271
+      }
+    },
+    {
+      "_id": "qgY60G0vcD43UXwc",
+      "name": "Potions",
+      "sort": 30,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table style=\"text-align:center\"><thead><tr style=\"border-bottom:1px solid #999\"><th>Objet</th><th>Difficulté</th><th>Prix</th><th>Temps (Heures)</th><th>Rareté</th><th>Description</th></tr></thead><tbody><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0.5em 1em;text-align:right\"><strong>Acide</strong></td><td style=\"padding:0.5em 1em\">[DI][DI]</td><td style=\"padding:0.5em 1em\">600</td><td style=\"padding:0.5em 1em\">2</td><td style=\"padding:0.5em 1em\">6</td><td style=\"padding:0.5em 1em;text-align:left\">Peut être appliqué à une arme ou à une nourriture. La cible doit réussir un test de Résistance ([di][di][di]) pour ne pas subir 2 blessures au début de son prochain tour d’action et pendant les « prochains rounds et subir en plus une accumulation de [th] à chaque round.</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0.5em 1em;text-align:right\"><strong>PyroMixture</strong></td><td style=\"padding:0.5em 1em\">[DI][DI][DI]</td><td style=\"padding:0.5em 1em\">400</td><td style=\"padding:0.5em 1em\">3</td><td style=\"padding:0.5em 1em\">5</td><td style=\"padding:0.5em 1em;text-align:left\">Une fois consommée, le corps est recouvert de flammes. Le personnage est immunisé aux dommages de feu ou de flammes. Ses attaques non armées acquièrent la qualité Incendiaire 4 ou l’augmentent de 1 s’il avait déjà cette qualité. Les effets se dissipent au bout de 1 round ou 30 mn en temps de narration</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0.5em 1em;text-align:right\"><strong>Elixir de Vigueur</strong></td><td style=\"padding:0.5em 1em\">[DI][DI][DI]</td><td style=\"padding:0.5em 1em\">600</td><td style=\"padding:0.5em 1em\">4</td><td style=\"padding:0.5em 1em\">6</td><td style=\"padding:0.5em 1em;text-align:left\">Jusqu’à la fin du round, le personnage bénéficie d’une augmentation de 1 en Vigueur et une diminution de 1 en Volonté.</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0.5em 1em;text-align:right\"><strong>Potion de Soin</strong></td><td style=\"padding:0.5em 1em\">[DI][DI]</td><td style=\"padding:0.5em 1em\">1000</td><td style=\"padding:0.5em 1em\">2</td><td style=\"padding:0.5em 1em\">5</td><td style=\"padding:0.5em 1em;text-align:left\">Soigne immédiatement un critique d’une sévérité de [di][di][di] ou moins. Cela permet de faire disparaître un critique, pas de faire repousser un membre.</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0.5em 1em;text-align:right\">@UUID[Compendium.world.oggdudegear.NzZRGjPXSTIoQZjF]{Poison}</td><td style=\"padding:0.5em 1em\">[DI]</td><td style=\"padding:0.5em 1em\">500</td><td style=\"padding:0.5em 1em\">2</td><td style=\"padding:0.5em 1em\">4</td><td style=\"padding:0.5em 1em;text-align:left\">La cible doit effectuer un test de Résistance ([di][di]) pour éviter de souffrir de 5 points de blessures, plus 1 point de stress par [th].</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0.5em 1em;text-align:right\"><strong>Poison de Volonté</strong></td><td style=\"padding:0.5em 1em\">[DI][DI][DI][DI]</td><td style=\"padding:0.5em 1em\">1000</td><td style=\"padding:0.5em 1em\">6</td><td style=\"padding:0.5em 1em\">8</td><td style=\"padding:0.5em 1em;text-align:left\">Poison d’ingestion dont la cible doit effectuer un test de Sang-froid ([di][di]) pour ne pas avoir une Volonté à 0 pour le reste de la rencontre. Les effets durent une heure, plus 1 h par [th] en plus.</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0.5em 1em;text-align:right\">@UUID[Compendium.world.oggdudegear.nGrVFba4JXe0biuR]{Stimulant}</td><td style=\"padding:0.5em 1em\">[DI][DI]</td><td style=\"padding:0.5em 1em\">400</td><td style=\"padding:0.5em 1em\">2</td><td style=\"padding:0.5em 1em\">4</td><td style=\"padding:0.5em 1em;text-align:left\">Augmente le nombre de points de stress de 5 pendant la durée de la rencontre ou une heure</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0.5em 1em;text-align:right\"><strong>Eau de Vie</strong></td><td style=\"padding:0.5em 1em\">[DI][DI][DI][DI][DI]</td><td style=\"padding:0.5em 1em\">1000</td><td style=\"padding:0.5em 1em\">8</td><td style=\"padding:0.5em 1em\">10</td><td style=\"padding:0.5em 1em;text-align:left\">Soigne tous les points de blessures. De plus, si le personnage est mort durant la rencontre, il peut immédiatement effectuer un test de Sang-froid ou Résistance ([di][di][di][di]). Si c’est réussi, il revient à la vie et soigne une blessure critique de son choix. Alternativement, le buveur peut effectuer un test de Force, subir 1 point de conflit et ajoute automatiquement [li] et [da] au résultat du test. Si l’utilisateur de la Force utilise la potion pour effectuer une Conjuration, il ajoute le double.</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0.5em 1em;text-align:right\"><strong>Potion d'affaiblissement</strong></td><td style=\"padding:0.5em 1em\">[DI][DI][DI]</td><td style=\"padding:0.5em 1em\">1000</td><td style=\"padding:0.5em 1em\">4</td><td style=\"padding:0.5em 1em\">6</td><td style=\"padding:0.5em 1em;text-align:left\">La cible effectue immédiatement un test de Résistance ([di][di]) pour éviter de réduire de moitié ses valeurs de seuil de blessure et de stress, pour une durée de une heure, plus 1 h par [th] en plus.</td></tr></tbody></table>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783951205052
+      }
+    },
+    {
+      "_id": "Qyx2EdEjRAUsnP9y",
+      "name": "Talisman",
+      "sort": 40,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table style=\"text-align:center\"><thead><tr style=\"border-bottom:1px solid #999\"><th>Objet</th><th>Difficulté</th><th>Prix</th><th>Temps (Heures)</th><th>Rareté</th><th>Description</th></tr></thead><tbody><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0.5em 1em;text-align:right\"><strong>Amulette De Puissance</strong></td><td style=\"padding:0.5em 1em\">[di][di][di]</td><td style=\"padding:0.5em 1em\">500</td><td style=\"padding:0.5em 1em\">4</td><td style=\"padding:0.5em 1em\">6</td><td style=\"padding:0.5em 1em;text-align:left\">Ajoute [fo] aux tests de Force ou aux tests renforcés par la Force. Une fois utilisé, le talisman tombe en poussière.</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0.5em 1em;text-align:right\"><strong>Fétiche De Peur</strong></td><td style=\"padding:0.5em 1em\">[di][di]</td><td style=\"padding:0.5em 1em\">300</td><td style=\"padding:0.5em 1em\">2</td><td style=\"padding:0.5em 1em\">4</td><td style=\"padding:0.5em 1em;text-align:left\">L’utilisateur cible un adversaire à portée Au contact, pour faire effectuer un test de résistance de Peur difficulté Moyenne ([di][di]). Si c’est réussi, la cible est libre de ses mouvements. En cas d’échec, la cible ne peut pas effectuer la manœuvre qu’elle avait choisie mais peut en effectuer une autre.</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0.5em 1em;text-align:right\"><strong>Charme Neural</strong></td><td style=\"padding:0.5em 1em\">[di][di][di][di]</td><td style=\"padding:0.5em 1em\">1200</td><td style=\"padding:0.5em 1em\">6</td><td style=\"padding:0.5em 1em\">7</td><td style=\"padding:0.5em 1em;text-align:left\">Lorsque le personnage utilise ce charme, il subit 1 point de stress par point qu’il a dans la caractéristique Intelligence. Pour chaque point de stress subi, il bénéficie d’un bonus [bo] pour son prochain test de Connaissance</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0.5em 1em;text-align:right\"><strong>Amulette de Protection</strong></td><td style=\"padding:0.5em 1em\">[di]</td><td style=\"padding:0.5em 1em\">300</td><td style=\"padding:0.5em 1em\">3</td><td style=\"padding:0.5em 1em\">4</td><td style=\"padding:0.5em 1em;text-align:left\">Le porteur de l’amulette ignore les effets de l’environnement (feu, acide, corrosif). Il peut également se mouvoir sans gêne dans un environnement sans gravité, dans le vide ou sous l’eau. Les armes avec l’attribut Incendiaire, fonctionnent normalement contre le porteur.</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0.5em 1em;text-align:right\"><strong>Talisman de Guérison rapide</strong></td><td style=\"padding:0.5em 1em\">[di][di][di][di]</td><td style=\"padding:0.5em 1em\">600</td><td style=\"padding:0.5em 1em\">8</td><td style=\"padding:0.5em 1em\">5</td><td style=\"padding:0.5em 1em;text-align:left\">Lorsque le talisman est actif, le porteur guérit de 1 point de stress et blessure supplémentaire.</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0.5em 1em;text-align:right\"><strong>Amulette Bouclier</strong></td><td style=\"padding:0.5em 1em\">[di][di][di][di]</td><td style=\"padding:0.5em 1em\">1000</td><td style=\"padding:0.5em 1em\">10</td><td style=\"padding:0.5em 1em\">8</td><td style=\"padding:0.5em 1em;text-align:left\">Une fois par session, le personnage peut réduire de moitié les dommages subis provenant d’une attaque ou un pouvoir de la Force à augmenter l’attaque ou directement provoquer des dommages.</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0.5em 1em;text-align:right\"><strong>Talisman de Fatalité</strong></td><td style=\"padding:0.5em 1em\">[di][di][di]</td><td style=\"padding:0.5em 1em\">4000</td><td style=\"padding:0.5em 1em\">10</td><td style=\"padding:0.5em 1em\">6</td><td style=\"padding:0.5em 1em;text-align:left\">Lorsque le MJ retourne un jeton de Destin pour augmenter une difficulté ou une capacité, le porteur peut diminuer la difficulté de son test de 1. Cet effet ne retourne pas un jeton de Destin mais le talisman tombe en poussière après usage.</td></tr><tr style=\"border-bottom:1px solid #999\"><td style=\"padding:0.5em 1em;text-align:right\"><strong>Marque De Résistance</strong></td><td style=\"padding:0.5em 1em\">[di][di][di][di][di]</td><td style=\"padding:0.5em 1em\">1800</td><td style=\"padding:0.5em 1em\">8</td><td style=\"padding:0.5em 1em\">9</td><td style=\"padding:0.5em 1em;text-align:left\">Lorsque le porteur est la cible d’une attaque sociale ou un pouvoir de la Force est utilisé ou augmenté, il peut faire écarter un [FO]. Si l’adversaire n’a pas assez de [FO], il échoue automatiquement à son test.</td></tr></tbody></table>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783951287427
+      }
+    }
+  ],
+  "folder": null,
+  "categories": [],
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_stats": {
+    "coreVersion": "13.351",
+    "systemId": "starwarsffg",
+    "systemVersion": "2.0.3",
+    "createdTime": 1783614118144,
+    "modifiedTime": 1783614118144,
+    "lastModifiedBy": "ZlIotMp24V8C0Wao",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!journalentry!90WEmffiykm2oWXS"
+}

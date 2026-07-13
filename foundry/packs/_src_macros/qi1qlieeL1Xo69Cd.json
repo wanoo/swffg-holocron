@@ -1,0 +1,21 @@
+{
+  "name": "💰 Kessel — Jetons & Pot",
+  "type": "script",
+  "img": "icons/svg/coins.svg",
+  "folder": null,
+  "command": "game.modules.get(\"swffg-sabacc\").api.run(\"kessel-tokens-pot\");",
+  "ownership": {
+    "default": 2,
+    "bTpHpbvEEXuoga8Z": 3
+  },
+  "flags": {
+    "swffg-sabacc": {
+      "role": "kessel-tokens-pot"
+    }
+  },
+  "_id": "qi1qlieeL1Xo69Cd",
+  "author": "bTpHpbvEEXuoga8Z",
+  "scope": "global",
+  "sort": 0,
+  "_key": "!macros!qi1qlieeL1Xo69Cd"
+}

@@ -27,6 +27,12 @@
     { "lang": "en", "name": "English", "path": "lang/en.json" },
     { "lang": "fr", "name": "Français", "path": "lang/fr.json" }
   ],
+  "packs": [
+    { "name": "regles", "label": "📖 Règles & Références (FR)", "path": "packs/regles", "type": "JournalEntry", "system": "starwarsffg", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
+    { "name": "macros", "label": "🎲 Macros — Holocron", "path": "packs/macros", "type": "Macro", "system": "starwarsffg", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
+    { "name": "structure", "label": "⚙️ Structure & Config", "path": "packs/structure", "type": "JournalEntry", "system": "starwarsffg", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
+    { "name": "sample", "label": "🧪 Échantillon de test", "path": "packs/sample", "type": "JournalEntry", "system": "starwarsffg", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } }
+  ],
   "url": "https://github.com/wanoo/swffg-holocron",
   "manifest": "https://github.com/wanoo/swffg-holocron/releases/latest/download/module.json",
   "download": "https://github.com/wanoo/swffg-holocron/releases/latest/download/swffg-holocron.zip"

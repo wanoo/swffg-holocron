@@ -1,0 +1,166 @@
+{
+  "name": "13 · Aide — Dépenser avantages & menaces (combat)",
+  "pages": [
+    {
+      "name": "[ad] / [tr] au sol",
+      "sort": 0,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><tbody><tr><td>[ad]</td><td>Récupérer 1 stress · +[bo] à l'allié suivant · remarquer un détail important · activer un attribut d'arme (coût variable)</td></tr><tr><td>[ad] (selon l'arme)</td><td>Infliger une blessure critique si l'attaque dépasse l'encaissement (+10 par critique déjà cumulé sur le même jet)</td></tr><tr><td>[ad][ad]</td><td>Manœuvre gratuite immédiate · +[se] au prochain test de la cible · +[bo] au prochain test d'un allié</td></tr><tr><td>[ad][ad][ad]</td><td>Annuler les bonus défensifs de la cible · ignorer les malus d'environnement · neutraliser un élément d'équipement adverse (temporaire) · +1 défense jusqu'à son prochain tour · la cible lâche une arme</td></tr><tr><td>[tr]</td><td>Améliorer 1 [di] du prochain test de la cible · améliorer 1 dé d'un allié · action cruciale (fermer la porte anti-explosion…) · soigner une blessure</td></tr><tr><td>[tr][tr]</td><td>Détruire un élément d'équipement de la cible (son blaster explose…)</td></tr></tbody></table>",
+        "format": 1
+      },
+      "_id": "CLO08LYyKsHn00zF",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "name": "[th] / [de] au sol",
+      "sort": 10,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><tbody><tr><td>[th]</td><td>Le personnage actif subit 1 stress · perd le bénéfice d'une manœuvre précédente (mise à l'abri, posture…)</td></tr><tr><td>[th][th]</td><td>Un adversaire fait une manœuvre gratuite · +[bo] au prochain test visant le personnage · [se] à sa prochaine action</td></tr><tr><td>[th][th][th]</td><td>Le personnage actif tombe à terre · favorise son ennemi (détruit la console dont il avait besoin…)</td></tr><tr><td>[de]</td><td>L'arme à distance tombe à court de munitions pour la rencontre · améliore 1 dé du prochain test d'un adversaire · l'arme/outil de CàC est endommagé</td></tr></tbody></table>",
+        "format": 1
+      },
+      "_id": "cZgeEtbUIMdUFWmO",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "name": "[ad] / [tr] en spatial",
+      "sort": 20,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><tbody><tr><td>[ad]</td><td>+[bo] au prochain test de Pilotage, Artillerie, Informatique ou Mécanique · détail important · attribut d'arme · critique (coût selon l'arme)</td></tr><tr><td>[ad][ad]</td><td>Manœuvre gratuite · +[se] au prochain test de Pilotage/Artillerie visant le personnage · +[bo] à un allié</td></tr><tr><td>[ad][ad][ad]</td><td>Neutraliser un composant précis (boucliers à 0…) au lieu des dégâts · ignorer terrain/phénomènes jusqu'à son prochain tour · manœuvre de pilote gratuite · forcer un vaisseau à changer de cap</td></tr><tr><td>[tr]</td><td>Améliorer 1 [di] du prochain test de la cible · améliorer 1 dé d'un allié · action cruciale (détruire les générateurs de boucliers…)</td></tr><tr><td>[tr][tr]</td><td>Détruire un composant important</td></tr></tbody></table>",
+        "format": 1
+      },
+      "_id": "T9QeUg1McIXROekN",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "name": "[th] / [de] en spatial",
+      "sort": 30,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><tbody><tr><td>[th]</td><td>Vitesse réduite de 1 (obligatoire) · perd le bénéfice d'une manœuvre · le vaisseau subit 1 stress mécanique</td></tr><tr><td>[th][th]</td><td>Manœuvre gratuite adverse · +[bo] au prochain test de Pilotage/Artillerie visant le personnage · [se] à sa prochaine action</td></tr><tr><td>[th][th][th]</td><td>Dernier dans l'ordre d'initiative · favorise son ennemi</td></tr><tr><td>[de]</td><td>Arme à court de munitions · améliore 1 [di] d'un test allié · collision mineure (critique − 10× Défense)</td></tr><tr><td>Test raté + [de]</td><td>Collision majeure (critique − 5× Défense)</td></tr></tbody></table>",
+        "format": 1
+      },
+      "_id": "gVy7wajynWdH7kJz",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    }
+  ],
+  "_id": "qf8OHLMH0oW4vK5C",
+  "folder": null,
+  "categories": [],
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_stats": {
+    "coreVersion": "13.351",
+    "systemId": "starwarsffg",
+    "systemVersion": "2.0.3",
+    "createdTime": 1783614187482,
+    "modifiedTime": 1783614187482,
+    "lastModifiedBy": "ZlIotMp24V8C0Wao",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!journalentry!qf8OHLMH0oW4vK5C"
+}

@@ -1,0 +1,17 @@
+{
+  "name": "⭐ Points de Destin",
+  "type": "script",
+  "scope": "global",
+  "img": "icons/svg/sun.svg",
+  "command": "const light = game.settings.get(\"starwarsffg\", \"dPoolLight\"), dark = game.settings.get(\"starwarsffg\", \"dPoolDark\");\nconst fd = await foundry.applications.api.DialogV2.wait({\n  window: { title: \"Points de Destin\" },\n  content: `<p>Réserve actuelle : <strong>${light} [li] · ${dark} [da]</strong></p>\n    <div class=\"form-group\"><label>Jet de début de séance — dés de Force à lancer (1/PJ)</label>\n    <input type=\"number\" name=\"n\" value=\"3\" min=\"0\" max=\"10\"/></div>\n    <div class=\"form-group\"><label><input type=\"checkbox\" name=\"remind\" checked/> Poster le rappel des usages</label></div>`,\n  buttons: [{ action: \"roll\", label: \"Lancer & mettre à jour\", default: true,\n      callback: (event, button) => new (foundry.applications.ux?.FormDataExtended ?? FormDataExtended)(button.form).object },\n    { action: \"cancel\", label: \"Fermer\" }],\n});\nif (!fd || fd === \"cancel\") return;\nlet msg = \"\";\nif (Number(fd.n) > 0) {\n  const roll = new game.ffg.RollFFG(`${Number(fd.n)}df`);\n  await roll.evaluate();\n  let l = 0, d = 0;\n  for (const die of roll.dice) for (const r of die.results) {\n    l += r.ffg?.light ?? 0; d += r.ffg?.dark ?? 0;\n  }\n  if (!l && !d && roll.ffg) { l = roll.ffg.light ?? 0; d = roll.ffg.dark ?? 0; }\n  await game.settings.set(\"starwarsffg\", \"dPoolLight\", l);\n  await game.settings.set(\"starwarsffg\", \"dPoolDark\", d);\n  await roll.toMessage({ flavor: \"Jet de Destin — début de séance\" });\n  msg = `<p>Nouvelle réserve : <strong>${l} [li] · ${d} [da]</strong></p>`;\n}\nif (fd.remind) await ChatMessage.create({ content: `<h3>⭐ Points de Destin</h3>${msg}\n  <p><strong>Joueurs [li]</strong> : améliorer 1 dé de son pool · dégrader 1 [di] adverse ·\n  activer certains talents · « coup de pouce » narratif validé par le MJ.</p>\n  <p><strong>MJ [da]</strong> : améliorer la difficulté d'un test de PJ · améliorer le pool d'un PNJ ·\n  déclencher une complication narrative.</p>\n  <p style=\"font-size:.9em\">Un point dépensé bascule de l'autre côté de la réserve.</p>` });",
+  "_id": "ZbQ62FgKhcCeU40t",
+  "author": "ZlIotMp24V8C0Wao",
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_key": "!macros!ZbQ62FgKhcCeU40t"
+}

@@ -1,0 +1,21 @@
+{
+  "name": "⚒️ Atelier de fabrication",
+  "type": "script",
+  "img": "icons/tools/smithing/anvil.webp",
+  "folder": null,
+  "command": "game.modules.get(\"swffg-workshops\").api.run(\"atelier\");",
+  "ownership": {
+    "default": 2,
+    "bTpHpbvEEXuoga8Z": 3
+  },
+  "flags": {
+    "swffg-workshops": {
+      "role": "atelier"
+    }
+  },
+  "_id": "Hu3heD1yHkYaNVZC",
+  "author": "bTpHpbvEEXuoga8Z",
+  "scope": "global",
+  "sort": 0,
+  "_key": "!macros!Hu3heD1yHkYaNVZC"
+}

@@ -1,0 +1,17 @@
+{
+  "name": "🩹 Dégâts-Stress de groupe",
+  "type": "script",
+  "scope": "global",
+  "img": "icons/svg/blood.svg",
+  "command": "const tokens = canvas.tokens.controlled.filter(t => t.actor);\nif (!tokens.length) return ui.notifications.warn(\"Sélectionne d'abord des tokens.\");\nconst fd = await foundry.applications.api.DialogV2.wait({\n  window: { title: `Dégâts / Stress — ${tokens.length} token(s)` },\n  content: `\n    <div class=\"form-group\"><label>Type</label>\n      <select name=\"mode\"><option value=\"wounds\">Blessures</option><option value=\"strain\">Stress</option>\n      <option value=\"healW\">Soin (blessures)</option><option value=\"healS\">Récup (stress)</option></select></div>\n    <div class=\"form-group\"><label>Montant</label><input type=\"number\" name=\"amount\" value=\"5\" min=\"1\"/></div>\n    <div class=\"form-group\"><label><input type=\"checkbox\" name=\"soak\" checked/> Retirer l'encaissement (blessures seulement)</label></div>`,\n  buttons: [{ action: \"ok\", label: \"Appliquer\", default: true,\n    callback: (event, button) => new (foundry.applications.ux?.FormDataExtended ?? FormDataExtended)(button.form).object }],\n});\nif (!fd) return;\nconst amount = Number(fd.amount);\nconst lines = [];\nfor (const t of tokens) {\n  const a = t.actor, st = a.system?.stats ?? {};\n  const soak = fd.soak && fd.mode === \"wounds\" ? Number(st.soak?.value ?? 0) : 0;\n  const heal = fd.mode.startsWith(\"heal\");\n  const key = (fd.mode === \"wounds\" || fd.mode === \"healW\") ? \"wounds\" : \"strain\";\n  const cur = Number(st[key]?.value ?? 0);\n  const delta = heal ? -amount : Math.max(0, amount - soak);\n  const next = Math.max(0, cur + delta);\n  await a.update({ [`system.stats.${key}.value`]: next });\n  const max = Number(st[key]?.max ?? 0);\n  lines.push(`${t.name} : ${key === \"wounds\" ? \"blessures\" : \"stress\"} ${cur} → ${next}${max ? `/${max}` : \"\"}${soak ? ` (encaissement ${soak})` : \"\"}${max && next >= max ? \" ⚠️ <strong>seuil dépassé !</strong>\" : \"\"}`);\n}\nawait ChatMessage.create({ content: `<h4>🩹 ${fd.mode.startsWith(\"heal\") ? \"Soins\" : \"Dégâts\"}</h4><p>${lines.join(\"<br>\")}</p>`,\n  whisper: ChatMessage.getWhisperRecipients(\"GM\").map(u => u.id) });",
+  "_id": "rRJamtI1b0w8YVXF",
+  "author": "ZlIotMp24V8C0Wao",
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_key": "!macros!rRJamtI1b0w8YVXF"
+}

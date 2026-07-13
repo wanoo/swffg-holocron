@@ -1,0 +1,21 @@
+{
+  "name": "⚔️ Fabrication / Recustom — Sabre Laser",
+  "type": "script",
+  "img": "icons/weapons/swords/sword-laser-red.webp",
+  "folder": null,
+  "command": "game.modules.get(\"swffg-workshops\").api.run(\"saber-forge\");",
+  "ownership": {
+    "default": 2,
+    "bTpHpbvEEXuoga8Z": 3
+  },
+  "flags": {
+    "swffg-workshops": {
+      "role": "saber-forge"
+    }
+  },
+  "_id": "yNd39oOBBQ33Zdnt",
+  "author": "bTpHpbvEEXuoga8Z",
+  "scope": "global",
+  "sort": 0,
+  "_key": "!macros!yNd39oOBBQ33Zdnt"
+}

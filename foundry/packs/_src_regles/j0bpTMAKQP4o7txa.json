@@ -1,0 +1,201 @@
+{
+  "name": "14 · Aide — Vaisseaux & combat spatial",
+  "pages": [
+    {
+      "name": "Caractéristiques",
+      "sort": 0,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><tbody><tr><td>Maniabilité</td><td>Bonus en [bo] ou malus en [se] aux tests de pilotage</td></tr><tr><td>Gabarit 1-4 (petits)</td><td>2 zones de boucliers · 1 manœuvre + 1 action (2 manœuvres = 2 stress mécanique + 2 stress pilote, sauf à 2 pilotes)</td></tr><tr><td>Gabarit 5+ (capitaux)</td><td>4 zones de défense · une seule manœuvre de pilote par tour</td></tr><tr><td>Seuil de coque (DC)</td><td>1 dégât de coque ≈ 10 blessures personnage</td></tr><tr><td>Seuil de stress mécanique (SM)</td><td>Ne s'élimine pas avec [ad] — 1 point/jour ou intervention d'équipage</td></tr><tr><td>Défense</td><td>Boucliers déflecteurs = [se] imposés à l'attaquant</td></tr><tr><td>Blindage</td><td>1 point = 10 points d'encaissement</td></tr></tbody></table>",
+        "format": 1
+      },
+      "_id": "rF7AVFXU2Brq3mo7",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "name": "Manœuvres de vaisseau",
+      "sort": 10,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><tbody><tr><td>Accélérer/décélérer</td><td>±1 vitesse</td></tr><tr><td>Voler/conduire</td><td>Changer de portée selon la vitesse (v1 : 1 manœuvre proche↔courte · v2-4 : jusqu'à moyenne · v5-6 : jusqu'à longue)</td></tr><tr><td>Manœuvre d'évasion (g1-4, v3+)</td><td>Améliore 1 [di] de tous les tests qui ciblent l'appareil (et de ses propres tirs) jusqu'au prochain tour</td></tr><tr><td>Coller à la cible (g1-4, v3+)</td><td>Améliore 1 [ab] des attaques effectuées depuis l'appareil</td></tr><tr><td>Mettre la gomme (g1-4, v3+)</td><td>Vitesse max immédiate · 1 stress mécanique par niveau gagné</td></tr><tr><td>Réorienter les boucliers</td><td>Transférer 1 point de défense d'une zone à l'autre</td></tr></tbody></table>",
+        "format": 1
+      },
+      "_id": "M6n3Mc07vlqw6ZWU",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "name": "Actions de vaisseau",
+      "sort": 20,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><tbody><tr><td>Effectuer une attaque</td><td>Difficulté selon la différence de gabarit : cible +2 plus grande Facile ([di]) · ±1 Moyen ([di][di]) · -2 Difficile ([di][di][di]) · -3 Intimidant ([di][di][di][di]) · -4 Exceptionnel ([di][di][di][di][di])</td></tr><tr><td>Contrôle des dégâts</td><td>Mécanique — &lt; ½ seuil : Facile ([di]) · ≥ ½ : Moyen ([di][di]) · &gt; seuil : Difficile ([di][di][di]) — récupère 1 stress mécanique ou 1 coque par [su] (1×/rencontre en combat) · répare aussi un effet critique</td></tr><tr><td>Assister le pilote</td><td>Pilotage Moyen ([di][di]) : dégrade 1 [di] du prochain test du pilote par succès</td></tr><tr><td>Brouillage</td><td>Informatique Moyen ([di][di]) : l'adversaire doit tester pour communiquer · +1 [di] par [su][su] · +1 cible par [ad] dépensé</td></tr><tr><td>Contre-mesures</td><td>Informatique Moyen ([di][di]) ou Vigilance Difficile ([di][di][di]) : améliore 1 [di] des armes à Projectile guidé</td></tr><tr><td>Discipline de tir</td><td>Commandement/Sang-froid Difficile ([di][di][di]) : +[bo] au prochain tir du vaisseau par [su][su] · [ad][ad][ad] : toutes les armes infligent +1 stress</td></tr><tr><td>Intensifier le bouclier</td><td>Mécanique Difficile ([di][di][di]) : 1 stress, +1 défense sur une zone (chaque [su] prolonge d'un round)</td></tr><tr><td>Pirater l'ennemi</td><td>Informatique Difficile ([di][di][di]) : -1 défense d'une zone par [su] (1 round) · [tr] désactive une arme · [ad][ad] inflige 1 stress mécanique</td></tr><tr><td>Réparations manuelles</td><td>Athlétisme Difficile ([di][di][di]) : 1 coque +1 par [su][su] (1×/rencontre)</td></tr><tr><td>Scanner l'ennemi</td><td>Perception Difficile ([di][di][di]) : révèle armes, modifications, dégâts</td></tr><tr><td>Tracer l'itinéraire</td><td>Astrogation Moyen ([di][di]) ou Perception Difficile ([di][di][di]) : chaque succès retire 1 [se] de terrain</td></tr></tbody></table>",
+        "format": 1
+      },
+      "_id": "QOVByl3jBFHNEsDY",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "name": "Actions d'équipage (personnes)",
+      "sort": 30,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><tbody><tr><td>Galvaniser</td><td>Charme/Commandement, [di] = nombre de cibles : +[bo] 1 round (+1 round par [su])</td></tr><tr><td>Distraire/intimider</td><td>Coercition, Commandement, Magouille, Négociation ou Tromperie : les cibles perdent 1 stress par [su][su]… ([tr] : perdent une manœuvre)</td></tr><tr><td>Sortir de la torpeur</td><td>Calme, Charme, Coercition ou Commandement : les cibles récupèrent 1 stress par [su][su]</td></tr><tr><td>Course-poursuite</td><td>Pilotage concurrentiel, [di] = vitesse ou ½ gabarit (le pire des deux) — le résultat donne la position relative</td></tr></tbody></table>",
+        "format": 1
+      },
+      "_id": "ucuEwZeOXK7vjyRZ",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "name": "Astrogation",
+      "sort": 40,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p><strong>Durées</strong> : orbite → point de saut : 5-15 min · traverser un système : 12-72 h · hyperespace : moins d'un jour (secteur) à 1-3 semaines (bout à bout de la galaxie).</p><table><tbody><tr><td>Route majeure bien cartographiée</td><td>Facile ([di])</td></tr><tr><td>Route mineure, régions voisines</td><td>Moyen ([di][di])</td></tr><tr><td>Régions peu fréquentées (cartes vieilles de plusieurs siècles)</td><td>Difficile ([di][di][di])</td></tr><tr><td>Région éloignée de toutes routes (cartes millénaires)</td><td>Intimidant ([di][di][di][di])</td></tr><tr><td>Espace inconnu, jamais cartographié</td><td>Exceptionnel ([di][di][di][di][di])</td></tr></tbody></table><p><strong>Calcul en urgence</strong> : temps = 3 + dés de difficulté (en rounds) ; chaque réussite au round réduit le temps. Malus cumulables : [se] astromech/naviordinateur endommagé ou calcul en urgence · [se]-[se][se][se] vaisseau endommagé/sous le feu · [se] itinéraire de 10-19 cases, [se][se] 20+.</p><p><strong>Résultats</strong> : [su] -1 round de calcul, arrivée précise/discrète · [ad] voyage plus court, raccourci · [tr] découverte d'une route oubliée ou d'une zone « discrète » · [th] +1 round de calcul, arrivée à 10 UA, débris/turbulences · [de] tout recommencer, secteur inconnu, voyage interrompu près d'un puits gravitique, piège…</p>",
+        "format": 1
+      },
+      "_id": "tVEWw5V8OyZy3XrU",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    }
+  ],
+  "_id": "j0bpTMAKQP4o7txa",
+  "folder": null,
+  "categories": [],
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_stats": {
+    "coreVersion": "13.351",
+    "systemId": "starwarsffg",
+    "systemVersion": "2.0.3",
+    "createdTime": 1783614187541,
+    "modifiedTime": 1783614187541,
+    "lastModifiedBy": "ZlIotMp24V8C0Wao",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!journalentry!j0bpTMAKQP4o7txa"
+}

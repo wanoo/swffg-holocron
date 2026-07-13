@@ -1,0 +1,310 @@
+{
+  "_id": "6RQ7YqlIrFYlkAdc",
+  "name": "05 · Équipements",
+  "pages": [
+    {
+      "_id": "gem1quuuctVUhNM0",
+      "name": "Trouver un Objet",
+      "sort": 0,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p>Si jet D10 &gt;= rareté, objet disponible <strong>au marché légal</strong></p><ul><li><p>Pour le trouver : test de <strong>Perception</strong> vs. <strong>Difficulté</strong></p></li><li><p>Sinon (si MJ ok) marché noir et test de <strong>Système D</strong></p></li></ul><h2>Difficulté</h2><div><table border=\"0\"><thead><tr style=\"border-top:1px dotted #aaa\"><th style=\"text-align:center\">Rareté</th><th style=\"text-align:center\">Difficulté*</th><th>Exemples</th></tr></thead><tbody><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">0</td><td style=\"text-align:center\" rowspan=\"2\">-</td><td>Tige fluorescente</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">1</td><td>Comlink large bande</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">2</td><td style=\"text-align:center\" rowspan=\"2\">[di]</td><td>Medpack</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">3</td><td>Jumelles scaner</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">4</td><td style=\"text-align:center\" rowspan=\"2\">[di][di]</td><td>Pistolet Blaster</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">5</td><td>Fusil Blaster</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">6</td><td style=\"text-align:center\" rowspan=\"2\">[di][di][di]</td><td>Membres Cybernétiques</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">7</td><td>Gants en cortosis</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">8</td><td style=\"text-align:center\" rowspan=\"2\">[di][di][di][di]</td><td>Détonateur Thermique</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">9</td><td>Cristal Dantari</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">10</td><td style=\"text-align:center\">[di][di][di][di][di]</td><td>Sabre Laser</td></tr></tbody></table></div><h2>Modificateurs de rareté du monde</h2><div><table style=\"text-align:center\" border=\"0\"><thead><tr style=\"border-top:1px dotted #aaa\"><th rowspan=\"2\"><p>+ Rareté</p></th><th style=\"text-align:center\" rowspan=\"2\">Circonstances</th><th colspan=\"2\"><p>Marge de base</p></th></tr><tr><th>Légal</th><th>Marché Noir</th></tr></thead><tbody><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\"><p>-2</p></td><td style=\"text-align:center\">Capitals (Coruscant, Duro, Corellia)</td><td>×1</td><td>×2.5</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\"><p>-1</p></td><td style=\"text-align:center\">Autres mondes du noyau</td><td>×1</td><td>×2</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\"><p>-1</p></td><td style=\"text-align:center\">Mondes civilisés sur routes commerciales primaires</td><td>×0.9</td><td>×1.9</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\"><p>0</p></td><td style=\"text-align:center\">Colonies, bordures intérieures</td><td>×1</td><td>×2</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\"><p>0</p></td><td style=\"text-align:center\">Mondes civilisés</td><td>×1</td><td>×2</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\"><p>1</p></td><td style=\"text-align:center\">Bordures médianes</td><td>×1</td><td>×2</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">1</td><td style=\"text-align:center\">Colonies récentes en dehors des chemins</td><td>×1.5</td><td>×2.5</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">2</td><td style=\"text-align:center\">Bordures extérieures</td><td>×2</td><td>×3</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">2</td><td style=\"text-align:center\">Mondes frontières</td><td>×2</td><td>×4</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">3</td><td style=\"text-align:center\">Espace sauvage</td><td>×3</td><td>-</td></tr><tr style=\"border-top:1px dotted #aaa\"><td style=\"text-align:center\">4</td><td style=\"text-align:center\">Mondes non civilisés</td><td>×4</td><td>-</td></tr></tbody></table></div>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950554746
+      }
+    },
+    {
+      "_id": "P9BNa3viadqB48gv",
+      "name": "Transaction",
+      "sort": 10,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<h2>Prix</h2><p><span style=\"font-family:sans-serif\">Prix de base × marge de base + % du marchand</span></p><h2>Négocier le prix</h2><div><table style=\"text-align:center\" border=\"0\"><thead><tr style=\"border-bottom:1px solid #999\"><th><p>Nb. succès</p></th><th>Achat</th><th>Vente</th></tr></thead><tbody><tr style=\"border-bottom:1px solid #999\"><td><p>[su]</p></td><td>prix - <strong>10%</strong></td><td>prix × <strong>1/4</strong></td></tr><tr style=\"border-bottom:1px solid #999\"><td><p>[su][su]</p></td><td>prix - <strong>15%</strong></td><td>prix × <strong>1/2</strong></td></tr><tr style=\"border-bottom:1px solid #999\"><td><p>[su][su][su]</p></td><td>prix - <strong>20%</strong></td><td>prix × <strong>3/4</strong></td></tr><tr style=\"border-bottom:1px solid #999\"><td><p>[th][th][th] ou [de]</p></td><td colspan=\"2\">La transaction échoue, pb dans la marchandise (si marché noir : PJ doublé, descente de police...)</td></tr></tbody></table></div>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "ge6Us3YWNqC4Fi8K",
+      "name": "Encombrements",
+      "sort": 20,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p><span style=\"text-decoration:underline\"><strong><span style=\"text-decoration:underline\">Seuil d’Encombrement (SE)</span></strong><span style=\"text-decoration:underline\"> = vigueur +5</span></span></p><ul><li><p>Encombrement &gt; SE = +[se] par surplus aux tests d’agilité / vigueur</p></li><li><p>Encombrement &gt; SE + vigueur = 1re manœuvre coute 2 stress</p></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950498865
+      }
+    },
+    {
+      "_id": "Xwr0l2wwMo2A995E",
+      "name": "Soulever",
+      "sort": 30,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p><strong><span style=\"text-decoration:underline\">Test d’athlétisme :</span></strong> (les personnages aidant ajoutent leur vigueur au <strong>SE</strong>)</p><ul><li><p>Objet soulevé ≤ SE = pas de difficulté</p></li><li><p>Objet soulevé &gt; SE = +[di] par point surplus d’encombrement</p></li><li><p>Objet soulevé &gt; SE +5 = impossible de soulever l’objet</p></li></ul>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "GWsI0bn0Gw1SgtDc",
+      "name": "Objets Cachés",
+      "sort": 40,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p>Pour leurs recherches, les personnages gagnent +[bo] par valeur d’encombrement -1 des gros objets</p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "_id": "Mu4dVPy8A3j6Hmb3",
+      "name": "Avantage de l'équipements",
+      "sort": 50,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p>En général, si la tâche peut être accomplie sans équipement, l’équipement ajoute +[bo] à la tentative</p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950522289
+      }
+    },
+    {
+      "_id": "gOBmRJRzojUvVEjN",
+      "name": "Objets Endommagés",
+      "sort": 60,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p>Appliquer les malus suivants aux attaques (ne se cumulent pas)</p><table style=\"text-align:center\"><thead><tr style=\"border-bottom:1px solid #999\"><th>Dommage</th><th>Armes</th><th>Armures</th><th>Equipements</th></tr></thead><tbody><tr style=\"border-bottom:1px solid #999\"><td>Mineure</td><td>+[se]</td><td>+[bo]</td><td>+[se]/+[bo]</td></tr><tr style=\"border-bottom:1px solid #999\"><td>Moyenne</td><td>+[di]</td><td>-[di]</td><td>+[di]/-[di]</td></tr><tr style=\"border-bottom:1px solid #999\"><td>Majeure</td><td>Inutilisable</td><td>Inutilisable</td><td>Inutilisable</td></tr></tbody></table>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": "ZlIotMp24V8C0Wao",
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "modifiedTime": 1783950510571
+      }
+    },
+    {
+      "_id": "PocpPdhEu4eWMxnP",
+      "name": "Réparer l'équipement",
+      "sort": 70,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p><span style=\"text-decoration:underline\">Test de </span><strong><span style=\"text-decoration:underline\">mécanique</span></strong><span style=\"text-decoration:underline\"> :</span></p><table style=\"text-align:center\"><thead><tr style=\"border-bottom:1px solid #999\"><th>Dommage</th><th>Coût</th><th>Difficulté</th></tr></thead><tbody><tr style=\"border-bottom:1px solid #999\"><td>Mineure</td><td>25% coût de base</td><td>[di]</td></tr><tr style=\"border-bottom:1px solid #999\"><td>Moyenne</td><td>50% coût de base</td><td>[di][di]</td></tr><tr style=\"border-bottom:1px solid #999\"><td>Majeure</td><td>100% cout de base</td><td>[di][di][di]</td></tr></tbody></table><p>(-10% au coût par [ad])</p>",
+        "format": 1
+      },
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    }
+  ],
+  "folder": null,
+  "categories": [],
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_stats": {
+    "coreVersion": "13.351",
+    "systemId": "starwarsffg",
+    "systemVersion": "2.0.3",
+    "createdTime": 1783614117725,
+    "modifiedTime": 1783614117725,
+    "lastModifiedBy": "ZlIotMp24V8C0Wao",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!journalentry!6RQ7YqlIrFYlkAdc"
+}

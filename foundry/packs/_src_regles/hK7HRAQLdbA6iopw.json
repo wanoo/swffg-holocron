@@ -1,0 +1,131 @@
+{
+  "name": "17 · Aide — Économie galactique",
+  "pages": [
+    {
+      "name": "Trouver un objet",
+      "sort": 0,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><tbody><tr><th>Rareté</th><th>Test de Négociation</th></tr><tr><td>Rareté 0-1</td><td>Simple (aucun dé)</td></tr><tr><td>Rareté 2-3</td><td>Facile ([di])</td></tr><tr><td>Rareté 4-5</td><td>Moyen ([di][di])</td></tr><tr><td>Rareté 6-7</td><td>Difficile ([di][di][di])</td></tr><tr><td>Rareté 8-9</td><td>Intimidant ([di][di][di][di])</td></tr><tr><td>Rareté 10</td><td>Exceptionnel ([di][di][di][di][di])</td></tr></tbody></table><p><strong>Marché noir</strong> : Négociation remplacée par Système D ; les articles notés (i) n'existent que là. Sur un [th] ou [de], la transaction tourne mal.</p>",
+        "format": 1
+      },
+      "_id": "fOUoHHlPYEWLi2BJ",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "name": "Modificateurs de rareté (lieu)",
+      "sort": 10,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><tbody><tr><td>-2</td><td>Planète majeure du Noyau (Coruscant, Corellia…)</td></tr><tr><td>-1</td><td>Autre planète du Noyau ou grand axe commercial</td></tr><tr><td>0</td><td>Colonie, Bordure intérieure, planète civilisée</td></tr><tr><td>+1</td><td>Cœur de la Bordure, planète isolée ou récente</td></tr><tr><td>+2</td><td>Bordure extérieure, frontières de l'Empire</td></tr><tr><td>+3</td><td>Espace sauvage</td></tr><tr><td>+4</td><td>Planète primitive</td></tr></tbody></table>",
+        "format": 1
+      },
+      "_id": "9nb1eIT8tkyRH6Mb",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "name": "Acheter & vendre",
+      "sort": 20,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p><strong>Acheter</strong> : Négociation opposée — profit de 5 % par [su] pour le vendeur ; les [ad] se convertissent en faveurs ; [tr] : interlocuteur commercial privilégié (+[bo] à l'avenir).</p><p><strong>Vendre</strong> : Négociation opposée — au quart de la valeur si réussi, à la moitié avec [su][su], aux trois quarts avec [su][su][su].</p><table><tbody><tr><th>Rareté locale (revente)</th><th>Prix</th></tr><tr><td>+0 ou +1</td><td>×1</td></tr><tr><td>+2</td><td>×2</td></tr><tr><td>+3</td><td>×3</td></tr><tr><td>+4</td><td>×4</td></tr></tbody></table>",
+        "format": 1
+      },
+      "_id": "skGSNv5kcmrG8x7V",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    }
+  ],
+  "_id": "hK7HRAQLdbA6iopw",
+  "folder": null,
+  "categories": [],
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_stats": {
+    "coreVersion": "13.351",
+    "systemId": "starwarsffg",
+    "systemVersion": "2.0.3",
+    "createdTime": 1783614187721,
+    "modifiedTime": 1783614187721,
+    "lastModifiedBy": "ZlIotMp24V8C0Wao",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!journalentry!hK7HRAQLdbA6iopw"
+}

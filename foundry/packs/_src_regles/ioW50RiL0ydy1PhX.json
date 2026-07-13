@@ -1,0 +1,166 @@
+{
+  "name": "10 · Aide — Dés & symboles",
+  "pages": [
+    {
+      "name": "Types de dés",
+      "sort": 0,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p>Le pool se construit avec la caractéristique et la compétence (la plus haute donne le nombre de dés, la plus basse le nombre d'améliorations).</p><table><tbody><tr><td>[ab] Aptitude (vert)</td><td>[di] Difficulté (violet)</td></tr><tr><td>[pr] Maîtrise (jaune)</td><td>[ch] Défi (rouge)</td></tr><tr><td>[bo] Fortune (bleu)</td><td>[se] Infortune (noir)</td></tr><tr><td>[fo] Force (blanc)</td><td>—</td></tr></tbody></table>",
+        "format": 1
+      },
+      "_id": "LOAWwy8Xv8cJ03fj",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "name": "Symboles",
+      "sort": 10,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><tbody><tr><td>[su] Succès</td><td>[fa] Échec — annule [su]</td></tr><tr><td>[ad] Avantage</td><td>[th] Menace — annule [ad]</td></tr><tr><td>[tr] Triomphe (= [su] + effet majeur)</td><td>[de] Désastre (= [fa] + effet majeur)</td></tr><tr><td>[li] Côté lumineux</td><td>[da] Côté obscur</td></tr></tbody></table><p>Il faut au moins 1 [su] net pour réussir. Chaque [su] supplémentaire ajoute +1 dégât sur une attaque.</p>",
+        "format": 1
+      },
+      "_id": "wm7wyeSAlynODTpX",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "name": "Améliorer vs augmenter",
+      "sort": 20,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<p><strong>Améliorer</strong> : [ab] → [pr] (ou [di] → [ch]) ; si tous les dés sont déjà améliorés, on ajoute un dé de base. <strong>Augmenter</strong> : on ajoute des dés au pool.</p><p>Exemple : 2 améliorations sur [di][di] → [ch][ch] ; 2 augmentations → [di][di][di][di].</p>",
+        "format": 1
+      },
+      "_id": "kbRxl9l7FprTmC86",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "name": "Assistance",
+      "sort": 30,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<ul><li><strong>Qualifiée</strong> : on combine la meilleure caractéristique de l'un et la meilleure compétence de l'autre.</li><li><strong>Non qualifiée</strong> : +[bo] au test.</li></ul>",
+        "format": 1
+      },
+      "_id": "xMuIDNgzs94WZ9ds",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    }
+  ],
+  "_id": "ioW50RiL0ydy1PhX",
+  "folder": null,
+  "categories": [],
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_stats": {
+    "coreVersion": "13.351",
+    "systemId": "starwarsffg",
+    "systemVersion": "2.0.3",
+    "createdTime": 1783614187303,
+    "modifiedTime": 1783614187303,
+    "lastModifiedBy": "ZlIotMp24V8C0Wao",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!journalentry!ioW50RiL0ydy1PhX"
+}

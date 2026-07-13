@@ -1,0 +1,21 @@
+{
+  "name": "🏆 Sabacc — Révélation",
+  "type": "script",
+  "img": "icons/svg/eye.svg",
+  "folder": null,
+  "command": "game.modules.get(\"swffg-sabacc\").api.run(\"spike-reveal\");",
+  "ownership": {
+    "default": 2,
+    "bTpHpbvEEXuoga8Z": 3
+  },
+  "flags": {
+    "swffg-sabacc": {
+      "role": "spike-reveal"
+    }
+  },
+  "_id": "dPT5XjCPNgkaJ4Zr",
+  "author": "bTpHpbvEEXuoga8Z",
+  "scope": "global",
+  "sort": 0,
+  "_key": "!macros!dPT5XjCPNgkaJ4Zr"
+}

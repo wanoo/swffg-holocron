@@ -1,0 +1,21 @@
+{
+  "name": "🔧 Réglage / Accessoires d'objet",
+  "type": "script",
+  "img": "icons/tools/smithing/hammer-and-anvil.webp",
+  "folder": null,
+  "command": "game.modules.get(\"swffg-workshops\").api.run(\"tuning\");",
+  "ownership": {
+    "default": 2,
+    "bTpHpbvEEXuoga8Z": 3
+  },
+  "flags": {
+    "swffg-workshops": {
+      "role": "tuning"
+    }
+  },
+  "_id": "J61Avgu9s91vLWdR",
+  "author": "bTpHpbvEEXuoga8Z",
+  "scope": "global",
+  "sort": 0,
+  "_key": "!macros!J61Avgu9s91vLWdR"
+}

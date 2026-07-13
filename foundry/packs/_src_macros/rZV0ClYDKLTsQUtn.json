@@ -1,0 +1,17 @@
+{
+  "name": "😱 Test de Peur",
+  "type": "script",
+  "scope": "global",
+  "img": "icons/svg/terror.svg",
+  "command": "const fd = await foundry.applications.api.DialogV2.wait({\n  window: { title: \"Test de Peur\" },\n  content: `\n    <div class=\"form-group\"><label>Difficulté</label>\n      <select name=\"diff\"><option value=\"1\">Facile (1)</option><option value=\"2\" selected>Moyen (2)</option>\n      <option value=\"3\">Difficile (3)</option><option value=\"4\">Intimidant (4)</option><option value=\"5\">Exceptionnel (5)</option></select></div>\n    <div class=\"form-group\"><label>Améliorations ([di]→[ch])</label><input type=\"number\" name=\"upg\" value=\"0\" min=\"0\" max=\"5\"/></div>\n    <div class=\"form-group\"><label>Source (affichée aux joueurs)</label><input type=\"text\" name=\"src\" value=\"Quelque chose remue dans l'ombre…\"/></div>`,\n  buttons: [{ action: \"ok\", label: \"Envoyer aux joueurs\", default: true,\n    callback: (event, button) => new (foundry.applications.ux?.FormDataExtended ?? FormDataExtended)(button.form).object }],\n});\nif (!fd) return;\nconst diff = Number(fd.diff), upg = Math.min(Number(fd.upg), diff);\nconst pool = { difficulty: diff - upg, challenge: upg };\nawait ChatMessage.create({\n  content: `<h3>😱 Test de Peur</h3><p><em>${fd.src}</em></p>\n    <p>Lancez <strong>Sang-froid</strong> ou <strong>Discipline</strong>.</p>\n    <p style=\"font-size:.9em\">Échec : 1 stress + [se] jusqu'à la fin de la rencontre · [th][th][th] ou [de] :\n    le personnage cède à la panique (le MJ tranche) · [tr] : immunisé à cette source pour la scène.</p>\n    <button class=\"ffg-pool-to-player\">🎲 Lancer (le pool contient la difficulté)</button>`,\n  flags: { starwarsffg: { dicePool: pool, description: \"Test de Peur\", roll: { data: {}, skillName: \"Peur\", item: {}, flavor: \"\", sound: null } } },\n});",
+  "_id": "rZV0ClYDKLTsQUtn",
+  "author": "ZlIotMp24V8C0Wao",
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_key": "!macros!rZV0ClYDKLTsQUtn"
+}

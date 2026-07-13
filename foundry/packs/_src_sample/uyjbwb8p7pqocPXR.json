@@ -1,0 +1,59 @@
+{
+  "_id": "uyjbwb8p7pqocPXR",
+  "name": "(Exemple) Contact rebelle",
+  "pages": [
+    {
+      "_id": "MgvyzoII49o3I1Mz",
+      "name": "Contact rebelle",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "image": {},
+      "text": {
+        "format": 1,
+        "content": "<p><em>Fiche d'exemple — supprimez-la ou dupliquez-la comme modèle.</em></p><p>Un contact discret de l'Alliance Rebelle, rencontré dans une cantina de la Bordure. Fournit renseignements et caches d'armes en échange de services rendus à la cause.</p><ul><li><strong>Espèce :</strong> Humain</li><li><strong>Allégeance :</strong> Alliance Rebelle</li><li><strong>Attitude :</strong> Ami</li></ul>",
+        "markdown": ""
+      },
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "system": {},
+      "sort": 0,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {
+        "monks-enhanced-journal": {
+          "type": "person",
+          "role": "Ami",
+          "location": "",
+          "attributes": {
+            "race": "Humain",
+            "gender": "M",
+            "life": "Vivant",
+            "faction": "Alliance Rebelle"
+          },
+          "relationships": {},
+          "items": {}
+        }
+      },
+      "_stats": {}
+    }
+  ],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "monks-enhanced-journal": {
+      "pagetype": "person"
+    }
+  },
+  "_stats": {},
+  "_key": "!journalentry!uyjbwb8p7pqocPXR"
+}

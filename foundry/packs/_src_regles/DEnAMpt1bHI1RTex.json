@@ -1,0 +1,96 @@
+{
+  "name": "11 · Aide — Soins & états préjudiciables",
+  "pages": [
+    {
+      "name": "Récupération",
+      "sort": 0,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><tbody><tr><td>Repos naturel</td><td>1 blessure/nuit · 1 nuit complète efface tout le stress · 1 test de Résistance/semaine pour éliminer 1 blessure critique ([tr] en soigne une de plus)</td></tr><tr><td>Soins médicaux</td><td>1 test/rencontre — blessures ≤ ½ seuil : Facile ([di]) · &gt; ½ seuil : Moyen ([di][di]) · &gt; seuil (neutralisé) : Difficile ([di][di][di])</td></tr><tr><td>Cuve à bacta</td><td>1 blessure/2 h (neutralisé : 1/6 h) · 1 test de Résistance/24 h pour une blessure critique</td></tr><tr><td>Stimpack / pouvoir Guérison</td><td>1 manœuvre : -5 blessures, puis -4, -3… (revient à -5 après une nuit de repos)</td></tr><tr><td>Se remettre du stress</td><td>Fin de rencontre : test de Calme ou Sang-froid — chaque [su] élimine 1 stress</td></tr></tbody></table>",
+        "format": 1
+      },
+      "_id": "u0Td9WVmE1NjqatU",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    },
+    {
+      "name": "États préjudiciables",
+      "sort": 10,
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "text": {
+        "content": "<table><tbody><tr><td>Étourdi</td><td>Aucune action (les durées se cumulent)</td></tr><tr><td>Immobilisé</td><td>Aucune manœuvre (les durées se cumulent)</td></tr><tr><td>Désorienté</td><td>+[se] à tous les tests (les durées se cumulent)</td></tr><tr><td>Mort</td><td>Uniquement sur une blessure critique (131+ en général)</td></tr></tbody></table>",
+        "format": 1
+      },
+      "_id": "z5eFj211ZQ8nPaqX",
+      "system": {},
+      "image": {},
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "category": null,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {},
+      "_stats": {
+        "coreVersion": "13.351",
+        "systemId": "starwarsffg",
+        "systemVersion": "2.0.3",
+        "lastModifiedBy": null,
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null
+      }
+    }
+  ],
+  "_id": "DEnAMpt1bHI1RTex",
+  "folder": null,
+  "categories": [],
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_stats": {
+    "coreVersion": "13.351",
+    "systemId": "starwarsffg",
+    "systemVersion": "2.0.3",
+    "createdTime": 1783614187365,
+    "modifiedTime": 1783614187365,
+    "lastModifiedBy": "ZlIotMp24V8C0Wao",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!journalentry!DEnAMpt1bHI1RTex"
+}

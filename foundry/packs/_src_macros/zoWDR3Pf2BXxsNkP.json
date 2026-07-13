@@ -1,0 +1,21 @@
+{
+  "name": "🎰 Sabacc — Lancer une partie",
+  "type": "script",
+  "img": "icons/svg/dice-target.svg",
+  "folder": null,
+  "command": "game.modules.get(\"swffg-sabacc\").api.run(\"sabacc-lobby\");",
+  "ownership": {
+    "default": 2,
+    "bTpHpbvEEXuoga8Z": 3
+  },
+  "flags": {
+    "swffg-sabacc": {
+      "role": "sabacc-lobby"
+    }
+  },
+  "_id": "zoWDR3Pf2BXxsNkP",
+  "author": "bTpHpbvEEXuoga8Z",
+  "scope": "global",
+  "sort": 0,
+  "_key": "!macros!zoWDR3Pf2BXxsNkP"
+}

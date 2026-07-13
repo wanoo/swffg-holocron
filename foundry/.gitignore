@@ -1,2 +1,4 @@
+node_modules/
 dist/
+packs/*/LOCK
 .DS_Store

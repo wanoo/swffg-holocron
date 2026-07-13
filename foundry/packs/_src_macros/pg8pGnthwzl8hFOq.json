@@ -1,0 +1,17 @@
+{
+  "name": "🎲📡 Pont de jets Holocron",
+  "type": "script",
+  "scope": "global",
+  "img": "icons/svg/upgrade.svg",
+  "command": "const KEY = \"__holocronRollBridge\";\nif (globalThis[KEY]?.hookId != null) {\n  Hooks.off(\"createChatMessage\", globalThis[KEY].hookId);\n  globalThis[KEY] = null;\n  ui.notifications.info(\"📡 Pont de jets Holocron : DÉSACTIVÉ.\");\n} else {\n  const handled = new Set();\n  async function evalReq(msg) {\n    try {\n      const holo = msg?.flags?.holocron;\n      const sf = msg?.flags?.starwarsffg;\n      if (!holo?.req || !sf?.dicePool) return;\n      if (!game.user.isGM) return;\n      const token = String(holo.token || \"\");\n      if (!token || handled.has(token)) return;\n      handled.add(token);\n      const Pool = globalThis.DicePoolFFG;\n      const RollFFG = game.ffg?.RollFFG;\n      if (!Pool || !RollFFG) { ui.notifications.error(\"Système FFG introuvable — jet Holocron non évalué.\"); return; }\n      const dp = new Pool(sf.dicePool || {});\n      const roll = new RollFFG(dp.renderDiceExpression(), {}, dp, holo.description || \"\");\n      await roll.evaluate();\n      const f = roll.ffg || {};\n      const result = { success: f.success||0, failure: f.failure||0, advantage: f.advantage||0, threat: f.threat||0, triumph: f.triumph||0, despair: f.despair||0, light: f.light||0, dark: f.dark||0 };\n      await roll.toMessage({ speaker: msg.speaker || {}, flavor: (holo.description || \"Jet\") + \" — via Holocron\", flags: { holocron: { resultFor: token, at: Date.now(), result } } });\n      try { await msg.delete(); } catch (e) {}\n    } catch (e) { console.error(\"[Holocron] pont de jets :\", e); ui.notifications.warn(\"Pont de jets Holocron : échec (voir console).\"); }\n  }\n  const hookId = Hooks.on(\"createChatMessage\", evalReq);\n  globalThis[KEY] = { hookId, handled };\n  for (const m of game.messages.contents) { if (m?.flags?.holocron?.req) evalReq(m); }\n  ui.notifications.info(\"📡 Pont de jets Holocron : ACTIF — les jets de l'Holocron seront lancés ici (\" + game.user.name + \").\");\n}",
+  "_id": "pg8pGnthwzl8hFOq",
+  "author": "ZlIotMp24V8C0Wao",
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "ZlIotMp24V8C0Wao": 3
+  },
+  "flags": {},
+  "_key": "!macros!pg8pGnthwzl8hFOq"
+}
