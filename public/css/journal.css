@@ -189,8 +189,10 @@
   height: 64px;
   border-radius: 8px;
   object-fit: cover;
+  object-position: center top;
   border: 2px solid var(--page-accent);
   flex: 0 0 auto;
+  cursor: zoom-in;
 }
 .page-head h2.page-title {
   margin: 0;

@@ -70,7 +70,7 @@ function fallbackAvatar(name) {
   return d;
 }
 // Portrait en plein écran (clic sur l'avatar) — voir l'illustration entière.
-function openImageFull(src, alt) {
+export function openImageFull(src, alt) {
   const ov = el('div', 'img-full');
   const im = el('img'); im.src = src; im.alt = alt || '';
   ov.appendChild(im);

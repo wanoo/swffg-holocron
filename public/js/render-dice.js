@@ -16,7 +16,9 @@ export const DICE = {
   setback: { glyph: 'b', color: '#111', fr: "dé d'Infortune", kind: 'die' },
   difficulty: { glyph: 'd', color: 'purple', fr: 'dé de Difficulté', kind: 'die' },
   challenge: { glyph: 'c', color: 'red', fr: 'dé de Défi', kind: 'die' },
-  force: { glyph: 'C', color: '#111', fr: 'dé de Force', kind: 'die' },
+  // Force = d12 (même silhouette que Maîtrise/Défi) : glyphe PLEIN 'c' coloré blanc.
+  // ('C' est le contour creux → coloré blanc il donne un « hexagone noir bords blanc ».)
+  force: { glyph: 'c', color: '#fff', fr: 'dé de Force', kind: 'die' },
   forcepoint: { glyph: 'Y', color: '#111', fr: 'Point de Force', kind: 'symbol' },
   success: { glyph: 's', color: '#111', fr: 'Succès', kind: 'symbol' },
   advantage: { glyph: 'a', color: '#111', fr: 'Avantage', kind: 'symbol' },

@@ -5,7 +5,7 @@ import { mountSidebar, setActiveTreeLink } from './tree.js';
 import { initSearch, openPalette } from './search.js';
 import { buildTOC, setupScrollSpy } from './toc.js';
 import { renderJournalHTML, renderRichHTML } from './render-journal.js';
-import { renderSheet } from './sheet.js';
+import { renderSheet, openImageFull } from './sheet.js';
 import { renderBestiary, renderNpcList } from './bestiary.js';
 import { legendHTML } from './render-dice.js';
 import { initGenerator, openGenerator } from './dice-roller.js';
@@ -129,10 +129,13 @@ function pageHead(page, journalName) {
   if (page.img) {
     const img = document.createElement('img');
     img.className = 'portrait';
-    img.src = foundryAsset(page.img);
+    const src = foundryAsset(page.img);
+    img.src = src;
     img.alt = page.name;
     img.loading = 'lazy';
+    img.title = 'Agrandir';
     img.addEventListener('error', () => img.remove(), { once: true });
+    img.addEventListener('click', () => openImageFull(src, page.name));
     head.appendChild(img);
   }
   const h = document.createElement('h2');

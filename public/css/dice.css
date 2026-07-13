@@ -44,9 +44,9 @@
   -webkit-text-stroke: 0.75px #ece9dd;
   text-shadow: none;
 }
-/* Force + Côtés lumineux/obscur = blancs. Lumineux = glyphe PLEIN (rond blanc) ;
-   Obscur = glyphe CREUX (rond à bord blanc, intérieur sombre) ; Force = hexagone.
-   La distinction lumineux/obscur vient donc de la FORME du glyphe (cf. render-dice.js). */
+/* Force + Côtés lumineux/obscur = blancs. Force = d12 PLEIN blanc (glyphe 'c') ;
+   Lumineux = glyphe PLEIN (rond blanc) ; Obscur = glyphe CREUX (rond à bord blanc,
+   intérieur sombre). La distinction lumineux/obscur vient de la FORME (cf. render-dice.js). */
 .dt-force,
 .dt-light,
 .dt-dark {
