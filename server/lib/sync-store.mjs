@@ -98,29 +98,47 @@ export function createStore({ dataDir, logger = console }) {
     return new Set(folders.filter((f) => names.has(f.name)).map((f) => f._id));
   }
 
-  // Index léger, construit PAR DOSSIER (réponses petites, flags inclus, jamais
-  // tronquées contrairement au dump global) et LIMITÉ aux dossiers pertinents. Les
-  // journaux sans dossier (Config, Dossiers/Notes MJ, Mondes…) sont récupérés à part.
-  async function syncJournalsIndex() {
+  // Entrée d'index (sans les pages) dérivée d'un doc complet.
+  const lightEntry = (j) => {
+    const e = {};
+    for (const k of INDEX_FIELDS) if (j[k] !== undefined) e[k] = j[k];
+    return e;
+  };
+
+  // Synchro des journaux en 1 SEUL APPEL PAR DOSSIER pertinent (PAGES INCLUSES) :
+  // d'une même réponse on remplit le cache `journal:<id>` ET l'index léger. Fini les
+  // ~70 pulls individuels (tous sériés par le connecteur socket) → de ~73 appels à
+  // ~une douzaine. Le connecteur ne supportant pas le concurrentiel (cf. mcp.mjs :
+  // file séquentielle), on optimise en RÉDUISANT le nombre d'appels, pas en parallèle.
+  // Dossiers hors-scope (ex. milliers de planètes MEJ) jamais visités : cf. l'allowlist.
+  async function syncJournalsFull() {
     const relevant = relevantJournalFolderIds();
-    const seen = new Map();
+    const index = [];
     for (const fid of relevant) {
       try {
-        const part = await mcpCall('get_journals', { where: { folder: fid }, requested_fields: INDEX_FIELDS });
-        for (const j of (Array.isArray(part) ? part : [])) if (j && j._id) seen.set(j._id, j);
-      } catch (e) { logger.error(`[store] index dossier ${fid}: ${e.message}`); }
+        const list = await mcpCall('get_journals', { where: { folder: fid } }); // docs complets
+        for (const j of (Array.isArray(list) ? list : [])) {
+          if (!j || !j._id) continue;
+          set(`journal:${j._id}`, j);
+          index.push(lightEntry(j));
+        }
+      } catch (e) { logger.error(`[store] journaux dossier ${fid}: ${e.message}`); }
     }
-    // journaux SANS dossier uniquement (on ignore les foldered hors-scope, ex. planètes)
+    // journaux SANS dossier utiles (Dossiers/Notes MJ, Mondes…) : liste légère (sans
+    // flags → jamais tronquée) puis full ciblé sur les seuls hors-dossier.
     try {
-      const light = await mcpCall('get_journals', { requested_fields: ['_id', 'folder'] });
-      for (const r of (Array.isArray(light) ? light : [])) {
-        if (!r || !r._id || r.folder || seen.has(r._id)) continue;
-        const one = await mcpCall('get_journals', { where: { _id: r._id }, requested_fields: INDEX_FIELDS });
-        const j = (Array.isArray(one) ? one : []).find((x) => x && x._id === r._id);
-        if (j) seen.set(j._id, j);
+      const light = await mcpCall('get_journals', { requested_fields: ['_id', 'name', 'folder'] });
+      const NOISE = /^(sequencerDatabase|dice_helper)$/i; // DB de module / barème (déjà synced à part)
+      const nulls = (Array.isArray(light) ? light : []).filter((r) => r && r._id && !r.folder && !NOISE.test(r.name || ''));
+      for (const r of nulls) {
+        try {
+          const list = await mcpCall('get_journals', { where: { _id: r._id } });
+          const j = (Array.isArray(list) ? list : []).find((x) => x && x._id === r._id);
+          if (j) { set(`journal:${j._id}`, j); index.push(lightEntry(j)); }
+        } catch { /* journal individuel indisponible : on ignore */ }
       }
-    } catch (e) { logger.error(`[store] index hors-dossier: ${e.message}`); }
-    if (seen.size) set('journalsIndex', [...seen.values()]);
+    } catch (e) { logger.error(`[store] journaux hors-dossier: ${e.message}`); }
+    if (index.length) set('journalsIndex', index);
   }
 
   // Barème de dépense FFG (journal « dice_helper ») — pullé par requête CIBLÉE
@@ -178,9 +196,9 @@ export function createStore({ dataDir, logger = console }) {
     const { configJournalName } = opts;
     const jobs = [
       ['config', () => syncConfig(configJournalName)],
+      ['folders', () => syncFolders()],        // avant les journaux (relevantFolderIds)
+      ['journals', () => syncJournalsFull()],   // 1 appel/dossier : cache journal + index
       ['users', () => syncUsers()],
-      ['folders', () => syncFolders()],
-      ['journalsIndex', () => syncJournalsIndex()],
       ['diceHelper', () => syncDiceHelper()],
       ['actors', () => syncActors()],
     ];
@@ -191,25 +209,8 @@ export function createStore({ dataDir, logger = console }) {
         logger.error(`[store] sync ${name}: ${e.message}`);
       }
     }
-    // journaux dont l'index a changé depuis le cache. Signature de fraîcheur =
-    // rev.updatedAt (écritures Holocron) OU _stats.modifiedTime du journal
-    // (édition directe du document dans Foundry). Attention : le modifiedTime
-    // d'une PAGE ne remonte PAS sur le journal parent, et l'index léger n'a pas
-    // les pages — les métadonnées Monk's Enhanced Journal (portées par la page)
-    // sont donc invisibles ici. Les journaux MEJ (ensemble borné, ceux qu'on
-    // édite dans Foundry) sont donc re-pull à chaque tick.
-    const sig = (o) => o?.flags?.holocron?.rev?.updatedAt || o?._stats?.modifiedTime || null;
-    const idx = get('journalsIndex') || [];
-    for (const entry of idx) {
-      const cached = mem.get(`journal:${entry._id}`)?.items;
-      const isMej = Boolean(entry.flags?.['monks-enhanced-journal'] || cached?.flags?.['monks-enhanced-journal']);
-      const s = sig(entry);
-      const cachedS = sig(cached);
-      if (!cached || isMej || (s && s !== cachedS)) {
-        try { await syncJournal(entry._id, entry.name); }
-        catch (e) { logger.error(`[store] journal ${entry.name}: ${e.message}`); }
-      }
-    }
+    // (plus de boucle de pull individuel : syncJournalsFull a déjà tiré chaque
+    // journal pertinent avec ses pages, en 1 appel par dossier.)
   }
 
   function startLoop(opts, intervalS = 300) {
@@ -234,6 +235,6 @@ export function createStore({ dataDir, logger = console }) {
 
   return {
     get, set, version, patch, boot, startLoop, status,
-    sync: { config: syncConfig, users: syncUsers, folders: syncFolders, journalsIndex: syncJournalsIndex, diceHelper: syncDiceHelper, journal: syncJournal, actors: syncActors, pack: syncPack, tick },
+    sync: { config: syncConfig, users: syncUsers, folders: syncFolders, journals: syncJournalsFull, journalsIndex: syncJournalsFull, diceHelper: syncDiceHelper, journal: syncJournal, actors: syncActors, pack: syncPack, tick },
   };
 }
