@@ -61,6 +61,26 @@ export async function foundryAvailable() {
 // Peut-on lancer dans Foundry ? Connecté (session) ET jet autorisé (sa fiche, ou MJ).
 function canRollFoundry() { return Boolean(Data.me) && canFoundry; }
 
+// Identité joueur — utilisée par l'astronav (voyages vaisseau, pas les jets) : session
+// Foundry si connecté, sinon nom + code de table de secours. Les jets, eux, exigent
+// une vraie session (voir sendToFoundry) et n'appellent pas cette fonction.
+export function playerIdentity() {
+  if (Data.me) return { name: Data.me.name, key: '' };
+  let name = localStorage.getItem('holocron-player-name') || '';
+  if (!name) {
+    name = (window.prompt('Ton nom de personnage (affiché dans le chat Foundry) :') || '').trim();
+    if (!name) return null;
+    localStorage.setItem('holocron-player-name', name);
+  }
+  let key = localStorage.getItem('holocron-table-key') || '';
+  if (!key) {
+    key = (window.prompt('Code de table (demande au MJ) :') || '').trim();
+    if (!key) return null;
+    localStorage.setItem('holocron-table-key', key);
+  }
+  return { name, key };
+}
+
 async function pollRollResult(token, tries = 24, delayMs = 1000) {
   for (let i = 0; i < tries; i++) {
     await new Promise((r) => setTimeout(r, delayMs));
