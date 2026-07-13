@@ -110,8 +110,19 @@ export async function ensureNpcs() {
 }
 export async function ensureAdversaries() {
   if (advLoaded) return Data.adversaries;
-  const body = await getCached('/content/adversaries', { gated: true });
-  if (body) { Data.adversaries = body; Data.advById.clear(); for (const a of body) Data.advById.set(a.id, a); advLoaded = true; }
+  // Bestiaire en lazy-load côté serveur : tant qu'il renvoie { syncing:true },
+  // on réessaie (le pack ~1430 fiches se synchronise à la 1re demande).
+  for (let i = 0; i < 60; i++) {
+    const body = await getCached('/content/adversaries', { gated: true });
+    if (Array.isArray(body)) {
+      Data.adversaries = body; Data.advById.clear();
+      for (const a of body) Data.advById.set(a.id, a);
+      advLoaded = true;
+      return Data.adversaries;
+    }
+    if (!body || !body.syncing) break; // 401 (non-MJ) ou réponse inattendue
+    await new Promise((r) => setTimeout(r, 2500));
+  }
   return Data.adversaries;
 }
 

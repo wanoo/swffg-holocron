@@ -56,6 +56,19 @@ const gmOK = (req, session) => isGM(session) || (ENV.gmKey && (req.headers['x-gm
 const playerOK = (req, session) => Boolean(session) || (ENV.playerKey && (req.headers['x-player-key'] || '') === ENV.playerKey);
 const who = (session, body) => session?.name || String(body?.player || 'Joueur').slice(0, 40);
 
+// Bestiaire (pack Adversaires, ~1430 fiches, MJ only) : lazy-load à la 1re demande
+// plutôt qu'au boot (sync lourde, ~36 appels sériés). Déclenché en arrière-plan,
+// dédupliqué ; le front réessaie tant que `{syncing:true}` est renvoyé.
+let advSyncing = false;
+function lazyAdversaries() {
+  const pid = cc().packs.adversaries;
+  if (!pid || advSyncing || store.get(`pack:${pid}`)) return;
+  advSyncing = true;
+  store.sync.pack(pid, 'Actor')
+    .catch((e) => console.error('[sync] adversaires (lazy):', e.message))
+    .finally(() => { advSyncing = false; });
+}
+
 // --- proxy assets MJ (spoilers derrière auth, cache disque) -------------------------
 const assetCacheDir = join(ENV.dataDir, 'cache', 'assets');
 async function proxyAsset(req, res, rel, session) {
@@ -164,6 +177,8 @@ async function handleApi(req, res, urlPath) {
     }
     if (kind === 'adversaries') {
       if (!gmOK(req, session)) return sendJSON(res, 401, { error: 'réservé MJ' });
+      const pid = cc().packs.adversaries;
+      if (pid && !store.get(`pack:${pid}`)) { lazyAdversaries(); return sendJSON(res, 200, { syncing: true }); }
       return sendVersioned(req, res, content.adversariesView(), v.adversaries || 0);
     }
     return sendJSON(res, 404, { error: 'collection inconnue' });
@@ -443,10 +458,11 @@ server.listen(ENV.port, () => {
 
 if (mode !== 'none') {
   store.startLoop({ configJournalName: ENV.configJournalName }, ENV.syncIntervalS);
-  // packs : premier chargement en arrière-plan après le tick initial
+  // pack RÈGLES en arrière-plan après le tick initial (petit, sert la catégorie
+  // « Règles du jeu » visible des joueurs). Le pack ADVERSAIRES (lourd, MJ only)
+  // est en LAZY-LOAD : synchronisé à la 1re ouverture du bestiaire, pas au boot.
   setTimeout(async () => {
     const conf = cc();
     try { if (conf.packs.rules) await store.sync.pack(conf.packs.rules, 'JournalEntry'); } catch (e) { console.error('[sync] rules:', e.message); }
-    try { if (conf.packs.adversaries && !store.get(`pack:${conf.packs.adversaries}`)) await store.sync.pack(conf.packs.adversaries, 'Actor'); } catch (e) { console.error('[sync] adversaries:', e.message); }
   }, 15_000).unref?.();
 }
