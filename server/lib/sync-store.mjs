@@ -122,6 +122,7 @@ export function createStore({ dataDir, logger = console }) {
           set(`journal:${j._id}`, j);
           index.push(lightEntry(j));
         }
+        if (index.length) set('journalsIndex', [...index]); // index PROGRESSIF : les journaux apparaissent dossier par dossier
       } catch (e) { logger.error(`[store] journaux dossier ${fid}: ${e.message}`); }
     }
     // journaux SANS dossier utiles (Dossiers/Notes MJ, Mondes…) : liste légère (sans
@@ -194,13 +195,15 @@ export function createStore({ dataDir, logger = console }) {
   /* ------------------------------------------------------- boucle de fond -- */
   async function tick(opts) {
     const { configJournalName } = opts;
+    // Ordre = ordre d'apparition (le connecteur sérialise). On sort d'abord le rapide
+    // et à haute valeur (config, PJ/acteurs, barème), puis les journaux (le plus long).
     const jobs = [
       ['config', () => syncConfig(configJournalName)],
       ['folders', () => syncFolders()],        // avant les journaux (relevantFolderIds)
-      ['journals', () => syncJournalsFull()],   // 1 appel/dossier : cache journal + index
       ['users', () => syncUsers()],
+      ['actors', () => syncActors()],           // PJ/PNJ tôt
       ['diceHelper', () => syncDiceHelper()],
-      ['actors', () => syncActors()],
+      ['journals', () => syncJournalsFull()],   // 1 appel/dossier : cache journal + index (le plus long → en dernier)
     ];
     for (const [name, job] of jobs) {
       try { await job(); }
