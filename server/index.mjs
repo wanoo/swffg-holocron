@@ -48,7 +48,7 @@ const writer = createWriteService({ store, config: cc, logger: console });
 const encounters = createEncounterService({ store, config: cc });
 const dashPayload = createDashService({ journals: campaignConfig(store).journals });
 const shipSvc = () => createShipService({ journalName: cc().journals.ship });
-const astro = createAstroService({ publicDir: PUBLIC_DIR, config: cc });
+const astro = createAstroService({ publicDir: PUBLIC_DIR, config: cc, store });
 const serveStatic = makeStatic(PUBLIC_DIR);
 
 // --- auth helpers ------------------------------------------------------------------
@@ -257,6 +257,12 @@ async function handleApi(req, res, urlPath) {
         const r = await astro.route(q);
         return sendJSON(res, r.code, r.body);
       }
+      // Fiche MEJ « Place » live depuis Foundry (repli planets.json côté client si absente).
+      if (parts[1] === 'fiche' && req.method === 'GET') {
+        if (!playerOK(req, session)) return sendJSON(res, 401, { error: 'connexion requise' });
+        const f = await astro.fiche(q.get('name') || '', isGM(session));
+        return f ? sendJSON(res, 200, { fiche: f }) : sendJSON(res, 404, { error: 'fiche MEJ absente' });
+      }
     } catch (e) { return sendJSON(res, 500, { error: 'astro : ' + String(e.message || e).slice(0, 200) }); }
     return sendJSON(res, 404, { error: 'action astro inconnue' });
   }
@@ -266,6 +272,20 @@ async function handleApi(req, res, urlPath) {
     if (parts[1] === 'asset') return proxyAsset(req, res, decodeURIComponent(parts.slice(2).join('/')), session);
     if (!gmOK(req, session)) return sendJSON(res, 401, { error: 'réservé MJ — connecte-toi avec un compte MJ Foundry' });
     const id = parts[2] ? decodeURIComponent(parts[2]) : null;
+
+    // Favoris MEJ (marque-pages) du MJ connecté — lecture + ajout/retrait (écrit le flag User).
+    if (parts[1] === 'astro' && parts[2] === 'favorites') {
+      if (!session?.userId) return sendJSON(res, 400, { error: 'connexion MJ Foundry requise (compte utilisateur)' });
+      try {
+        if (req.method === 'GET') return sendJSON(res, 200, { names: await astro.favorites(session.userId) });
+        if (req.method === 'POST') {
+          const body = JSON.parse(await readBody(req));
+          if (!body.name) return sendJSON(res, 400, { error: 'name requis' });
+          return sendJSON(res, 200, await astro.toggleFavorite(session.userId, String(body.name), body.on !== false));
+        }
+      } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
+      return sendJSON(res, 405, { error: 'méthode non supportée' });
+    }
 
     if (parts[1] === 'docs' && req.method === 'GET' && !id) return sendJSON(res, 200, { docs: writer.gmList() });
     if (parts[1] === 'dossiers' && req.method === 'GET') return sendJSON(res, 200, { dossiers: writer.dossiers() });

@@ -104,6 +104,25 @@ Réglages du module (Foundry settings, monde) : `resFoodLabel`, `resFuelLabel`,
 > **ici** (`foundry/`, source canonique), pas dans la copie `star-wars JDR/swffg-holocron/`.
 > Versions publiées : astronav **1.7.5**, holocron **1.2.2**.
 
+## 9. Astronav **web** ↔ MEJ — fiche + favoris (livré 2026-07-13)
+
+L'astronav de **l'app web** (`public/js/astronav.js`, statique `planets.json`) est désormais reliée
+aux données MEJ du monde, **sans** synchroniser le dossier planètes (toujours hors allowlist de
+`sync-store.mjs`) : tout passe par des **appels MCP ciblés**.
+
+- **Fiche MEJ live** — `GET /api/astro/fiche?name=…` (`server/lib/astro.mjs` `fiche()`) : `get_journals
+  { where:{name}, requested_fields }` → filtre la fiche « Place » → `mejView` (exporté depuis
+  `transform/journals.mjs`). Le front l'affiche **en plus** de `planets.json` (repli si absente).
+- **Favoris MEJ = marque-pages par-utilisateur** (`flags['monks-enhanced-journal'].bookmarks`).
+  Lecture `GET /api/gm/astro/favorites` + bascule `POST` (`{name,on}`), **MJ uniquement** (`gmOK` +
+  `session.userId`). Écriture via **`modify_document { type:'User', … }`** (le connecteur l'autorise) ;
+  bookmark écrit **à la forme exacte de MEJ** : `{ id:<16 alnum>, entityId:'JournalEntry.<id>',
+  text:<nom>, icon:'fa-place-of-worship' }` (cf. MEJ `apps/enhanced-journal.js addBookmark`). Côté
+  front : section « ★ Favoris (MEJ) », marqueurs carte, toggle dans la fiche (visible si `Data.gm`).
+- **Le module Foundry lit le même flag** (`favoriteWorlds()` / deck) → favoris synchronisés web ↔ Foundry.
+- ⚠️ Écriture réservée MJ (choix produit) ; les joueurs voient la fiche (OBSERVER) mais pas le toggle.
+- **Ne pas** ajouter le dossier « Planètes — Astronav » à l'allowlist du sync (garde anti-dump).
+
 ## 7. État au 2026-07-13 — module Foundry **`swffg-holocron`** livré (v1.2.0)
 
 Le module Foundry Holocron **existe désormais** : `~/Documents/Dev/star-wars JDR/swffg-holocron`

@@ -4,8 +4,19 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import * as Astro from '../../public/js/astro-core.js';
 import { mcpCall } from './mcp.mjs';
+import { mejView } from './transform/journals.mjs';
 
-export function createAstroService({ publicDir, config, logger = console }) {
+// id à la Foundry/MEJ (makeid) : 16 caractères alphanumériques.
+const AL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+const makeId16 = () => { let s = ''; for (let i = 0; i < 16; i++) s += AL[Math.floor(Math.random() * AL.length)]; return s; };
+// Est-ce la fiche MEJ « Place » d'une planète de l'astronav ?
+const isPlanetPlace = (d) => {
+  const jf = d?.flags?.['monks-enhanced-journal'];
+  const pagePlace = (d?.pages || []).some((p) => p.flags?.['monks-enhanced-journal']?.type === 'place');
+  return jf?.pagetype === 'place' || pagePlace || !!d?.flags?.['swffg-astronavigation'];
+};
+
+export function createAstroService({ publicDir, config, store, logger = console }) {
   let data = null;
   async function astroData() {
     if (data) return data;
@@ -49,5 +60,122 @@ export function createAstroService({ publicDir, config, logger = console }) {
     } };
   }
 
-  return { astroData, route };
+  /* ------------------------------------------------------ MEJ : fiche + favoris */
+  // Caches mémoire (la file MCP est lente/séquentielle ; les fiches/favoris changent peu).
+  const ficheCache = new Map();     // name → { t, view }
+  const uuidByName = new Map();      // name → 'JournalEntry.<id>' | null
+  const nameByUuid = new Map();      // uuid → name | null
+  const favCache = new Map();        // userId → { t, names }
+  const FRESH = 30_000;
+
+  async function getJournals(where, fields) {
+    const res = await mcpCall('get_journals', { where, requested_fields: fields });
+    return Array.isArray(res) ? res : (res?.journals || res?.results || res?.documents || []);
+  }
+
+  // La fiche MEJ « Place » du monde pour un nom de planète (ou null si non importée).
+  async function placeDoc(name) {
+    if (!name) return null;
+    const list = await getJournals({ name }, ['_id', 'name', 'img', 'flags', 'folder', 'ownership', 'pages']);
+    const doc = list.find(isPlanetPlace) || null;
+    const uuid = doc ? `JournalEntry.${doc._id}` : null;
+    uuidByName.set(name, uuid);
+    if (uuid) nameByUuid.set(uuid, name);
+    return doc;
+  }
+
+  function buildFiche(doc, gm) {
+    const mv = mejView(doc, gm) || {};
+    const page = (doc.pages || []).find((p) => p.flags?.['monks-enhanced-journal']) || (doc.pages || [])[0] || {};
+    return {
+      name: doc.name,
+      uuid: `JournalEntry.${doc._id}`,
+      img: page.src || doc.img || doc.flags?.['monks-enhanced-journal']?.img || null,
+      html: page.text?.content || '',
+      region: mv.placetype || '',                       // MEJ Place : placetype = région
+      sector: mv.location || '',                        // location = secteur
+      coord: mv.attributes?.districts || mv.attributes?.coordonnées || '',
+      attributes: mv.attributes || {},
+      relationships: mv.relationships || [],
+      type: mv.type || 'place',
+      source: 'mej',
+    };
+  }
+
+  async function fiche(name, gm = false) {
+    if (!name) return null;
+    const c = ficheCache.get(name);
+    if (c && Date.now() - c.t < FRESH && c.gm === gm) return c.view;
+    let view = null;
+    try { const doc = await placeDoc(name); view = doc ? buildFiche(doc, gm) : null; }
+    catch (e) { logger.warn?.('[astro] fiche', name, String(e.message || e)); view = null; }
+    ficheCache.set(name, { t: Date.now(), gm, view });
+    return view;
+  }
+
+  async function planetUuid(name) {
+    if (uuidByName.has(name)) return uuidByName.get(name);
+    await placeDoc(name);
+    return uuidByName.get(name) ?? null;
+  }
+
+  async function nameFromUuid(uuid) {
+    if (nameByUuid.has(uuid)) return nameByUuid.get(uuid);
+    const m = /^JournalEntry\.([A-Za-z0-9]+)/.exec(String(uuid || ''));
+    let name = null;
+    if (m) { try { const list = await getJournals({ _id: m[1] }, ['_id', 'name']); name = list[0]?.name || null; } catch { name = null; } }
+    nameByUuid.set(uuid, name);
+    return name;
+  }
+
+  async function userDoc(userId) {
+    const res = await mcpCall('get_users', { requested_fields: ['_id', 'name', 'flags'] });
+    const list = Array.isArray(res) ? res : (res?.users || res?.results || res?.documents || []);
+    return list.find((u) => u._id === userId) || null;
+  }
+  const readBookmarks = (u) => {
+    const bm = u?.flags?.['monks-enhanced-journal']?.bookmarks;
+    return Array.isArray(bm) ? bm : [];
+  };
+
+  // Favoris MEJ d'un utilisateur → noms de planètes (résout chaque bookmark entityId).
+  async function favorites(userId) {
+    if (!userId) return [];
+    const c = favCache.get(userId);
+    if (c && Date.now() - c.t < FRESH) return c.names;
+    const u = await userDoc(userId);
+    const bm = readBookmarks(u);
+    const names = [];
+    for (const b of bm) {
+      const uuid = b?.entityId || b?.uuid || null;
+      if (!uuid) continue;
+      const nm = await nameFromUuid(uuid);
+      if (nm) names.push(nm);
+    }
+    const uniq = [...new Set(names)];
+    favCache.set(userId, { t: Date.now(), names: uniq });
+    return uniq;
+  }
+
+  // Ajoute/retire un favori MEJ (marque-page) pour un utilisateur — écrit le flag bookmarks.
+  // Forme du bookmark strictement identique à MEJ (apps/enhanced-journal.js addBookmark).
+  async function toggleFavorite(userId, name, on) {
+    if (!userId) throw Object.assign(new Error('utilisateur inconnu'), { code: 400 });
+    if (!name) throw Object.assign(new Error('nom de monde requis'), { code: 400 });
+    const uuid = await planetUuid(name);
+    if (!uuid) throw Object.assign(new Error(`fiche MEJ absente pour « ${name} » — importe l'atlas dans Foundry`), { code: 404 });
+    const u = await userDoc(userId);
+    if (!u) throw Object.assign(new Error('utilisateur Foundry introuvable'), { code: 404 });
+    const bm = readBookmarks(u);
+    const present = bm.some((b) => b?.entityId === uuid);
+    let next = bm;
+    if (on && !present) next = [...bm, { id: makeId16(), entityId: uuid, text: name, icon: 'fa-place-of-worship' }];
+    else if (!on && present) next = bm.filter((b) => b?.entityId !== uuid);
+    else { favCache.delete(userId); return { ok: true, name, on: present, changed: false }; }
+    await mcpCall('modify_document', { type: 'User', _id: userId, updates: [{ 'flags.monks-enhanced-journal.bookmarks': next }] });
+    favCache.delete(userId);
+    return { ok: true, name, on: !!on, changed: true };
+  }
+
+  return { astroData, route, fiche, favorites, toggleFavorite, planetUuid };
 }

@@ -36,7 +36,7 @@ const MEJ_ROLE_STATUT = {
   contact: 'contact', informateur: 'contact',
 };
 const ID16 = /^[a-zA-Z0-9]{16}$/; // clés par-utilisateur (notes privées) à ignorer
-function mejView(doc, gm) {
+export function mejView(doc, gm) {
   const page = (doc.pages || []).find((p) => p.flags?.['monks-enhanced-journal']);
   const jf = doc.flags?.['monks-enhanced-journal'];
   if (!page && !jf) return null;

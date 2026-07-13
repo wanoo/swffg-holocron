@@ -18,6 +18,8 @@ let PLANETS = null, byName = null;
 // planètes de campagne : fournies par la config (⚙️ Holocron Config → campaignPlanets)
 const CAMPAIGN_ORDER = [];
 const CAMPAIGN = new Set(CAMPAIGN_ORDER);
+// Favoris = marque-pages Monk's Enhanced Journal du MJ connecté (chargés depuis Foundry).
+const FAV = new Set();
 const REGION_COLOR = {
   'Noyau profond': '#e6c66c', 'Noyau': '#e6c66c', 'Colonies': '#d9b45b',
   'Bordure Intérieure': '#57c7ff', "Région d'expansion": '#57c7ff', 'Bordure Médiane': '#57c7ff',
@@ -255,6 +257,7 @@ export async function mountAstronav(container) {
     renderLibrary();
   });
   compute();
+  if (Data.gm) loadFavorites();   // favoris MEJ du MJ connecté (marque-pages Foundry)
 
   // Détection du pont Foundry (sans prompt : on ne demande l'identité qu'au clic).
   (async () => {
@@ -671,6 +674,15 @@ export async function mountAstronav(container) {
       ctx.fillStyle = '#d9b45b'; ctx.beginPath(); ctx.arc(sp[0], sp[1], 4.5, 0, 7); ctx.fill();
       if (showLabel) label(sp[0] + 9, sp[1] + 4, p.name, '#e6c66c', 13);
     }
+    // favoris MEJ (MJ) : anneau or (distinct du point plein campagne)
+    for (const name of FAV) {
+      if (CAMPAIGN.has(name)) continue;
+      const p = byName[name];
+      if (!p || (o && p.name === o.name) || (dst && p.name === dst.name)) continue;
+      const sp = SP(p); if (!sp) continue;
+      ctx.strokeStyle = '#ffd76a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(sp[0], sp[1], 5.5, 0, 7); ctx.stroke();
+      if (showLabel) label(sp[0] + 9, sp[1] + 4, p.name, '#ffd76a', 13);
+    }
     const marker = (p, col) => {
       const sp = SP(p); if (!sp) return;
       ctx.strokeStyle = col; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.arc(sp[0], sp[1], 13, 0, 7); ctx.stroke();
@@ -748,7 +760,7 @@ export async function mountAstronav(container) {
   function thumb(p) { return p.img ? `<img src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy" referrerpolicy="no-referrer">` : `<div class="an-orb" style="--oc:${orbColor(p)}">${esc(p.name[0])}</div>`; }
   function cardHTML(p) {
     return `<button class="an-pcard" data-name="${esc(p.name)}">
-      <div class="an-thumb">${CAMPAIGN.has(p.name) ? '<span class="an-star">★</span>' : ''}${thumb(p)}</div>
+      <div class="an-thumb">${(CAMPAIGN.has(p.name) || FAV.has(p.name)) ? `<span class="an-star"${FAV.has(p.name) && !CAMPAIGN.has(p.name) ? ' title="Favori MEJ" style="color:#ffd76a"' : ''}>★</span>` : ''}${thumb(p)}</div>
       <div class="an-body"><h4>${esc(p.name)}</h4><div class="an-meta"><span class="an-coord">${esc(p.coord || '?')}</span>${p.sector ? `<span class="an-sectag">· ${esc(p.sector)}</span>` : ''}</div></div></button>`;
   }
   function renderLibrary() {
@@ -765,14 +777,44 @@ export async function mountAstronav(container) {
     let html = '';
     const camp = pool.filter((p) => CAMPAIGN.has(p.name)).sort((a, b) => CAMPAIGN_ORDER.indexOf(a.name) - CAMPAIGN_ORDER.indexOf(b.name));
     if (camp.length) html += `<div class="an-regionblock"><h3><span class="an-dot" style="background:var(--gold)"></span>★ Campagne <span class="an-rcount">${camp.length}</span></h3><div class="an-grid">${camp.map(cardHTML).join('')}</div></div>`;
+    // Favoris MEJ (MJ) : marque-pages Foundry, épinglés en tête comme la campagne.
+    const fav = pool.filter((p) => FAV.has(p.name) && !CAMPAIGN.has(p.name)).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+    if (fav.length) html += `<div class="an-regionblock"><h3><span class="an-dot" style="background:#ffd76a"></span>★ Favoris (MEJ) <span class="an-rcount">${fav.length}</span></h3><div class="an-grid">${fav.map(cardHTML).join('')}</div></div>`;
     for (const r of REGION_ORDER) {
-      const list = (groups[r] || []).filter((p) => !CAMPAIGN.has(p.name)).sort((a, b) => (a.sector || '~').localeCompare(b.sector || '~', 'fr') || a.name.localeCompare(b.name, 'fr'));
+      const list = (groups[r] || []).filter((p) => !CAMPAIGN.has(p.name) && !FAV.has(p.name)).sort((a, b) => (a.sector || '~').localeCompare(b.sector || '~', 'fr') || a.name.localeCompare(b.name, 'fr'));
       if (!list.length) continue;
       const shown = list.slice(0, 400);
       html += `<div class="an-regionblock"><h3><span class="an-dot" style="background:${REGION_COLOR[r] || '#889'}"></span>${esc(r)} <span class="an-rcount">${list.length} monde${list.length > 1 ? 's' : ''}${list.length > 400 ? ' · 400 affichés' : ''}</span></h3><div class="an-grid">${shown.map(cardHTML).join('')}</div></div>`;
     }
     lib.innerHTML = html || `<p class="muted">Aucun système ne correspond aux critères.</p>`;
     lib.querySelectorAll('.an-pcard').forEach((b) => b.addEventListener('click', () => openDetail(b.dataset.name)));
+  }
+
+  // --- favoris MEJ (MJ) : lecture + bascule, synchronisés avec les marque-pages Foundry ---
+  async function loadFavorites() {
+    try {
+      const r = await fetch('/api/gm/astro/favorites', { credentials: 'same-origin' });
+      if (!r.ok) return;
+      const { names } = await r.json();
+      FAV.clear(); for (const n of names || []) FAV.add(n);
+      renderLibrary(); renderOverlay();
+    } catch { /* pas de favoris (pas MJ, ou pont indisponible) */ }
+  }
+  async function toggleFav(name) {
+    const on = !FAV.has(name);
+    if (on) FAV.add(name); else FAV.delete(name);   // optimiste
+    renderLibrary(); renderOverlay();
+    try {
+      const r = await fetch('/api/gm/astro/favorites', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, on }),
+      });
+      if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'échec');
+    } catch (e) {
+      if (on) FAV.delete(name); else FAV.add(name);   // rollback
+      renderLibrary(); renderOverlay();
+      alert('Favori — ' + (e.message || 'erreur'));
+    }
   }
 
   function openDetail(name) {
@@ -800,7 +842,8 @@ export async function mountAstronav(container) {
         ${camp}${laneHtml}${fbadges}${facts}${p.desc ? `<p class="an-desc">${esc(p.desc)}</p>` : ''}
         ${meta && meta !== esc(p.region) ? `<p class="an-desc an-metaline">${meta}</p>` : ''}
         ${pts}
-        <div class="an-acts"><button class="an-o" type="button">Définir origine</button><button class="an-d" type="button">Définir destination</button>
+        <div class="an-mej" style="display:none"></div>
+        <div class="an-acts">${Data.gm ? `<button class="an-o an-favbtn" type="button">${FAV.has(p.name) ? '★ Retirer des favoris' : '☆ Ajouter aux favoris'}</button>` : ''}<button class="an-o" type="button">Définir origine</button><button class="an-d" type="button">Définir destination</button>
           <button class="an-map" type="button" title="Centrer la carte sur ce monde">📍 Carte</button>
         </div>
       </div>`;
@@ -811,6 +854,25 @@ export async function mountAstronav(container) {
     body.querySelector('.an-o').addEventListener('click', () => { orig.value = p.name; compute(); ov.remove(); });
     body.querySelector('.an-d').addEventListener('click', () => { dest.value = p.name; compute(); ov.remove(); });
     body.querySelector('.an-map').addEventListener('click', () => { ov.remove(); focusPlanet(p); });
+    const favBtn = body.querySelector('.an-favbtn');
+    if (favBtn) favBtn.addEventListener('click', async () => {
+      favBtn.disabled = true;
+      await toggleFav(p.name);
+      favBtn.disabled = false;
+      favBtn.textContent = FAV.has(p.name) ? '★ Retirer des favoris' : '☆ Ajouter aux favoris';
+    });
+    // Enrichissement live : fiche MEJ « Place » de Foundry (secteur/coords/description/relations).
+    fetch('/api/astro/fiche?name=' + encodeURIComponent(name), { credentials: 'same-origin' })
+      .then((r) => (r.ok ? r.json() : null)).then((d) => {
+        const f = d && d.fiche; if (!f || !document.body.contains(ov)) return;
+        const box = body.querySelector('.an-mej'); if (!box) return;
+        const rel = (f.relationships || []).map((x) => esc(x.rel || x.ref)).filter(Boolean);
+        box.innerHTML =
+          `<div class="an-mejtag" style="font-size:11px;opacity:.7;margin:8px 0 4px">🛰️ Fiche Foundry (MEJ)${f.region ? ` · ${esc(f.region)}` : ''}${f.sector ? ` · ${esc(f.sector)}` : ''}${f.coord ? ` · ${esc(f.coord)}` : ''}</div>` +
+          (f.html ? `<div class="an-desc an-mejbody">${f.html}</div>` : '') +
+          (rel.length ? `<div class="an-desc" style="opacity:.85"><b>Relations —</b> ${rel.join(' · ')}</div>` : '');
+        box.style.display = '';
+      }).catch(() => { /* fiche MEJ indisponible → on garde le repli planets.json */ });
     document.body.appendChild(ov);
     const onKey = (e) => { if (e.key === 'Escape') { ov.remove(); document.removeEventListener('keydown', onKey); } };
     document.addEventListener('keydown', onKey);
