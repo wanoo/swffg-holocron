@@ -8,6 +8,7 @@
   "diff": { "1": "Facile", "2": "Moyen", "3": "Difficile", "4": "Intimidant", "5": "Exceptionnel" },
   "ship": {
    "pageName": "État du vaisseau", "provisions": "Vivres", "fuel": "Carburant", "wear": "Usure",
+   "wearPct": "Usure du vaisseau (%)",
    "hyperdrive": "Hyperdrive", "lastTrip": "Dernier voyage : {from} → {to}.",
    "noJournal": "Journal du vaisseau introuvable (le MJ doit ouvrir le Holocron une fois).",
    "tripLog": "Voyage : −{days}j vivres · −{fuel} carburant · +{usure}% usure → 🥫 {v}/{vm} · ⛽ {f}/{fm} · 🔧 {u}%",
@@ -91,7 +92,8 @@
   "pr": {
    "absent": "Le module « Party Resources » n'est pas actif : le pool du groupe reste dans le journal du vaisseau.",
    "noApi": "API Party Resources indisponible — ouvre-le une fois puis relance l'installation.",
-   "done": "Ressources du groupe installées dans Party Resources ({n} créée(s))."
+   "done": "Ressources du groupe installées dans Party Resources ({n} créée(s)).",
+   "wearUp": "L'usure du vaisseau augmente.", "wearDown": "Le vaisseau a été réparé (usure en baisse)."
   },
   "bridge": {
    "title": "Astronav → vaisseau",

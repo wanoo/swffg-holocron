@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.1 — Usure = pourcentage qui monte, relié à la difficulté
+
+- **Usure du vaisseau = ressource % dans Party Resources** : créée en `Usure du vaisseau (%)`
+  (0 → 100), elle **augmente** avec les voyages (messages de notif « usure en hausse / réparée »).
+- **L'usure pilote la difficulté d'astrogation** : `ship.usure` est synchronisée vers le réglage
+  `usure` de l'astronav (> 50 % : +1 au test ; > 80 % : +2). L'usure accumulée a enfin un effet.
+
 ## 1.2.0 — Renommage en **SWFFG Holocron** + intégration Astronav complète
 
 - **Renommage** `swffg-command-deck` → **`swffg-holocron`** (le « Navi-Computer » devient le module

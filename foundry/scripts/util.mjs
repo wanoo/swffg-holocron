@@ -100,6 +100,8 @@ export async function writeShip(j, ship, logHTML = null) {
   await j.update({ [`flags.${MOD}.ship`]: s });
   // miroir du pool vers party-resources (si présent) — la barre de statut se rafraîchit d'elle-même
   prSet("vivres", s.vivres); prSet("fuel", s.fuel); prSet("usure", s.usure);
+  // l'usure accumulée pilote la difficulté d'astrogation de l'astronav (>50 % : +1 ; >80 % : +2)
+  if (game.user.isGM) { try { if (astronavActive()) await game.settings.set("swffg-astronavigation", "usure", s.usure); } catch (e) { console.warn("swffg-holocron | sync usure→astronav", e); } }
   const pct = (v, m) => Math.round((v / m) * 100);
   const pg = j.pages.contents[0];
   if (pg) await pg.update({ "text.content":
@@ -221,7 +223,9 @@ export async function ensurePartyResources({ force = false, silent = false } = {
   const specs = [
     { id: resId("vivres"), name: t("ship.provisions"), value: s.vivres, max: s.vivresMax, min: 0 },
     { id: resId("fuel"),   name: t("ship.fuel"),       value: s.fuel,   max: s.fuelMax,   min: 0 },
-    { id: resId("usure"),  name: t("ship.wear"),       value: s.usure,  max: 100,         min: 0 },
+    // Usure = pourcentage (0 → 100) qui MONTE avec les voyages ; l'augmentation est « mauvaise ».
+    { id: resId("usure"),  name: t("ship.wearPct"),    value: s.usure,  max: 100,         min: 0,
+      incMsg: t("pr.wearUp"), decMsg: t("pr.wearDown") },
   ];
   const list = [...(api.get("resource_list") || [])];
   let created = 0;
@@ -234,6 +238,8 @@ export async function ensurePartyResources({ force = false, silent = false } = {
       api.set(r.id + "_max", r.max);
       api.set(r.id + "_min", r.min);
       api.set(r.id + "_visible", true);
+      if (r.incMsg) api.set(r.id + "_notify_chat_increment_message", r.incMsg);
+      if (r.decMsg) api.set(r.id + "_notify_chat_decrement_message", r.decMsg);
       api.set(r.id, Math.max(r.min, Math.min(r.max, Math.round(r.value))));
     }
   }

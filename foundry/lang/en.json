@@ -8,6 +8,7 @@
   "diff": { "1": "Easy", "2": "Average", "3": "Hard", "4": "Daunting", "5": "Formidable" },
   "ship": {
    "pageName": "Ship status", "provisions": "Provisions", "fuel": "Fuel", "wear": "Wear",
+   "wearPct": "Ship wear (%)",
    "hyperdrive": "Hyperdrive", "lastTrip": "Last trip: {from} → {to}.",
    "noJournal": "Ship journal not found (the GM must open the Holocron once).",
    "tripLog": "Trip: −{days}d provisions · −{fuel} fuel · +{usure}% wear → 🥫 {v}/{vm} · ⛽ {f}/{fm} · 🔧 {u}%",
@@ -91,7 +92,8 @@
   "pr": {
    "absent": "The \"Party Resources\" module is not active: the party pool stays in the ship journal.",
    "noApi": "Party Resources API unavailable — open it once, then re-run the install.",
-   "done": "Party pool installed in Party Resources ({n} created)."
+   "done": "Party pool installed in Party Resources ({n} created).",
+   "wearUp": "The ship's wear is increasing.", "wearDown": "The ship was repaired (wear decreasing)."
   },
   "bridge": {
    "title": "Astronav → ship",
