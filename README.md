@@ -62,6 +62,16 @@ Open http://localhost:8080 — then log in with a GM account and `POST /api/gm/b
 
 ### Docker
 
+Prebuilt image published to GitHub Container Registry on every push to `main` and
+every `vX.Y.Z` tag:
+
+```bash
+docker run -p 8080:8080 -v holocron-data:/data --env-file .env \
+  ghcr.io/wanoo/swffg-holocron:latest
+```
+
+Or build locally:
+
 ```bash
 docker build -t swffg-holocron .
 docker run -p 8080:8080 -v holocron-data:/data --env-file .env swffg-holocron
