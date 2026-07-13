@@ -19,7 +19,15 @@ function pageView(p) {
 // --- Monk's Enhanced Journal : métadonnées structurées portées par la page ----
 // (type person/place/organization…, role, location, attributes, relationships).
 // Le contenu texte reste dans page.text.content — on n'extrait ici que le méta.
-const MEJ_ROLE_STATUT = { ally: 'allié', enemy: 'ennemi', mentor: 'mentor', neutral: 'neutre', contact: 'contact' };
+// role MEJ (page person, FR ou EN) → clé de statut du front (statut.js : allie /
+// ennemi / neutre / mentor / contact). MEJ est la source par défaut de l'Holocron.
+const MEJ_ROLE_STATUT = {
+  ally: 'allie', allie: 'allie', allié: 'allie', ami: 'allie', friend: 'allie', amie: 'allie',
+  enemy: 'ennemi', ennemi: 'ennemi', ennemie: 'ennemi', rival: 'ennemi', hostile: 'ennemi',
+  mentor: 'mentor', maitre: 'mentor', maître: 'mentor',
+  neutral: 'neutre', neutre: 'neutre',
+  contact: 'contact', informateur: 'contact',
+};
 const ID16 = /^[a-zA-Z0-9]{16}$/; // clés par-utilisateur (notes privées) à ignorer
 function mejView(doc, gm) {
   const page = (doc.pages || []).find((p) => p.flags?.['monks-enhanced-journal']);
@@ -69,10 +77,11 @@ export function buildJournalsView({ config, folders, journalsIndex, getJournal, 
     if (!doc) continue; // pas encore synchronisé — apparaîtra au prochain tick
     const fh = entry.flags?.holocron || {};
     const mej = mejView(doc, gm);
-    // statut/mort : flags holocron prioritaires, méta MEJ en repli (role → statut,
-    // attribut life/vie « mort » → pastille †) — MEJ devient la source native.
-    const statut = fh.statut || MEJ_ROLE_STATUT[String(mej?.role || '').toLowerCase()] || '';
-    const mort = Boolean(fh.mort) || /mort|décéd/i.test(String(mej?.attributes?.life || mej?.attributes?.vie || ''));
+    // statut/mort : MEJ (role → statut, attribut life « mort » → pastille †) est la
+    // SOURCE PAR DÉFAUT ; flags.holocron ne sert plus que de repli pour un journal
+    // pas encore typé MEJ.
+    const statut = MEJ_ROLE_STATUT[String(mej?.role || '').toLowerCase()] || fh.statut || '';
+    const mort = /mort|décéd|décès|deceased|dead/i.test(String(mej?.attributes?.life || mej?.attributes?.vie || '')) || Boolean(fh.mort);
     journals.push({
       id: fh.legacyId || doc._id,
       foundryId: doc._id,

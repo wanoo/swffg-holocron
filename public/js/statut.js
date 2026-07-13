@@ -5,6 +5,7 @@ export const STATUT = {
   ennemi: { label: 'Ennemi', color: '#e5544b' },
   neutre: { label: 'Neutre', color: '#8b9bc0' },
   mentor: { label: 'Mentor', color: '#d9b45b' },
+  contact: { label: 'Contact', color: '#7ec8d9' },
 };
 
 // Construit une pastille <span> pour un journal { statut, mort }.
