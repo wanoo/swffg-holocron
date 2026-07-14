@@ -77,7 +77,11 @@ le journal du vaisseau prend le relais (dégradation gracieuse).
 ## 4. Structure de campagne (dossiers)
 
 Le module et l'app web s'appuient sur une **convention de dossiers** (renommables via les
-réglages / le journal de config). Recréer cette arborescence suffit à tout faire fonctionner.
+réglages / le journal de config). **Depuis la 1.5.0, le module crée cette arborescence
+automatiquement au premier lancement MJ** (avec l'import des règles/événements et le
+rangement des journaux techniques dans le dossier système) — menu de réglage
+*« Installer / réinstaller »* pour relancer, réglage `systemFolder` (nom ou uuid
+`Folder.<id>`) pour choisir le dossier des journaux techniques.
 
 **Dossiers de JOURNAUX**
 - `🎬 Campagne — Actes` — la trame jouée (un journal par Acte).

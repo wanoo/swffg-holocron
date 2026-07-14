@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.5.0 — Installation automatique dans le monde
+
+- **Au premier lancement (client MJ), le module installe tout** (`scripts/setup.mjs`,
+  idempotent — ne recrée jamais l'existant, relançable via le menu de réglage
+  *« Installer / réinstaller »* ou `api.install()`) :
+  1. **Structure de dossiers clés** : 🎬 Campagne — Actes, 🏛️ Organisations,
+     🎭 Personnages rencontrés, 📓 Notes des joueurs, 🎲 MJ — Bible de campagne,
+     📅 Événements (+ dossiers d'acteurs 👥 Personnages joueurs, 🎭 PNJ de campagne).
+  2. **Import des compendiums dans le monde** : 📖 Règles & Références (FR) au complet,
+     et les 📅 Événements canon dans le dossier d'événements (celui de la catégorie
+     `kind:"timeline"` de ⚙️ Holocron Config s'il existe).
+  3. **Rangement des journaux techniques** (vaisseau, codex, HoloNet, ⚙️ Holocron
+     Config, notes MJ, rencontres, dossiers, dice_helper) dans le **dossier système** —
+     nouveau réglage `systemFolder` (nom ou uuid `Folder.<id>`) ; si les journaux sont
+     déjà rangés quelque part, ce dossier est adopté tel quel.
+- Les journaux créés par le module (`boundJournal`) naissent directement dans le
+  dossier système.
+- ⚠️ App web : nécessite l'Archive Holocron déployée après le 2026-07-14 (la sync
+  suit désormais les journaux techniques par NOM, où qu'ils soient rangés).
+
 ## 1.4.1 — Événements canon : attribut `position` + import dans le monde
 
 - Les 20 fiches du compendium « 📅 Événements canon » portent désormais l'attribut

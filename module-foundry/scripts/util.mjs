@@ -53,8 +53,13 @@ export async function boundJournal(settingKey, defaultPages, extraFlags = null) 
   const name = game.settings.get(MOD, settingKey);
   let j = game.journal.getName(name);
   if (!j && game.user.isGM) {
+    // créé directement dans le dossier système s'il existe (réglage : nom ou uuid
+    // « Folder.<id> » — setup.mjs le crée à l'installation)
+    const ref = game.settings.get(MOD, "systemFolder") || "";
+    const sysF = game.folders.find((f) => f.type === "JournalEntry" && (f.name === ref || f.id === ref || `Folder.${f.id}` === ref)) || null;
     j = await JournalEntry.create({
       name,
+      folder: sysF?.id ?? null,
       ownership: { default: CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER },
       flags: { [MOD]: { bound: settingKey }, ...(extraFlags || {}) },
       pages: defaultPages || [{ name, type: "text", text: { content: "", format: 1 } }],

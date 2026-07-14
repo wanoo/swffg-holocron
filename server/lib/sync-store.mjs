@@ -126,12 +126,23 @@ export function createStore({ dataDir, logger = console }) {
         if (index.length) set('journalsIndex', [...index]); // index PROGRESSIF : les journaux apparaissent dossier par dossier
       } catch (e) { logger.error(`[store] journaux dossier ${fid}: ${e.message}`); }
     }
-    // journaux SANS dossier utiles (Dossiers/Notes MJ, Mondes…) : liste légère (sans
-    // flags → jamais tronquée) puis full ciblé sur les seuls hors-dossier.
+    // journaux SANS dossier utiles (Dossiers/Notes MJ, Mondes…) + journaux TECHNIQUES
+    // suivis PAR NOM où qu'ils soient rangés (le module ≥1.5.0 les range dans le
+    // dossier système, hors allowlist) : liste légère (sans flags → jamais tronquée)
+    // puis full ciblé.
     try {
+      const cfgJ = (get('config') || {}).journals || {};
+      const UTIL_NAMES = new Set([
+        '🚀 Vaisseau du groupe', '🖥️ Codex du groupe', '📡 HoloNet — Actualités',
+        '🗒️ Notes MJ (Holocron)', '⚔️ Bibliothèque de rencontres', '🗂️ Dossiers MJ (Holocron)',
+        process.env.CONFIG_JOURNAL_NAME || '⚙️ Holocron Config',
+        ...Object.values(cfgJ).filter((v) => typeof v === 'string' && v && !v.includes(':')),
+      ]);
       const light = await mcpCall('get_journals', { requested_fields: ['_id', 'name', 'folder'] });
       const NOISE = /^(sequencerDatabase|dice_helper)$/i; // DB de module / barème (déjà synced à part)
-      const nulls = (Array.isArray(light) ? light : []).filter((r) => r && r._id && !r.folder && !NOISE.test(r.name || ''));
+      const nulls = (Array.isArray(light) ? light : []).filter((r) => r && r._id
+        && (!r.folder || (UTIL_NAMES.has(r.name) && !relevant.has(r.folder)))
+        && !NOISE.test(r.name || ''));
       for (const r of nulls) {
         try {
           const list = await mcpCall('get_journals', { where: { _id: r._id } });

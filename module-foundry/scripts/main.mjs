@@ -1,11 +1,16 @@
 /** SWFFG Holocron — entry point: settings, API, scene buttons, astronav ↔ ship bridge. */
 import { MOD, t, applyTrip, shipJournal, readShip, setShipWorld, astronavApi, favoriteWorlds, ensurePartyResources } from "./util.mjs";
+import { installHolocron } from "./setup.mjs";
 import { HolocronApp } from "./deck.mjs";
 import { openToolbox, TOOLS } from "./gm-tools.mjs";
 
 /** Menu de réglage : (ré)installe les ressources party-resources du groupe. */
 class PartyResSetupMenu extends foundry.applications.api.ApplicationV2 {
   async render() { await ensurePartyResources({ force: true }); return this; }
+}
+/** Menu de réglage : (ré)installe la structure Holocron (dossiers, règles, rangement). */
+class InstallMenu extends foundry.applications.api.ApplicationV2 {
+  async render() { await installHolocron(); return this; }
 }
 
 /** Dernier coût d'astrogation calculé par l'astronav (hook swffgAstronav.cost). */
@@ -32,11 +37,18 @@ Hooks.once("init", () => {
   S("resFoodId", "vivres");
   S("resFuelId", "carburant");
   S("resWearId", "usure");
-  // marqueur d'installation auto (une seule proposition automatique).
+  // dossier SYSTÈME (journaux techniques rangés là) : nom OU uuid « Folder.<id> ».
+  S("systemFolder", "🛠️ Holocron — Système");
+  // marqueurs d'installation auto (une seule exécution automatique chacun).
   game.settings.register(MOD, "partyResSetup", { scope: "world", config: false, type: Boolean, default: false });
+  game.settings.register(MOD, "installDone", { scope: "world", config: false, type: Boolean, default: false });
   game.settings.registerMenu(MOD, "partyResMenu", {
     name: "SWH.settings.partyResMenu.name", label: "SWH.settings.partyResMenu.label",
     hint: "SWH.settings.partyResMenu.hint", icon: "fa-solid fa-gauge-high", type: PartyResSetupMenu, restricted: true,
+  });
+  game.settings.registerMenu(MOD, "installMenu", {
+    name: "SWH.settings.installMenu.name", label: "SWH.settings.installMenu.label",
+    hint: "SWH.settings.installMenu.hint", icon: "fa-solid fa-boxes-packing", type: InstallMenu, restricted: true,
   });
 
   game.modules.get(MOD).api = {
@@ -49,6 +61,7 @@ Hooks.once("init", () => {
     favorites: favoriteWorlds,
     importAtlas: () => astronavApi()?.importToWorld?.({ confirm: true }),
     setupPartyResources: ensurePartyResources,
+    install: installHolocron,
     lastCost: () => LAST_COST,
     HolocronApp,
   };
@@ -122,6 +135,15 @@ Hooks.once("ready", async () => {
         await ensurePartyResources({ silent: true });   // idempotent : recrée seulement si supprimées
       }
     } catch (e) { console.warn("swffg-holocron | setup party-resources", e); }
+  }
+  // Installation auto de la structure Holocron (dossiers clés, import des règles
+  // et événements canon, rangement des journaux techniques dans le dossier système).
+  // Un seul MJ « actif » l'exécute, UNE fois (relançable via le menu de réglage).
+  if (game.user.isGM && isTripApplier() && !game.settings.get(MOD, "installDone")) {
+    try {
+      await installHolocron();
+      await game.settings.set(MOD, "installDone", true);
+    } catch (e) { console.warn("swffg-holocron | installation auto", e); }
   }
   // Marqueur « vous êtes ici » (un seul applicateur pour éviter les races).
   if (!isTripApplier()) return;

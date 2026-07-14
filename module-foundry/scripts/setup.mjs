@@ -1,0 +1,100 @@
+/** SWFFG Holocron — installation automatique dans le monde (MJ, idempotent) :
+ *  1. structure de dossiers clés (journaux + acteurs),
+ *  2. import des compendiums Règles et Événements canon dans le monde,
+ *  3. rangement des journaux techniques (vaisseau, codex, HoloNet, config, notes
+ *     MJ, rencontres, dossiers, dice_helper) dans le dossier SYSTÈME.
+ *  Ne recrée jamais l'existant (repérage par nom) — relançable sans risque. */
+import { MOD, t } from "./util.mjs";
+
+// Dossiers clés de la campagne (créés s'ils manquent) — cf. README §4.
+const JOURNAL_FOLDERS = [
+  "🎬 Campagne — Actes",
+  "🏛️ Organisations",
+  "🎭 Personnages rencontrés",
+  "📓 Notes des joueurs",
+  "🎲 MJ — Bible de campagne",
+];
+const ACTOR_FOLDERS = ["👥 Personnages joueurs", "🎭 PNJ de campagne"];
+const RULES_FOLDER = "📖 Règles & Références (FR)";
+const EVENTS_FOLDER = "📅 Événements";
+
+/** Dossier par nom, id ou uuid « Folder.<id> ». */
+const findFolder = (type, ref) => (ref ? game.folders.find((f) =>
+  f.type === type && (f.name === ref || f.id === ref || `Folder.${f.id}` === ref)) : null) || null;
+
+async function ensureFolder(type, name) {
+  return findFolder(type, name) || Folder.create({ name, type });
+}
+
+/** Journal ⚙️ Holocron Config (par flag, repli par nom). */
+const configJournal = () =>
+  game.journal.find((j) => j.flags?.holocron?.config) || game.journal.getName("⚙️ Holocron Config");
+
+/** Journaux techniques (état/sync Holocron) à ranger dans le dossier système. */
+function utilityJournals() {
+  const names = [
+    game.settings.get(MOD, "shipJournal"),
+    game.settings.get(MOD, "codexJournal"),
+    game.settings.get(MOD, "holonetJournal"),
+    "🗒️ Notes MJ (Holocron)",
+    "⚔️ Bibliothèque de rencontres",
+    "🗂️ Dossiers MJ (Holocron)",
+    "dice_helper",
+  ].filter(Boolean);
+  const docs = names.map((n) => game.journal.getName(n)).filter(Boolean);
+  const cfg = configJournal();
+  if (cfg && !docs.includes(cfg)) docs.push(cfg);
+  return docs;
+}
+
+/** Dossier système : réglage (nom ou uuid) → adoption (dossier d'un journal
+ * technique déjà rangé) → création avec le nom du réglage. */
+export async function systemFolder() {
+  const ref = game.settings.get(MOD, "systemFolder") || "🛠️ Holocron — Système";
+  const bySetting = findFolder("JournalEntry", ref);
+  if (bySetting) return bySetting;
+  for (const j of utilityJournals()) if (j.folder) return j.folder;
+  return ensureFolder("JournalEntry", /^Folder\./.test(ref) ? "🛠️ Holocron — Système" : ref);
+}
+
+/** Dossier des événements de la frise : catégorie kind:"timeline" de la config
+ * web si résolvable, sinon le dossier par défaut (créé au besoin). */
+async function eventsFolder() {
+  const cfg = configJournal()?.flags?.holocron?.config;
+  const ref = (cfg?.categories || []).find((c) => c?.kind === "timeline" && c.folder)?.folder;
+  return findFolder("JournalEntry", ref) || ensureFolder("JournalEntry", EVENTS_FOLDER);
+}
+
+/** Importe les documents d'un pack absents du monde (repérage par nom, ids conservés). */
+async function importPack(packId, folderId) {
+  const pack = game.packs.get(packId);
+  if (!pack) return 0;
+  const docs = await pack.getDocuments();
+  const missing = docs.filter((d) => !game.journal.getName(d.name));
+  if (!missing.length) return 0;
+  const data = missing.map((d) => ({ ...d.toObject(), folder: folderId }));
+  await JournalEntry.createDocuments(data, { keepId: true });
+  return missing.length;
+}
+
+export async function installHolocron({ silent = false } = {}) {
+  if (!game.user.isGM) return false;
+  let folders = 0;
+  for (const n of JOURNAL_FOLDERS) if (!findFolder("JournalEntry", n)) { await ensureFolder("JournalEntry", n); folders++; }
+  for (const n of ACTOR_FOLDERS) if (!findFolder("Actor", n)) { await ensureFolder("Actor", n); folders++; }
+
+  const rulesF = await ensureFolder("JournalEntry", RULES_FOLDER);
+  const rules = await importPack(`${MOD}.regles`, rulesF.id);
+  const events = await importPack(`${MOD}.evenements`, (await eventsFolder()).id);
+
+  const sys = await systemFolder();
+  let moved = 0;
+  for (const j of utilityJournals()) {
+    if (j.folder?.id !== sys.id) { await j.update({ folder: sys.id }); moved++; }
+  }
+
+  if (!silent && (folders || rules || events || moved)) {
+    ui.notifications.info(t("setup.done", { folders, rules, events, moved, sys: sys.name }));
+  }
+  return true;
+}

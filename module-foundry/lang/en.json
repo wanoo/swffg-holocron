@@ -1,116 +1,263 @@
 {
- "SWH": {
-  "common": {
-   "rollBtn": "Roll (obstacle included in the pool)", "edit": "edit", "add": "Add", "remove": "Remove",
-   "open": "open", "close": "Close", "cancel": "Cancel", "apply": "Apply", "save": "Save",
-   "send": "Send to players", "name": "Name"
-  },
-  "diff": { "1": "Easy", "2": "Average", "3": "Hard", "4": "Daunting", "5": "Formidable" },
-  "ship": {
-   "pageName": "Ship status", "provisions": "Provisions", "fuel": "Fuel", "wear": "Wear",
-   "wearPct": "Ship wear (%)",
-   "hyperdrive": "Hyperdrive", "lastTrip": "Last trip: {from} → {to}.",
-   "noJournal": "Ship journal not found (the GM must open the Holocron once).",
-   "tripLog": "Trip: −{days}d provisions · −{fuel} fuel · +{usure}% wear → 🥫 {v}/{vm} · ⛽ {f}/{fm} · 🔧 {u}%",
-   "refuel": "Restock provisions", "refill": "Refuel", "repair": "Overhaul (wear to 0)",
-   "manualTrip": "Apply a trip (manual)",
-   "applyPlanned": "Apply the planned route: {from} → {to} (−{days}d · −{fuel} fuel · +{usure}% wear)",
-   "noPlanned": "No route calculated in the Astronav.",
-   "form": { "days": "Days (−provisions)", "tripFuel": "Fuel (−)", "tripWear": "Wear (+%)" },
-   "log": { "refuel": "Provisions restocked to maximum.", "fuel": "Fuel tank refilled.", "repair": "Full overhaul: wear back to 0%." }
-  },
-  "deck": {
-   "title": "Holocron", "allegiance": "Party allegiance",
-   "allegianceEmpty": "— not set —", "openAstronav": "Astronav",
-   "position": "Current position", "positionUnknown": "Unknown",
-   "crew": "Crew", "crewEmpty": "Assign a character to each player (Configure Players).",
-   "alignment": "Character alignment", "allies": "Allies", "neutrals": "Neutrals", "enemies": "Enemies",
-   "holonet": "HoloNet", "holonetEmpty": "Create or edit the \"{name}\" journal to feed this panel.",
-   "poi": "Points of interest", "poiEmpty": "No world flagged yet.",
-   "favorites": "Favorites (MEJ bookmarks)",
-   "favEmpty": "No favorites yet. Pin a world from its sheet (Monk's Enhanced Journal star).",
-   "favOpen": "Open the sheet", "favToAstronav": "Set as destination in the Astronav",
-   "import": "Import atlas", "importHint": "Import the planet compendium into the world journals (required for MEJ sheets and favorites).",
-   "npcAdd": "Add a character to the codex", "npcStatus": "Alignment",
-   "poiAdd": "Flag a world of interest", "poiNote": "Note (visible to players)"
-  },
-  "codex": { "pageName": "Party codex" },
-  "toolbox": {
-   "title": "GM toolbox", "fear": "Fear check", "destiny": "Destiny Points",
-   "groupDamage": "Group damage / strain", "critical": "Critical injury",
-   "encounterEnd": "End of encounter", "groupInitiative": "Group initiative", "shop": "Generate a shop"
-  },
-  "tools": {
-   "diff": "Difficulty", "ffgOnly": "Requires the Star Wars FFG system.",
-   "fear": {
-    "title": "Fear check", "upgrades": "Upgrades (◆→red ◆)", "source": "Source (shown to players)",
-    "sourceDefault": "Something stirs in the shadows…",
-    "rules": "Roll <strong>Cool</strong> or <strong>Discipline</strong>.<br><span style=\"font-size:.9em\">Failure: 1 strain + a Setback die until the end of the encounter · 3 Threat or 1 Despair: the character panics (GM's call) · Triumph: immune to this source for the scene.</span>",
-    "skill": "Fear"
-   },
-   "damage": {
-    "title": "Group damage / strain", "noTokens": "Select some tokens first.",
-    "mode": "Type", "wounds": "Wounds", "strain": "Strain", "healW": "Heal (wounds)", "healS": "Recover (strain)",
-    "amount": "Amount", "soak": "Subtract soak (wounds only)", "over": "threshold exceeded!"
-   },
-   "crit": {
-    "title": "Critical injury", "table": "Table", "character": "Character", "vehicle": "Vehicle / starship",
-    "prev": "Existing criticals (+10 each)", "bonus": "Bonus (Lethal Blows ×10, talents…)", "draw": "Draw",
-    "noTable": "Table not found: {name} (configurable in the module settings)."
-   },
-   "end": {
-    "title": "End of encounter",
-    "rules": "<strong>Strain recovery</strong>: roll <strong>Cool</strong> or <strong>Discipline</strong> (Simple difficulty) — each Success removes 1 strain, each Advantage may heal 1 strain on an ally.<br><span style=\"font-size:.9em\">Also remember: medical care (1 check/encounter), reloading Limited Ammo weapons, recovering committed Force dice.</span>",
-    "skill": "Cool / Discipline"
-   },
-   "init": { "noTokens": "Select the tokens to add to combat." },
-   "destiny": {
-    "title": "Destiny Points", "current": "Current pool: <strong>{light} light · {dark} dark</strong>",
-    "n": "Session-start roll — Force dice (1/PC)", "remind": "Post the usage reminder",
-    "roll": "Roll & update", "flavor": "Destiny roll — session start",
-    "new": "New pool: <strong>{light} light · {dark} dark</strong>",
-    "rules": "<strong>Players (light)</strong>: upgrade 1 die of your pool · downgrade 1 opposing Difficulty die · activate certain talents · narrative nudge with GM approval.<br><strong>GM (dark)</strong>: upgrade the difficulty of a PC check · upgrade an NPC pool · trigger a narrative complication.<br><span style=\"font-size:.9em\">A spent point flips to the other side of the pool.</span>"
-   },
-   "shop": {
-    "title": "Generate a shop", "type": "Type", "place": "Location", "count": "Number of items",
-    "show": "Show to players on creation", "generate": "Generate",
-    "noPacks": "No item compendium configured (module settings).",
-    "rarityMod": "local rarity modifier", "item": "Item", "price": "Price", "rarity": "Rarity",
-    "folder": "Shops",
-    "t": { "armurier": "Gunsmith", "bazar": "Bazaar & gear", "noir": "Black market", "droides": "Droid & tech shop", "apothicaire": "Apothecary" },
-    "pm2": "Core (Coruscant…)", "pm1": "Core world / trade axis", "p0": "Colony / Inner Rim",
-    "p1": "Rim, isolated world", "p2": "Outer Rim", "p3": "Wild Space", "p4": "Primitive world",
-    "names": {
-     "armurier0": "The Smoking Stock", "armurier1": "Denal Arsenal", "armurier2": "Krieg's", "armurier3": "The Short Barrel",
-     "bazar0": "The Star Counter", "bazar1": "Ryloth Bazaar", "bazar2": "Maz's", "bazar3": "The Sector Warehouse",
-     "noir0": "The Back Room", "noir1": "The Quiet One", "noir2": "Ghost Cargo", "noir3": "Vessk's (invitation only)",
-     "droides0": "Circuits & Cogs", "droides1": "The Scrapper", "droides2": "Workshop R-7", "droides3": "Doc Circuit",
-     "apothicaire0": "The Green Still", "apothicaire1": "Jashwik's Remedies", "apothicaire2": "The Vat", "apothicaire3": "Herbs & Hypos"
+  "SWH": {
+    "common": {
+      "rollBtn": "Roll (obstacle included in the pool)",
+      "edit": "edit",
+      "add": "Add",
+      "remove": "Remove",
+      "open": "open",
+      "close": "Close",
+      "cancel": "Cancel",
+      "apply": "Apply",
+      "save": "Save",
+      "send": "Send to players",
+      "name": "Name"
+    },
+    "diff": {
+      "1": "Easy",
+      "2": "Average",
+      "3": "Hard",
+      "4": "Daunting",
+      "5": "Formidable"
+    },
+    "ship": {
+      "pageName": "Ship status",
+      "provisions": "Provisions",
+      "fuel": "Fuel",
+      "wear": "Wear",
+      "wearPct": "Ship wear (%)",
+      "hyperdrive": "Hyperdrive",
+      "lastTrip": "Last trip: {from} → {to}.",
+      "noJournal": "Ship journal not found (the GM must open the Holocron once).",
+      "tripLog": "Trip: −{days}d provisions · −{fuel} fuel · +{usure}% wear → 🥫 {v}/{vm} · ⛽ {f}/{fm} · 🔧 {u}%",
+      "refuel": "Restock provisions",
+      "refill": "Refuel",
+      "repair": "Overhaul (wear to 0)",
+      "manualTrip": "Apply a trip (manual)",
+      "applyPlanned": "Apply the planned route: {from} → {to} (−{days}d · −{fuel} fuel · +{usure}% wear)",
+      "noPlanned": "No route calculated in the Astronav.",
+      "form": {
+        "days": "Days (−provisions)",
+        "tripFuel": "Fuel (−)",
+        "tripWear": "Wear (+%)"
+      },
+      "log": {
+        "refuel": "Provisions restocked to maximum.",
+        "fuel": "Fuel tank refilled.",
+        "repair": "Full overhaul: wear back to 0%."
+      }
+    },
+    "deck": {
+      "title": "Holocron",
+      "allegiance": "Party allegiance",
+      "allegianceEmpty": "— not set —",
+      "openAstronav": "Astronav",
+      "position": "Current position",
+      "positionUnknown": "Unknown",
+      "crew": "Crew",
+      "crewEmpty": "Assign a character to each player (Configure Players).",
+      "alignment": "Character alignment",
+      "allies": "Allies",
+      "neutrals": "Neutrals",
+      "enemies": "Enemies",
+      "holonet": "HoloNet",
+      "holonetEmpty": "Create or edit the \"{name}\" journal to feed this panel.",
+      "poi": "Points of interest",
+      "poiEmpty": "No world flagged yet.",
+      "favorites": "Favorites (MEJ bookmarks)",
+      "favEmpty": "No favorites yet. Pin a world from its sheet (Monk's Enhanced Journal star).",
+      "favOpen": "Open the sheet",
+      "favToAstronav": "Set as destination in the Astronav",
+      "import": "Import atlas",
+      "importHint": "Import the planet compendium into the world journals (required for MEJ sheets and favorites).",
+      "npcAdd": "Add a character to the codex",
+      "npcStatus": "Alignment",
+      "poiAdd": "Flag a world of interest",
+      "poiNote": "Note (visible to players)"
+    },
+    "codex": {
+      "pageName": "Party codex"
+    },
+    "toolbox": {
+      "title": "GM toolbox",
+      "fear": "Fear check",
+      "destiny": "Destiny Points",
+      "groupDamage": "Group damage / strain",
+      "critical": "Critical injury",
+      "encounterEnd": "End of encounter",
+      "groupInitiative": "Group initiative",
+      "shop": "Generate a shop"
+    },
+    "tools": {
+      "diff": "Difficulty",
+      "ffgOnly": "Requires the Star Wars FFG system.",
+      "fear": {
+        "title": "Fear check",
+        "upgrades": "Upgrades (◆→red ◆)",
+        "source": "Source (shown to players)",
+        "sourceDefault": "Something stirs in the shadows…",
+        "rules": "Roll <strong>Cool</strong> or <strong>Discipline</strong>.<br><span style=\"font-size:.9em\">Failure: 1 strain + a Setback die until the end of the encounter · 3 Threat or 1 Despair: the character panics (GM's call) · Triumph: immune to this source for the scene.</span>",
+        "skill": "Fear"
+      },
+      "damage": {
+        "title": "Group damage / strain",
+        "noTokens": "Select some tokens first.",
+        "mode": "Type",
+        "wounds": "Wounds",
+        "strain": "Strain",
+        "healW": "Heal (wounds)",
+        "healS": "Recover (strain)",
+        "amount": "Amount",
+        "soak": "Subtract soak (wounds only)",
+        "over": "threshold exceeded!"
+      },
+      "crit": {
+        "title": "Critical injury",
+        "table": "Table",
+        "character": "Character",
+        "vehicle": "Vehicle / starship",
+        "prev": "Existing criticals (+10 each)",
+        "bonus": "Bonus (Lethal Blows ×10, talents…)",
+        "draw": "Draw",
+        "noTable": "Table not found: {name} (configurable in the module settings)."
+      },
+      "end": {
+        "title": "End of encounter",
+        "rules": "<strong>Strain recovery</strong>: roll <strong>Cool</strong> or <strong>Discipline</strong> (Simple difficulty) — each Success removes 1 strain, each Advantage may heal 1 strain on an ally.<br><span style=\"font-size:.9em\">Also remember: medical care (1 check/encounter), reloading Limited Ammo weapons, recovering committed Force dice.</span>",
+        "skill": "Cool / Discipline"
+      },
+      "init": {
+        "noTokens": "Select the tokens to add to combat."
+      },
+      "destiny": {
+        "title": "Destiny Points",
+        "current": "Current pool: <strong>{light} light · {dark} dark</strong>",
+        "n": "Session-start roll — Force dice (1/PC)",
+        "remind": "Post the usage reminder",
+        "roll": "Roll & update",
+        "flavor": "Destiny roll — session start",
+        "new": "New pool: <strong>{light} light · {dark} dark</strong>",
+        "rules": "<strong>Players (light)</strong>: upgrade 1 die of your pool · downgrade 1 opposing Difficulty die · activate certain talents · narrative nudge with GM approval.<br><strong>GM (dark)</strong>: upgrade the difficulty of a PC check · upgrade an NPC pool · trigger a narrative complication.<br><span style=\"font-size:.9em\">A spent point flips to the other side of the pool.</span>"
+      },
+      "shop": {
+        "title": "Generate a shop",
+        "type": "Type",
+        "place": "Location",
+        "count": "Number of items",
+        "show": "Show to players on creation",
+        "generate": "Generate",
+        "noPacks": "No item compendium configured (module settings).",
+        "rarityMod": "local rarity modifier",
+        "item": "Item",
+        "price": "Price",
+        "rarity": "Rarity",
+        "folder": "Shops",
+        "t": {
+          "armurier": "Gunsmith",
+          "bazar": "Bazaar & gear",
+          "noir": "Black market",
+          "droides": "Droid & tech shop",
+          "apothicaire": "Apothecary"
+        },
+        "pm2": "Core (Coruscant…)",
+        "pm1": "Core world / trade axis",
+        "p0": "Colony / Inner Rim",
+        "p1": "Rim, isolated world",
+        "p2": "Outer Rim",
+        "p3": "Wild Space",
+        "p4": "Primitive world",
+        "names": {
+          "armurier0": "The Smoking Stock",
+          "armurier1": "Denal Arsenal",
+          "armurier2": "Krieg's",
+          "armurier3": "The Short Barrel",
+          "bazar0": "The Star Counter",
+          "bazar1": "Ryloth Bazaar",
+          "bazar2": "Maz's",
+          "bazar3": "The Sector Warehouse",
+          "noir0": "The Back Room",
+          "noir1": "The Quiet One",
+          "noir2": "Ghost Cargo",
+          "noir3": "Vessk's (invitation only)",
+          "droides0": "Circuits & Cogs",
+          "droides1": "The Scrapper",
+          "droides2": "Workshop R-7",
+          "droides3": "Doc Circuit",
+          "apothicaire0": "The Green Still",
+          "apothicaire1": "Jashwik's Remedies",
+          "apothicaire2": "The Vat",
+          "apothicaire3": "Herbs & Hypos"
+        }
+      }
+    },
+    "pr": {
+      "absent": "The \"Party Resources\" module is not active: the party pool stays in the ship journal.",
+      "noApi": "Party Resources API unavailable — open it once, then re-run the install.",
+      "done": "Party pool installed in Party Resources ({n} created).",
+      "wearUp": "The ship's wear is increasing.",
+      "wearDown": "The ship was repaired (wear decreasing)."
+    },
+    "bridge": {
+      "title": "Astronav → ship",
+      "body": "Route {from} → {to}: −{days}d provisions · −{fuel} fuel · +{usure}% wear.",
+      "apply": "Apply to the ship",
+      "applied": "applied",
+      "gmOnly": "GM only."
+    },
+    "settings": {
+      "shipJournal": {
+        "name": "Ship journal",
+        "hint": "Name of the journal holding the party ship state (created automatically)."
+      },
+      "codexJournal": {
+        "name": "Codex journal",
+        "hint": "Name of the journal holding allegiance, NPC alignment and points of interest."
+      },
+      "holonetJournal": {
+        "name": "HoloNet journal",
+        "hint": "Name of the journal displayed in the Holocron HoloNet panel."
+      },
+      "critTableCharacter": {
+        "name": "Critical table (characters)",
+        "hint": "Name of the d100 critical injuries RollTable."
+      },
+      "critTableVehicle": {
+        "name": "Critical table (vehicles)",
+        "hint": "Name of the d100 critical hits RollTable."
+      },
+      "shopPacks": {
+        "name": "Shop compendiums",
+        "hint": "Item compendium ids, comma-separated (e.g. world.oggdudegear)."
+      },
+      "resFoodId": {
+        "name": "Resource — Provisions (party-resources id)",
+        "hint": "Id of the fvtt-party-resources resource tracking party provisions."
+      },
+      "resFuelId": {
+        "name": "Resource — Fuel (party-resources id)",
+        "hint": "Id of the fvtt-party-resources resource tracking fuel."
+      },
+      "resWearId": {
+        "name": "Resource — Wear (party-resources id)",
+        "hint": "Id of the fvtt-party-resources resource tracking ship wear (%)."
+      },
+      "partyResMenu": {
+        "name": "Party pool",
+        "label": "Install into Party Resources",
+        "hint": "Creates (or resets) the Provisions / Fuel / Wear resources in Party Resources from the ship state."
+      },
+      "systemFolder": {
+        "name": "System folder (technical journals)",
+        "hint": "Name or uuid (Folder.<id>) of the journal folder where the Holocron's technical journals are stored (ship, codex, HoloNet, config, GM notes…). Created if missing."
+      },
+      "installMenu": {
+        "name": "Holocron structure install",
+        "label": "Install / reinstall",
+        "hint": "Creates the key campaign folders, imports the Rules and Canon Events compendiums into the world and files the technical journals into the system folder. Safe: never recreates existing content."
+      }
+    },
+    "setup": {
+      "done": "Holocron installed: {folders} folder(s) created, {rules} rule(s) and {events} event(s) imported, {moved} journal(s) filed into “{sys}”."
     }
-   }
-  },
-  "pr": {
-   "absent": "The \"Party Resources\" module is not active: the party pool stays in the ship journal.",
-   "noApi": "Party Resources API unavailable — open it once, then re-run the install.",
-   "done": "Party pool installed in Party Resources ({n} created).",
-   "wearUp": "The ship's wear is increasing.", "wearDown": "The ship was repaired (wear decreasing)."
-  },
-  "bridge": {
-   "title": "Astronav → ship",
-   "body": "Route {from} → {to}: −{days}d provisions · −{fuel} fuel · +{usure}% wear.",
-   "apply": "Apply to the ship", "applied": "applied", "gmOnly": "GM only."
-  },
-  "settings": {
-   "shipJournal": { "name": "Ship journal", "hint": "Name of the journal holding the party ship state (created automatically)." },
-   "codexJournal": { "name": "Codex journal", "hint": "Name of the journal holding allegiance, NPC alignment and points of interest." },
-   "holonetJournal": { "name": "HoloNet journal", "hint": "Name of the journal displayed in the Holocron HoloNet panel." },
-   "critTableCharacter": { "name": "Critical table (characters)", "hint": "Name of the d100 critical injuries RollTable." },
-   "critTableVehicle": { "name": "Critical table (vehicles)", "hint": "Name of the d100 critical hits RollTable." },
-   "shopPacks": { "name": "Shop compendiums", "hint": "Item compendium ids, comma-separated (e.g. world.oggdudegear)." },
-   "resFoodId": { "name": "Resource — Provisions (party-resources id)", "hint": "Id of the fvtt-party-resources resource tracking party provisions." },
-   "resFuelId": { "name": "Resource — Fuel (party-resources id)", "hint": "Id of the fvtt-party-resources resource tracking fuel." },
-   "resWearId": { "name": "Resource — Wear (party-resources id)", "hint": "Id of the fvtt-party-resources resource tracking ship wear (%)." },
-   "partyResMenu": { "name": "Party pool", "label": "Install into Party Resources", "hint": "Creates (or resets) the Provisions / Fuel / Wear resources in Party Resources from the ship state." }
   }
- }
 }
