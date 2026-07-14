@@ -113,12 +113,24 @@ async function ensureConfig(eventsF) {
   return added;
 }
 
-/** Importe les documents d'un pack absents du monde (repérage par nom, ids conservés). */
+/** Compendium de règles à importer : celui déclaré par la config web
+ * (packs.rules, ex. world.regles-and-references-fr) s'il existe dans le monde,
+ * sinon le pack embarqué du module. */
+function rulesPackId() {
+  const ref = configJournal()?.flags?.holocron?.config?.packs?.rules;
+  return (ref && game.packs.get(ref)) ? ref : `${MOD}.regles`;
+}
+
+// Nom normalisé pour la déduplication : préfixe de tri « NN · » ignoré, casse pliée.
+const normName = (n) => String(n || "").toLowerCase().replace(/^\d+\s*[·.\-–—]?\s*/, "").trim();
+
+/** Importe les documents d'un pack absents du monde (dédup par nom normalisé, ids conservés). */
 async function importPack(packId, folderId) {
   const pack = game.packs.get(packId);
   if (!pack) return 0;
+  const existing = new Set(game.journal.map((j) => normName(j.name)));
   const docs = await pack.getDocuments();
-  const missing = docs.filter((d) => !game.journal.getName(d.name));
+  const missing = docs.filter((d) => !existing.has(normName(d.name)));
   if (!missing.length) return 0;
   const data = missing.map((d) => ({ ...d.toObject(), folder: folderId }));
   await JournalEntry.createDocuments(data, { keepId: true });
@@ -131,8 +143,10 @@ export async function installHolocron({ silent = false } = {}) {
   for (const n of JOURNAL_FOLDERS) if (!findFolder("JournalEntry", n)) { await ensureFolder("JournalEntry", n); folders++; }
   for (const n of ACTOR_FOLDERS) if (!findFolder("Actor", n)) { await ensureFolder("Actor", n); folders++; }
 
+  // règles : copiées depuis le compendium déclaré par la config (packs.rules,
+  // ex. world.regles-and-references-fr) — repli sur le pack embarqué du module
   const rulesF = await ensureFolder("JournalEntry", RULES_FOLDER);
-  const rules = await importPack(`${MOD}.regles`, rulesF.id);
+  const rules = await importPack(rulesPackId(), rulesF.id);
   const eventsF = await eventsFolder();
   const events = await importPack(`${MOD}.evenements`, eventsF.id);
 

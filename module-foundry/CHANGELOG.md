@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.3 — Les règles s'importent depuis le compendium du monde
+
+- L'import des règles copie désormais depuis le **compendium déclaré par la
+  config web** (`packs.rules`, ex. `world.regles-and-references-fr`) quand il
+  existe — repli sur le pack embarqué `swffg-holocron.regles` sinon.
+- Déduplication par **nom normalisé** (préfixes de tri « NN · » ignorés) : pas
+  de doublon entre versions du monde et versions du module.
+
 ## 1.5.2 — Le journal de config devient un réglage du module
 
 - Nouveau réglage **« Journal de configuration (app web) »** (`configJournal`,
