@@ -30,6 +30,9 @@ Hooks.once("init", () => {
   S("shipJournal", "🚀 Vaisseau du groupe");
   S("codexJournal", "🖥️ Codex du groupe");
   S("holonetJournal", "📡 HoloNet — Actualités");
+  // journal de configuration de l'app web (flags.holocron.config) — doit
+  // correspondre à CONFIG_JOURNAL_NAME côté Archive Holocron.
+  S("configJournal", "⚙️ Holocron Config");
   S("critTableCharacter", "🩸 Blessures critiques (d100)");
   S("critTableVehicle", "🔥 Avaries critiques — véhicules (d100)");
   S("shopPacks", "world.oggdudeweapons, world.oggdudearmor, world.oggdudegear");

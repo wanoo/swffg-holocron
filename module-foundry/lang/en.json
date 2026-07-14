@@ -254,6 +254,10 @@
         "name": "Holocron structure install",
         "label": "Install / reinstall",
         "hint": "Creates the key campaign folders, imports the Rules and Canon Events compendiums into the world and files the technical journals into the system folder. Safe: never recreates existing content."
+      },
+      "configJournal": {
+        "name": "Configuration journal (web app)",
+        "hint": "Name of the journal holding the Archive Holocron config (flags.holocron.config). Must match CONFIG_JOURNAL_NAME on the web app side (default: ⚙️ Holocron Config). Created and completed automatically at install."
       }
     },
     "setup": {

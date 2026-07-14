@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.2 — Le journal de config devient un réglage du module
+
+- Nouveau réglage **« Journal de configuration (app web) »** (`configJournal`,
+  défaut `⚙️ Holocron Config`) : l'installeur le cherche/crée sous ce nom, comme
+  les autres journaux liés (vaisseau, codex, HoloNet). Doit correspondre à
+  `CONFIG_JOURNAL_NAME` côté Archive Holocron. La détection par flag
+  (`flags.holocron.config`) reste prioritaire — un journal renommé est retrouvé.
+
 ## 1.5.1 — La config de campagne se complète toute seule
 
 - **⚙️ Holocron Config n'a plus besoin d'être éditée à la main** : l'installation

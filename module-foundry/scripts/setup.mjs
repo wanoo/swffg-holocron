@@ -26,9 +26,10 @@ async function ensureFolder(type, name) {
   return findFolder(type, name) || Folder.create({ name, type });
 }
 
-/** Journal ⚙️ Holocron Config (par flag, repli par nom). */
+/** Journal de config de l'app web (par flag, repli par nom — réglage configJournal). */
 const configJournal = () =>
-  game.journal.find((j) => j.flags?.holocron?.config) || game.journal.getName("⚙️ Holocron Config");
+  game.journal.find((j) => j.flags?.holocron?.config)
+  || game.journal.getName(game.settings.get(MOD, "configJournal") || "⚙️ Holocron Config");
 
 /** Journaux techniques (état/sync Holocron) à ranger dans le dossier système. */
 function utilityJournals() {
@@ -77,7 +78,7 @@ async function ensureConfig(eventsF) {
   let j = configJournal();
   if (!j) {
     j = await JournalEntry.create({
-      name: "⚙️ Holocron Config",
+      name: game.settings.get(MOD, "configJournal") || "⚙️ Holocron Config",
       ownership: { default: 0 },
       flags: { holocron: { config: { v: 1, meta: { title: game.world?.title || "Ma campagne SWFFG", description: "", system: "starwarsffg" } } } },
       pages: [{ name: "Config", type: "text", text: { content: "<p>Configuration du Holocron (flags.holocron.config).</p>", format: 1 } }],

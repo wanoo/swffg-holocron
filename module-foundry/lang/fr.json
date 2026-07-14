@@ -254,6 +254,10 @@
         "name": "Installation de la structure Holocron",
         "label": "Installer / réinstaller",
         "hint": "Crée les dossiers clés de campagne, importe les compendiums Règles et Événements canon dans le monde et range les journaux techniques dans le dossier système. Sans risque : ne recrée jamais l'existant."
+      },
+      "configJournal": {
+        "name": "Journal de configuration (app web)",
+        "hint": "Nom du journal qui porte la config de l'Archive Holocron (flags.holocron.config). Doit correspondre à CONFIG_JOURNAL_NAME côté app web (défaut : ⚙️ Holocron Config). Créé et complété automatiquement à l'installation."
       }
     },
     "setup": {
