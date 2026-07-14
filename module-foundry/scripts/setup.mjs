@@ -58,11 +58,58 @@ export async function systemFolder() {
 }
 
 /** Dossier des événements de la frise : catégorie kind:"timeline" de la config
- * web si résolvable, sinon le dossier par défaut (créé au besoin). */
+ * si résolvable → adoption du dossier qui contient déjà des fiches MEJ « event »
+ * → dossier par défaut (créé au besoin). */
 async function eventsFolder() {
   const cfg = configJournal()?.flags?.holocron?.config;
   const ref = (cfg?.categories || []).find((c) => c?.kind === "timeline" && c.folder)?.folder;
-  return findFolder("JournalEntry", ref) || ensureFolder("JournalEntry", EVENTS_FOLDER);
+  const byCfg = findFolder("JournalEntry", ref);
+  if (byCfg) return byCfg;
+  const withEvent = game.journal.find((j) => j.folder && j.flags?.["monks-enhanced-journal"]?.pagetype === "event");
+  if (withEvent) return withEvent.folder;
+  return ensureFolder("JournalEntry", EVENTS_FOLDER);
+}
+
+/** Complète ⚙️ Holocron Config : crée le journal s'il manque, AJOUTE les catégories
+ * et champs absents (dont la catégorie timeline, pointée par uuid — stable au
+ * renommage). Ne touche JAMAIS à ce qui est déjà déclaré. */
+async function ensureConfig(eventsF) {
+  let j = configJournal();
+  if (!j) {
+    j = await JournalEntry.create({
+      name: "⚙️ Holocron Config",
+      ownership: { default: 0 },
+      flags: { holocron: { config: { v: 1, meta: { title: game.world?.title || "Ma campagne SWFFG", description: "", system: "starwarsffg" } } } },
+      pages: [{ name: "Config", type: "text", text: { content: "<p>Configuration du Holocron (flags.holocron.config).</p>", format: 1 } }],
+    });
+  }
+  const cfg = j.flags?.holocron?.config || {};
+  const cats = Array.isArray(cfg.categories) ? foundry.utils.deepClone(cfg.categories) : [];
+  const resolvedIds = new Set(cats.map((c) => findFolder("JournalEntry", c?.folder)?.id).filter(Boolean));
+  const wanted = [
+    { folder: "🎬 Campagne — Actes", kind: "story", editable: true },
+    { folder: "🏛️ Organisations", kind: "org" },
+    { folder: "🎭 Personnages rencontrés", kind: "pc" },
+    { folder: "📓 Notes des joueurs", kind: "notes", editable: true },
+  ];
+  let added = 0;
+  for (const w of wanted) {
+    const f = findFolder("JournalEntry", w.folder);
+    if (!f || resolvedIds.has(f.id)) continue;
+    cats.push({ ...w });
+    added++;
+  }
+  if (eventsF && !cats.some((c) => c?.kind === "timeline") && !resolvedIds.has(eventsF.id)) {
+    cats.push({ folder: `Folder.${eventsF.id}`, kind: "timeline", label: "Événements" });
+    added++;
+  }
+  const updates = {};
+  if (added) updates["flags.holocron.config.categories"] = cats;
+  if (!cfg.gmBibleFolder) updates["flags.holocron.config.gmBibleFolder"] = "🎲 MJ — Bible de campagne";
+  if (!cfg.pcFolder) updates["flags.holocron.config.pcFolder"] = "👥 Personnages joueurs";
+  if (!cfg.npcsWorldFolder) updates["flags.holocron.config.npcsWorldFolder"] = "🎭 PNJ de campagne";
+  if (Object.keys(updates).length) await j.update(updates);
+  return added;
 }
 
 /** Importe les documents d'un pack absents du monde (repérage par nom, ids conservés). */
@@ -85,7 +132,11 @@ export async function installHolocron({ silent = false } = {}) {
 
   const rulesF = await ensureFolder("JournalEntry", RULES_FOLDER);
   const rules = await importPack(`${MOD}.regles`, rulesF.id);
-  const events = await importPack(`${MOD}.evenements`, (await eventsFolder()).id);
+  const eventsF = await eventsFolder();
+  const events = await importPack(`${MOD}.evenements`, eventsF.id);
+
+  // la config de campagne se complète toute seule (catégories, timeline, dossiers)
+  await ensureConfig(eventsF);
 
   const sys = await systemFolder();
   let moved = 0;

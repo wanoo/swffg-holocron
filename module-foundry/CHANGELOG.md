@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.5.1 — La config de campagne se complète toute seule
+
+- **⚙️ Holocron Config n'a plus besoin d'être éditée à la main** : l'installation
+  crée le journal s'il manque et **ajoute les catégories absentes** (Actes/story,
+  Organisations/org, Personnages/pc, Notes/notes) + la **catégorie timeline**,
+  pointée par uuid `Folder.<id>` (stable au renommage) vers le dossier d'événements.
+  Celui-ci est détecté automatiquement : catégorie déjà déclarée → **dossier
+  contenant des fiches MEJ « event »** → dossier « 📅 Événements » créé. Les champs
+  `gmBibleFolder` / `pcFolder` / `npcsWorldFolder` vides sont aussi remplis.
+  **Rien de déjà déclaré n'est jamais écrasé.**
+- L'installation auto se rejoue **à chaque mise à jour du module** (marqueur par
+  version, opérations idempotentes) — plus besoin du menu pour bénéficier des
+  nouveaux compléments.
+
 ## 1.5.0 — Installation automatique dans le monde
 
 - **Au premier lancement (client MJ), le module installe tout** (`scripts/setup.mjs`,
