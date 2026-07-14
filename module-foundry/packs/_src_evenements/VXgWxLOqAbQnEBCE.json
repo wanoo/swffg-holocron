@@ -1,9 +1,11 @@
 {
   "_id": "VXgWxLOqAbQnEBCE",
+  "_key": "!journal!VXgWxLOqAbQnEBCE",
   "name": "3 ABY — Bataille de Hoth",
   "pages": [
     {
       "_id": "BBA0o2Mq13YGNZ8x",
+      "_key": "!journal.pages!VXgWxLOqAbQnEBCE.BBA0o2Mq13YGNZ8x",
       "name": "Bataille de Hoth",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!VXgWxLOqAbQnEBCE"
+  "_stats": {}
 }

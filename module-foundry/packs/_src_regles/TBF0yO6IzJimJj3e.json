@@ -34,7 +34,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!TBF0yO6IzJimJj3e.49GcN3IwgmIKYOig"
     },
     {
       "name": "Manœuvres",
@@ -69,7 +70,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!TBF0yO6IzJimJj3e.Sx44NktIFavpLSVt"
     },
     {
       "name": "Difficulté des attaques",
@@ -104,7 +106,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!TBF0yO6IzJimJj3e.X6MQu8xbL3Mqzh7h"
     },
     {
       "name": "Combat à deux armes",
@@ -139,7 +142,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!TBF0yO6IzJimJj3e.QDQf4cz9pb7nPqyx"
     }
   ],
   "_id": "TBF0yO6IzJimJj3e",
@@ -162,5 +166,5 @@
     "duplicateSource": null,
     "exportSource": null
   },
-  "_key": "!journalentry!TBF0yO6IzJimJj3e"
+  "_key": "!journal!TBF0yO6IzJimJj3e"
 }

@@ -1,9 +1,11 @@
 {
   "_id": "lJ0ucUCL71r2AR8V",
+  "_key": "!journal!lJ0ucUCL71r2AR8V",
   "name": "2 BBY — Massacre de Ghorman & Déclaration de l'Alliance",
   "pages": [
     {
       "_id": "KNPuXYDlayTKPPcK",
+      "_key": "!journal.pages!lJ0ucUCL71r2AR8V.KNPuXYDlayTKPPcK",
       "name": "Massacre de Ghorman & Déclaration de l'Alliance",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!lJ0ucUCL71r2AR8V"
+  "_stats": {}
 }

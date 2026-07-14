@@ -1,9 +1,11 @@
 {
   "_id": "G3cQowaYOOl0wzKp",
+  "_key": "!journal!G3cQowaYOOl0wzKp",
   "name": "19 BBY — Ordre 66 — proclamation de l'Empire",
   "pages": [
     {
       "_id": "IOWcCPInKnBMsvE9",
+      "_key": "!journal.pages!G3cQowaYOOl0wzKp.IOWcCPInKnBMsvE9",
       "name": "Ordre 66 — proclamation de l'Empire",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!G3cQowaYOOl0wzKp"
+  "_stats": {}
 }

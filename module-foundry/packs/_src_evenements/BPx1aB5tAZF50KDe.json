@@ -1,9 +1,11 @@
 {
   "_id": "BPx1aB5tAZF50KDe",
+  "_key": "!journal!BPx1aB5tAZF50KDe",
   "name": "24 BBY — Discours de Raxus — la crise séparatiste",
   "pages": [
     {
       "_id": "jXNHviEhdvXgpdOK",
+      "_key": "!journal.pages!BPx1aB5tAZF50KDe.jXNHviEhdvXgpdOK",
       "name": "Discours de Raxus — la crise séparatiste",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!BPx1aB5tAZF50KDe"
+  "_stats": {}
 }

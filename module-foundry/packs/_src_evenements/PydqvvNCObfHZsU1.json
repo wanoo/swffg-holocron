@@ -1,9 +1,11 @@
 {
   "_id": "PydqvvNCObfHZsU1",
+  "_key": "!journal!PydqvvNCObfHZsU1",
   "name": "10 BBY — Raid de Kessel",
   "pages": [
     {
       "_id": "LLTBizmSIaH7wL3d",
+      "_key": "!journal.pages!PydqvvNCObfHZsU1.LLTBizmSIaH7wL3d",
       "name": "Raid de Kessel",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!PydqvvNCObfHZsU1"
+  "_stats": {}
 }

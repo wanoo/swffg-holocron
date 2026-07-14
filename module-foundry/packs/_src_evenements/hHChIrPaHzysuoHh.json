@@ -1,9 +1,11 @@
 {
   "_id": "hHChIrPaHzysuoHh",
+  "_key": "!journal!hHChIrPaHzysuoHh",
   "name": "4 ABY — Bataille d'Endor — chute de l'Empereur",
   "pages": [
     {
       "_id": "Uglu1nbjDC7fagMg",
+      "_key": "!journal.pages!hHChIrPaHzysuoHh.Uglu1nbjDC7fagMg",
       "name": "Bataille d'Endor — chute de l'Empereur",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!hHChIrPaHzysuoHh"
+  "_stats": {}
 }

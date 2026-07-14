@@ -27,7 +27,8 @@
         "default": -1
       },
       "flags": {},
-      "_stats": {}
+      "_stats": {},
+      "_key": "!journal.pages!y7dOzY8aZGNW4o6H.MGj5NEHvY78xSrGz"
     }
   ],
   "folder": null,
@@ -37,5 +38,5 @@
   },
   "flags": {},
   "_stats": {},
-  "_key": "!journalentry!y7dOzY8aZGNW4o6H"
+  "_key": "!journal!y7dOzY8aZGNW4o6H"
 }

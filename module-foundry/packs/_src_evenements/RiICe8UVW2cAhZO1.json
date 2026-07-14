@@ -1,9 +1,11 @@
 {
   "_id": "RiICe8UVW2cAhZO1",
+  "_key": "!journal!RiICe8UVW2cAhZO1",
   "name": "232 BBY — La Grande Catastrophe hyperspatiale",
   "pages": [
     {
       "_id": "KArmXtFnnM1IPx5w",
+      "_key": "!journal.pages!RiICe8UVW2cAhZO1.KArmXtFnnM1IPx5w",
       "name": "La Grande Catastrophe hyperspatiale",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!RiICe8UVW2cAhZO1"
+  "_stats": {}
 }

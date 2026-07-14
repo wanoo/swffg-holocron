@@ -34,7 +34,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!DEnAMpt1bHI1RTex.u0Td9WVmE1NjqatU"
     },
     {
       "name": "États préjudiciables",
@@ -69,7 +70,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!DEnAMpt1bHI1RTex.z5eFj211ZQ8nPaqX"
     }
   ],
   "_id": "DEnAMpt1bHI1RTex",
@@ -92,5 +94,5 @@
     "duplicateSource": null,
     "exportSource": null
   },
-  "_key": "!journalentry!DEnAMpt1bHI1RTex"
+  "_key": "!journal!DEnAMpt1bHI1RTex"
 }

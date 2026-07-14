@@ -1,9 +1,11 @@
 {
   "_id": "Oqpiu98vyAtxOoZX",
+  "_key": "!journal!Oqpiu98vyAtxOoZX",
   "name": "41 BBY — Naissance d'Anakin Skywalker",
   "pages": [
     {
       "_id": "1tkKJNVTDdGoTrQS",
+      "_key": "!journal.pages!Oqpiu98vyAtxOoZX.1tkKJNVTDdGoTrQS",
       "name": "Naissance d'Anakin Skywalker",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!Oqpiu98vyAtxOoZX"
+  "_stats": {}
 }

@@ -34,7 +34,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!Ddmssc87FSjukyK7.QWHgBJGzJ4c07zJS"
     },
     {
       "name": "Passifs",
@@ -69,7 +70,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!Ddmssc87FSjukyK7.HNVKHyggahtmMZND"
     }
   ],
   "_id": "Ddmssc87FSjukyK7",
@@ -92,5 +94,5 @@
     "duplicateSource": null,
     "exportSource": null
   },
-  "_key": "!journalentry!Ddmssc87FSjukyK7"
+  "_key": "!journal!Ddmssc87FSjukyK7"
 }

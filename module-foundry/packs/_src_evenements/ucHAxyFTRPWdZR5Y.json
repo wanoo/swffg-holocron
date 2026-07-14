@@ -1,9 +1,11 @@
 {
   "_id": "ucHAxyFTRPWdZR5Y",
+  "_key": "!journal!ucHAxyFTRPWdZR5Y",
   "name": "0 BBY — Scarif & Yavin — l'Étoile Noire détruite",
   "pages": [
     {
       "_id": "ZbAy29Eo0Y3JMNL2",
+      "_key": "!journal.pages!ucHAxyFTRPWdZR5Y.ZbAy29Eo0Y3JMNL2",
       "name": "Scarif & Yavin — l'Étoile Noire détruite",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!ucHAxyFTRPWdZR5Y"
+  "_stats": {}
 }

@@ -69,9 +69,13 @@ for (const [date, name, location, body] of EVENTS) {
   const pid = fid(`swh-event-page:${name}`);
   const doc = {
     _id: jid,
+    // clés LevelDB Foundry : !journal!<id> + !journal.pages!<jid>.<pid> — le format
+    // !journalentry! (bug historique) rend le compendium invisible dans Foundry.
+    _key: `!journal!${jid}`,
     name: `${date} — ${name}`,
     pages: [{
       _id: pid,
+      _key: `!journal.pages!${jid}.${pid}`,
       name,
       type: "text",
       title: { show: true, level: 1 },
@@ -99,7 +103,6 @@ for (const [date, name, location, body] of EVENTS) {
     ownership: { default: 0 },
     flags: { "monks-enhanced-journal": { pagetype: "event" } },
     _stats: {},
-    _key: `!journalentry!${jid}`,
   };
   await writeFile(path.join(OUT, `${jid}.json`), JSON.stringify(doc, null, 2) + "\n");
   console.log(`${jid}  ${doc.name}`);

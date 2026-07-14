@@ -34,7 +34,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!ioW50RiL0ydy1PhX.LOAWwy8Xv8cJ03fj"
     },
     {
       "name": "Symboles",
@@ -69,7 +70,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!ioW50RiL0ydy1PhX.wm7wyeSAlynODTpX"
     },
     {
       "name": "Améliorer vs augmenter",
@@ -104,7 +106,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!ioW50RiL0ydy1PhX.kbRxl9l7FprTmC86"
     },
     {
       "name": "Assistance",
@@ -139,7 +142,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!ioW50RiL0ydy1PhX.xMuIDNgzs94WZ9ds"
     }
   ],
   "_id": "ioW50RiL0ydy1PhX",
@@ -162,5 +166,5 @@
     "duplicateSource": null,
     "exportSource": null
   },
-  "_key": "!journalentry!ioW50RiL0ydy1PhX"
+  "_key": "!journal!ioW50RiL0ydy1PhX"
 }

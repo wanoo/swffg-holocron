@@ -1,9 +1,11 @@
 {
   "_id": "OimTBERm19DBQomO",
+  "_key": "!journal!OimTBERm19DBQomO",
   "name": "5 BBY — Casse d'Aldhani — l'étincelle rebelle",
   "pages": [
     {
       "_id": "t8BoVPeb0NCXDWGm",
+      "_key": "!journal.pages!OimTBERm19DBQomO.t8BoVPeb0NCXDWGm",
       "name": "Casse d'Aldhani — l'étincelle rebelle",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!OimTBERm19DBQomO"
+  "_stats": {}
 }

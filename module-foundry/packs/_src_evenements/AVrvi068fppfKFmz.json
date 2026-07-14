@@ -1,9 +1,11 @@
 {
   "_id": "AVrvi068fppfKFmz",
+  "_key": "!journal!AVrvi068fppfKFmz",
   "name": "32 BBY — Bataille de Naboo",
   "pages": [
     {
       "_id": "6iwLca4LjzKJZTfY",
+      "_key": "!journal.pages!AVrvi068fppfKFmz.6iwLca4LjzKJZTfY",
       "name": "Bataille de Naboo",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!AVrvi068fppfKFmz"
+  "_stats": {}
 }

@@ -1,9 +1,11 @@
 {
   "_id": "tQxEXHVIX7XgE0ql",
+  "_key": "!journal!tQxEXHVIX7XgE0ql",
   "name": "200 BBY — Naissance de Chewbacca",
   "pages": [
     {
       "_id": "PCb0L7Hk7RFYeXiM",
+      "_key": "!journal.pages!tQxEXHVIX7XgE0ql.PCb0L7Hk7RFYeXiM",
       "name": "Naissance de Chewbacca",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!tQxEXHVIX7XgE0ql"
+  "_stats": {}
 }

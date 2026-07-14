@@ -1,9 +1,11 @@
 {
   "_id": "4mOZ9Ervvcx9gxtc",
+  "_key": "!journal!4mOZ9Ervvcx9gxtc",
   "name": "13 BBY — Han Solo quitte Corellia",
   "pages": [
     {
       "_id": "MAEKMmuQriaMIgzn",
+      "_key": "!journal.pages!4mOZ9Ervvcx9gxtc.MAEKMmuQriaMIgzn",
       "name": "Han Solo quitte Corellia",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!4mOZ9Ervvcx9gxtc"
+  "_stats": {}
 }

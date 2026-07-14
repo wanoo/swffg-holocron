@@ -41,7 +41,8 @@
           "items": {}
         }
       },
-      "_stats": {}
+      "_stats": {},
+      "_key": "!journal.pages!uyjbwb8p7pqocPXR.MgvyzoII49o3I1Mz"
     }
   ],
   "folder": null,
@@ -55,5 +56,5 @@
     }
   },
   "_stats": {},
-  "_key": "!journalentry!uyjbwb8p7pqocPXR"
+  "_key": "!journal!uyjbwb8p7pqocPXR"
 }

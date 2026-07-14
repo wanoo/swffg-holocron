@@ -1,9 +1,11 @@
 {
   "_id": "nok3iprUoqmhVZ6l",
+  "_key": "!journal!nok3iprUoqmhVZ6l",
   "name": "9 BBY — Obi-Wan sort de l'ombre",
   "pages": [
     {
       "_id": "SBgrfXTCk0ibiDfN",
+      "_key": "!journal.pages!nok3iprUoqmhVZ6l.SBgrfXTCk0ibiDfN",
       "name": "Obi-Wan sort de l'ombre",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!nok3iprUoqmhVZ6l"
+  "_stats": {}
 }

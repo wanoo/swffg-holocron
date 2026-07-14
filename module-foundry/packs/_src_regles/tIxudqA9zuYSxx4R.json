@@ -34,7 +34,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!tIxudqA9zuYSxx4R.2sj3EmXH4kqOafTv"
     },
     {
       "name": "Kits d'armes (sélection)",
@@ -69,7 +70,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!tIxudqA9zuYSxx4R.B4Xlq3CVlbzoKU7L"
     },
     {
       "name": "Kits d'armures (sélection)",
@@ -104,7 +106,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!tIxudqA9zuYSxx4R.NzgUxnmo1TlTGoWO"
     },
     {
       "name": "Kits de vaisseaux (sélection)",
@@ -139,7 +142,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!tIxudqA9zuYSxx4R.LEukgqI0UwrYCNh5"
     }
   ],
   "_id": "tIxudqA9zuYSxx4R",
@@ -162,5 +166,5 @@
     "duplicateSource": null,
     "exportSource": null
   },
-  "_key": "!journalentry!tIxudqA9zuYSxx4R"
+  "_key": "!journal!tIxudqA9zuYSxx4R"
 }

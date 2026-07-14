@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.5.4 — FIX : les compendiums de journaux étaient vides dans Foundry
+
+- **Bug depuis la 1.3.0** : les 4 packs JournalEntry (📖 Règles, ⚙️ Structure,
+  🧪 Échantillon, 📅 Événements canon) étaient compilés avec des clés LevelDB
+  `!journalentry!<id>` au lieu du format Foundry `!journal!<id>` +
+  `!journal.pages!<jid>.<pid>` — Foundry n'y voyait **aucune entrée**. Les
+  sources sont corrigées (pages désormais en clés séparées, comme les packs de
+  l'astronav) ; le pack 🎲 Macros n'était pas touché (`!macros!` correct).
+- Après mise à jour : les compendiums affichent enfin leur contenu, et
+  l'installation auto (rejouée à la mise à jour) peut importer règles et
+  événements dans le monde.
+
 ## 1.5.3 — Les règles s'importent depuis le compendium du monde
 
 - L'import des règles copie désormais depuis le **compendium déclaré par la

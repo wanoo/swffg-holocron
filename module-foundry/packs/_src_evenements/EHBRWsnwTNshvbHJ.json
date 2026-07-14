@@ -1,9 +1,11 @@
 {
   "_id": "EHBRWsnwTNshvbHJ",
+  "_key": "!journal!EHBRWsnwTNshvbHJ",
   "name": "1 BBY — Libération de Lothal",
   "pages": [
     {
       "_id": "o1Am4eIJBymx2zZs",
+      "_key": "!journal.pages!EHBRWsnwTNshvbHJ.o1Am4eIJBymx2zZs",
       "name": "Libération de Lothal",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!EHBRWsnwTNshvbHJ"
+  "_stats": {}
 }

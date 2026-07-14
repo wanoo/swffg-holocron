@@ -34,7 +34,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!hK7HRAQLdbA6iopw.fOUoHHlPYEWLi2BJ"
     },
     {
       "name": "Modificateurs de rareté (lieu)",
@@ -69,7 +70,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!hK7HRAQLdbA6iopw.9nb1eIT8tkyRH6Mb"
     },
     {
       "name": "Acheter & vendre",
@@ -104,7 +106,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!hK7HRAQLdbA6iopw.skGSNv5kcmrG8x7V"
     }
   ],
   "_id": "hK7HRAQLdbA6iopw",
@@ -127,5 +130,5 @@
     "duplicateSource": null,
     "exportSource": null
   },
-  "_key": "!journalentry!hK7HRAQLdbA6iopw"
+  "_key": "!journal!hK7HRAQLdbA6iopw"
 }

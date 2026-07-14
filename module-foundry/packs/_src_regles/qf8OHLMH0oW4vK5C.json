@@ -34,7 +34,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!qf8OHLMH0oW4vK5C.CLO08LYyKsHn00zF"
     },
     {
       "name": "[th] / [de] au sol",
@@ -69,7 +70,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!qf8OHLMH0oW4vK5C.cZgeEtbUIMdUFWmO"
     },
     {
       "name": "[ad] / [tr] en spatial",
@@ -104,7 +106,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!qf8OHLMH0oW4vK5C.T9QeUg1McIXROekN"
     },
     {
       "name": "[th] / [de] en spatial",
@@ -139,7 +142,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!qf8OHLMH0oW4vK5C.gVy7wajynWdH7kJz"
     }
   ],
   "_id": "qf8OHLMH0oW4vK5C",
@@ -162,5 +166,5 @@
     "duplicateSource": null,
     "exportSource": null
   },
-  "_key": "!journalentry!qf8OHLMH0oW4vK5C"
+  "_key": "!journal!qf8OHLMH0oW4vK5C"
 }

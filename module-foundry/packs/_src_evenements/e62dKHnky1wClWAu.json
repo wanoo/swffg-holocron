@@ -1,9 +1,11 @@
 {
   "_id": "e62dKHnky1wClWAu",
+  "_key": "!journal!e62dKHnky1wClWAu",
   "name": "22 BBY — Bataille de Géonosis — début de la Guerre des Clones",
   "pages": [
     {
       "_id": "iRdKQn7CLGygEfsu",
+      "_key": "!journal.pages!e62dKHnky1wClWAu.iRdKQn7CLGygEfsu",
       "name": "Bataille de Géonosis — début de la Guerre des Clones",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!e62dKHnky1wClWAu"
+  "_stats": {}
 }

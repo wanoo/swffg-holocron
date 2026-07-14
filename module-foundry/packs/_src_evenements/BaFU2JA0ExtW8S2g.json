@@ -1,9 +1,11 @@
 {
   "_id": "BaFU2JA0ExtW8S2g",
+  "_key": "!journal!BaFU2JA0ExtW8S2g",
   "name": "57 BBY — Naissance d'Obi-Wan Kenobi",
   "pages": [
     {
       "_id": "x4t9KlNMVkaKzKTM",
+      "_key": "!journal.pages!BaFU2JA0ExtW8S2g.x4t9KlNMVkaKzKTM",
       "name": "Naissance d'Obi-Wan Kenobi",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!BaFU2JA0ExtW8S2g"
+  "_stats": {}
 }

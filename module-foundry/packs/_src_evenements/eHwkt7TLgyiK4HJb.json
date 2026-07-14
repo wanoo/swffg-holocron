@@ -1,9 +1,11 @@
 {
   "_id": "eHwkt7TLgyiK4HJb",
+  "_key": "!journal!eHwkt7TLgyiK4HJb",
   "name": "4 BBY — Les Spectres rejoignent la rébellion",
   "pages": [
     {
       "_id": "HPMvZaZNnIL8ffEz",
+      "_key": "!journal.pages!eHwkt7TLgyiK4HJb.HPMvZaZNnIL8ffEz",
       "name": "Les Spectres rejoignent la rébellion",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!eHwkt7TLgyiK4HJb"
+  "_stats": {}
 }

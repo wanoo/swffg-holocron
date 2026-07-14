@@ -34,7 +34,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!j0bpTMAKQP4o7txa.rF7AVFXU2Brq3mo7"
     },
     {
       "name": "Manœuvres de vaisseau",
@@ -69,7 +70,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!j0bpTMAKQP4o7txa.M6n3Mc07vlqw6ZWU"
     },
     {
       "name": "Actions de vaisseau",
@@ -104,7 +106,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!j0bpTMAKQP4o7txa.QOVByl3jBFHNEsDY"
     },
     {
       "name": "Actions d'équipage (personnes)",
@@ -139,7 +142,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!j0bpTMAKQP4o7txa.ucuEwZeOXK7vjyRZ"
     },
     {
       "name": "Astrogation",
@@ -174,7 +178,8 @@
         "compendiumSource": null,
         "duplicateSource": null,
         "exportSource": null
-      }
+      },
+      "_key": "!journal.pages!j0bpTMAKQP4o7txa.tVEWw5V8OyZy3XrU"
     }
   ],
   "_id": "j0bpTMAKQP4o7txa",
@@ -197,5 +202,5 @@
     "duplicateSource": null,
     "exportSource": null
   },
-  "_key": "!journalentry!j0bpTMAKQP4o7txa"
+  "_key": "!journal!j0bpTMAKQP4o7txa"
 }

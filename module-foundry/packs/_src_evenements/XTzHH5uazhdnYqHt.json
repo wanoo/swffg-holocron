@@ -1,9 +1,11 @@
 {
   "_id": "XTzHH5uazhdnYqHt",
+  "_key": "!journal!XTzHH5uazhdnYqHt",
   "name": "5 ABY — Bataille de Jakku — Concordance Galactique",
   "pages": [
     {
       "_id": "xg8breIvpKLZcCHT",
+      "_key": "!journal.pages!XTzHH5uazhdnYqHt.xg8breIvpKLZcCHT",
       "name": "Bataille de Jakku — Concordance Galactique",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!XTzHH5uazhdnYqHt"
+  "_stats": {}
 }

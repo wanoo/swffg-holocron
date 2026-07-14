@@ -1,9 +1,11 @@
 {
   "_id": "Z2GTDVCjOpSxrTys",
+  "_key": "!journal!Z2GTDVCjOpSxrTys",
   "name": "9 ABY — L'ère de la Nouvelle République",
   "pages": [
     {
       "_id": "X4XQJ2bv49tstB2K",
+      "_key": "!journal.pages!Z2GTDVCjOpSxrTys.X4XQJ2bv49tstB2K",
       "name": "L'ère de la Nouvelle République",
       "type": "text",
       "title": {
@@ -52,6 +54,5 @@
       "pagetype": "event"
     }
   },
-  "_stats": {},
-  "_key": "!journalentry!Z2GTDVCjOpSxrTys"
+  "_stats": {}
 }
