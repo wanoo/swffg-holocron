@@ -101,8 +101,9 @@ Réglages du module (Foundry settings, monde) : `resFoodLabel`, `resFuelLabel`,
 > et les **zones à ne pas se marcher dessus** sont notés dans
 > `swffg-astronavigation/docs/STATUS-FRONTEND.md` (repo astronav). Résumé : `scripts/astronav.mjs`
 > est « possédé » par le Claude frontend ; les **fonctions MJ** (gm-tools/deck) sont libres, à éditer
-> **ici** (`foundry/`, source canonique), pas dans la copie `star-wars JDR/swffg-holocron/`.
-> Versions publiées : astronav **1.7.5**, holocron **1.2.2**.
+> **ici** (`module-foundry/`, source canonique — ex-`foundry/`, renommé le 2026-07-13 ; l'ancienne
+> copie `star-wars JDR/swffg-holocron/` n'existe plus, le dépôt vit sous `modules/swffg-holocron/`).
+> Versions publiées : astronav **1.7.5**, holocron **1.3.0**.
 
 ## 9. Astronav **web** ↔ MEJ — fiche + favoris (livré 2026-07-13)
 
@@ -128,8 +129,8 @@ aux données MEJ du monde, **sans** synchroniser le dossier planètes (toujours 
 Le module Foundry Holocron **existe désormais** : `~/Documents/Dev/star-wars JDR/swffg-holocron`
 (rename de `swffg-command-deck`, qui fond ici comme décidé). Le contrat §5 est **rempli** :
 
-- ✅ **Dépendances** déclarées : `swffg-astronavigation` (≥1.6.0), `fvtt-party-resources` (≥1.8.0),
-  `monks-enhanced-journal`.
+- ✅ **Dépendances** déclarées : `swffg-astronavigation` (≥1.7.2 depuis holocron 1.3.0),
+  `fvtt-party-resources` (≥1.8.0), `monks-enhanced-journal`.
 - ✅ **Vaisseau ↔ party-resources** : pool live via `window.pr.api.get/set` (ids `resFoodId`/
   `resFuelId`/`resWearId`). La valeur PR prime sur le flag ; `writeShip` met PR à jour. Repli journal
   si PR absent. → **plus besoin de brancher `swffgAstronav.cost` côté web** pour la déduction : c'est

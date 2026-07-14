@@ -60,14 +60,12 @@ le journal du vaisseau prend le relais (dégradation gracieuse).
 - **📖 Règles & Références (FR)** — l'aide de jeu traduite : mécanique de base, compétences,
   combat, Force & Moralité, équipement, vaisseaux, fabrication, plus les fiches d'aide
   (dés & symboles, dépense d'avantages/menaces, etc.).
-- **⚙️ Structure de campagne** — les **dossiers** de journaux et d'acteurs prêts à l'emploi
-  (voir §4) + le journal **⚙️ Holocron Config** (paramètre l'app web).
+- **⚙️ Structure & Config** — le journal **📁 Structure de campagne** qui décrit
+  l'arborescence de dossiers à recréer (voir §4). Le journal **⚙️ Holocron Config** est
+  créé par l'app web (`POST /api/gm/bootstrap`), pas par ce pack.
 - **🎲 Macros MJ** — voir §5.
-- **🧪 Échantillon de test** — un mini-set (1 scène, quelques PNJ, un vaisseau) pour vérifier
-  l'installation d'un coup d'œil.
-
-*(Ces compendiums sont en cours d'intégration au module ; d'ici là, la structure ci-dessous
-décrit le format attendu.)*
+- **🧪 Échantillon de test** — deux fiches MEJ d'exemple (une *organisation*, un *contact*)
+  pour vérifier l'installation d'un coup d'œil.
 
 ---
 

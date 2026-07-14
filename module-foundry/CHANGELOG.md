@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.3.0 — Compendiums embarqués + flag d'état unifié avec l'app web
+
+- **4 compendiums bundlés** (LevelDB, sources JSON dans `packs/_src_*`) : **📖 Règles &
+  Références (FR)** (17 journaux d'aide de jeu), **🎲 Macros — Holocron** (25 macros : outils MJ,
+  pont de jets Holocron, délégations écosystème), **⚙️ Structure & Config** (journal décrivant
+  l'arborescence de campagne), **🧪 Échantillon** (2 fiches MEJ d'exemple). Build :
+  `node build_pack.mjs` puis `python build.py --zip`.
+- **Flag d'état unifié** : les états vaisseau/codex s'écrivent désormais sous
+  **`flags.holocron.*`** — le même espace que l'app web Archive Holocron — au lieu de
+  `flags.swffg-holocron.*`. Fini la divergence quand les deux côtés écrivaient chacun leur
+  flag. Migration douce : les anciens flags (`swffg-holocron`, `swffg-command-deck`) sont
+  repris en lecture et nettoyés à la première écriture.
+- **Auto-setup party-resources sur tout client MJ navigateur** : le connecteur MCP headless
+  peut être l'`activeGM` sans jamais exécuter le module ; le setup (idempotent) se fait
+  maintenant sur n'importe quel MJ qui ouvre le monde dans un navigateur.
+- **Favoris MEJ partagés** : les marque-pages sont propagés à tous les utilisateurs
+  (mondes d'intérêt identiques pour tout le groupe) ; retrait du legacy « campagne ».
+- **Écosystème recommandé** : `swffg-sabacc` et `swffg-workshops` déclarés en modules
+  recommandés (leurs règles sont aussi lisibles dans l'Archive Holocron).
+- **Dépendances resserrées** : `swffg-astronavigation` ≥ **1.7.2** (contrat `setUsure`),
+  `fvtt-party-resources` ≥ **1.8.0** (contrat §7 ASTRONAV-SYNC).
+
 ## 1.2.2 — Usure via le contrat propre de l'astronav
 
 - L'usure du vaisseau est poussée à l'astronav via la nouvelle API **`api.setUsure(pct)`**

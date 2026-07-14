@@ -1,6 +1,11 @@
 /** Shared helpers — SWFFG Holocron. */
 export const MOD = "swffg-holocron";
 
+// Espace de flags canonique des états vaisseau/codex : `flags.holocron.*`, PARTAGÉ avec
+// l'app web Archive Holocron (server/lib/ship.mjs lit/écrit les mêmes clés). Ne pas écrire
+// ces états sous `flags.swffg-holocron` — lu seulement en migration douce.
+export const FLAG_SCOPE = "holocron";
+
 /** i18n under the SWH.* prefix. */
 export const t = (k, data) => (data ? game.i18n.format(`SWH.${k}`, data) : game.i18n.localize(`SWH.${k}`));
 
@@ -82,9 +87,9 @@ export async function shipJournal() {
 }
 
 export function readShip(j) {
-  // migration douce : reprend un flag « holocron » (macros historiques) ou l'ancien command-deck
-  const own = j ? gp(j, `flags.${MOD}.ship`) : null;
-  const legacy = j ? (gp(j, "flags.holocron.ship") || gp(j, "flags.swffg-command-deck.ship")) : null;
+  // migration douce : reprend l'ancien flag module (≤1.2.x) ou l'ex command-deck
+  const own = j ? gp(j, `flags.${FLAG_SCOPE}.ship`) : null;
+  const legacy = j ? (gp(j, `flags.${MOD}.ship`) || gp(j, "flags.swffg-command-deck.ship")) : null;
   const s = clampShip(own || legacy || {});
   if (!s.name) s.name = game.settings.get(MOD, "shipJournal");
   // party-resources = pool live partagé : sa valeur courante prime sur le flag (bornée par les max du vaisseau)
@@ -97,7 +102,7 @@ export function readShip(j) {
 
 export async function writeShip(j, ship, logHTML = null) {
   const s = clampShip(ship);
-  await j.update({ [`flags.${MOD}.ship`]: s });
+  await j.update({ [`flags.${FLAG_SCOPE}.ship`]: s, [`flags.${MOD}.-=ship`]: null });
   // miroir du pool vers party-resources (si présent) — la barre de statut se rafraîchit d'elle-même
   prSet("vivres", s.vivres); prSet("fuel", s.fuel); prSet("usure", s.usure);
   // l'usure accumulée pilote la difficulté d'astrogation de l'astronav (>50 % : +1 ; >80 % : +2)
@@ -144,7 +149,7 @@ export async function codexJournal() {
 }
 
 export function readCodex(j) {
-  const own = j ? gp(j, `flags.${MOD}.codex`) : null;
+  const own = j ? (gp(j, `flags.${FLAG_SCOPE}.codex`) || gp(j, `flags.${MOD}.codex`)) : null;
   if (own) return { ...CODEX_DEFAULTS, ...own };
   // migration douce depuis les journaux « holocron » historiques
   const legacyCodex = gp(game.journal.getName("🖥️ Codex du groupe") || {}, "flags.holocron.codex");
@@ -158,7 +163,7 @@ export function readCodex(j) {
 }
 
 export async function writeCodex(j, codex) {
-  await j.update({ [`flags.${MOD}.codex`]: codex });
+  await j.update({ [`flags.${FLAG_SCOPE}.codex`]: codex, [`flags.${MOD}.-=codex`]: null });
   const pg = j.pages.contents[0];
   if (pg) {
     const SC = { allie: "🟢", mentor: "🟡", neutre: "⚪", ennemi: "🔴" };

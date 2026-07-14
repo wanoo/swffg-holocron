@@ -33,7 +33,7 @@ if "--zip" in sys.argv:
         # exclus du zip de release : outils de build (jamais expédiés), sources de packs
         # (packs/_src_*), et le LOCK LevelDB (transitoire). On GARDE packs/<name>/ (LevelDB).
         SKIP_TOP = ("dist", ".git", "build.py", "node_modules", "package.json",
-                    "package-lock.json", "build_pack.mjs", "build_macros.mjs")
+                    "package-lock.json", "build_pack.mjs")
         for p in ROOT.rglob("*"):
             rel = p.relative_to(ROOT)
             if rel.parts[0] in SKIP_TOP or rel.name in (".DS_Store", "LOCK"): continue

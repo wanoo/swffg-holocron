@@ -15,8 +15,8 @@
       { "id": "starwarsffg", "type": "system", "compatibility": {} }
     ],
     "requires": [
-      { "id": "swffg-astronavigation", "type": "module", "reason": "Calculateur d'astrogation, carte galactique, atlas MEJ des mondes et marqueur « vous êtes ici » du vaisseau.", "compatibility": { "minimum": "1.6.0" } },
-      { "id": "fvtt-party-resources", "type": "module", "reason": "Pool de ressources partagé du groupe (vivres, carburant, usure) alimenté par les voyages.", "manifest": "https://github.com/davelens/fvtt-party-resources/releases/latest/download/module.json", "compatibility": {} },
+      { "id": "swffg-astronavigation", "type": "module", "reason": "Calculateur d'astrogation, carte galactique, atlas MEJ des mondes et marqueur « vous êtes ici » du vaisseau.", "compatibility": { "minimum": "1.7.2" } },
+      { "id": "fvtt-party-resources", "type": "module", "reason": "Pool de ressources partagé du groupe (vivres, carburant, usure) alimenté par les voyages.", "manifest": "https://github.com/davelens/fvtt-party-resources/releases/latest/download/module.json", "compatibility": { "minimum": "1.8.0" } },
       { "id": "monks-enhanced-journal", "type": "module", "reason": "Fiches de mondes et système de favoris (marque-pages) utilisés comme mondes d'intérêt.", "compatibility": {} }
     ],
     "recommends": [
