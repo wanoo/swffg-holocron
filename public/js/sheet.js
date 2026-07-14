@@ -5,6 +5,7 @@ import { openGenerator } from './dice-roller.js';
 import { openCard } from './modal.js';
 import { foundryAsset, Data } from './data.js';
 import { getGMKey, gmGetBackrefs, gmGetDossiers } from './collab.js';
+import { addShowButton } from './show-image.js';
 
 const normSkillKey = (en) => (en || '').replace(/[^A-Za-z]/g, '');
 
@@ -70,10 +71,12 @@ function fallbackAvatar(name) {
   return d;
 }
 // Portrait en plein écran (clic sur l'avatar) — voir l'illustration entière.
+// En profil MJ : bouton « 📡 Montrer aux joueurs » (ImagePopout Foundry partagé).
 export function openImageFull(src, alt) {
   const ov = el('div', 'img-full');
   const im = el('img'); im.src = src; im.alt = alt || '';
   ov.appendChild(im);
+  addShowButton(ov, src, alt || '');
   ov.addEventListener('click', () => ov.remove());
   const onKey = (e) => { if (e.key === 'Escape') { ov.remove(); document.removeEventListener('keydown', onKey); } };
   document.addEventListener('keydown', onKey);

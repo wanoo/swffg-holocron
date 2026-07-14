@@ -1,0 +1,56 @@
+{
+  "_id": "PydqvvNCObfHZsU1",
+  "name": "10 BBY — Raid de Kessel",
+  "pages": [
+    {
+      "_id": "LLTBizmSIaH7wL3d",
+      "name": "Raid de Kessel",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "image": {},
+      "text": {
+        "format": 1,
+        "content": "<p>Le casse des mines d'épice de Kessel : premier exploit du <em>Faucon Millenium</em>, qui boucle le « Kessel Run » en moins de douze parsecs sous Lando puis Han Solo.</p>",
+        "markdown": ""
+      },
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "system": {},
+      "sort": 0,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {
+        "monks-enhanced-journal": {
+          "type": "event",
+          "role": "",
+          "location": "Kessel",
+          "attributes": {
+            "date": "10 BBY"
+          },
+          "relationships": {},
+          "items": {}
+        }
+      },
+      "_stats": {}
+    }
+  ],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "monks-enhanced-journal": {
+      "pagetype": "event"
+    }
+  },
+  "_stats": {},
+  "_key": "!journalentry!PydqvvNCObfHZsU1"
+}

@@ -171,6 +171,8 @@ async function handleApi(req, res, urlPath) {
     if (kind === 'manifest') return sendVersioned(req, res, content.manifest(), v.manifest);
     if (kind === 'journals') return sendVersioned(req, res, content.journalsView(session), v.journals * 13 + (session ? 1 : 0) + (isGM(session) ? 7 : 0));
     if (kind === 'pcs') return sendVersioned(req, res, content.pcsView(), v.pcs);
+    if (kind === 'vehicle') return sendVersioned(req, res, content.vehicleView(), v.vehicle);
+    if (kind === 'timeline') return sendVersioned(req, res, content.timelineView(session), v.timeline * 13 + (session ? 1 : 0) + (isGM(session) ? 7 : 0));
     if (kind === 'dice-helper') return sendVersioned(req, res, content.diceHelper(), v.diceHelper);
     if (kind === 'config') return sendVersioned(req, res, publicConfig(cc(), ENV.foundryBaseUrl), store.version('config'));
     if (kind === 'npcs') {
@@ -255,6 +257,25 @@ async function handleApi(req, res, urlPath) {
         if (q.get('debug') === '1' && gmOK(req, session)) return sendJSON(res, 200, await partyRes.debug());
         return sendJSON(res, 200, { resources: await partyRes.list() });
       } catch (e) { return sendJSON(res, 502, { error: String(e.message || e).slice(0, 200) }); }
+    }
+    // Page « notes du vaisseau » (config.journals.shipNotes) : servie depuis le store
+    // (sync ciblée en tâche de fond), éditée via PUT /api/docs/<jid>:<pid>.
+    if (parts[1] === 'ship-notes' && req.method === 'GET') {
+      const ref = String(cc().journals.shipNotes || '');
+      if (!ref) return sendJSON(res, 404, { error: 'journals.shipNotes non configuré (⚙️ Holocron Config)' });
+      const [jid, pid] = ref.split(':');
+      const doc = store.get(`journal:${jid}`);
+      if (!doc) { store.sync.journal(jid).catch(() => {}); return sendJSON(res, 200, { syncing: true }); }
+      if (!canSee(session, { ownership: doc.ownership })) return sendJSON(res, 403, { error: 'non autorisé' });
+      const page = pid ? (doc.pages || []).find((p) => p._id === pid) : (doc.pages || [])[0];
+      if (!page) return sendJSON(res, 404, { error: 'page introuvable' });
+      return sendJSON(res, 200, {
+        id: ref, name: page.name || doc.name,
+        html: page.text?.content || '',
+        updatedAt: doc.flags?.holocron?.rev?.updatedAt || 0,
+        updatedBy: doc.flags?.holocron?.rev?.updatedBy || '',
+        editable: canEdit(session, { ownership: doc.ownership }) || gmOK(req, session),
+      });
     }
     if (parts[1] === 'ship') {
       try {
@@ -371,6 +392,7 @@ async function handleApi(req, res, urlPath) {
         if (target === 'all' || target === 'core') jobs.push(() => store.sync.tick({ configJournalName: ENV.configJournalName }));
         if (target === 'all' || target === 'packs') {
           if (conf.packs.rules) jobs.push(() => store.sync.pack(conf.packs.rules, 'JournalEntry'));
+          if (conf.packs.events) jobs.push(() => store.sync.pack(conf.packs.events, 'JournalEntry'));
           if (conf.packs.adversaries) jobs.push(() => store.sync.pack(conf.packs.adversaries, 'Actor'));
         }
         // fire-and-forget séquencé — la réponse revient tout de suite
@@ -408,6 +430,11 @@ async function handleApi(req, res, urlPath) {
         if (action === 'handout' && req.method === 'POST') {
           const body = JSON.parse(await readBody(req));
           await tools.showHandout(body.id, body.name);
+          return sendJSON(res, 200, { ok: true });
+        }
+        if (action === 'show-image' && req.method === 'POST') {
+          const body = JSON.parse(await readBody(req, 5000));
+          await tools.showImage({ src: body.src, title: body.title });
           return sendJSON(res, 200, { ok: true });
         }
         if (action === 'playlists' && req.method === 'GET') return sendJSON(res, 200, { playlists: await tools.listPlaylists() });
@@ -478,5 +505,7 @@ if (mode !== 'none') {
   setTimeout(async () => {
     const conf = cc();
     try { if (conf.packs.rules) await store.sync.pack(conf.packs.rules, 'JournalEntry'); } catch (e) { console.error('[sync] rules:', e.message); }
+    // pack ÉVÉNEMENTS canon (petit, alimente la timeline) — même régime que les règles
+    try { if (conf.packs.events) await store.sync.pack(conf.packs.events, 'JournalEntry'); } catch (e) { console.error('[sync] events:', e.message); }
   }, 15_000).unref?.();
 }

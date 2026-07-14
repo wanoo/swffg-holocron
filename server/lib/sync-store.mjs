@@ -174,6 +174,14 @@ export function createStore({ dataDir, logger = console }) {
     return j || null;
   }
 
+  // Page de notes du vaisseau (config.journals.shipNotes = "<jid>:<pid>") : son
+  // journal peut vivre hors des dossiers synchronisés → pull ciblé à chaque tick.
+  async function syncShipNotes() {
+    const ref = String((get('config') || {}).journals?.shipNotes || '');
+    const jid = ref.split(':')[0];
+    if (jid) await syncJournal(jid);
+  }
+
   // Tous les acteurs MONDE (PJ + PNJ custom) — les vues filtrent par dossier.
   async function syncActors() {
     const actors = await mcpCall('get_actors', {});
@@ -204,6 +212,7 @@ export function createStore({ dataDir, logger = console }) {
       ['actors', () => syncActors()],           // PJ/PNJ tôt
       ['diceHelper', () => syncDiceHelper()],
       ['journals', () => syncJournalsFull()],   // 1 appel/dossier : cache journal + index (le plus long → en dernier)
+      ['shipNotes', () => syncShipNotes()],      // pull ciblé (journal possiblement hors allowlist)
     ];
     for (const [name, job] of jobs) {
       try { await job(); }

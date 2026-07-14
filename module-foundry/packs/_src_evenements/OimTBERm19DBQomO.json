@@ -1,0 +1,56 @@
+{
+  "_id": "OimTBERm19DBQomO",
+  "name": "5 BBY — Casse d'Aldhani — l'étincelle rebelle",
+  "pages": [
+    {
+      "_id": "t8BoVPeb0NCXDWGm",
+      "name": "Casse d'Aldhani — l'étincelle rebelle",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "image": {},
+      "text": {
+        "format": 1,
+        "content": "<p>Le vol de la paie impériale d'Aldhani révèle qu'on peut frapper l'Empire. Les cellules dispersées commencent à se coordonner ; la répression impériale se durcit.</p>",
+        "markdown": ""
+      },
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "system": {},
+      "sort": 0,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {
+        "monks-enhanced-journal": {
+          "type": "event",
+          "role": "",
+          "location": "Aldhani",
+          "attributes": {
+            "date": "5 BBY"
+          },
+          "relationships": {},
+          "items": {}
+        }
+      },
+      "_stats": {}
+    }
+  ],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "monks-enhanced-journal": {
+      "pagetype": "event"
+    }
+  },
+  "_stats": {},
+  "_key": "!journalentry!OimTBERm19DBQomO"
+}

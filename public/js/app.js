@@ -12,6 +12,8 @@ import { initGenerator, openGenerator } from './dice-roller.js';
 import { mountAstronav } from './astronav.js';
 import { mountSpendHelp } from './spendhelp.js';
 import { mountNaviComputer } from './navicomputer.js';
+import { mountShipView } from './ship-view.js';
+import { mountTimeline } from './timeline.js';
 import { mountSabacc, mountAteliers } from './games.js';
 import { mountEncounters } from './gm-encounters.js';
 import { openCard } from './modal.js';
@@ -106,9 +108,11 @@ function viewHome() {
   wrap.insertAdjacentHTML('beforeend', '<h2 class="section-title">Outils</h2>');
   const tg = document.createElement('div');
   tg.className = 'home-grid';
-  tg.innerHTML = `<a class="home-card" href="#/astronav"><div class="hc-count">🪐</div><div class="hc-title">Astronav</div><div class="hc-sub">Calculateur d'astrogation · 6 750 systèmes</div></a>`
+  tg.innerHTML = `<a class="home-card" href="#/vaisseau"><div class="hc-count">🚀</div><div class="hc-title">Vaisseau</div><div class="hc-sub">État, position, fiche technique & notes</div></a>`
+    + `<a class="home-card" href="#/astronav"><div class="hc-count">🪐</div><div class="hc-title">Astronav</div><div class="hc-sub">Calculateur d'astrogation · 6 750 systèmes</div></a>`
     + `<a class="home-card" href="#/sabacc"><div class="hc-count">🎴</div><div class="hc-title">Sabacc</div><div class="hc-sub">Règles — Spike de Corellia & Kessel</div></a>`
-    + `<a class="home-card" href="#/ateliers"><div class="hc-count">⚒️</div><div class="hc-title">Ateliers</div><div class="hc-sub">Fabrication — sabre laser, mods, potions</div></a>`;
+    + `<a class="home-card" href="#/ateliers"><div class="hc-count">⚒️</div><div class="hc-title">Ateliers</div><div class="hc-sub">Fabrication — sabre laser, mods, potions</div></a>`
+    + `<a class="home-card" href="#/timeline"><div class="hc-count">📅</div><div class="hc-title">Chronologie</div><div class="hc-sub">Frise galactique — canon & campagne (BBY/ABY)</div></a>`;
   wrap.appendChild(tg);
 
   // Bestiaire / PNJ — RÉSERVÉ AU MJ (stats/spoilers). Masqué côté joueur.
@@ -151,7 +155,7 @@ function pageHead(page, journalName) {
 // Carte d'identité Monk's Enhanced Journal : type de fiche, attributs,
 // rattachement et relations (liens vers les journaux visibles).
 const MEJ_TYPES = { person: '👤 Personnage', place: '🌍 Lieu', organization: '🏛️ Organisation', shop: '🏪 Boutique', quest: '🎯 Quête', poi: '📍 Point d\'intérêt', event: '📅 Événement', loot: '💰 Butin' };
-const MEJ_ATTR_LABELS = { race: 'Espèce', gender: 'Genre', life: 'Vie', faction: 'Faction', age: 'Âge', size: 'Taille', government: 'Gouvernement', inhabitants: 'Habitants', districts: 'Districts', alignment: 'Alignement', ancestry: 'Origine', profession: 'Profession', voice: 'Voix' };
+const MEJ_ATTR_LABELS = { race: 'Espèce', gender: 'Genre', life: 'Vie', faction: 'Faction', age: 'Âge', size: 'Taille', government: 'Gouvernement', inhabitants: 'Habitants', districts: 'Districts', alignment: 'Alignement', ancestry: 'Origine', profession: 'Profession', voice: 'Voix', date: 'Date', datefin: 'Fin' };
 const MEJ_ROLE_FR = { enemy: 'Ennemi', ennemi: 'Ennemi', ally: 'Allié', allié: 'Allié', allie: 'Allié', ami: 'Ami', amie: 'Amie', neutral: 'Neutre', neutre: 'Neutre', mentor: 'Mentor', maitre: 'Maître', 'maître': 'Maître', contact: 'Contact', friend: 'Ami', rival: 'Rival' };
 function mejCard(journal) {
   const m = journal.mej;
@@ -341,6 +345,8 @@ function route() {
   else if (a === 'astronav') { cleanupSpy(); cleanupSpy = () => {}; mountAstronav(content); }
   else if (a === 'aidejeu') { cleanupSpy(); cleanupSpy = () => {}; mountSpendHelp(content); }
   else if (a === 'navicomputer') { cleanupSpy(); cleanupSpy = () => {}; mountNaviComputer(content); }
+  else if (a === 'vaisseau') { cleanupSpy(); cleanupSpy = () => {}; mountShipView(content, cleanupEditors); }
+  else if (a === 'timeline') { cleanupSpy(); cleanupSpy = () => {}; mountTimeline(content); }
   else if (a === 'sabacc') { cleanupSpy(); cleanupSpy = () => {}; mountSabacc(content); }
   else if (a === 'ateliers') { cleanupSpy(); cleanupSpy = () => {}; mountAteliers(content); }
   else if (a === 'rencontres') { cleanupSpy(); cleanupSpy = () => {}; if (isGm) mountEncounters(content); else viewGmOnly(); }

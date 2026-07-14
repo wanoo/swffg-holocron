@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.4.0 — Événements canon (timeline) + envoi d'images aux joueurs
+
+- **Nouveau compendium « 📅 Événements canon »** : 20 dates clés de la galaxie
+  (232 BBY → 9 ABY) en fiches MEJ de type *event*, datées par l'attribut `date`
+  (format BBY/ABY). Elles alimentent la **frise chronologique** de l'Archive
+  Holocron (`#/timeline`, config `packs.events: "swffg-holocron.evenements"`),
+  mêlées aux événements de campagne du monde. Sources : `packs/_src_evenements/`
+  (régénérables via `node gen_events.mjs`, ids stables).
+- **Pont d'images web → joueurs** : le module écoute les ChatMessages flaggés
+  `holocron.showImage` postés par l'app web (bouton « 📡 Montrer aux joueurs » /
+  Pont Foundry) et ouvre un **ImagePopout partagé** chez tous les clients
+  (`shareImage`). Garde « MJ actif unique » anti-doublon, requête supprimée après
+  envoi, compatible Foundry v12 (global) et v13 (ApplicationV2).
+
 ## 1.3.0 — Compendiums embarqués + flag d'état unifié avec l'app web
 
 - **4 compendiums bundlés** (LevelDB, sources JSON dans `packs/_src_*`) : **📖 Règles &

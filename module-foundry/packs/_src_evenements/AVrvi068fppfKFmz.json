@@ -1,0 +1,56 @@
+{
+  "_id": "AVrvi068fppfKFmz",
+  "name": "32 BBY — Bataille de Naboo",
+  "pages": [
+    {
+      "_id": "6iwLca4LjzKJZTfY",
+      "name": "Bataille de Naboo",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "image": {},
+      "text": {
+        "format": 1,
+        "content": "<p>La Fédération du Commerce envahit Naboo. La reine Amidala reprend Theed avec l'aide des Gungans ; Qui-Gon Jinn tombe face à Dark Maul. Palpatine devient Chancelier Suprême.</p>",
+        "markdown": ""
+      },
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "system": {},
+      "sort": 0,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {
+        "monks-enhanced-journal": {
+          "type": "event",
+          "role": "",
+          "location": "Naboo",
+          "attributes": {
+            "date": "32 BBY"
+          },
+          "relationships": {},
+          "items": {}
+        }
+      },
+      "_stats": {}
+    }
+  ],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "monks-enhanced-journal": {
+      "pagetype": "event"
+    }
+  },
+  "_stats": {},
+  "_key": "!journalentry!AVrvi068fppfKFmz"
+}

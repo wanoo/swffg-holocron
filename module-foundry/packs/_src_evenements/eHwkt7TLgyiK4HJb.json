@@ -1,0 +1,56 @@
+{
+  "_id": "eHwkt7TLgyiK4HJb",
+  "name": "4 BBY — Les Spectres rejoignent la rébellion",
+  "pages": [
+    {
+      "_id": "HPMvZaZNnIL8ffEz",
+      "name": "Les Spectres rejoignent la rébellion",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "image": {},
+      "text": {
+        "format": 1,
+        "content": "<p>L'équipage du <em>Ghost</em>, qui harcelait l'Empire depuis Lothal, intègre le réseau rebelle naissant coordonné par Fulcrum.</p>",
+        "markdown": ""
+      },
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "system": {},
+      "sort": 0,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {
+        "monks-enhanced-journal": {
+          "type": "event",
+          "role": "",
+          "location": "Lothal",
+          "attributes": {
+            "date": "4 BBY"
+          },
+          "relationships": {},
+          "items": {}
+        }
+      },
+      "_stats": {}
+    }
+  ],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "monks-enhanced-journal": {
+      "pagetype": "event"
+    }
+  },
+  "_stats": {},
+  "_key": "!journalentry!eHwkt7TLgyiK4HJb"
+}

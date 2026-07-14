@@ -91,6 +91,23 @@ Hooks.on("ffgDiceMessage", async (roll) => {
   } catch (e) { console.warn("swffg-holocron | application du voyage", e); }
 });
 
+/* Pont web → joueurs : l'app Holocron poste un ChatMessage flaggé holocron.showImage
+   (POST /api/gm/foundry/show-image). Le MJ « actif » ouvre un ImagePopout PARTAGÉ à
+   tous les clients (shareImage) puis supprime la requête — même pont que les jets. */
+Hooks.on("createChatMessage", async (msg) => {
+  const req = msg.flags?.holocron?.showImage;
+  if (!req?.src || !isTripApplier()) return;
+  try {
+    const IPv13 = foundry.applications?.apps?.ImagePopout;             // v13 : ApplicationV2 ({src,…})
+    const popout = IPv13
+      ? new IPv13({ src: req.src, window: { title: req.title || "Holocron" }, shareable: true })
+      : new ImagePopout(req.src, { title: req.title || "Holocron", shareable: true }); // v12 : (src, options)
+    await popout.render(true);
+    await popout.shareImage();
+  } catch (e) { console.warn("swffg-holocron | show-image", e); }
+  finally { await msg.delete().catch(() => {}); }
+});
+
 /* Au chargement : setup auto des ressources party-resources + cale le POI « vous êtes ici ». */
 Hooks.once("ready", async () => {
   // Setup/install automatique du pool du groupe : sur TOUT client MJ (idempotent).

@@ -243,9 +243,13 @@ a.skill-name:hover { color: var(--holo); text-decoration: underline; }
   padding: 4px 2px;
 }
 .talent-tree {
+  /* Les gaps pilotent aussi les offsets des connecteurs (.conn-top/.conn-right) : ne
+     les changer que via ces variables, jamais indépendamment. */
+  --tree-gap-y: 30px;
+  --tree-gap-x: 26px;
   display: grid;
   grid-template-columns: auto repeat(4, minmax(110px, 1fr));
-  gap: 30px 26px;
+  gap: var(--tree-gap-y) var(--tree-gap-x);
   align-items: stretch;
   min-width: 520px;
 }
@@ -260,9 +264,10 @@ a.skill-name:hover { color: var(--holo); text-decoration: underline; }
 }
 
 .upgrade-tree {
+  --tree-gap-y: 30px;
   display: flex;
   flex-wrap: wrap;
-  gap: 30px 0;
+  gap: var(--tree-gap-y) 0;
 }
 .upgrade-tree .tree-cell { margin: 0 1%; }
 .tree-cell.size-single { flex: 0 0 21%; }
@@ -334,9 +339,44 @@ a.skill-name:hover { color: var(--holo); text-decoration: underline; }
 /* Connecteurs de l'arbre (barres façon Foundry) */
 .conn { position: absolute; background: var(--fg-dim); z-index: 0; border-radius: 2px; }
 .tree-cell.learned .conn { background: var(--gold); }
-.conn-top { top: -30px; transform: translateX(-50%); width: 4px; height: 30px; }
-.conn-right { right: -26px; top: 50%; transform: translateY(-50%); height: 4px; width: 26px; }
+.conn-top { top: calc(-1 * var(--tree-gap-y, 30px)); transform: translateX(-50%); width: 4px; height: var(--tree-gap-y, 30px); }
+.conn-right { right: calc(-1 * var(--tree-gap-x, 26px)); top: 50%; transform: translateY(-50%); height: 4px; width: var(--tree-gap-x, 26px); }
 .upgrade-tree .conn-right { right: -1%; width: 2%; }
+
+/* Mobile portrait : arbre compacté (cases lisibles) + léger scroll horizontal signalé.
+   Compacter jusqu'à tenir dans ~360px donnerait ~67px/colonne (noms illisibles) ;
+   à 88px/colonne il ne reste que ~80-90px de défilement. */
+@media (max-width: 620px) {
+  .talent-tree {
+    --tree-gap-y: 18px;
+    --tree-gap-x: 12px;
+    grid-template-columns: auto repeat(4, minmax(88px, 1fr));
+    min-width: 430px;
+  }
+  .upgrade-tree { --tree-gap-y: 18px; min-width: 430px; }
+  .tier-cost { font-size: 0.62rem; }
+  .tree-cell, .tree-cell.empty { padding: 0.35rem 0.4rem; min-height: 48px; gap: 0.25rem; }
+  .tree-cell .tree-name { font-size: 0.72rem; line-height: 1.15; }
+  .tree-cell .tree-rank, .tree-cell .tree-cost { font-size: 0.6rem; }
+  .conn-top { width: 3px; }
+  .conn-right { height: 3px; }
+}
+/* Sous ~480px l'arbre déborde forcément : fondu de bord droit + indice de défilement. */
+@media (max-width: 480px) {
+  .tree-scroll {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+            mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+  }
+  .spec-tree::after, .force-tree::after {
+    content: "↔ faire défiler l'arbre";
+    display: block;
+    text-align: right;
+    font-size: 0.62rem;
+    color: var(--fg-muted);
+    opacity: 0.7;
+    margin-top: 2px;
+  }
+}
 
 /* --- Générateur de dés --- */
 .dg-seed { color: var(--fg-muted); margin-bottom: 0.8rem; }

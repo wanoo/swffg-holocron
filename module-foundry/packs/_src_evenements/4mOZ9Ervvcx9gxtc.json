@@ -1,0 +1,56 @@
+{
+  "_id": "4mOZ9Ervvcx9gxtc",
+  "name": "13 BBY — Han Solo quitte Corellia",
+  "pages": [
+    {
+      "_id": "MAEKMmuQriaMIgzn",
+      "name": "Han Solo quitte Corellia",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "image": {},
+      "text": {
+        "format": 1,
+        "content": "<p>Le jeune Han fuit les gangs de Corellia et s'engage dans la Marine impériale — début d'un parcours qui fera de lui le contrebandier le plus connu de la Bordure.</p>",
+        "markdown": ""
+      },
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "system": {},
+      "sort": 0,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {
+        "monks-enhanced-journal": {
+          "type": "event",
+          "role": "",
+          "location": "Corellia",
+          "attributes": {
+            "date": "13 BBY"
+          },
+          "relationships": {},
+          "items": {}
+        }
+      },
+      "_stats": {}
+    }
+  ],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "monks-enhanced-journal": {
+      "pagetype": "event"
+    }
+  },
+  "_stats": {},
+  "_key": "!journalentry!4mOZ9Ervvcx9gxtc"
+}

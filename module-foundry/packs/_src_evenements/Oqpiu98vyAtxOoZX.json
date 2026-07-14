@@ -1,0 +1,56 @@
+{
+  "_id": "Oqpiu98vyAtxOoZX",
+  "name": "41 BBY — Naissance d'Anakin Skywalker",
+  "pages": [
+    {
+      "_id": "1tkKJNVTDdGoTrQS",
+      "name": "Naissance d'Anakin Skywalker",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "image": {},
+      "text": {
+        "format": 1,
+        "content": "<p>Naissance d'Anakin Skywalker, esclave sur Tatooine — l'« Élu » de la prophétie Jedi, futur Dark Vador.</p>",
+        "markdown": ""
+      },
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "system": {},
+      "sort": 0,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {
+        "monks-enhanced-journal": {
+          "type": "event",
+          "role": "",
+          "location": "Tatooine",
+          "attributes": {
+            "date": "41 BBY"
+          },
+          "relationships": {},
+          "items": {}
+        }
+      },
+      "_stats": {}
+    }
+  ],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "monks-enhanced-journal": {
+      "pagetype": "event"
+    }
+  },
+  "_stats": {},
+  "_key": "!journalentry!Oqpiu98vyAtxOoZX"
+}

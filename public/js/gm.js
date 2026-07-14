@@ -13,6 +13,7 @@ import { mountNotes, openNotes } from './notes.js';
 import { openLoginModal } from './login.js';
 import { openScreen } from './gm-screen.js';
 import { renderGmHome } from './gm-home.js';
+import { addShowButton } from './show-image.js';
 import { initSession, isSessionOn, toggleSession, teardownSession, refreshSessionBar, injectPins } from './gm-session.js';
 
 const gmApi = { getDoc: gmGet, saveDoc: gmSave };
@@ -119,7 +120,7 @@ function rewriteAssets(root) {
 // --- Lightbox « montrer aux joueurs » : une image MJ en plein écran, sans
 // chrome ni spoiler autour — idéal pour partager l'écran / retourner l'iPad.
 let lightbox = null;
-function openLightbox(src, alt) {
+function openLightbox(src, alt, foundryPath = '') {
   if (!lightbox) {
     lightbox = document.createElement('div');
     lightbox.className = 'gm-lightbox';
@@ -131,12 +132,14 @@ function openLightbox(src, alt) {
   const im = lightbox.querySelector('img');
   im.src = src;
   im.alt = alt || '';
+  // envoi Foundry : on passe le chemin worlds/… d'origine (jamais l'URL proxy MJ)
+  addShowButton(lightbox, foundryPath || src, alt || '');
   lightbox.hidden = false;
 }
 function attachLightbox(main) {
   main.addEventListener('click', (e) => {
     const img = e.target.closest('img[data-gm-asset][data-loaded]');
-    if (img) openLightbox(img.src, img.alt);
+    if (img) openLightbox(img.src, img.alt, img.dataset.gmAsset);
   });
 }
 

@@ -1,0 +1,56 @@
+{
+  "_id": "VXgWxLOqAbQnEBCE",
+  "name": "3 ABY — Bataille de Hoth",
+  "pages": [
+    {
+      "_id": "BBA0o2Mq13YGNZ8x",
+      "name": "Bataille de Hoth",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "image": {},
+      "text": {
+        "format": 1,
+        "content": "<p>L'Empire écrase la base Echo sur Hoth ; l'Alliance se disperse. À Bespin, Vador révèle à Luke qu'il est son père.</p>",
+        "markdown": ""
+      },
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "system": {},
+      "sort": 0,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {
+        "monks-enhanced-journal": {
+          "type": "event",
+          "role": "",
+          "location": "Hoth / Bespin",
+          "attributes": {
+            "date": "3 ABY"
+          },
+          "relationships": {},
+          "items": {}
+        }
+      },
+      "_stats": {}
+    }
+  ],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "monks-enhanced-journal": {
+      "pagetype": "event"
+    }
+  },
+  "_stats": {},
+  "_key": "!journalentry!VXgWxLOqAbQnEBCE"
+}

@@ -1,0 +1,56 @@
+{
+  "_id": "nok3iprUoqmhVZ6l",
+  "name": "9 BBY — Obi-Wan sort de l'ombre",
+  "pages": [
+    {
+      "_id": "SBgrfXTCk0ibiDfN",
+      "name": "Obi-Wan sort de l'ombre",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "image": {},
+      "text": {
+        "format": 1,
+        "content": "<p>Traqué par l'Inquisitorius, Obi-Wan Kenobi quitte son exil pour sauver la jeune Leia Organa et affronte de nouveau Dark Vador.</p>",
+        "markdown": ""
+      },
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "system": {},
+      "sort": 0,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {
+        "monks-enhanced-journal": {
+          "type": "event",
+          "role": "",
+          "location": "Tatooine / Jabiim",
+          "attributes": {
+            "date": "9 BBY"
+          },
+          "relationships": {},
+          "items": {}
+        }
+      },
+      "_stats": {}
+    }
+  ],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "monks-enhanced-journal": {
+      "pagetype": "event"
+    }
+  },
+  "_stats": {},
+  "_key": "!journalentry!nok3iprUoqmhVZ6l"
+}

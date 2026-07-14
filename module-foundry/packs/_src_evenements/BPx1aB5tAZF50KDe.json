@@ -1,0 +1,56 @@
+{
+  "_id": "BPx1aB5tAZF50KDe",
+  "name": "24 BBY — Discours de Raxus — la crise séparatiste",
+  "pages": [
+    {
+      "_id": "jXNHviEhdvXgpdOK",
+      "name": "Discours de Raxus — la crise séparatiste",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "image": {},
+      "text": {
+        "format": 1,
+        "content": "<p>Le comte Dooku proclame la Confédération des Systèmes Indépendants : des milliers de systèmes font sécession. La République vacille, le réarmement commence.</p>",
+        "markdown": ""
+      },
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "system": {},
+      "sort": 0,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {
+        "monks-enhanced-journal": {
+          "type": "event",
+          "role": "",
+          "location": "Raxus",
+          "attributes": {
+            "date": "24 BBY"
+          },
+          "relationships": {},
+          "items": {}
+        }
+      },
+      "_stats": {}
+    }
+  ],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "monks-enhanced-journal": {
+      "pagetype": "event"
+    }
+  },
+  "_stats": {},
+  "_key": "!journalentry!BPx1aB5tAZF50KDe"
+}

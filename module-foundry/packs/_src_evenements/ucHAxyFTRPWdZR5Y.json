@@ -1,0 +1,56 @@
+{
+  "_id": "ucHAxyFTRPWdZR5Y",
+  "name": "0 BBY — Scarif & Yavin — l'Étoile Noire détruite",
+  "pages": [
+    {
+      "_id": "ZbAy29Eo0Y3JMNL2",
+      "name": "Scarif & Yavin — l'Étoile Noire détruite",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "image": {},
+      "text": {
+        "format": 1,
+        "content": "<p>Les rebelles de Rogue One volent les plans de l'Étoile Noire à Scarif. Quelques jours plus tard, Luke Skywalker détruit la station lors de la bataille de Yavin — l'an 0 du calendrier galactique.</p>",
+        "markdown": ""
+      },
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "system": {},
+      "sort": 0,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {
+        "monks-enhanced-journal": {
+          "type": "event",
+          "role": "",
+          "location": "Scarif / Yavin",
+          "attributes": {
+            "date": "0 BBY"
+          },
+          "relationships": {},
+          "items": {}
+        }
+      },
+      "_stats": {}
+    }
+  ],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "monks-enhanced-journal": {
+      "pagetype": "event"
+    }
+  },
+  "_stats": {},
+  "_key": "!journalentry!ucHAxyFTRPWdZR5Y"
+}

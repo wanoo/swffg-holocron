@@ -11,6 +11,7 @@ const KIND_COLOR = {
   pc: '#8ad17a',
   org: '#c99bff',
   notes: '#ff9e6b',
+  timeline: '#e8c26a',
   misc: '#8b9bc0',
   players: '#d9b45b',
   bestiary: '#e5544b',
@@ -102,7 +103,7 @@ export function mountSidebar() {
 
   // Ordre : Règles → PJ → puis les catégories de la config (notes, actes, PNJ,
   // orgs…) dans l'ordre des kinds — plus aucun id de campagne en dur.
-  const KIND_ORDER = ['rules', 'notes', 'story', 'pc', 'org', 'misc'];
+  const KIND_ORDER = ['rules', 'notes', 'story', 'timeline', 'pc', 'org', 'misc'];
   const cats = [...Data.categories].sort((a, b) => {
     const ka = KIND_ORDER.indexOf(a.kind), kb = KIND_ORDER.indexOf(b.kind);
     return (ka < 0 ? 99 : ka) - (kb < 0 ? 99 : kb);
@@ -134,8 +135,10 @@ export function mountSidebar() {
   // Outils transverses (toujours visibles) — calculateur d'astrogation.
   const tools = [
     { href: '#/navicomputer', label: '🖥️ Navi-Computer' },
+    { href: '#/vaisseau', label: '🚀 Vaisseau' },
     { href: '#/astronav', label: '🪐 Astronav' },
     { href: '#/aidejeu', label: '🎲 Symboles & dépenses' },
+    { href: '#/timeline', label: '📅 Chronologie' },
     { href: '#/sabacc', label: '🎴 Sabacc' },
     { href: '#/ateliers', label: '⚒️ Ateliers' },
   ];

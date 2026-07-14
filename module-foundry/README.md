@@ -66,6 +66,10 @@ le journal du vaisseau prend le relais (dégradation gracieuse).
 - **🎲 Macros MJ** — voir §5.
 - **🧪 Échantillon de test** — deux fiches MEJ d'exemple (une *organisation*, un *contact*)
   pour vérifier l'installation d'un coup d'œil.
+- **📅 Événements canon** — 20 dates clés de la galaxie (232 BBY → 9 ABY) en fiches MEJ
+  *event* datées en BBY/ABY (attribut `date`). Alimente la frise chronologique de
+  l'Archive Holocron (`packs.events` dans ⚙️ Holocron Config) ; importables dans le
+  monde comme modèles pour vos propres événements de campagne.
 
 ---
 

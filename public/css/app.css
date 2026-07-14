@@ -1635,3 +1635,51 @@ body.gm-session .gm-doc h2, body.gm-session .gm-doc h3, body.gm-session .gm-doc 
 .enc-btn.danger { border-color: var(--danger); color: var(--danger); }
 .enc-track { border-top: 1px solid var(--line); padding-top: 0.7rem; }
 .an-map { border: 1px solid #57c7ff; color: #57c7ff; background: transparent; border-radius: 999px; padding: 0.4rem 0.8rem; cursor: pointer; font-weight: 700; }
+
+/* --- 📡 Montrer aux joueurs (bouton d'overlay image, profil MJ) --------------- */
+.show-players-btn {
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  z-index: 6; border: 1px solid var(--gold); color: var(--gold);
+  background: rgba(8,12,18,0.88); border-radius: 999px; padding: 0.45rem 1rem;
+  font: 700 0.85rem var(--font-body, inherit); cursor: pointer; white-space: nowrap;
+}
+.show-players-btn:hover:not(:disabled) { background: var(--gold); color: #0c1018; }
+
+/* --- Chronologie (#/timeline) ----------------------------------------------- */
+.tl-wrap { max-width: 46rem; }
+.tl-filters { display: flex; gap: 1rem; margin: 0 0 0.8rem; }
+.tl-filters label { display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer; color: var(--fg-muted); font-size: 0.85rem; }
+.tl-pill { border-radius: 999px; padding: 0.1rem 0.55rem; font-size: 0.72rem; font-weight: 700; border: 1px solid; }
+.tl-pill.tl-canon, .tl-item.tl-canon .tl-src { color: #e8c26a; border-color: #e8c26a; }
+.tl-pill.tl-campagne, .tl-item.tl-campagne .tl-src { color: #57c7ff; border-color: #57c7ff; }
+.tl-line { list-style: none; margin: 0; padding: 0 0 0 1.2rem; position: relative; }
+.tl-line::before { content: ''; position: absolute; left: 5px; top: 6px; bottom: 6px; width: 2px; background: linear-gradient(180deg, #2b5b73, rgba(43,91,115,0.25)); border-radius: 2px; }
+.tl-item { position: relative; margin: 0 0 0.7rem; }
+.tl-dot { position: absolute; left: -1.2rem; top: 0.95rem; width: 12px; height: 12px; border-radius: 50%; background: #0a1520; border: 2px solid #2b5b73; box-shadow: 0 0 8px rgba(90,190,255,0.35); }
+.tl-item.tl-canon .tl-dot { border-color: #e8c26a; }
+.tl-item.tl-campagne .tl-dot { border-color: #57c7ff; }
+.tl-card { display: block; width: 100%; text-align: left; cursor: pointer; border: 1px solid var(--line); border-radius: 10px; background: linear-gradient(180deg, rgba(18,38,54,0.4), rgba(8,16,24,0.4)); padding: 0.55rem 0.75rem; color: var(--fg); font: inherit; }
+.tl-card:hover { border-color: var(--holo); }
+.tl-date { font-weight: 800; color: var(--gold); font-size: 0.85rem; margin-right: 0.5rem; }
+.tl-src { font-size: 0.62rem; font-weight: 700; border: 1px solid; border-radius: 999px; padding: 0.05rem 0.45rem; vertical-align: 2px; }
+.tl-name { display: block; margin: 0.15rem 0 0; font-size: 0.98rem; }
+.tl-loc { display: block; color: var(--fg-muted); margin-top: 0.15rem; }
+.tl-excerpt { display: block; color: var(--fg-dim); margin-top: 0.25rem; line-height: 1.35; }
+.tl-undated::before { background: rgba(139,155,192,0.3); }
+
+/* --- Vue Vaisseau (#/vaisseau) --------------------------------------------- */
+.shipv { display: flex; flex-direction: column; gap: 1rem; }
+.shipv-head { display: flex; align-items: center; gap: 1rem; }
+.shipv-img { width: 84px; height: 84px; border-radius: 12px; flex: 0 0 auto; background: #0a1520 center/cover no-repeat; border: 1px solid #2b5b73; box-shadow: 0 0 16px rgba(90,190,255,0.2); }
+.shipv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: stretch; }
+@media (max-width: 760px) { .shipv-grid { grid-template-columns: 1fr; } }
+.shipv-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.6rem; }
+.shipv-btn { border: 1px solid #2b5b73; color: #9fd8ff; background: transparent; border-radius: 999px; padding: 0.35rem 0.75rem; cursor: pointer; font-weight: 700; }
+.shipv-btn:hover:not(:disabled) { border-color: #57c7ff; color: #eaf6ff; }
+.shipv-from { display: block; margin-top: 0.3rem; }
+.shipv-stats { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.4rem; }
+.shipv-stat { border: 1px solid var(--line); border-radius: 8px; padding: 0.3rem 0.6rem; display: flex; flex-direction: column; min-width: 90px; }
+.shipv-stat small { color: var(--fg-muted); font-size: 0.66rem; }
+.shipv-stat b { color: var(--gold); font-size: 0.95rem; }
+.shipv-attach { margin: 0.4rem 0 0; padding-left: 1.1rem; }
+.shipv-attach li { margin: 0.15rem 0; }

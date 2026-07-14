@@ -29,12 +29,13 @@ export const CAMPAIGN_DEFAULTS = {
   gmBibleFolder: '',
   pcFolder: '👥 Personnages joueurs',
   npcsWorldFolder: '',
-  packs: { adversaries: '', npcsExtra: null, rules: '', rulesNamePrefix: '^\\d+\\s*·\\s*', translations: [] },
+  packs: { adversaries: '', npcsExtra: null, rules: '', rulesNamePrefix: '^\\d+\\s*·\\s*', translations: [], events: '' },
   journals: {
     ship: '🚀 Vaisseau du groupe', codex: '🖥️ Codex du groupe',
     holonet: '📡 HoloNet — Actualités',
     gmNotes: '🗒️ Notes MJ (Holocron)', encounters: '⚔️ Bibliothèque de rencontres',
     dossiers: '🗂️ Dossiers MJ (Holocron)',
+    shipNotes: '', // page « notes du vaisseau » : "<journalId>:<pageId>" (vue #/vaisseau)
   },
   registry: [],
   advLinks: { externalUrl: '', map: [] },

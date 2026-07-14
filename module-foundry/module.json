@@ -2,7 +2,7 @@
   "id": "swffg-holocron",
   "title": "SWFFG Holocron — Poste de commande de campagne",
   "description": "Le poste de commande de votre campagne Star Wars FFG : vaisseau partagé du groupe (vivres, carburant, usure — voyages appliqués depuis l'Astronav), tableau de bord holographique (allégeance, équipage, alignement des PNJ, HoloNet, mondes d'intérêt) et boîte à outils MJ (test de Peur, points de Destin, dégâts de groupe, blessures critiques, fin de rencontre, initiative, générateur de boutiques). Your Star Wars FFG campaign command deck: shared party ship, holographic dashboard and GM toolbox.",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "authors": [
     { "name": "wanoo" }
   ],
@@ -35,7 +35,8 @@
     { "name": "regles", "label": "📖 Règles & Références (FR)", "path": "packs/regles", "type": "JournalEntry", "system": "starwarsffg", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
     { "name": "macros", "label": "🎲 Macros — Holocron", "path": "packs/macros", "type": "Macro", "system": "starwarsffg", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
     { "name": "structure", "label": "⚙️ Structure & Config", "path": "packs/structure", "type": "JournalEntry", "system": "starwarsffg", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
-    { "name": "sample", "label": "🧪 Échantillon de test", "path": "packs/sample", "type": "JournalEntry", "system": "starwarsffg", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } }
+    { "name": "sample", "label": "🧪 Échantillon de test", "path": "packs/sample", "type": "JournalEntry", "system": "starwarsffg", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
+    { "name": "evenements", "label": "📅 Événements canon", "path": "packs/evenements", "type": "JournalEntry", "system": "starwarsffg", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } }
   ],
   "url": "https://github.com/wanoo/swffg-holocron",
   "manifest": "https://github.com/wanoo/swffg-holocron/releases/latest/download/module.json",

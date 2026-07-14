@@ -99,6 +99,25 @@ export async function showHandout(id, name) {
   }] });
 }
 
+// « 📡 Montrer une image » aux joueurs : message-requête flaggé (même pont que les
+// jets) — le module Foundry (MJ actif) ouvre un ImagePopout PARTAGÉ à tous les
+// clients puis supprime la requête. src = URL http(s) OU chemin Foundry (worlds/…).
+// Jamais d'URL /api/… de l'Holocron : les clients Foundry ne la connaissent pas,
+// et une clé MJ en query fuiterait dans le chat.
+export async function showImage({ src, title = '' }) {
+  const s = String(src || '').trim().slice(0, 600);
+  const ok = /^https?:\/\/\S+$/i.test(s)
+    || (!s.includes('..') && /^(worlds|icons|modules|systems|assets)\//.test(s) && /\.(png|jpe?g|webp|gif|svg|avif)(\?.*)?$/i.test(s));
+  if (!ok) throw new Error("src d'image invalide (URL http(s) ou chemin Foundry worlds/…)");
+  const author = await mcpAuthorId();
+  await mcpCall('create_document', { type: 'ChatMessage', data: [{
+    author,
+    whisper: [author],
+    content: '<p style="opacity:.55;font-size:.85em">📡 Image → joueurs</p>',
+    flags: { holocron: { showImage: { src: s, title: String(title || '').slice(0, 120) } } },
+  }] });
+}
+
 export async function listPlaylists() {
   const list = await mcpCall('get_playlists', { requested_fields: ['_id', 'name', 'playing'] });
   return (Array.isArray(list) ? list : []).map((p) => ({ id: p._id, name: p.name, playing: !!p.playing }));

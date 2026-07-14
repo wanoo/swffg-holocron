@@ -1,12 +1,12 @@
 // content.mjs — vues de contenu servies depuis le SyncStore (jamais de MCP dans
 // le chemin de requête). Formes = celles des anciens JSON statiques du front.
-import { transformCharacter, transformAdversary } from './transform/actors.mjs';
-import { buildJournalsView } from './transform/journals.mjs';
+import { transformCharacter, transformAdversary, transformVehicle } from './transform/actors.mjs';
+import { buildJournalsView, buildTimelineView } from './transform/journals.mjs';
 import { canSee, isGM } from './auth.mjs';
 
 // Version de SCHÉMA : à incrémenter dès que la FORME des vues change (transform), pour
 // invalider les ETag/caches clients même si les données Foundry n'ont pas bougé.
-const SCHEMA_VERSION = 6;
+const SCHEMA_VERSION = 7;
 
 export function createContentService({ store, config }) {
   const actorFolderId = (name) => {
@@ -38,7 +38,19 @@ export function createContentService({ store, config }) {
     const cc = config();
     const fid = actorFolderId(cc.pcFolder);
     const actors = store.get('actors') || [];
-    return fid ? actors.filter((a) => a.folder === fid) : actors.filter((a) => a.type === 'character');
+    // le vaisseau du groupe vit dans le dossier PJ mais a sa propre vue (vehicle)
+    const list = fid ? actors.filter((a) => a.folder === fid) : actors.filter((a) => a.type === 'character');
+    return list.filter((a) => a.type !== 'vehicle');
+  }
+
+  // Le vaisseau du groupe : premier actor « vehicle » du dossier PJ (repli : du monde).
+  function vehicleView() {
+    const cc = config();
+    const fid = actorFolderId(cc.pcFolder);
+    const actors = store.get('actors') || [];
+    const v = actors.find((a) => a.type === 'vehicle' && (!fid || a.folder === fid))
+      || actors.find((a) => a.type === 'vehicle');
+    return v ? transformVehicle(v) : null;
   }
 
   function journalsView(session) {
@@ -56,6 +68,21 @@ export function createContentService({ store, config }) {
   }
 
   const pcsView = () => pcsRaw().map(transformCharacter);
+
+  // Frise chronologique : événements MEJ canon (pack du module) + campagne (dossiers
+  // de catégories kind « timeline »), datés en BBY/ABY (attribut `date`).
+  function timelineView(session) {
+    const cc = config();
+    return buildTimelineView({
+      config: cc,
+      folders: store.get('folders'),
+      journalsIndex: store.get('journalsIndex'),
+      getJournal: (id) => store.get(`journal:${id}`),
+      eventsPack: cc.packs.events ? store.get(`pack:${cc.packs.events}`) : null,
+      visibleFilter: (entry) => canSee(session, entry),
+      gm: isGM(session),
+    });
+  }
 
   // Aide de dépense FFG (avantages/menaces/triomphes/désespoirs/succès par
   // compétence) : collection dédiée « diceHelper » du SyncStore (journal Foundry
@@ -85,11 +112,13 @@ export function createContentService({ store, config }) {
       manifest: S + store.version('config') * 31 + store.version('actors') + store.version('journalsIndex') + store.version(`pack:${cc.packs.adversaries}`),
       journals: S + store.version('journalsIndex') * 31 + store.version('folders') + store.version('config'),
       pcs: S + store.version('actors') * 31 + store.version('folders'),
+      vehicle: S + store.version('actors') * 31 + store.version('folders') + 3,
       npcs: S + store.version('actors') * 31 + store.version('folders') + 7,
       adversaries: S + store.version(`pack:${cc.packs.adversaries}`),
+      timeline: S + store.version('journalsIndex') * 31 + store.version(`pack:${cc.packs.events}`) * 7 + store.version('folders') + store.version('config'),
       diceHelper: S + diceHelperVersion(),
     };
   }
 
-  return { manifest, journalsView, pcsView, npcsView, adversariesView, diceHelper, versions };
+  return { manifest, journalsView, pcsView, vehicleView, npcsView, adversariesView, timelineView, diceHelper, versions };
 }

@@ -32,7 +32,7 @@ async function fetchDash() {
 
 // Fiche planète (image + région) depuis planets.json (mis en cache, partagé avec l'Astronav).
 let PLANETS = null;
-async function planetInfo(name) {
+export async function planetInfo(name) {
   if (!name) return null;
   if (!PLANETS) {
     try {
@@ -45,7 +45,7 @@ async function planetInfo(name) {
   return PLANETS[name] || null;
 }
 
-function bar(label, icon, val, max, color, opts = {}) {
+export function bar(label, icon, val, max, color, opts = {}) {
   const pct = Math.max(0, Math.min(100, (val / (max || 1)) * 100));
   const txt = opts.pctOnly ? `${Math.round(val)}%` : `${val} / ${max}`;
   return `<div class="nc-stat">

@@ -59,6 +59,65 @@ export function mejView(doc, gm) {
   return out.type || Object.keys(out).length > 1 ? out : null;
 }
 
+// --- Timeline : dates galactiques BBY/ABY -------------------------------------
+// « 19 BBY » → -19, « 4 ABY » → 4, « 0 » / « 0 BBY/ABY » → 0 ; décimales acceptées.
+// null si illisible : l'événement part en fin de frise (section « non datés »).
+export function parseDateBBY(s) {
+  const t = String(s == null ? '' : s).trim().toUpperCase().replace(',', '.');
+  if (!t) return null;
+  const m = /^(-?\d+(?:\.\d+)?)\s*(BBY|ABY)?/.exec(t);
+  if (!m) return null;
+  const n = Number(m[1]);
+  if (!Number.isFinite(n)) return null;
+  const era = m[2] || (t.includes('BBY') ? 'BBY' : t.includes('ABY') ? 'ABY' : '');
+  return era === 'BBY' ? -n : n;
+}
+
+// Timeline de campagne : fiches MEJ « event » dont l'attribut `date` est en BBY/ABY.
+// Canon = pack du module (packs.events) ; Campagne = journaux des catégories
+// kind === 'timeline'. Tri chronologique croissant, non-datés en fin de frise.
+// Les événements canon embarquent leur HTML (affichés en modale, pas navigables).
+export function buildTimelineView({ config, folders, journalsIndex, getJournal, eventsPack, visibleFilter, gm = false }) {
+  const events = [];
+  const folderByName = new Map((folders || []).filter((f) => f.type === 'JournalEntry').map((f) => [f.name, f]));
+  const tlFolderIds = new Set((config?.categories || [])
+    .filter((c) => c && c.kind === 'timeline' && c.folder)
+    .map((c) => folderByName.get(c.folder)?._id)
+    .filter(Boolean));
+
+  const firstHTML = (doc) => String(((doc.pages || []).find((p) => p.text?.content) || {}).text?.content || '');
+  const excerptOf = (html) => {
+    const txt = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    return txt.length > 240 ? txt.slice(0, 240) + '…' : txt;
+  };
+  const push = (doc, source, id) => {
+    const mej = mejView(doc, gm);
+    if (String(mej?.type || '') !== 'event') return;
+    const date = String(mej.attributes?.date || '');
+    const dateEnd = String(mej.attributes?.datefin || '');
+    const html = firstHTML(doc);
+    events.push({
+      id, foundryId: doc._id, name: doc.name, source,
+      date, dateValue: parseDateBBY(date),
+      ...(dateEnd ? { dateEnd, dateEndValue: parseDateBBY(dateEnd) } : {}),
+      ...(mej.location ? { location: mej.location } : {}),
+      excerpt: excerptOf(html),
+      ...(source === 'canon' ? { html } : {}),
+    });
+  };
+
+  for (const entry of (journalsIndex || [])) {
+    if (!tlFolderIds.has(entry.folder)) continue;
+    if (visibleFilter && !visibleFilter(entry)) continue;
+    const doc = getJournal(entry._id);
+    if (doc) push(doc, 'campagne', entry.flags?.holocron?.legacyId || doc._id);
+  }
+  for (const doc of (eventsPack || [])) push(doc, 'canon', doc._id);
+
+  events.sort((a, b) => ((a.dateValue ?? Infinity) - (b.dateValue ?? Infinity)) || a.name.localeCompare(b.name, 'fr'));
+  return { events };
+}
+
 // journalsIndex + journaux complets (store) + pack règles → vue front.
 // `visibleFilter(doc)` applique l'ownership de la session (auth.canSee).
 export function buildJournalsView({ config, folders, journalsIndex, getJournal, rulesPack, visibleFilter, gm = false }) {

@@ -1,0 +1,56 @@
+{
+  "_id": "Z2GTDVCjOpSxrTys",
+  "name": "9 ABY — L'ère de la Nouvelle République",
+  "pages": [
+    {
+      "_id": "X4XQJ2bv49tstB2K",
+      "name": "L'ère de la Nouvelle République",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "image": {},
+      "text": {
+        "format": 1,
+        "content": "<p>Cinq ans après Endor, la Nouvelle République peine à pacifier la Bordure : seigneurs de guerre impériaux, guildes de chasseurs de primes et vestiges de l'Empire s'y disputent le vide laissé.</p>",
+        "markdown": ""
+      },
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "system": {},
+      "sort": 0,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {
+        "monks-enhanced-journal": {
+          "type": "event",
+          "role": "",
+          "location": "Bordure Extérieure",
+          "attributes": {
+            "date": "9 ABY"
+          },
+          "relationships": {},
+          "items": {}
+        }
+      },
+      "_stats": {}
+    }
+  ],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "monks-enhanced-journal": {
+      "pagetype": "event"
+    }
+  },
+  "_stats": {},
+  "_key": "!journalentry!Z2GTDVCjOpSxrTys"
+}

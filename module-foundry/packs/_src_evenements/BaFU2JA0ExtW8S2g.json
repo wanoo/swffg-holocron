@@ -1,0 +1,56 @@
+{
+  "_id": "BaFU2JA0ExtW8S2g",
+  "name": "57 BBY — Naissance d'Obi-Wan Kenobi",
+  "pages": [
+    {
+      "_id": "x4t9KlNMVkaKzKTM",
+      "name": "Naissance d'Obi-Wan Kenobi",
+      "type": "text",
+      "title": {
+        "show": true,
+        "level": 1
+      },
+      "image": {},
+      "text": {
+        "format": 1,
+        "content": "<p>Naissance du futur Chevalier puis Maître Jedi Obi-Wan Kenobi, général de la Guerre des Clones et mentor des Skywalker.</p>",
+        "markdown": ""
+      },
+      "video": {
+        "controls": true,
+        "volume": 0.5
+      },
+      "src": null,
+      "system": {},
+      "sort": 0,
+      "ownership": {
+        "default": -1
+      },
+      "flags": {
+        "monks-enhanced-journal": {
+          "type": "event",
+          "role": "",
+          "location": "Stewjon",
+          "attributes": {
+            "date": "57 BBY"
+          },
+          "relationships": {},
+          "items": {}
+        }
+      },
+      "_stats": {}
+    }
+  ],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "monks-enhanced-journal": {
+      "pagetype": "event"
+    }
+  },
+  "_stats": {},
+  "_key": "!journalentry!BaFU2JA0ExtW8S2g"
+}

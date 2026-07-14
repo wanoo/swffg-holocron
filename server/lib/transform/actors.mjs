@@ -96,6 +96,20 @@ const itemsOf = (doc, type) => (doc.items || []).filter((i) => i && i.type === t
 const sysOf = (i) => i.system || i.data || {};
 const descOf = (i) => str(sysOf(i).description || '');
 
+// Qualités d'arme (itemmodifier) : nom + rang + description (lisibles au clic).
+// On garde les vraies qualités (nom court « Pierce », « Qualité Brèche »…) et
+// écarte les mods génériques/attachements descriptifs. Partagé PJ / véhicule.
+function weaponQualities(s) {
+  const seen = new Set();
+  return (Array.isArray(s.itemmodifier) ? s.itemmodifier : Object.values(s.itemmodifier || {}))
+    .map((m) => {
+      const ms = (m && m.system) || m || {};
+      const name = str(m?.name).replace(/^Qualité\s+/i, '').trim();
+      return { name, rank: num(ms.rank), description: str(ms.description) };
+    })
+    .filter((q) => q.name && q.name.length <= 26 && !/^Mod\s+(unique|générique|generic)/i.test(q.name) && !seen.has(q.name) && seen.add(q.name));
+}
+
 // --- Dérivation FFG (starwarsffg 2.0.3) ------------------------------------
 // Le MCP renvoie le document SOURCE : caractéristiques, seuils et rangs y valent 0
 // (le système les calcule au prepareData, côté navigateur uniquement). On reproduit
@@ -332,17 +346,7 @@ export function transformCharacter(doc) {
       const s = sysOf(w);
       // les champs sont wrappés en { value } — unwrap systématique (sinon "[object Object]"
       // quand value est vide et qu'on retombe sur l'objet). + qualités (itemmodifier).
-      // qualités d'arme (itemmodifier) : nom + rang + description (lisibles au clic).
-      // On garde les vraies qualités (nom court « Pierce », « Qualité Brèche »…) et
-      // écarte les mods génériques/attachements descriptifs.
-      const seenQ = new Set();
-      const quals = (Array.isArray(s.itemmodifier) ? s.itemmodifier : Object.values(s.itemmodifier || {}))
-        .map((m) => {
-          const ms = (m && m.system) || m || {};
-          const name = str(m?.name).replace(/^Qualité\s+/i, '').trim();
-          return { name, rank: num(ms.rank), description: str(ms.description) };
-        })
-        .filter((q) => q.name && q.name.length <= 26 && !/^Mod\s+(unique|générique|generic)/i.test(q.name) && !seenQ.has(q.name) && seenQ.add(q.name));
+      const quals = weaponQualities(s);
       const skEn = unwrap(s.skill);
       const skFr = (SKILL_FR[normKey(skEn)] || SKILL_BY_EN[normKey(skEn)] || null);
       return {
@@ -431,5 +435,56 @@ export function transformAdversary(doc, packSource = '') {
         crit: val(s.crit), range: str(s.range?.value || s.range), special: str(s.special?.value || s.special),
       };
     }),
+  };
+}
+
+// Fiche du VAISSEAU/véhicule (actor starwarsffg « vehicle ») — stats telles que
+// stockées (pas de dérivation xpLog, spécifique personnages). Les champs « adjusted »
+// (armure, points durs) intègrent les attachements quand le système les a calculés :
+// on prend le max stocké/ajusté, tolérant aux documents source.
+export function transformVehicle(doc) {
+  const sys = doc.system || doc.data || {};
+  const st = sys.stats || {};
+  const sh = st.shields || {};
+  const adj = (f) => Math.max(val(f), num(f?.adjusted));
+  return {
+    id: doc._id,
+    name: doc.name,
+    type: doc.type,
+    img: str(doc.img || ''),
+    silhouette: val(st.silhouette),
+    speed: { value: val(st.speed), max: num(st.speed?.max) },
+    handling: val(st.handling),
+    armour: adj(st.armour),
+    hullTrauma: { value: val(st.hullTrauma), max: num(st.hullTrauma?.max) },
+    systemStrain: { value: val(st.systemStrain), max: num(st.systemStrain?.max) },
+    // défense par zone = boucliers starwarsffg { fore, port, starboard, aft }
+    defence: { fore: num(sh.fore), aft: num(sh.aft), port: num(sh.port), starboard: num(sh.starboard) },
+    sensorRange: unwrap(st.sensorRange),
+    crew: val(st.crew),
+    passengers: val(st.passengerCapacity),
+    encumbrance: { value: val(st.encumbrance), max: num(st.encumbrance?.max) },
+    consumables: { value: val(st.consumables), duration: str(st.consumables?.duration) },
+    hardPoints: adj(st.customizationHardPoints),
+    hyperdrive: val(st.hyperdrive, 1),
+    navicomputer: Boolean(st.navicomputer?.value ?? st.navicomputer),
+    spaceShip: Boolean(sys.spaceShip),
+    weapons: itemsOf(doc, 'shipweapon').map((w) => {
+      const s = sysOf(w);
+      const arcs = Object.entries(s.firingarc || {}).filter(([, on]) => on).map(([k]) => k);
+      return {
+        name: w.name,
+        damage: adj(s.damage),
+        crit: adj(s.crit),
+        range: unwrap(s.range),
+        firingArc: arcs,
+        qualities: weaponQualities(s),
+        description: descOf(w),
+      };
+    }),
+    attachments: itemsOf(doc, 'shipattachment').map((a) => ({
+      name: a.name, hardpoints: val(sysOf(a).hardpoints), description: descOf(a),
+    })),
+    biography: str(sys.biography || ''),
   };
 }

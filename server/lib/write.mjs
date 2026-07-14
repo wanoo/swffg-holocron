@@ -84,9 +84,17 @@ export function createWriteService({ store, config, logger = console }) {
   // L'id logique préserve les ancres legacy (flags.holocron.legacyId).
   function resolvePublicDoc(docId) {
     const [jid, pid] = String(docId).split(':');
+    const cc = config();
+    // Exception : la page « notes du vaisseau » (config.journals.shipNotes) est éditable
+    // où que vive son journal — l'ownership Foundry reste vérifié par la route (canEdit).
+    if (docId && docId === cc.journals.shipNotes) {
+      const doc = store.get(`journal:${jid}`);
+      if (!doc) return null;
+      const page = pid ? (doc.pages || []).find((p) => p._id === pid) : (doc.pages || [])[0];
+      return { entry: doc, doc, page };
+    }
     const entry = idx().find((j) => j._id === jid || j.flags?.holocron?.legacyId === jid);
     if (!entry) return null;
-    const cc = config();
     const editableFolders = new Set(
       (store.get('folders') || [])
         .filter((f) => (cc.categories || []).some((c) => c.editable && c.folder === f.name))

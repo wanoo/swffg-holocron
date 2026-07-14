@@ -7,6 +7,7 @@
 //   · ambiances : lance/coupe les playlists Foundry.
 // La carte ne s'affiche que si le serveur a FOUNDRY_MCP_URL (status.enabled).
 import { apiBase, getGMKey } from './collab.js';
+import { toFoundrySrc } from './show-image.js';
 
 const DICE = [
   ['ability', 'Aptitude', 'gmf-ab'], ['proficiency', 'Maîtrise', 'gmf-pr'],
@@ -155,6 +156,29 @@ async function init(body) {
   rowH.append(selH, showBtn);
   ho.appendChild(rowH);
   body.appendChild(ho);
+
+  // --- Image aux joueurs (ImagePopout partagé via le module) --------------------
+  const imB = el('div', 'gmf-block');
+  imB.appendChild(el('h3', 'gmf-h3', '📡 Montrer une image'));
+  const rowI = el('div', 'gmf-row');
+  const urlI = el('input', 'gmf-input gmf-grow');
+  urlI.type = 'text';
+  urlI.placeholder = 'URL https://… ou chemin Foundry worlds/…';
+  const sendI = el('button', 'gmf-cta', 'Montrer');
+  sendI.type = 'button';
+  sendI.title = "Ouvre l'image en plein écran chez tous les joueurs (client MJ Foundry requis)";
+  sendI.addEventListener('click', async () => {
+    const src = urlI.value.trim();
+    if (!src) return;
+    sendI.disabled = true;
+    try {
+      await api('show-image', { method: 'POST', body: JSON.stringify({ src: toFoundrySrc(src) }) });
+      sendI.textContent = '✓'; setTimeout(() => { sendI.textContent = 'Montrer'; sendI.disabled = false; }, 1200);
+    } catch (e) { sendI.textContent = '✗'; sendI.title = e.message; sendI.disabled = false; }
+  });
+  rowI.append(urlI, sendI);
+  imB.appendChild(rowI);
+  body.appendChild(imB);
 
   // --- Ambiances ----------------------------------------------------------------
   const amb = el('div', 'gmf-block');
