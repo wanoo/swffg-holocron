@@ -91,11 +91,12 @@ export function createStore({ dataDir, logger = console }) {
   const GM_FOLDER_NAMES = ['🎭 PNJ & fronts', '🖥️ Poste de commande', '🧰 Ressources MJ', '🎬 Actes & scénarios', '🛠️ Ateliers', '🎴 Sabacc', 'Boutiques'];
   function relevantJournalFolderIds() {
     const cfg = get('config') || {};
-    const names = new Set(GM_FOLDER_NAMES);
-    for (const c of (cfg.categories || [])) if (c && c.folder) names.add(c.folder);
-    if (cfg.gmBibleFolder) names.add(cfg.gmBibleFolder);
+    const refs = new Set(GM_FOLDER_NAMES);
+    for (const c of (cfg.categories || [])) if (c && c.folder) refs.add(c.folder);
+    if (cfg.gmBibleFolder) refs.add(cfg.gmBibleFolder);
     const folders = (get('folders') || []).filter((f) => f && f.type === 'JournalEntry');
-    return new Set(folders.filter((f) => names.has(f.name)).map((f) => f._id));
+    // une référence de config = nom Foundry, _id ou uuid « Folder.<id> »
+    return new Set(folders.filter((f) => refs.has(f.name) || refs.has(f._id) || refs.has(`Folder.${f._id}`)).map((f) => f._id));
   }
 
   // Entrée d'index (sans les pages) dérivée d'un doc complet.

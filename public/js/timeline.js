@@ -1,8 +1,7 @@
-// timeline.js — frise chronologique (#/timeline) : fiches MEJ « event » datées en
-// BBY/ABY. Événements Canon (pack du module, en modale) + Campagne (dossier du
-// monde, navigables) mêlés et triés par le serveur (/api/content/timeline).
-import { openCard } from './modal.js';
-import { renderRichHTML } from './render-journal.js';
+// timeline.js — frise chronologique (#/timeline) : fiches MEJ « event » du dossier
+// d'événements du monde, datées en BBY/ABY (attribut `date`) et classées par
+// l'attribut `position` (Canon / Campagne). Tri serveur (/api/content/timeline) ;
+// chaque événement est une fiche navigable (#/journal/<id>).
 
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -40,9 +39,10 @@ export async function mountTimeline(container) {
   const status = container.querySelector('#tl-status');
   const events = data?.events || [];
   if (!events.length) {
-    status.innerHTML = 'Aucun événement. Créez des fiches MEJ de type <b>📅 Événement</b> avec un attribut '
-      + '<code>date</code> (ex. « 19 BBY ») dans le dossier de campagne déclaré <code>kind:"timeline"</code>, '
-      + 'ou renseignez <code>packs.events</code> (⚙️ Holocron Config) pour les événements canon.';
+    status.innerHTML = 'Aucun événement. Créez des fiches MEJ de type <b>📅 Événement</b> avec les attributs '
+      + '<code>date</code> (ex. « 19 BBY ») et <code>position</code> (Canon / Campagne) dans le dossier '
+      + 'd\'événements déclaré <code>kind:"timeline"</code> (⚙️ Holocron Config). Le compendium '
+      + '« 📅 Événements canon » du module fournit 20 fiches prêtes à importer dans ce dossier.';
     return;
   }
   status.remove();
@@ -65,13 +65,7 @@ export async function mountTimeline(container) {
     const li = e.target.closest('.tl-item');
     if (!li) return;
     const ev = events[+li.dataset.i];
-    if (!ev) return;
-    if (ev.source === 'campagne') { location.hash = `#/journal/${ev.id}`; return; }
-    // canon : contenu embarqué, affiché en modale (non navigable)
-    const node = document.createElement('div');
-    node.className = 'journal-content';
-    node.innerHTML = renderRichHTML(ev.html || `<p>${esc(ev.excerpt)}</p>`);
-    openCard(ev.name, node, `${ev.date || 'Sans date'} · Canon${ev.location ? ' · ' + ev.location : ''}`);
+    if (ev) location.hash = `#/journal/${ev.id}`;
   });
   for (const box of wrap.querySelectorAll('.tl-filters input')) {
     box.addEventListener('change', () => {

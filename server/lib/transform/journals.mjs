@@ -73,46 +73,50 @@ export function parseDateBBY(s) {
   return era === 'BBY' ? -n : n;
 }
 
-// Timeline de campagne : fiches MEJ « event » dont l'attribut `date` est en BBY/ABY.
-// Canon = pack du module (packs.events) ; Campagne = journaux des catégories
-// kind === 'timeline'. Tri chronologique croissant, non-datés en fin de frise.
-// Les événements canon embarquent leur HTML (affichés en modale, pas navigables).
-export function buildTimelineView({ config, folders, journalsIndex, getJournal, eventsPack, visibleFilter, gm = false }) {
+// Résout la référence de dossier d'une catégorie : NOM Foundry, _id ou uuid
+// « Folder.<id> » (pratique : copier l'uuid depuis Foundry suffit).
+export function resolveFolder(folders, ref) {
+  const list = (folders || []).filter((f) => f && f.type === 'JournalEntry');
+  return list.find((f) => f.name === ref || f._id === ref || `Folder.${f._id}` === ref) || null;
+}
+
+// Timeline de campagne : fiches MEJ « event » des catégories kind === 'timeline'
+// (UN dossier monde porte canon ET campagne). L'attribut `date` est en BBY/ABY ;
+// l'attribut `position` (canon / campagne) classe l'événement — défaut : campagne.
+// Tri chronologique croissant, non-datés en fin de frise.
+export function buildTimelineView({ config, folders, journalsIndex, getJournal, visibleFilter, gm = false }) {
   const events = [];
-  const folderByName = new Map((folders || []).filter((f) => f.type === 'JournalEntry').map((f) => [f.name, f]));
   const tlFolderIds = new Set((config?.categories || [])
     .filter((c) => c && c.kind === 'timeline' && c.folder)
-    .map((c) => folderByName.get(c.folder)?._id)
+    .map((c) => resolveFolder(folders, c.folder)?._id)
     .filter(Boolean));
 
-  const firstHTML = (doc) => String(((doc.pages || []).find((p) => p.text?.content) || {}).text?.content || '');
-  const excerptOf = (html) => {
+  const excerptOf = (doc) => {
+    const html = String(((doc.pages || []).find((p) => p.text?.content) || {}).text?.content || '');
     const txt = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
     return txt.length > 240 ? txt.slice(0, 240) + '…' : txt;
-  };
-  const push = (doc, source, id) => {
-    const mej = mejView(doc, gm);
-    if (String(mej?.type || '') !== 'event') return;
-    const date = String(mej.attributes?.date || '');
-    const dateEnd = String(mej.attributes?.datefin || '');
-    const html = firstHTML(doc);
-    events.push({
-      id, foundryId: doc._id, name: doc.name, source,
-      date, dateValue: parseDateBBY(date),
-      ...(dateEnd ? { dateEnd, dateEndValue: parseDateBBY(dateEnd) } : {}),
-      ...(mej.location ? { location: mej.location } : {}),
-      excerpt: excerptOf(html),
-      ...(source === 'canon' ? { html } : {}),
-    });
   };
 
   for (const entry of (journalsIndex || [])) {
     if (!tlFolderIds.has(entry.folder)) continue;
     if (visibleFilter && !visibleFilter(entry)) continue;
     const doc = getJournal(entry._id);
-    if (doc) push(doc, 'campagne', entry.flags?.holocron?.legacyId || doc._id);
+    if (!doc) continue;
+    const mej = mejView(doc, gm);
+    if (String(mej?.type || '') !== 'event') continue;
+    const date = String(mej.attributes?.date || '');
+    const dateEnd = String(mej.attributes?.datefin || '');
+    events.push({
+      id: entry.flags?.holocron?.legacyId || doc._id,
+      foundryId: doc._id,
+      name: doc.name,
+      source: /^canon/i.test(String(mej.attributes?.position || '')) ? 'canon' : 'campagne',
+      date, dateValue: parseDateBBY(date),
+      ...(dateEnd ? { dateEnd, dateEndValue: parseDateBBY(dateEnd) } : {}),
+      ...(mej.location ? { location: mej.location } : {}),
+      excerpt: excerptOf(doc),
+    });
   }
-  for (const doc of (eventsPack || [])) push(doc, 'canon', doc._id);
 
   events.sort((a, b) => ((a.dateValue ?? Infinity) - (b.dateValue ?? Infinity)) || a.name.localeCompare(b.name, 'fr'));
   return { events };
@@ -127,9 +131,10 @@ export function buildJournalsView({ config, folders, journalsIndex, getJournal, 
 
   const declared = (config?.categories || []);
   for (const c of declared) {
-    const f = folderByName.get(c.folder);
+    // c.folder = nom Foundry, _id ou uuid « Folder.<id> » (resolveFolder)
+    const f = folderByName.get(c.folder) || resolveFolder(folders, c.folder);
     if (!f) continue;
-    const label = c.label || c.folder.replace(/^[^\p{L}\p{N}]+\s*/u, '');
+    const label = c.label || (f.name || c.folder).replace(/^[^\p{L}\p{N}]+\s*/u, '');
     cats.push({ id: f._id, label, kind: c.kind || 'misc', editable: Boolean(c.editable) });
   }
 

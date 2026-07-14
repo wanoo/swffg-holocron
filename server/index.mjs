@@ -392,7 +392,6 @@ async function handleApi(req, res, urlPath) {
         if (target === 'all' || target === 'core') jobs.push(() => store.sync.tick({ configJournalName: ENV.configJournalName }));
         if (target === 'all' || target === 'packs') {
           if (conf.packs.rules) jobs.push(() => store.sync.pack(conf.packs.rules, 'JournalEntry'));
-          if (conf.packs.events) jobs.push(() => store.sync.pack(conf.packs.events, 'JournalEntry'));
           if (conf.packs.adversaries) jobs.push(() => store.sync.pack(conf.packs.adversaries, 'Actor'));
         }
         // fire-and-forget séquencé — la réponse revient tout de suite
@@ -505,7 +504,5 @@ if (mode !== 'none') {
   setTimeout(async () => {
     const conf = cc();
     try { if (conf.packs.rules) await store.sync.pack(conf.packs.rules, 'JournalEntry'); } catch (e) { console.error('[sync] rules:', e.message); }
-    // pack ÉVÉNEMENTS canon (petit, alimente la timeline) — même régime que les règles
-    try { if (conf.packs.events) await store.sync.pack(conf.packs.events, 'JournalEntry'); } catch (e) { console.error('[sync] events:', e.message); }
   }, 15_000).unref?.();
 }

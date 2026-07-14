@@ -9,16 +9,19 @@ Toute la spécificité de VOTRE campagne vit dans un journal Foundry (nom par d�
   "v": 1,
   "meta": { "title": "Ma campagne", "description": "<p>HTML du bandeau d'accueil</p>", "system": "starwarsffg" },
 
-  // Catégories joueurs = dossiers Foundry de journaux. kind pilote l'affichage :
-  // rules | story | org | pc | notes | timeline | misc. editable → l'éditeur web écrit dedans.
-  // kind "timeline" : fiches MEJ « event » (attribut `date` en BBY/ABY, ex. « 19 BBY »)
-  // → événements Campagne de la frise #/timeline (mêlés au pack canon, cf. packs.events).
+  // Catégories joueurs = dossiers Foundry de journaux, référencés par NOM, _id ou
+  // uuid « Folder.<id> ». kind pilote l'affichage : rules | story | org | pc | notes |
+  // timeline | misc. editable → l'éditeur web écrit dedans.
+  // kind "timeline" : le dossier porte les fiches MEJ « event » de la frise #/timeline —
+  // attribut `date` en BBY/ABY (ex. « 19 BBY ») + attribut `position` (Canon / Campagne,
+  // défaut Campagne). Le compendium « 📅 Événements canon » du module (≥ 1.4.1) fournit
+  // 20 fiches datées prêtes à importer dans ce dossier.
   "categories": [
     { "folder": "🎬 Campagne — Actes", "kind": "story", "editable": true },
     { "folder": "🏛️ Organisations", "kind": "org" },
     { "folder": "🎭 Personnages rencontrés", "kind": "pc" },
     { "folder": "📓 Notes des joueurs", "kind": "notes", "editable": true },
-    { "folder": "📅 Événements", "kind": "timeline" }
+    { "folder": "Folder.vdYoDbNca37GaYxK", "kind": "timeline", "label": "Événements" }
   ],
 
   // Espace MJ : dossier racine de la bible (ses SOUS-dossiers = rubriques).
@@ -28,14 +31,11 @@ Toute la spécificité de VOTRE campagne vit dans un journal Foundry (nom par d�
   "pcFolder": "👥 Personnages joueurs",
   "npcsWorldFolder": "🎭 PNJ de campagne",
 
-  // Compendiums : règles (JournalEntry), bestiaire (Actor) et événements canon
-  // de la timeline (pack « 📅 Événements canon » du module swffg-holocron ≥ 1.4.0 ;
-  // synchronisé au boot ou via POST /api/gm/sync {"collection":"packs"}).
+  // Compendiums : règles (JournalEntry) et bestiaire (Actor).
   "packs": {
     "rules": "world.regles-and-references-fr",
     "rulesNamePrefix": "^\\d+ · ",          // préfixe de tri retiré à l'affichage
     "adversaries": "world.star-wars-adversaries",
-    "events": "swffg-holocron.evenements",
     "translations": []
   },
 

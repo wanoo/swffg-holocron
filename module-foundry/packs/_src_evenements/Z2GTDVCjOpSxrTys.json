@@ -32,7 +32,8 @@
           "role": "",
           "location": "Bordure Extérieure",
           "attributes": {
-            "date": "9 ABY"
+            "date": "9 ABY",
+            "position": "Canon"
           },
           "relationships": {},
           "items": {}

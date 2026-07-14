@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.4.1 — Événements canon : attribut `position` + import dans le monde
+
+- Les 20 fiches du compendium « 📅 Événements canon » portent désormais l'attribut
+  MEJ **`position: Canon`** (en plus de `date`). La frise de l'Archive Holocron lit
+  maintenant TOUT depuis **un seul dossier monde d'événements** (catégorie
+  `kind:"timeline"`, référencée par nom ou uuid `Folder.<id>`) : le compendium ne
+  sert plus de source live — **importez ses fiches dans ce dossier** et mêlez-les à
+  vos événements de campagne (`position: Campagne`, ou vide).
+
 ## 1.4.0 — Événements canon (timeline) + envoi d'images aux joueurs
 
 - **Nouveau compendium « 📅 Événements canon »** : 20 dates clés de la galaxie

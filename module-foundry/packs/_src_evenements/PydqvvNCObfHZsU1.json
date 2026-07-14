@@ -32,7 +32,8 @@
           "role": "",
           "location": "Kessel",
           "attributes": {
-            "date": "10 BBY"
+            "date": "10 BBY",
+            "position": "Canon"
           },
           "relationships": {},
           "items": {}

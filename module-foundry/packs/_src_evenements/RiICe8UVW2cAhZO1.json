@@ -32,7 +32,8 @@
           "role": "",
           "location": "Bordure Extérieure",
           "attributes": {
-            "date": "232 BBY"
+            "date": "232 BBY",
+            "position": "Canon"
           },
           "relationships": {},
           "items": {}

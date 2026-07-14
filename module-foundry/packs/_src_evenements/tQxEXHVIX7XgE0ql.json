@@ -32,7 +32,8 @@
           "role": "",
           "location": "Kashyyyk",
           "attributes": {
-            "date": "200 BBY"
+            "date": "200 BBY",
+            "position": "Canon"
           },
           "relationships": {},
           "items": {}

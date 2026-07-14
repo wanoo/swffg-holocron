@@ -32,7 +32,8 @@
           "role": "",
           "location": "Tatooine",
           "attributes": {
-            "date": "41 BBY"
+            "date": "41 BBY",
+            "position": "Canon"
           },
           "relationships": {},
           "items": {}

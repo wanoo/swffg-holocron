@@ -29,7 +29,7 @@ export const CAMPAIGN_DEFAULTS = {
   gmBibleFolder: '',
   pcFolder: '👥 Personnages joueurs',
   npcsWorldFolder: '',
-  packs: { adversaries: '', npcsExtra: null, rules: '', rulesNamePrefix: '^\\d+\\s*·\\s*', translations: [], events: '' },
+  packs: { adversaries: '', npcsExtra: null, rules: '', rulesNamePrefix: '^\\d+\\s*·\\s*', translations: [] },
   journals: {
     ship: '🚀 Vaisseau du groupe', codex: '🖥️ Codex du groupe',
     holonet: '📡 HoloNet — Actualités',

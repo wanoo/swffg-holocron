@@ -89,35 +89,29 @@ test('parseDateBBY interprète les dates galactiques', () => {
   assert.equal(parseDateBBY(null), null);
 });
 
-test('buildTimelineView trie canon + campagne, non-datés en fin', () => {
-  const mejEvent = (date, extra = {}) => ({
-    'monks-enhanced-journal': { type: 'event', attributes: date ? { date } : {}, relationships: {}, ...extra },
-  });
-  const page = (flags, content = '<p>Texte.</p>') => ({ _id: 'p1', type: 'text', text: { content }, flags });
+test('buildTimelineView : tri par date, position Canon/Campagne, dossier par uuid', () => {
+  const page = (attrs) => ({ _id: 'p1', type: 'text', text: { content: '<p>Texte.</p>' },
+    flags: { 'monks-enhanced-journal': { type: 'event', attributes: attrs, relationships: {} } } });
+  const doc = (id, name, attrs) => ({ _id: id, name, pages: [page(attrs)] });
   const out = buildTimelineView({
-    config: { categories: [{ folder: '📅 Événements', kind: 'timeline' }] },
+    config: { categories: [{ folder: 'Folder.F1', kind: 'timeline' }] }, // uuid, pas le nom
     folders: [{ _id: 'F1', type: 'JournalEntry', name: '📅 Événements' }],
     journalsIndex: [
       { _id: 'j1', folder: 'F1', flags: {} },
       { _id: 'j2', folder: 'F1', flags: {} },
-      { _id: 'j3', folder: 'AUTRE', flags: {} }, // hors catégorie timeline : ignoré
+      { _id: 'j3', folder: 'F1', flags: {} },
+      { _id: 'j4', folder: 'AUTRE', flags: {} }, // hors catégorie timeline : ignoré
     ],
     getJournal: (id) => ({
-      j1: { _id: 'j1', name: 'Sans date', pages: [page(mejEvent(null))] },
-      j2: { _id: 'j2', name: 'Chute de la base', pages: [page(mejEvent('2 ABY'))] },
-      j3: { _id: 'j3', name: 'Ignoré', pages: [page(mejEvent('1 ABY'))] },
+      j1: doc('j1', 'Empire', { date: '19 BBY', position: 'Canon' }),
+      j2: doc('j2', 'Chute de la base', { date: '2 ABY', position: 'Campagne' }),
+      j3: doc('j3', 'Sans date', {}),
+      j4: doc('j4', 'Ignoré', { date: '1 ABY' }),
     })[id],
-    eventsPack: [
-      { _id: 'c1', name: '0 BBY — Yavin', pages: [page(mejEvent('0 BBY'))] },
-      { _id: 'c2', name: '19 BBY — Empire', pages: [page(mejEvent('19 BBY'))] },
-      { _id: 'c3', name: 'Pas un event', pages: [page({ 'monks-enhanced-journal': { type: 'place' } })] },
-    ],
     visibleFilter: null,
     gm: false,
   });
-  assert.deepEqual(out.events.map((e) => e.name), ['19 BBY — Empire', '0 BBY — Yavin', 'Chute de la base', 'Sans date']);
-  assert.deepEqual(out.events.map((e) => e.source), ['canon', 'canon', 'campagne', 'campagne']);
+  assert.deepEqual(out.events.map((e) => e.name), ['Empire', 'Chute de la base', 'Sans date']);
+  assert.deepEqual(out.events.map((e) => e.source), ['canon', 'campagne', 'campagne'], 'position → source, défaut campagne');
   assert.equal(out.events[0].dateValue, -19);
-  assert.ok(out.events[0].html, 'les événements canon embarquent leur HTML');
-  assert.equal(out.events[2].html, undefined, 'les événements campagne restent navigables (pas de HTML embarqué)');
 });

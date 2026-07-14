@@ -87,7 +87,7 @@ for (const [date, name, location, body] of EVENTS) {
           type: "event",
           role: "",
           location,
-          attributes: { date },
+          attributes: { date, position: "Canon" },
           relationships: {},
           items: {},
         },

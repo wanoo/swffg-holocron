@@ -32,7 +32,8 @@
           "role": "",
           "location": "Scarif / Yavin",
           "attributes": {
-            "date": "0 BBY"
+            "date": "0 BBY",
+            "position": "Canon"
           },
           "relationships": {},
           "items": {}

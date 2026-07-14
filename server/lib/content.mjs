@@ -69,16 +69,15 @@ export function createContentService({ store, config }) {
 
   const pcsView = () => pcsRaw().map(transformCharacter);
 
-  // Frise chronologique : événements MEJ canon (pack du module) + campagne (dossiers
-  // de catégories kind « timeline »), datés en BBY/ABY (attribut `date`).
+  // Frise chronologique : fiches MEJ « event » des dossiers de catégories kind
+  // « timeline » — datées en BBY/ABY (attribut `date`), classées canon/campagne
+  // par l'attribut `position`.
   function timelineView(session) {
-    const cc = config();
     return buildTimelineView({
-      config: cc,
+      config: config(),
       folders: store.get('folders'),
       journalsIndex: store.get('journalsIndex'),
       getJournal: (id) => store.get(`journal:${id}`),
-      eventsPack: cc.packs.events ? store.get(`pack:${cc.packs.events}`) : null,
       visibleFilter: (entry) => canSee(session, entry),
       gm: isGM(session),
     });
@@ -115,7 +114,7 @@ export function createContentService({ store, config }) {
       vehicle: S + store.version('actors') * 31 + store.version('folders') + 3,
       npcs: S + store.version('actors') * 31 + store.version('folders') + 7,
       adversaries: S + store.version(`pack:${cc.packs.adversaries}`),
-      timeline: S + store.version('journalsIndex') * 31 + store.version(`pack:${cc.packs.events}`) * 7 + store.version('folders') + store.version('config'),
+      timeline: S + store.version('journalsIndex') * 31 + store.version('folders') + store.version('config'),
       diceHelper: S + diceHelperVersion(),
     };
   }
