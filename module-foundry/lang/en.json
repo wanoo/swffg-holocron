@@ -274,6 +274,38 @@
       "shipNotesPage": {
         "name": "Ship notes page (web app)",
         "hint": "Journal page displayed/editable in the Ship view. Paste the Foundry uuid (JournalEntry.….JournalEntryPage.…) or the <journalId>:<pageId> form."
+      },
+      "folderActes": {
+        "name": "Folder — Campaign acts",
+        "hint": "Played storyline journals (“story” category, web-editable). Name or “Folder.<id>” uuid; created if missing (applied at install)."
+      },
+      "folderOrgs": {
+        "name": "Folder — Organizations",
+        "hint": "MEJ organization sheets (“org” category). Name or “Folder.<id>” uuid; created if missing (applied at install)."
+      },
+      "folderPnj": {
+        "name": "Folder — Encountered characters",
+        "hint": "MEJ person sheets for NPCs (“pc” category). Name or “Folder.<id>” uuid; created if missing (applied at install)."
+      },
+      "folderNotes": {
+        "name": "Folder — Player notes",
+        "hint": "Players' free notes (“notes” category, web-editable). Name or “Folder.<id>” uuid; created if missing (applied at install)."
+      },
+      "folderRules": {
+        "name": "Folder — Imported rules",
+        "hint": "Target of the rules compendium import into the world. Name or “Folder.<id>” uuid; created if missing (applied at install)."
+      },
+      "folderEvents": {
+        "name": "Folder — Events (timeline)",
+        "hint": "MEJ event sheets of the chronology (canon + campaign). Name or “Folder.<id>” uuid; created if missing (applied at install)."
+      },
+      "folderPcs": {
+        "name": "Actor folder — PCs",
+        "hint": "Player characters folder (sheets shown to players, ship included). Name or “Folder.<id>” uuid; created if missing (applied at install)."
+      },
+      "folderNpcs": {
+        "name": "Actor folder — NPCs",
+        "hint": "World custom NPCs folder (GM bestiary). Name or “Folder.<id>” uuid; created if missing (applied at install)."
       }
     },
     "setup": {

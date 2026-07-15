@@ -274,6 +274,38 @@
       "shipNotesPage": {
         "name": "Page de notes du vaisseau (app web)",
         "hint": "Page de journal affichée/éditable dans la vue Vaisseau. Collez l'uuid Foundry (JournalEntry.….JournalEntryPage.…) ou le format <journalId>:<pageId>."
+      },
+      "folderActes": {
+        "name": "Dossier — Actes de campagne",
+        "hint": "Journaux de la trame jouée (catégorie « story », éditable web). Nom ou uuid « Folder.<id> » ; créé s'il n'existe pas (appliqué à l'installation)."
+      },
+      "folderOrgs": {
+        "name": "Dossier — Organisations",
+        "hint": "Fiches MEJ organization (catégorie « org »). Nom ou uuid « Folder.<id> » ; créé s'il n'existe pas (appliqué à l'installation)."
+      },
+      "folderPnj": {
+        "name": "Dossier — Personnages rencontrés",
+        "hint": "Fiches MEJ person des PNJ (catégorie « pc »). Nom ou uuid « Folder.<id> » ; créé s'il n'existe pas (appliqué à l'installation)."
+      },
+      "folderNotes": {
+        "name": "Dossier — Notes des joueurs",
+        "hint": "Notes libres des joueurs (catégorie « notes », éditable web). Nom ou uuid « Folder.<id> » ; créé s'il n'existe pas (appliqué à l'installation)."
+      },
+      "folderRules": {
+        "name": "Dossier — Règles importées",
+        "hint": "Cible de l'import du compendium de règles dans le monde. Nom ou uuid « Folder.<id> » ; créé s'il n'existe pas (appliqué à l'installation)."
+      },
+      "folderEvents": {
+        "name": "Dossier — Événements (frise)",
+        "hint": "Fiches MEJ event de la chronologie (canon + campagne). Nom ou uuid « Folder.<id> » ; créé s'il n'existe pas (appliqué à l'installation)."
+      },
+      "folderPcs": {
+        "name": "Dossier d'acteurs — PJ",
+        "hint": "Dossier des personnages joueurs (fiches affichées aux joueurs, vaisseau inclus). Nom ou uuid « Folder.<id> » ; créé s'il n'existe pas (appliqué à l'installation)."
+      },
+      "folderNpcs": {
+        "name": "Dossier d'acteurs — PNJ",
+        "hint": "Dossier des PNJ custom du monde (bestiaire MJ). Nom ou uuid « Folder.<id> » ; créé s'il n'existe pas (appliqué à l'installation)."
       }
     },
     "setup": {

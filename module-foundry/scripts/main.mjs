@@ -49,6 +49,16 @@ Hooks.once("init", () => {
   SC("adversariesPack", "");
   SC("gmBibleFolder", "🎲 MJ — Bible de campagne");
   SC("shipNotesPage", "");                         // "<jid>:<pid>" OU uuid JournalEntry.….JournalEntryPage.…
+  // Répertoires clés de la campagne (nom OU uuid « Folder.<id> ») — créés/adoptés
+  // à l'installation (menu « Installer / réinstaller » ou mise à jour du module).
+  S("folderActes", "🎬 Campagne — Actes");
+  S("folderOrgs", "🏛️ Organisations");
+  S("folderPnj", "🎭 Personnages rencontrés");
+  S("folderNotes", "📓 Notes des joueurs");
+  S("folderRules", "📖 Règles & Références (FR)");
+  S("folderEvents", "📅 Événements");
+  SC("folderPcs", "👥 Personnages joueurs");
+  SC("folderNpcs", "🎭 PNJ de campagne");
   // marqueurs d'installation auto : party-resources (une fois) ; structure Holocron
   // (une fois PAR VERSION du module — l'install est idempotente, chaque mise à jour
   // rejoue donc les compléments de structure/config sans rien écraser).

@@ -4,26 +4,39 @@
  *  3. rangement des journaux techniques (vaisseau, codex, HoloNet, config, notes
  *     MJ, rencontres, dossiers, dice_helper) dans le dossier SYSTÈME.
  *  Ne recrée jamais l'existant (repérage par nom) — relançable sans risque. */
-import { MOD, t } from "./util.mjs";
+import { MOD, t, boundJournal, shipJournal, codexJournal } from "./util.mjs";
 
-// Dossiers clés de la campagne (créés s'ils manquent) — cf. README §4.
-const JOURNAL_FOLDERS = [
-  "🎬 Campagne — Actes",
-  "🏛️ Organisations",
-  "🎭 Personnages rencontrés",
-  "📓 Notes des joueurs",
-  "🎲 MJ — Bible de campagne",
-];
-const ACTOR_FOLDERS = ["👥 Personnages joueurs", "🎭 PNJ de campagne"];
-const RULES_FOLDER = "📖 Règles & Références (FR)";
-const EVENTS_FOLDER = "📅 Événements";
+// Dossiers clés de la campagne — chaque réglage accepte un NOM ou un uuid
+// « Folder.<id> » ; le nom par défaut sert à la création si rien n'existe.
+export const KEY_FOLDERS = {
+  folderActes: { type: "JournalEntry", def: "🎬 Campagne — Actes", kind: "story", editable: true },
+  folderOrgs: { type: "JournalEntry", def: "🏛️ Organisations", kind: "org" },
+  folderPnj: { type: "JournalEntry", def: "🎭 Personnages rencontrés", kind: "pc" },
+  folderNotes: { type: "JournalEntry", def: "📓 Notes des joueurs", kind: "notes", editable: true },
+  folderRules: { type: "JournalEntry", def: "📖 Règles & Références (FR)" },
+  folderEvents: { type: "JournalEntry", def: "📅 Événements" },
+  gmBibleFolder: { type: "JournalEntry", def: "🎲 MJ — Bible de campagne" },
+  folderPcs: { type: "Actor", def: "👥 Personnages joueurs" },
+  folderNpcs: { type: "Actor", def: "🎭 PNJ de campagne" },
+};
 
 /** Dossier par nom, id ou uuid « Folder.<id> ». */
 const findFolder = (type, ref) => (ref ? game.folders.find((f) =>
   f.type === type && (f.name === ref || f.id === ref || `Folder.${f.id}` === ref)) : null) || null;
 
-async function ensureFolder(type, name) {
-  return findFolder(type, name) || Folder.create({ name, type });
+async function ensureFolder(type, ref, defName = null) {
+  const f = findFolder(type, ref);
+  if (f) return f;
+  // uuid non résolvable → on crée sous le nom par défaut ; sinon sous le nom donné
+  const name = /^Folder\./.test(String(ref)) ? (defName || ref) : (ref || defName);
+  return Folder.create({ name, type });
+}
+
+/** Résout (ou crée) un dossier clé depuis son réglage. */
+async function keyFolder(key) {
+  const spec = KEY_FOLDERS[key];
+  const ref = game.settings.get(MOD, key) || spec.def;
+  return ensureFolder(spec.type, ref, spec.def);
 }
 
 /** Journal de config de l'app web : parmi TOUS les porteurs du flag holocron.config
@@ -65,16 +78,18 @@ export async function systemFolder() {
 }
 
 /** Dossier des événements de la frise : catégorie kind:"timeline" de la config
- * si résolvable → adoption du dossier qui contient déjà des fiches MEJ « event »
- * → dossier par défaut (créé au besoin). */
+ * si résolvable → réglage folderEvents → adoption du dossier qui contient déjà
+ * des fiches MEJ « event » → création. */
 async function eventsFolder() {
   const cfg = configJournal()?.flags?.holocron?.config;
   const ref = (cfg?.categories || []).find((c) => c?.kind === "timeline" && c.folder)?.folder;
   const byCfg = findFolder("JournalEntry", ref);
   if (byCfg) return byCfg;
+  const bySetting = findFolder("JournalEntry", game.settings.get(MOD, "folderEvents"));
+  if (bySetting) return bySetting;
   const withEvent = game.journal.find((j) => j.folder && j.flags?.["monks-enhanced-journal"]?.pagetype === "event");
   if (withEvent) return withEvent.folder;
-  return ensureFolder("JournalEntry", EVENTS_FOLDER);
+  return keyFolder("folderEvents");
 }
 
 /** Complète ⚙️ Holocron Config : crée le journal s'il manque, AJOUTE les catégories
@@ -112,17 +127,15 @@ async function ensureConfig(eventsF) {
   const cfg = j.flags?.holocron?.config || {};
   const cats = Array.isArray(cfg.categories) ? foundry.utils.deepClone(cfg.categories) : [];
   const resolvedIds = new Set(cats.map((c) => findFolder("JournalEntry", c?.folder)?.id).filter(Boolean));
-  const wanted = [
-    { folder: "🎬 Campagne — Actes", kind: "story", editable: true },
-    { folder: "🏛️ Organisations", kind: "org" },
-    { folder: "🎭 Personnages rencontrés", kind: "pc" },
-    { folder: "📓 Notes des joueurs", kind: "notes", editable: true },
-  ];
   let added = 0;
-  for (const w of wanted) {
-    const f = findFolder("JournalEntry", w.folder);
+  // catégories joueurs dérivées des RÉGLAGES de dossiers clés (kind déclaré dans KEY_FOLDERS)
+  for (const [key, spec] of Object.entries(KEY_FOLDERS)) {
+    if (!spec.kind) continue;
+    const ref = game.settings.get(MOD, key) || spec.def;
+    const f = findFolder("JournalEntry", ref);
     if (!f || resolvedIds.has(f.id)) continue;
-    cats.push({ ...w });
+    cats.push({ folder: ref, kind: spec.kind, ...(spec.editable ? { editable: true } : {}) });
+    resolvedIds.add(f.id);
     added++;
   }
   if (eventsF && !cats.some((c) => c?.kind === "timeline") && !resolvedIds.has(eventsF.id)) {
@@ -131,8 +144,6 @@ async function ensureConfig(eventsF) {
   }
   const updates = {};
   if (added) updates["flags.holocron.config.categories"] = cats;
-  if (!cfg.pcFolder) updates["flags.holocron.config.pcFolder"] = "👥 Personnages joueurs";
-  if (!cfg.npcsWorldFolder) updates["flags.holocron.config.npcsWorldFolder"] = "🎭 PNJ de campagne";
   if (Object.keys(updates).length) await j.update(updates);
   return added;
 }
@@ -166,6 +177,15 @@ async function importPack(packId, folderId) {
 const SETTING_DEFAULTS = {
   rulesPack: "", adversariesPack: "",
   gmBibleFolder: "🎲 MJ — Bible de campagne", shipNotesPage: "",
+  folderPcs: "👥 Personnages joueurs", folderNpcs: "🎭 PNJ de campagne",
+};
+
+// Réglage de dossier → valeur écrite en config : le NOM du dossier résolu
+// (l'app web filtre les acteurs par nom de dossier).
+const folderSettingName = (key) => {
+  const spec = KEY_FOLDERS[key];
+  const ref = game.settings.get(MOD, key) || spec.def;
+  return findFolder(spec.type, ref)?.name || ref;
 };
 
 // « JournalEntry.<jid>.JournalEntryPage.<pid> » (uuid copié depuis Foundry) → « <jid>:<pid> ».
@@ -197,8 +217,10 @@ export async function pushSettingsToConfig() {
   };
   apply("flags.holocron.config.packs.rules", cfg.packs?.rules, "rulesPack");
   apply("flags.holocron.config.packs.adversaries", cfg.packs?.adversaries, "adversariesPack");
-  apply("flags.holocron.config.gmBibleFolder", cfg.gmBibleFolder, "gmBibleFolder");
+  apply("flags.holocron.config.gmBibleFolder", cfg.gmBibleFolder, "gmBibleFolder", () => folderSettingName("gmBibleFolder"));
   apply("flags.holocron.config.journals.shipNotes", cfg.journals?.shipNotes, "shipNotesPage", normShipNotes);
+  apply("flags.holocron.config.pcFolder", cfg.pcFolder, "folderPcs", () => folderSettingName("folderPcs"));
+  apply("flags.holocron.config.npcsWorldFolder", cfg.npcsWorldFolder, "folderNpcs", () => folderSettingName("folderNpcs"));
   if (!cfg.packs?.rules && !updates["flags.holocron.config.packs.rules"]) {
     updates["flags.holocron.config.packs.rules"] = detectRulesPack(); // zéro-config
   }
@@ -207,20 +229,28 @@ export async function pushSettingsToConfig() {
 
 export async function installHolocron({ silent = false } = {}) {
   if (!game.user.isGM) return false;
+  // 1. répertoires clés (pilotés par les réglages folder*, créés s'ils manquent)
   let folders = 0;
-  for (const n of JOURNAL_FOLDERS) if (!findFolder("JournalEntry", n)) { await ensureFolder("JournalEntry", n); folders++; }
-  for (const n of ACTOR_FOLDERS) if (!findFolder("Actor", n)) { await ensureFolder("Actor", n); folders++; }
-
+  for (const key of Object.keys(KEY_FOLDERS)) {
+    if (key === "folderEvents") continue; // résolu à part (eventsFolder, adoption possible)
+    const spec = KEY_FOLDERS[key];
+    if (!findFolder(spec.type, game.settings.get(MOD, key) || spec.def)) { await keyFolder(key); folders++; }
+  }
   const eventsF = await eventsFolder();
 
-  // la config de campagne se complète toute seule : catégories/timeline (ensureConfig)
-  // puis champs pilotés par les OPTIONS du module (packs, bible, notes du vaisseau)
+  // 2. la config de campagne se complète toute seule : catégories/timeline (ensureConfig)
+  // puis champs pilotés par les OPTIONS du module (packs, bible, notes du vaisseau…)
   await ensureConfig(eventsF);
   await pushSettingsToConfig();
 
-  // règles : copiées depuis le compendium déclaré par la config (packs.rules,
+  // 3. fiches liées du poste de commande : POI vaisseau (fiche MEJ), codex, HoloNet
+  // (créées dans le dossier système — no-op si déjà présentes)
+  try { await shipJournal(); await codexJournal(); await boundJournal("holonetJournal"); }
+  catch (e) { console.warn("swffg-holocron | journaux liés", e); }
+
+  // 4. règles : copiées depuis le compendium déclaré par la config (packs.rules,
   // ex. world.regles-and-references-fr) — repli sur le pack embarqué du module
-  const rulesF = await ensureFolder("JournalEntry", RULES_FOLDER);
+  const rulesF = await keyFolder("folderRules");
   const rules = await importPack(rulesPackId(), rulesF.id);
   const events = await importPack(`${MOD}.evenements`, eventsF.id);
 

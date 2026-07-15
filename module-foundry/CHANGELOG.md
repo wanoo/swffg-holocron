@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.7.0 — Bootstrap complet d'une installation fraîche + répertoires clés en options
+
+- **Installation fraîche = monde prêt à jouer** : répertoires clés, fiches liées
+  du poste de commande créées d'emblée (**🚀 POI vaisseau** — fiche MEJ,
+  🖥️ Codex, 📡 HoloNet), **toutes les règles importées** (compendium du monde ou
+  du module), **20 dates canon** dans le dossier d'événements, config web
+  complétée et journaux techniques rangés.
+- **Chaque répertoire clé a son option** (nom ou uuid `Folder.<id>`) : Actes,
+  Organisations, Personnages rencontrés, Notes des joueurs, Règles importées,
+  Événements, Bible MJ, dossier d'acteurs PJ, dossier d'acteurs PNJ, dossier
+  système. Les catégories de l'app web sont déclarées depuis ces options ;
+  changer un dossier = modifier l'option puis « Installer / réinstaller »
+  (PJ/PNJ/Bible s'appliquent immédiatement).
+
 ## 1.6.0 — La config web pilotée par les OPTIONS du module
 
 - Nouveaux réglages Foundry (appliqués à la volée et à chaque installation) :
