@@ -83,8 +83,17 @@ const pending = new Map(); // id → {resolve, reject}
 function startChild() {
   cfg.logger.log(`[mcp] démarrage du connecteur embarqué : ${cfg.childCmd.join(' ')}`);
   child = spawn(cfg.childCmd[0], cfg.childCmd.slice(1), {
-    stdio: ['pipe', 'pipe', 'inherit'],
+    stdio: ['pipe', 'pipe', 'pipe'],
     env: { ...process.env, FOUNDRY_CREDENTIALS: cfg.credsPath },
+  });
+  // stderr du connecteur : il logge CHAQUE message WebSocket — sur un monde
+  // volumineux ce sont des dumps de plusieurs Mo par tick qui saturent le
+  // pipeline de logs (et la mémoire d'une petite instance). On filtre le
+  // bruit et on tronque le reste.
+  const rlErr = createInterface({ input: child.stderr });
+  rlErr.on('line', (line) => {
+    if (line.includes('WebSocket message') || line.includes('userActivity')) return;
+    cfg.logger.error(`[mcp·child] ${line.length > 500 ? line.slice(0, 500) + '… (tronqué)' : line}`);
   });
   const rl = createInterface({ input: child.stdout });
   rl.on('line', (line) => {

@@ -117,24 +117,60 @@ export function createStore({ dataDir, logger = console }) {
   // ~une douzaine. Le connecteur ne supportant pas le concurrentiel (cf. mcp.mjs :
   // file séquentielle), on optimise en RÉDUISANT le nombre d'appels, pas en parallèle.
   // Dossiers hors-scope (ex. milliers de planètes MEJ) jamais visités : cf. l'allowlist.
+  // Gardes anti-OOM : au-delà de FOLDER_CHUNK journaux, un dossier est synchronisé
+  // en INCRÉMENTAL (index léger + full uniquement sur les journaux modifiés — une
+  // petite réponse par journal, jamais un dump du dossier entier, qui tue le
+  // connecteur par manque de mémoire sur une petite instance). Au-delà de
+  // FOLDER_MAX, le dossier est ignoré (dossier hors-scope, ex. atlas de planètes).
+  const FOLDER_CHUNK = 40;
+  const FOLDER_MAX = 800;
+
   async function syncJournalsFull() {
     const relevant = relevantJournalFolderIds();
     const index = [];
+    // 0. liste légère GLOBALE (une seule fois par tick) : comptes par dossier
+    // (gardes) + base des pulls hors-dossier/techniques de la phase 2.
+    let light = [];
+    try {
+      const res = await mcpCall('get_journals', { requested_fields: ['_id', 'name', 'folder'] });
+      light = (Array.isArray(res) ? res : []).filter((r) => r && r._id);
+    } catch (e) { logger.error(`[store] liste légère journaux: ${e.message}`); }
+    const counts = new Map();
+    for (const r of light) if (r.folder) counts.set(r.folder, (counts.get(r.folder) || 0) + 1);
+
     for (const fid of relevant) {
+      const n = counts.get(fid) || 0;
       try {
-        const list = await mcpCall('get_journals', { where: { folder: fid } }); // docs complets
-        for (const j of (Array.isArray(list) ? list : [])) {
-          if (!j || !j._id) continue;
-          set(`journal:${j._id}`, j);
-          index.push(lightEntry(j));
+        if (n > FOLDER_MAX) { logger.error(`[store] dossier ${fid} ignoré : ${n} journaux (> ${FOLDER_MAX}, garde anti-dump)`); continue; }
+        if (n > FOLDER_CHUNK) {
+          // GROS dossier (ex. bible MJ) : index avec flags/_stats, puis full ciblé sur
+          // les seuls journaux nouveaux/modifiés (les écritures web bumpent _stats via
+          // le flag rev ; une édition de PAGE seule côté Foundry peut attendre un flag).
+          const idx = await mcpCall('get_journals', { where: { folder: fid }, requested_fields: INDEX_FIELDS });
+          for (const e of (Array.isArray(idx) ? idx : [])) {
+            if (!e || !e._id) continue;
+            index.push(e);
+            const cached = get(`journal:${e._id}`);
+            const fresh = cached && (cached._stats?.modifiedTime || 0) >= (e._stats?.modifiedTime || 1);
+            if (fresh) continue;
+            const list = await mcpCall('get_journals', { where: { _id: e._id } });
+            const j = (Array.isArray(list) ? list : []).find((x) => x && x._id === e._id);
+            if (j) set(`journal:${j._id}`, j);
+          }
+        } else {
+          const list = await mcpCall('get_journals', { where: { folder: fid } }); // docs complets
+          for (const j of (Array.isArray(list) ? list : [])) {
+            if (!j || !j._id) continue;
+            set(`journal:${j._id}`, j);
+            index.push(lightEntry(j));
+          }
         }
         if (index.length) set('journalsIndex', [...index]); // index PROGRESSIF : les journaux apparaissent dossier par dossier
       } catch (e) { logger.error(`[store] journaux dossier ${fid}: ${e.message}`); }
     }
     // journaux SANS dossier utiles (Dossiers/Notes MJ, Mondes…) + journaux TECHNIQUES
     // suivis PAR NOM où qu'ils soient rangés (le module ≥1.5.0 les range dans le
-    // dossier système, hors allowlist) : liste légère (sans flags → jamais tronquée)
-    // puis full ciblé.
+    // dossier système, hors allowlist) : réutilise la liste légère du début.
     try {
       const cfgJ = (get('config') || {}).journals || {};
       const UTIL_NAMES = new Set([
@@ -143,10 +179,8 @@ export function createStore({ dataDir, logger = console }) {
         process.env.CONFIG_JOURNAL_NAME || '⚙️ Holocron Config',
         ...Object.values(cfgJ).filter((v) => typeof v === 'string' && v && !v.includes(':')),
       ]);
-      const light = await mcpCall('get_journals', { requested_fields: ['_id', 'name', 'folder'] });
       const NOISE = /^(sequencerDatabase|dice_helper)$/i; // DB de module / barème (déjà synced à part)
-      const nulls = (Array.isArray(light) ? light : []).filter((r) => r && r._id
-        && (!r.folder || (UTIL_NAMES.has(r.name) && !relevant.has(r.folder)))
+      const nulls = light.filter((r) => (!r.folder || (UTIL_NAMES.has(r.name) && !relevant.has(r.folder)))
         && !NOISE.test(r.name || ''));
       for (const r of nulls) {
         try {
