@@ -261,7 +261,8 @@
       }
     },
     "setup": {
-      "done": "Holocron installed: {folders} folder(s) created, {rules} rule(s) and {events} event(s) imported, {moved} journal(s) filed into “{sys}”."
+      "done": "Holocron installed: {folders} folder(s) created, {rules} rule(s) and {events} event(s) imported, {moved} journal(s) filed into “{sys}”.",
+      "dupRemoved": "Removed near-empty duplicate “{name}” (the real configuration is kept)."
     }
   }
 }

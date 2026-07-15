@@ -26,10 +26,16 @@ async function ensureFolder(type, name) {
   return findFolder(type, name) || Folder.create({ name, type });
 }
 
-/** Journal de config de l'app web (par flag, repli par nom — réglage configJournal). */
-const configJournal = () =>
-  game.journal.find((j) => j.flags?.holocron?.config)
-  || game.journal.getName(game.settings.get(MOD, "configJournal") || "⚙️ Holocron Config");
+/** Journal de config de l'app web : parmi TOUS les porteurs du flag holocron.config
+ * (ou homonymes du réglage, comparaison insensible aux variantes d'emoji/espaces),
+ * le plus RICHE gagne — un doublon quasi vide ne masque jamais la vraie config. */
+const normJName = (s) => String(s || "").normalize("NFKD").replace(/️/g, "").replace(/\s+/g, " ").trim();
+function configJournals() {
+  const name = normJName(game.settings.get(MOD, "configJournal") || "⚙️ Holocron Config");
+  const list = game.journal.filter((j) => j.flags?.holocron?.config || normJName(j.name) === name);
+  return list.sort((a, b) => JSON.stringify(b.flags?.holocron?.config || {}).length - JSON.stringify(a.flags?.holocron?.config || {}).length);
+}
+const configJournal = () => configJournals()[0] || null;
 
 /** Journaux techniques (état/sync Holocron) à ranger dans le dossier système. */
 function utilityJournals() {
@@ -75,6 +81,18 @@ async function eventsFolder() {
  * et champs absents (dont la catégorie timeline, pointée par uuid — stable au
  * renommage). Ne touche JAMAIS à ce qui est déjà déclaré. */
 async function ensureConfig(eventsF) {
+  // Répare les doublons créés par les installeurs 1.5.1→1.5.4 : on garde le plus
+  // riche, on supprime les coquilles quasi vides homonymes (config < 600 caractères,
+  // sans packs ni registre) — jamais autre chose.
+  const all = configJournals();
+  for (const dup of all.slice(1)) {
+    const cfgDup = dup.flags?.holocron?.config || {};
+    const empty = JSON.stringify(cfgDup).length < 600 && !cfgDup.packs?.rules && !(cfgDup.registry || []).length;
+    if (empty) {
+      await dup.delete();
+      ui.notifications.warn(t("setup.dupRemoved", { name: dup.name }));
+    }
+  }
   let j = configJournal();
   if (!j) {
     j = await JournalEntry.create({

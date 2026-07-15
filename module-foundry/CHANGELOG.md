@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.5.5 — FIX : doublon de ⚙️ Holocron Config (règles disparues du web)
+
+- Les installeurs 1.5.1→1.5.4 pouvaient créer un **second** journal
+  « ⚙️ Holocron Config » quasi vide ; l'app web pouvait alors synchroniser la
+  coquille au lieu de la vraie config (catégories et `packs.rules` perdus →
+  plus de règles affichées).
+- Le module choisit désormais **la config la plus riche** parmi les journaux
+  candidats (flag `holocron.config` ou nom homonyme, comparaison tolérante aux
+  variantes d'emoji/espaces), ne crée plus jamais de doublon, et **supprime
+  automatiquement** les coquilles homonymes quasi vides (< 600 caractères, sans
+  packs ni registre) créées par les versions précédentes.
+- Côté app web (déployé) : la sync trie aussi les homonymes par richesse de
+  config — double ceinture.
+
 ## 1.5.4 — FIX : les compendiums de journaux étaient vides dans Foundry
 
 - **Bug depuis la 1.3.0** : les 4 packs JournalEntry (📖 Règles, ⚙️ Structure,
