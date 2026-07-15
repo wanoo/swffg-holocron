@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.6 — Auto-guérison : config renommée ramenée au nom attendu
+
+- Si la vraie configuration (repérée par son flag `holocron.config`, la plus
+  riche) a été **renommée**, l'installation la **renomme automatiquement** vers
+  le nom du réglage `configJournal` — c'est par nom que l'app web la synchronise.
+
 ## 1.5.5 — FIX : doublon de ⚙️ Holocron Config (règles disparues du web)
 
 - Les installeurs 1.5.1→1.5.4 pouvaient créer un **second** journal

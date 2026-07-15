@@ -93,10 +93,17 @@ async function ensureConfig(eventsF) {
       ui.notifications.warn(t("setup.dupRemoved", { name: dup.name }));
     }
   }
+  // Auto-guérison : si la vraie config (repérée par son flag) a été renommée,
+  // on la ramène au nom attendu — c'est par NOM que l'app web la synchronise.
+  const wantedName = game.settings.get(MOD, "configJournal") || "⚙️ Holocron Config";
   let j = configJournal();
+  if (j && j.flags?.holocron?.config && j.name !== wantedName) {
+    await j.update({ name: wantedName });
+    ui.notifications.info(t("setup.cfgRenamed", { name: wantedName }));
+  }
   if (!j) {
     j = await JournalEntry.create({
-      name: game.settings.get(MOD, "configJournal") || "⚙️ Holocron Config",
+      name: wantedName,
       ownership: { default: 0 },
       flags: { holocron: { config: { v: 1, meta: { title: game.world?.title || "Ma campagne SWFFG", description: "", system: "starwarsffg" } } } },
       pages: [{ name: "Config", type: "text", text: { content: "<p>Configuration du Holocron (flags.holocron.config).</p>", format: 1 } }],

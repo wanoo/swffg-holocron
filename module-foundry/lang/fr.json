@@ -262,7 +262,8 @@
     },
     "setup": {
       "done": "Holocron installé : {folders} dossier(s) créé(s), {rules} règle(s) et {events} événement(s) importés, {moved} journal(aux) rangé(s) dans « {sys} ».",
-      "dupRemoved": "Doublon « {name} » quasi vide supprimé (la vraie configuration est conservée)."
+      "dupRemoved": "Doublon « {name} » quasi vide supprimé (la vraie configuration est conservée).",
+      "cfgRenamed": "Journal de configuration renommé en « {name} » (nom attendu par l'app web)."
     }
   }
 }
