@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.7.1 — Convention des fiches événement alignée sur MEJ + POI vaisseau
+
+- **Fiches événement canon corrigées** : la date BBY/ABY est désormais dans le
+  champ **natif « Date »** de la fiche event MEJ, et **« Position » (location) =
+  Canon / Campagne** — la convention des fiches faites à la main. Le lieu réel
+  devient l'attribut `lieu`. Fiches canon visibles des joueurs (OBSERVER).
+- **La fiche 🚀 vaisseau est un POI MEJ** (type `poi`, plus `person`) — comme la
+  fiche de référence du monde.
+- App web : lecture tolérante des deux conventions (champs natifs + anciens
+  attributs, valeurs `{value}` dépliées) et **frise redessinée** — compacte,
+  groupée par ère (avant/après Yavin), or = Canon / bleu holo = Campagne.
+
 ## 1.7.0 — Bootstrap complet d'une installation fraîche + répertoires clés en options
 
 - **Installation fraîche = monde prêt à jouer** : répertoires clés, fiches liées

@@ -2,7 +2,7 @@
   "id": "swffg-holocron",
   "title": "SWFFG Holocron — Poste de commande de campagne",
   "description": "Le poste de commande de votre campagne Star Wars FFG : vaisseau partagé du groupe (vivres, carburant, usure — voyages appliqués depuis l'Astronav), tableau de bord holographique (allégeance, équipage, alignement des PNJ, HoloNet, mondes d'intérêt) et boîte à outils MJ (test de Peur, points de Destin, dégâts de groupe, blessures critiques, fin de rencontre, initiative, générateur de boutiques). Your Star Wars FFG campaign command deck: shared party ship, holographic dashboard and GM toolbox.",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "authors": [
     { "name": "wanoo" }
   ],

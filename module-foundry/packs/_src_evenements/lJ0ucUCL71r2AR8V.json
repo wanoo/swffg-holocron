@@ -32,10 +32,10 @@
         "monks-enhanced-journal": {
           "type": "event",
           "role": "",
-          "location": "Ghorman / Yavin 4",
+          "date": "2 BBY",
+          "location": "Canon",
           "attributes": {
-            "date": "2 BBY",
-            "position": "Canon"
+            "lieu": "Ghorman / Yavin 4"
           },
           "relationships": {},
           "items": {}
@@ -47,7 +47,7 @@
   "folder": null,
   "sort": 0,
   "ownership": {
-    "default": 0
+    "default": 2
   },
   "flags": {
     "monks-enhanced-journal": {

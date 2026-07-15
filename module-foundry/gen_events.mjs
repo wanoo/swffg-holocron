@@ -90,8 +90,12 @@ for (const [date, name, location, body] of EVENTS) {
         "monks-enhanced-journal": {
           type: "event",
           role: "",
-          location,
-          attributes: { date, position: "Canon" },
+          // champs NATIFS de la fiche event MEJ : date (BBY/ABY) et location
+          // (affiché « Position » en FR) = Canon / Campagne. Le lieu réel est
+          // un attribut `lieu` (affiché par l'Holocron, pas par la fiche MEJ).
+          date,
+          location: "Canon",
+          attributes: { lieu: location },
           relationships: {},
           items: {},
         },
@@ -100,7 +104,7 @@ for (const [date, name, location, body] of EVENTS) {
     }],
     folder: null,
     sort: 0,
-    ownership: { default: 0 },
+    ownership: { default: 2 }, // OBSERVER : le canon est public (visible joueurs)
     flags: { "monks-enhanced-journal": { pagetype: "event" } },
     _stats: {},
   };

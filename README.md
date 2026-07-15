@@ -56,20 +56,44 @@ Foundry (SSOT) ⇄ connector (foundry-mcp fork, stdio child or HTTP gateway)
 
 ## Quick start
 
-Requirements: Node ≥ 20, a FoundryVTT server (v12/13, system `starwarsffg`), the
-**MCP connector [wanoo/foundry-vtt-mcp](https://github.com/wanoo/foundry-vtt-mcp)**
-(embedded as an optional dependency, or run as an external gateway), and a dedicated
-**GM-role bot user** in your world (the connector logs in as this user).
+### 1. Foundry side — install the module (does everything)
+
+In Foundry **Setup → Add-on Modules → Install Module**, paste the manifest:
+
+```
+https://github.com/wanoo/swffg-holocron/releases/latest/download/module.json
+```
+
+Foundry will offer to install the required dependencies:
+[swffg-astronavigation](https://github.com/wanoo/swffg-astronavigation) (galaxy map &
+astrogation), [Monk's Enhanced Journal](https://foundryvtt.com/packages/monks-enhanced-journal)
+(typed sheets & bookmarks) and
+[fvtt-party-resources](https://foundryvtt.com/packages/fvtt-party-resources) (shared pools).
+System: `starwarsffg` (v12/13).
+
+Enable the module and load your world as GM: **the bootstrap runs itself** — key campaign
+folders, 🚀 ship POI / codex / HoloNet journals, the full rules compendium imported into
+the world, 20 key canon dates for the timeline, the ⚙️ Holocron Config journal completed,
+technical journals filed into the system folder. Every key folder, compendium and journal
+is adjustable afterwards in the **module settings** (name or `Folder.<id>` uuid) — no JSON
+editing, ever. Re-run anytime via the *« Installer / réinstaller »* settings menu.
+
+Finally create a dedicated **GM-role bot user** in your world (the web app's connector
+logs in as this user).
+
+### 2. Web app side — run the Archive Holocron
+
+Requirements: Node ≥ 20 (or Docker) and network access to your Foundry server.
 
 ```bash
 git clone https://github.com/wanoo/swffg-holocron && cd swffg-holocron
 npm install                     # pulls the MCP connector fork (optional dependency)
-cp .env.example .env            # fill in FOUNDRY_BASE_URL, credentials, secrets
+cp .env.example .env            # FOUNDRY_BASE_URL, bot credentials, SESSION_SECRET
 npm start
 ```
 
-Open http://localhost:8080 — then log in with a GM account and `POST /api/gm/bootstrap`
-(or use the ⚙️ journal) to declare your campaign folders/packs.
+Open http://localhost:8080 and log in with any Foundry account of the world. Content
+appears as the background sync completes (first full sync: a few minutes).
 
 ### Docker
 

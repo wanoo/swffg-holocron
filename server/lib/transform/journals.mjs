@@ -43,7 +43,9 @@ export function mejView(doc, gm) {
   const mf = page?.flags?.['monks-enhanced-journal'] || {};
   const attributes = {};
   for (const [k, v] of Object.entries(mf.attributes || {})) {
-    if (typeof v === 'string' && v.trim() && !ID16.test(k)) attributes[k] = v.trim();
+    // tolérant aux deux formes MEJ : "valeur" directe OU { value: "valeur" }
+    const val = (v && typeof v === 'object') ? v.value : v;
+    if (typeof val === 'string' && val.trim() && !ID16.test(k)) attributes[k] = val.trim();
   }
   const relationships = Object.values(mf.relationships || {})
     .filter((r) => r && r.id && (gm || !r.hidden))
@@ -52,6 +54,7 @@ export function mejView(doc, gm) {
     type: String(mf.type || jf?.pagetype || ''),
     ...(mf.role ? { role: String(mf.role) } : {}),
     ...(mf.location ? { location: String(mf.location) } : {}),
+    ...(mf.date ? { date: String(mf.date) } : {}), // champ NATIF de la fiche event MEJ
     ...(mf.placetype ? { placetype: String(mf.placetype) } : {}),
     ...(Object.keys(attributes).length ? { attributes } : {}),
     ...(relationships.length ? { relationships } : {}),
@@ -104,16 +107,21 @@ export function buildTimelineView({ config, folders, journalsIndex, getJournal, 
     if (!doc) continue;
     const mej = mejView(doc, gm);
     if (String(mej?.type || '') !== 'event') continue;
-    const date = String(mej.attributes?.date || '');
+    // Convention de la fiche event MEJ : champ natif « Date » = BBY/ABY ; champ natif
+    // « Position » (location) = Canon / Campagne. Replis tolérants : attributs
+    // date/position (anciennes fiches) ; le lieu réel vit dans l'attribut `lieu`.
+    const date = String(mej.date || mej.attributes?.date || '');
     const dateEnd = String(mej.attributes?.datefin || '');
+    const pos = String(mej.location || mej.attributes?.position || '');
+    const lieu = String(mej.attributes?.lieu || (pos && !/^(canon|campagne)/i.test(pos) ? pos : ''));
     events.push({
       id: entry.flags?.holocron?.legacyId || doc._id,
       foundryId: doc._id,
       name: doc.name,
-      source: /^canon/i.test(String(mej.attributes?.position || '')) ? 'canon' : 'campagne',
+      source: /^canon/i.test(pos) ? 'canon' : 'campagne',
       date, dateValue: parseDateBBY(date),
       ...(dateEnd ? { dateEnd, dateEndValue: parseDateBBY(dateEnd) } : {}),
-      ...(mej.location ? { location: mej.location } : {}),
+      ...(lieu ? { location: lieu } : {}),
       excerpt: excerptOf(doc),
     });
   }

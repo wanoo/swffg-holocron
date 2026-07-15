@@ -83,12 +83,13 @@ export function clampShip(s) {
 }
 
 export async function shipJournal() {
-  // Le vaisseau est un POI Monk's Enhanced Journal (« person ») : il apparaît comme entité
-  // et sa position sur la carte est portée par l'astronav (setCurrentWorld).
+  // Le vaisseau est un POI Monk's Enhanced Journal (« poi », point d'intérêt) : il
+  // apparaît comme entité et sa position sur la carte est portée par l'astronav
+  // (setCurrentWorld). Cf. la fiche de référence 🚀 du monde (type poi).
   return boundJournal("shipJournal",
     [{ name: t("ship.pageName"), type: "text", text: { content: "", format: 1 },
-       flags: { "monks-enhanced-journal": { type: "person" } } }],
-    { "monks-enhanced-journal": { pagetype: "person" } });
+       flags: { "monks-enhanced-journal": { type: "poi" } } }],
+    { "monks-enhanced-journal": { pagetype: "poi" } });
 }
 
 export function readShip(j) {

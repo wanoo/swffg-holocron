@@ -103,7 +103,10 @@ test('buildTimelineView : tri par date, position Canon/Campagne, dossier par uui
       { _id: 'j4', folder: 'AUTRE', flags: {} }, // hors catégorie timeline : ignoré
     ],
     getJournal: (id) => ({
-      j1: doc('j1', 'Empire', { date: '19 BBY', position: 'Canon' }),
+      // j1 : convention NATIVE de la fiche event MEJ (date + location=Canon, lieu en attribut)
+      j1: { _id: 'j1', name: 'Empire', pages: [{ _id: 'p1', type: 'text', text: { content: '<p>Texte.</p>' },
+        flags: { 'monks-enhanced-journal': { type: 'event', date: '19 BBY', location: 'Canon', attributes: { lieu: 'Coruscant' }, relationships: {} } } }] },
+      // j2 : ancienne convention par attributs (repli toléré)
       j2: doc('j2', 'Chute de la base', { date: '2 ABY', position: 'Campagne' }),
       j3: doc('j3', 'Sans date', {}),
       j4: doc('j4', 'Ignoré', { date: '1 ABY' }),
@@ -112,6 +115,7 @@ test('buildTimelineView : tri par date, position Canon/Campagne, dossier par uui
     gm: false,
   });
   assert.deepEqual(out.events.map((e) => e.name), ['Empire', 'Chute de la base', 'Sans date']);
-  assert.deepEqual(out.events.map((e) => e.source), ['canon', 'campagne', 'campagne'], 'position → source, défaut campagne');
+  assert.deepEqual(out.events.map((e) => e.source), ['canon', 'campagne', 'campagne'], 'Position → source, défaut campagne');
   assert.equal(out.events[0].dateValue, -19);
+  assert.equal(out.events[0].location, 'Coruscant', "le lieu réel vient de l'attribut lieu");
 });
