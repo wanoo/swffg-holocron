@@ -69,8 +69,13 @@ export function createStore({ dataDir, logger = console }) {
 
   async function syncConfig(configJournalName) {
     const list = await mcpCall('get_journals', { where: { name: configJournalName } });
-    const j = (Array.isArray(list) ? list : []).find((x) => x && x.name === configJournalName);
-    set('config', j?.flags?.holocron?.config || {});
+    // Plusieurs journaux peuvent porter ce nom (doublon d'installeur, copie…) :
+    // on prend celui dont flags.holocron.config est le plus RICHE — jamais le
+    // premier venu, qui peut être une coquille quasi vide.
+    const candidates = (Array.isArray(list) ? list : [])
+      .filter((x) => x && x.name === configJournalName && x.flags?.holocron?.config);
+    candidates.sort((a, b) => JSON.stringify(b.flags.holocron.config).length - JSON.stringify(a.flags.holocron.config).length);
+    set('config', candidates[0]?.flags?.holocron?.config || {});
   }
 
   async function syncUsers() {
