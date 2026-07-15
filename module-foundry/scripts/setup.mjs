@@ -131,7 +131,6 @@ async function ensureConfig(eventsF) {
   }
   const updates = {};
   if (added) updates["flags.holocron.config.categories"] = cats;
-  if (!cfg.gmBibleFolder) updates["flags.holocron.config.gmBibleFolder"] = "🎲 MJ — Bible de campagne";
   if (!cfg.pcFolder) updates["flags.holocron.config.pcFolder"] = "👥 Personnages joueurs";
   if (!cfg.npcsWorldFolder) updates["flags.holocron.config.npcsWorldFolder"] = "🎭 PNJ de campagne";
   if (Object.keys(updates).length) await j.update(updates);
@@ -162,21 +161,68 @@ async function importPack(packId, folderId) {
   return missing.length;
 }
 
+// Réglages du module qui PILOTENT la config web (flags.holocron.config) : un champ
+// de config vide se remplit depuis le réglage ; un réglage modifié par le MJ gagne.
+const SETTING_DEFAULTS = {
+  rulesPack: "", adversariesPack: "",
+  gmBibleFolder: "🎲 MJ — Bible de campagne", shipNotesPage: "",
+};
+
+// « JournalEntry.<jid>.JournalEntryPage.<pid> » (uuid copié depuis Foundry) → « <jid>:<pid> ».
+const normShipNotes = (v) => {
+  const m = /JournalEntry\.([A-Za-z0-9]{16})\.JournalEntryPage\.([A-Za-z0-9]{16})/.exec(String(v || ""));
+  return m ? `${m[1]}:${m[2]}` : String(v || "").trim();
+};
+
+// Auto-détection du compendium de règles : un pack JournalEntry dont le titre
+// évoque les règles (priorité aux packs monde), sinon celui embarqué au module.
+function detectRulesPack() {
+  const packs = game.packs.filter((p) => p.documentName === "JournalEntry" && /r[eè]gle/i.test(p.title || p.metadata?.label || ""));
+  packs.sort((a, b) => (a.metadata?.packageType === "world" ? -1 : 1) - (b.metadata?.packageType === "world" ? -1 : 1));
+  return packs[0]?.collection || `${MOD}.regles`;
+}
+
+export async function pushSettingsToConfig() {
+  if (!game.user.isGM) return;
+  const j = configJournal();
+  if (!j) return;
+  const cfg = j.flags?.holocron?.config || {};
+  const updates = {};
+  const apply = (path, current, settingKey, transform = (x) => x) => {
+    const raw = game.settings.get(MOD, settingKey);
+    const val = transform(raw);
+    if (!val) return;
+    // champ vide → rempli ; réglage NON-défaut → il gagne ; sinon la config existante prime
+    if (!current || (raw !== SETTING_DEFAULTS[settingKey] && current !== val)) updates[path] = val;
+  };
+  apply("flags.holocron.config.packs.rules", cfg.packs?.rules, "rulesPack");
+  apply("flags.holocron.config.packs.adversaries", cfg.packs?.adversaries, "adversariesPack");
+  apply("flags.holocron.config.gmBibleFolder", cfg.gmBibleFolder, "gmBibleFolder");
+  apply("flags.holocron.config.journals.shipNotes", cfg.journals?.shipNotes, "shipNotesPage", normShipNotes);
+  if (!cfg.packs?.rules && !updates["flags.holocron.config.packs.rules"]) {
+    updates["flags.holocron.config.packs.rules"] = detectRulesPack(); // zéro-config
+  }
+  if (Object.keys(updates).length) await j.update(updates);
+}
+
 export async function installHolocron({ silent = false } = {}) {
   if (!game.user.isGM) return false;
   let folders = 0;
   for (const n of JOURNAL_FOLDERS) if (!findFolder("JournalEntry", n)) { await ensureFolder("JournalEntry", n); folders++; }
   for (const n of ACTOR_FOLDERS) if (!findFolder("Actor", n)) { await ensureFolder("Actor", n); folders++; }
 
+  const eventsF = await eventsFolder();
+
+  // la config de campagne se complète toute seule : catégories/timeline (ensureConfig)
+  // puis champs pilotés par les OPTIONS du module (packs, bible, notes du vaisseau)
+  await ensureConfig(eventsF);
+  await pushSettingsToConfig();
+
   // règles : copiées depuis le compendium déclaré par la config (packs.rules,
   // ex. world.regles-and-references-fr) — repli sur le pack embarqué du module
   const rulesF = await ensureFolder("JournalEntry", RULES_FOLDER);
   const rules = await importPack(rulesPackId(), rulesF.id);
-  const eventsF = await eventsFolder();
   const events = await importPack(`${MOD}.evenements`, eventsF.id);
-
-  // la config de campagne se complète toute seule (catégories, timeline, dossiers)
-  await ensureConfig(eventsF);
 
   const sys = await systemFolder();
   let moved = 0;

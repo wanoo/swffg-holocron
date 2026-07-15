@@ -1,6 +1,6 @@
 /** SWFFG Holocron — entry point: settings, API, scene buttons, astronav ↔ ship bridge. */
 import { MOD, t, applyTrip, shipJournal, readShip, setShipWorld, astronavApi, favoriteWorlds, ensurePartyResources } from "./util.mjs";
-import { installHolocron } from "./setup.mjs";
+import { installHolocron, pushSettingsToConfig } from "./setup.mjs";
 import { HolocronApp } from "./deck.mjs";
 import { openToolbox, TOOLS } from "./gm-tools.mjs";
 
@@ -42,6 +42,13 @@ Hooks.once("init", () => {
   S("resWearId", "usure");
   // dossier SYSTÈME (journaux techniques rangés là) : nom OU uuid « Folder.<id> ».
   S("systemFolder", "🛠️ Holocron — Système");
+  // Champs de la config web PILOTÉS par les options du module (appliqués à la
+  // volée + à chaque installation) : compendiums, bible MJ, notes du vaisseau.
+  const SC = (key, def) => S(key, def, { onChange: () => { if (game.user.isGM) pushSettingsToConfig().catch((e) => console.warn("swffg-holocron | config", e)); } });
+  SC("rulesPack", "");                             // vide : auto-détection (pack « règles »)
+  SC("adversariesPack", "");
+  SC("gmBibleFolder", "🎲 MJ — Bible de campagne");
+  SC("shipNotesPage", "");                         // "<jid>:<pid>" OU uuid JournalEntry.….JournalEntryPage.…
   // marqueurs d'installation auto : party-resources (une fois) ; structure Holocron
   // (une fois PAR VERSION du module — l'install est idempotente, chaque mise à jour
   // rejoue donc les compléments de structure/config sans rien écraser).

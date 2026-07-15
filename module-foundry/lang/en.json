@@ -258,6 +258,22 @@
       "configJournal": {
         "name": "Configuration journal (web app)",
         "hint": "Name of the journal holding the Archive Holocron config (flags.holocron.config). Must match CONFIG_JOURNAL_NAME on the web app side (default: ⚙️ Holocron Config). Created and completed automatically at install."
+      },
+      "rulesPack": {
+        "name": "Rules compendium (web app)",
+        "hint": "Id of the journal compendium served as “Game rules” in the Archive Holocron (e.g. world.regles-and-references-fr). Empty: auto-detected (pack whose title contains “rules/règles”), else the module's own."
+      },
+      "adversariesPack": {
+        "name": "Adversaries compendium (web app)",
+        "hint": "Id of the actor compendium served as the GM bestiary (e.g. world.star-wars-adversaries)."
+      },
+      "gmBibleFolder": {
+        "name": "GM bible folder (web app)",
+        "hint": "Name of the campaign bible root folder (its subfolders become GM-space sections)."
+      },
+      "shipNotesPage": {
+        "name": "Ship notes page (web app)",
+        "hint": "Journal page displayed/editable in the Ship view. Paste the Foundry uuid (JournalEntry.….JournalEntryPage.…) or the <journalId>:<pageId> form."
       }
     },
     "setup": {

@@ -45,13 +45,17 @@ export const CAMPAIGN_DEFAULTS = {
 
 export function campaignConfig(store) {
   const raw = store.get('config') || {};
-  return {
+  const cc = {
     ...CAMPAIGN_DEFAULTS,
     ...raw,
     packs: { ...CAMPAIGN_DEFAULTS.packs, ...(raw.packs || {}) },
     journals: { ...CAMPAIGN_DEFAULTS.journals, ...(raw.journals || {}) },
     meta: { ...CAMPAIGN_DEFAULTS.meta, ...(raw.meta || {}) },
   };
+  // shipNotes : uuid Foundry copié tel quel (« JournalEntry.X.JournalEntryPage.Y ») → « X:Y »
+  const m = /JournalEntry\.([A-Za-z0-9]{16})\.JournalEntryPage\.([A-Za-z0-9]{16})/.exec(cc.journals.shipNotes || '');
+  if (m) cc.journals.shipNotes = `${m[1]}:${m[2]}`;
+  return cc;
 }
 
 // Sous-ensemble PUBLIC-SAFE exposé au front (jamais la bible ni les cfg MJ).

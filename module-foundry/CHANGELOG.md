@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.6.0 — La config web pilotée par les OPTIONS du module
+
+- Nouveaux réglages Foundry (appliqués à la volée et à chaque installation) :
+  **Compendium des règles** (vide = auto-détection d'un pack « règles », repli sur
+  celui du module), **Compendium des adversaires**, **Dossier Bible MJ** et
+  **Page de notes du vaisseau** (accepte l'uuid copié depuis Foundry
+  `JournalEntry.….JournalEntryPage.…` ou `<journalId>:<pageId>`).
+- Règle de fusion : un champ vide de ⚙️ Holocron Config se remplit depuis le
+  réglage ; un réglage modifié par le MJ gagne ; sinon la config existante prime.
+  Plus AUCUNE édition manuelle du journal ⚙️ n'est nécessaire.
+
 ## 1.5.6 — Auto-guérison : config renommée ramenée au nom attendu
 
 - Si la vraie configuration (repérée par son flag `holocron.config`, la plus
