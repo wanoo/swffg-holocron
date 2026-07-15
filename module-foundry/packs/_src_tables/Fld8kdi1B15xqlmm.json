@@ -1,0 +1,265 @@
+{
+  "_id": "Fld8kdi1B15xqlmm",
+  "_key": "!tables!Fld8kdi1B15xqlmm",
+  "name": "🔥 Avaries critiques — véhicules (d100)",
+  "img": "icons/svg/fire.svg",
+  "description": "<p>Avaries critiques (véhicules & vaisseaux) — 1d100 + 10 par avarie critique déjà subie. Réparation : test de Mécanique.</p>",
+  "formula": "1d100",
+  "replacement": true,
+  "displayRoll": true,
+  "results": [
+    {
+      "_id": "glPjD88g1KDptLcQ",
+      "_key": "!tables.results!Fld8kdi1B15xqlmm.glPjD88g1KDptLcQ",
+      "type": 0,
+      "text": "<b>Stress mécanique</b> — Le véhicule subit 1 tension système.",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        1,
+        9
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "meJ67QkU6rOUqWSt",
+      "_key": "!tables.results!Fld8kdi1B15xqlmm.meJ67QkU6rOUqWSt",
+      "type": 0,
+      "text": "<b>Bousculé</b> — Secousse : chaque membre d'équipage subit 1 stress et est désorienté 1 round.",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        10,
+        18
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "7eo1uHcgJLRXCZ7x",
+      "_key": "!tables.results!Fld8kdi1B15xqlmm.7eo1uHcgJLRXCZ7x",
+      "type": 0,
+      "text": "<b>Perte d’alimentation des boucliers</b> — Défense réduite de 1 sur toutes les zones jusqu'à réparation.",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        19,
+        27
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "J0drqXxHh3nXbsRM",
+      "_key": "!tables.results!Fld8kdi1B15xqlmm.J0drqXxHh3nXbsRM",
+      "type": 0,
+      "text": "<b>Dévié</b> — Le pilote ne peut pas exécuter de manœuvre au prochain round.",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        28,
+        36
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "Dg2P0JoEyqQ8rads",
+      "_key": "!tables.results!Fld8kdi1B15xqlmm.Dg2P0JoEyqQ8rads",
+      "type": 0,
+      "text": "<b>Culbuté</b> — Vrille : ■ à tous les tests à bord, l'équipage s'accroche au prochain round.",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        37,
+        45
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "b6Y3VIGyB3Vosvdy",
+      "_key": "!tables.results!Fld8kdi1B15xqlmm.b6Y3VIGyB3Vosvdy",
+      "type": 0,
+      "text": "<b>Composant touché</b> — Un composant (au choix du MJ) est désactivé jusqu'à réparation.",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        46,
+        54
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "Yj8EUKBczYfhCu3y",
+      "_key": "!tables.results!Fld8kdi1B15xqlmm.Yj8EUKBczYfhCu3y",
+      "type": 0,
+      "text": "<b>Panne des boucliers</b> — Boucliers en chute : défense -1 (cumulatif) par round jusqu'à 0.",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        55,
+        63
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "LKrISlUfqqovy75v",
+      "_key": "!tables.results!Fld8kdi1B15xqlmm.LKrISlUfqqovy75v",
+      "type": 0,
+      "text": "<b>Panne du navordinateur / unité R2</b> — Plus de saut hyperspace tant que ce n'est pas réparé.",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        64,
+        72
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "K4t7zOm96JgWsjxJ",
+      "_key": "!tables.results!Fld8kdi1B15xqlmm.K4t7zOm96JgWsjxJ",
+      "type": 0,
+      "text": "<b>Fluctuations énergétiques</b> — Coupures aléatoires : le pilote ne peut plus infliger volontairement de tension système.",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        73,
+        81
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "4SNqkpRiiG6ubHfw",
+      "_key": "!tables.results!Fld8kdi1B15xqlmm.4SNqkpRiiG6ubHfw",
+      "type": 0,
+      "text": "<b>Boucliers désactivés</b> — Défense 0 ; chaque coup encaissé inflige +1 tension système, jusqu'à réparation.",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        82,
+        90
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "ntPd3TJLJwAgFxcH",
+      "_key": "!tables.results!Fld8kdi1B15xqlmm.ntPd3TJLJwAgFxcH",
+      "type": 0,
+      "text": "<b>Moteur endommagé</b> — Vitesse maximale réduite de 1 (minimum 1) jusqu'à réparation.",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        91,
+        99
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "bErrdq2o9lEYx2Ox",
+      "_key": "!tables.results!Fld8kdi1B15xqlmm.bErrdq2o9lEYx2Ox",
+      "type": 0,
+      "text": "<b>Boucliers surchargés</b> — Boucliers hors service (défense 0, non réparable en vol) ; 2 tensions système.",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        100,
+        108
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "bdaVwZxwsh6EWFbd",
+      "_key": "!tables.results!Fld8kdi1B15xqlmm.bdaVwZxwsh6EWFbd",
+      "type": 0,
+      "text": "<b>Arrêt moteur</b> — Vitesse 0 : le véhicule dérive, plus de manœuvres, jusqu'à réparation.",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        109,
+        117
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "MQMVQbxsPEKaxHMA",
+      "_key": "!tables.results!Fld8kdi1B15xqlmm.MQMVQbxsPEKaxHMA",
+      "type": 0,
+      "text": "<b>Panne système majeure</b> — Un composant (au choix du MJ) est DÉTRUIT.",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        118,
+        126
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "hoSKU9h6Xr1ETFTp",
+      "_key": "!tables.results!Fld8kdi1B15xqlmm.hoSKU9h6Xr1ETFTp",
+      "type": 0,
+      "text": "<b>Brèche majeure dans la coque</b> — Décompression : la coque cède, sections exposées au vide.",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        127,
+        133
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "b001ACztb06GXnPh",
+      "_key": "!tables.results!Fld8kdi1B15xqlmm.b001ACztb06GXnPh",
+      "type": 0,
+      "text": "<b>Déstabilisé</b> — Seuils de coque et de tension réduits de moitié jusqu'à réparation.",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        134,
+        138
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "wLAGsxRWkI3AjSF4",
+      "_key": "!tables.results!Fld8kdi1B15xqlmm.wLAGsxRWkI3AjSF4",
+      "type": 0,
+      "text": "<b>Au feu !</b> — Incendie à bord : dégâts et stress chaque round tant qu'il n'est pas éteint.",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        139,
+        144
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "HWBE7et66C3BfiXj",
+      "_key": "!tables.results!Fld8kdi1B15xqlmm.HWBE7et66C3BfiXj",
+      "type": 0,
+      "text": "<b>Dislocation</b> — Le véhicule se disloque : détruit à la fin du prochain round. Évacuation !",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        145,
+        153
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "nfmNp2bIrzGe4yPv",
+      "_key": "!tables.results!Fld8kdi1B15xqlmm.nfmNp2bIrzGe4yPv",
+      "type": 0,
+      "text": "<b>Désintégré</b> — Destruction totale et immédiate, équipage compris.",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        154,
+        500
+      ],
+      "drawn": false
+    }
+  ],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "sort": 0,
+  "_stats": {}
+}

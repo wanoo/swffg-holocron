@@ -45,7 +45,8 @@
         "refuel": "Ravitaillement : vivres au maximum.",
         "fuel": "Plein de carburant effectué.",
         "repair": "Révision complète : usure à 0 %."
-      }
+      },
+      "notesPageName": "📓 Notes d'équipage"
     },
     "deck": {
       "title": "Holocron — Poste de commande",
@@ -261,11 +262,11 @@
       },
       "rulesPack": {
         "name": "Compendium des règles (app web)",
-        "hint": "Id du compendium de journaux servi comme « Règles du jeu » dans l'Archive Holocron (ex. world.regles-and-references-fr). Vide : auto-détection (pack dont le titre contient « règles »), sinon celui du module."
+        "hint": "Compendium de journaux SOURCE de l'import des règles dans le monde (vide : auto-détection d'un pack « règles », sinon celui du module). L'app web lit le DOSSIER des règles importées (option « Dossier — Règles importées »)."
       },
       "adversariesPack": {
         "name": "Compendium des adversaires (app web)",
-        "hint": "Id du compendium d'acteurs servi comme bestiaire MJ (ex. world.star-wars-adversaries)."
+        "hint": "Id du compendium d'acteurs servi comme bestiaire MJ. Défaut : world.star-wars-adversaries — s'importe via l'outil SW Adversaries du système starwarsffg."
       },
       "gmBibleFolder": {
         "name": "Dossier Bible MJ (app web)",
@@ -273,7 +274,7 @@
       },
       "shipNotesPage": {
         "name": "Page de notes du vaisseau (app web)",
-        "hint": "Page de journal affichée/éditable dans la vue Vaisseau. Collez l'uuid Foundry (JournalEntry.….JournalEntryPage.…) ou le format <journalId>:<pageId>."
+        "hint": "Page de journal affichée/éditable dans la vue Vaisseau. Vide : la page 📓 Notes d'équipage du journal POI vaisseau (créée au besoin). Sinon collez l'uuid Foundry (JournalEntry.….JournalEntryPage.…) ou <journalId>:<pageId>."
       },
       "folderActes": {
         "name": "Dossier — Actes de campagne",

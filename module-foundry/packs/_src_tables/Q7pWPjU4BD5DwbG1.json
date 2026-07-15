@@ -1,0 +1,395 @@
+{
+  "_id": "Q7pWPjU4BD5DwbG1",
+  "_key": "!tables!Q7pWPjU4BD5DwbG1",
+  "name": "🩸 Blessures critiques (d100)",
+  "img": "icons/svg/blood.svg",
+  "description": "<p>Blessures critiques (personnages) — 1d100 + 10 par blessure critique déjà subie. Soin : test de Médecine de la gravité indiquée.</p>",
+  "formula": "1d100",
+  "replacement": true,
+  "displayRoll": true,
+  "results": [
+    {
+      "_id": "wtitmY1sJD99tvoN",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.wtitmY1sJD99tvoN",
+      "type": 0,
+      "text": "<b>Petite entaille</b> — Subit 1 stress. <i>(Gravité : Facile (◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        1,
+        5
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "zOrvqhlBTO2HsG8Z",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.zOrvqhlBTO2HsG8Z",
+      "type": 0,
+      "text": "<b>Ralentissement</b> — Agit en dernier au prochain round. <i>(Gravité : Facile (◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        6,
+        10
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "cOkoaATTv6n4bBW5",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.cOkoaATTv6n4bBW5",
+      "type": 0,
+      "text": "<b>Choc</b> — Lâche l'objet qu'il tenait en main. <i>(Gravité : Facile (◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        11,
+        15
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "J5PkXnAhaTcjxb5Z",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.J5PkXnAhaTcjxb5Z",
+      "type": 0,
+      "text": "<b>Distraction</b> — Pas de manœuvre gratuite à son prochain tour. <i>(Gravité : Facile (◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        16,
+        20
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "JkiWKTZNSHftTayI",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.JkiWKTZNSHftTayI",
+      "type": 0,
+      "text": "<b>Déséquilibré</b> — Ajoute ■ (contrainte) à son prochain test. <i>(Gravité : Facile (◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        21,
+        25
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "8VCq2t48DUT9YycH",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.8VCq2t48DUT9YycH",
+      "type": 0,
+      "text": "<b>Blessure accablante</b> — Retourne un point de Destin (clair → obscur). <i>(Gravité : Facile (◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        26,
+        30
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "zBUOuRGvLXfxkJF9",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.zBUOuRGvLXfxkJF9",
+      "type": 0,
+      "text": "<b>Etourdissement</b> — Chancelant jusqu'à la fin de son prochain tour. <i>(Gravité : Facile (◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        31,
+        35
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "o2akCJpxr902H3Sd",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.o2akCJpxr902H3Sd",
+      "type": 0,
+      "text": "<b>Piqûre</b> — La difficulté de son prochain test augmente de 1. <i>(Gravité : Facile (◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        36,
+        40
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "i6bm31wuaVDM9oOn",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.i6bm31wuaVDM9oOn",
+      "type": 0,
+      "text": "<b>Renversement</b> — À terre, et subit 1 stress. <i>(Gravité : Moyenne (◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        41,
+        45
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "N5TJV3DXNj5sc7Pe",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.N5TJV3DXNj5sc7Pe",
+      "type": 0,
+      "text": "<b>Mal au crâne</b> — +1 difficulté aux tests d'Intelligence et de Ruse jusqu'à la fin de la rencontre. <i>(Gravité : Moyenne (◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        46,
+        50
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "kwiAzGHGN5FyFCHb",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.kwiAzGHGN5FyFCHb",
+      "type": 0,
+      "text": "<b>Blessure effroyable</b> — +1 difficulté aux tests de Présence et de Volonté jusqu'à la fin de la rencontre. <i>(Gravité : Moyenne (◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        51,
+        55
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "AYrwLcKE8cKvQYJ3",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.AYrwLcKE8cKvQYJ3",
+      "type": 0,
+      "text": "<b>Blessure lancinante</b> — +1 difficulté aux tests de Vigueur et d'Agilité jusqu'à la fin de la rencontre. <i>(Gravité : Moyenne (◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        56,
+        60
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "T2y69tIeFGMFPpjx",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.T2y69tIeFGMFPpjx",
+      "type": 0,
+      "text": "<b>Hébétement</b> — Désorienté jusqu'à la fin de la rencontre. <i>(Gravité : Moyenne (◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        61,
+        65
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "P82Ogx4dDRgS9WHg",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.P82Ogx4dDRgS9WHg",
+      "type": 0,
+      "text": "<b>Confusion</b> — Perd tous ses dés de Fortune ☐ jusqu'à la fin de la rencontre. <i>(Gravité : Moyenne (◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        66,
+        70
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "EzsJMvUF0xzIOTWC",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.EzsJMvUF0xzIOTWC",
+      "type": 0,
+      "text": "<b>Paralysé</b> — Perd sa manœuvre gratuite jusqu'à la fin de la rencontre. <i>(Gravité : Moyenne (◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        71,
+        75
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "vTpQC2Ties4OMPtw",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.vTpQC2Ties4OMPtw",
+      "type": 0,
+      "text": "<b>Aux abois</b> — Baisse sa garde : les attaques contre lui gagnent ☐ jusqu'à la fin de la rencontre. <i>(Gravité : Moyenne (◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        76,
+        80
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "WoU078ZRkE0Un5Iw",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.WoU078ZRkE0Un5Iw",
+      "type": 0,
+      "text": "<b>Hors d’haleine</b> — Ne peut plus subir volontairement de stress (ni y convertir) jusqu'à la fin de la rencontre. <i>(Gravité : Moyenne (◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        81,
+        85
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "xTxYPxJQVPj5RaDN",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.xTxYPxJQVPj5RaDN",
+      "type": 0,
+      "text": "<b>A mal</b> — +1 difficulté à TOUS ses tests jusqu'à la fin de la rencontre. <i>(Gravité : Moyenne (◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        86,
+        90
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "rY0EuaGEsW6ANWPY",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.rY0EuaGEsW6ANWPY",
+      "type": 0,
+      "text": "<b>Exténuation</b> — Subit 1 stress après chaque action tant que la blessure n'est pas soignée. <i>(Gravité : Difficile (◆◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        91,
+        95
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "htDGo0Sst1vxFnQB",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.htDGo0Sst1vxFnQB",
+      "type": 0,
+      "text": "<b>Infirmité</b> — Un membre est estropié : +1 difficulté aux tests l'utilisant jusqu'à guérison. <i>(Gravité : Difficile (◆◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        96,
+        100
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "iVdiG7uuVyGDQqrB",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.iVdiG7uuVyGDQqrB",
+      "type": 0,
+      "text": "<b>Mutilation</b> — Un membre est définitivement perdu (hors prothèse). <i>(Gravité : Difficile (◆◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        101,
+        105
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "sn71fZKEK7o2G004",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.sn71fZKEK7o2G004",
+      "type": 0,
+      "text": "<b>Blessure épouvantable</b> — Réduit de 1 une caractéristique (aléatoire, 1d10) jusqu'à guérison. <i>(Gravité : Difficile (◆◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        106,
+        110
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "xKvokAxzhnTKtdrn",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.xKvokAxzhnTKtdrn",
+      "type": 0,
+      "text": "<b>Invalidité</b> — Une seule manœuvre par tour jusqu'à guérison. <i>(Gravité : Difficile (◆◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        111,
+        115
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "xkNeGHqFxdbQ9pUD",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.xkNeGHqFxdbQ9pUD",
+      "type": 0,
+      "text": "<b>Aveuglé</b> — Ne voit plus : +3 difficulté à la vision, +1 aux autres tests, jusqu'à guérison. <i>(Gravité : Difficile (◆◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        116,
+        120
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "CU9vrduGKypSxlUF",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.CU9vrduGKypSxlUF",
+      "type": 0,
+      "text": "<b>Perte de connaissance</b> — Inconscient jusqu'à ce qu'on le ranime (soins ou fin de rencontre). <i>(Gravité : Difficile (◆◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        121,
+        125
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "jtN6eN0IvExqx2dC",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.jtN6eN0IvExqx2dC",
+      "type": 0,
+      "text": "<b>Blessure de cauchemar</b> — Réduit DÉFINITIVEMENT de 1 une caractéristique (aléatoire, 1d10). <i>(Gravité : Redoutable (◆◆◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        126,
+        130
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "7shMoBsTAFOiiW8B",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.7shMoBsTAFOiiW8B",
+      "type": 0,
+      "text": "<b>Hémorragie</b> — Subit 1 blessure et 1 stress par round tant qu'il n'est pas soigné ; chaque tranche de 5 = +1 critique. <i>(Gravité : Redoutable (◆◆◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        131,
+        140
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "1uWPSPMEu5PCAFa7",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.1uWPSPMEu5PCAFa7",
+      "type": 0,
+      "text": "<b>La fin est proche</b> — Meurt à la fin de son prochain tour, sauf soins immédiats. <i>(Gravité : Redoutable (◆◆◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        141,
+        150
+      ],
+      "drawn": false
+    },
+    {
+      "_id": "6nyUEfpQKEUf19FZ",
+      "_key": "!tables.results!Q7pWPjU4BD5DwbG1.6nyUEfpQKEUf19FZ",
+      "type": 0,
+      "text": "<b>Mort</b> — Décès immédiat. <i>(Gravité : Redoutable (◆◆◆◆))</i>",
+      "img": "icons/svg/d20-black.svg",
+      "weight": 1,
+      "range": [
+        151,
+        500
+      ],
+      "drawn": false
+    }
+  ],
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "sort": 0,
+  "_stats": {}
+}

@@ -120,7 +120,11 @@ export async function writeShip(j, ship, logHTML = null) {
     } catch (e) { console.warn("swffg-holocron | sync usure→astronav", e); }
   }
   const pct = (v, m) => Math.round((v / m) * 100);
-  const pg = j.pages.contents[0];
+  // page de STATUT = la page POI (flag MEJ) — jamais la page notes d'équipage,
+  // même si l'ordre des pages change (repli : nom lié, puis première page).
+  const pg = j.pages.find((p) => p.flags?.["monks-enhanced-journal"])
+    || j.pages.getName?.(t("ship.pageName"))
+    || j.pages.contents[0];
   if (pg) await pg.update({ "text.content":
     `<h2>🚀 ${esc(s.name)}</h2><ul>` +
     `<li>🥫 ${t("ship.provisions")} : <strong>${s.vivres} / ${s.vivresMax}</strong> (${pct(s.vivres, s.vivresMax)}%)</li>` +

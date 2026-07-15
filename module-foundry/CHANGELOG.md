@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.8.0 — Règles lues depuis le monde, tables critiques embarquées, install sans détour
+
+- **L'app web lit les règles depuis le DOSSIER importé** (catégorie `kind:"rules"`
+  déclarée automatiquement par uuid vers « 📖 Règles importées ») — plus de
+  compendium à configurer côté web ; préfixes « NN · » retirés à l'affichage, pack
+  ignoré si le dossier est déclaré (pas de doublon). Le réglage « Compendium des
+  règles » ne pilote plus que la SOURCE de l'import.
+- **Nouveau pack « 🎲 Tables critiques (FR) »** : les deux RollTables d100 de la
+  boîte à outils MJ (🩸 Blessures critiques — 29 résultats avec gravité de soin,
+  🔥 Avaries critiques véhicules — 19 résultats), plages/libellés dérivés des pages
+  de règles, effets condensés. **Importées automatiquement** : l'outil « Blessure
+  critique » fonctionne d'office.
+- **Installation sans détour** : le dossier 🛠️ système est créé AVANT les fiches
+  liées — plus de journaux déposés à la racine puis déplacés.
+- **Notes du vaisseau par défaut** : la page 📓 Notes d'équipage du journal POI
+  vaisseau (page existante adoptée, sinon créée) — plus d'uuid à coller ;
+  `writeShip` cible la page de statut par flag MEJ (la page notes est intouchable).
+- **Compendium adversaires** : défaut `world.star-wars-adversaries` (import via
+  l'outil SW Adversaries du système).
+
 ## 1.7.1 — Convention des fiches événement alignée sur MEJ + POI vaisseau
 
 - **Fiches événement canon corrigées** : la date BBY/ABY est désormais dans le

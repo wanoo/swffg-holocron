@@ -142,22 +142,41 @@ async function ensureConfig(eventsF) {
     cats.push({ folder: `Folder.${eventsF.id}`, kind: "timeline", label: "Événements" });
     added++;
   }
+  // règles : l'app web lit le DOSSIER des règles importées (uuid stable), pas un pack
+  const rulesF = findFolder("JournalEntry", game.settings.get(MOD, "folderRules") || KEY_FOLDERS.folderRules.def);
+  if (rulesF && !cats.some((c) => c?.kind === "rules") && !resolvedIds.has(rulesF.id)) {
+    cats.push({ folder: `Folder.${rulesF.id}`, kind: "rules", label: "Règles du jeu" });
+    added++;
+  }
   const updates = {};
   if (added) updates["flags.holocron.config.categories"] = cats;
   if (Object.keys(updates).length) await j.update(updates);
   return added;
 }
 
-/** Compendium de règles à importer : celui déclaré par la config web
- * (packs.rules, ex. world.regles-and-references-fr) s'il existe dans le monde,
- * sinon le pack embarqué du module. */
+/** Compendium de règles à importer : réglage rulesPack s'il résout, sinon celui
+ * déclaré par la config web (packs.rules), sinon auto-détection. */
 function rulesPackId() {
+  const bySetting = game.settings.get(MOD, "rulesPack");
+  if (bySetting && game.packs.get(bySetting)) return bySetting;
   const ref = configJournal()?.flags?.holocron?.config?.packs?.rules;
-  return (ref && game.packs.get(ref)) ? ref : `${MOD}.regles`;
+  return (ref && game.packs.get(ref)) ? ref : detectRulesPack();
 }
 
 // Nom normalisé pour la déduplication : préfixe de tri « NN · » ignoré, casse pliée.
 const normName = (n) => String(n || "").toLowerCase().replace(/^\d+\s*[·.\-–—]?\s*/, "").trim();
+
+/** Importe les RollTables du pack tables absentes du monde (les réglages
+ * critTableCharacter/critTableVehicle pointent ces noms par défaut). */
+async function importTables() {
+  const pack = game.packs.get(`${MOD}.tables`);
+  if (!pack) return 0;
+  const docs = await pack.getDocuments();
+  const missing = docs.filter((d) => !game.tables.getName(d.name));
+  if (!missing.length) return 0;
+  await RollTable.createDocuments(missing.map((d) => d.toObject()), { keepId: true });
+  return missing.length;
+}
 
 /** Importe les documents d'un pack absents du monde (dédup par nom normalisé, ids conservés). */
 async function importPack(packId, folderId) {
@@ -175,7 +194,7 @@ async function importPack(packId, folderId) {
 // Réglages du module qui PILOTENT la config web (flags.holocron.config) : un champ
 // de config vide se remplit depuis le réglage ; un réglage modifié par le MJ gagne.
 const SETTING_DEFAULTS = {
-  rulesPack: "", adversariesPack: "",
+  rulesPack: "", adversariesPack: "world.star-wars-adversaries",
   gmBibleFolder: "🎲 MJ — Bible de campagne", shipNotesPage: "",
   folderPcs: "👥 Personnages joueurs", folderNpcs: "🎭 PNJ de campagne",
 };
@@ -194,8 +213,9 @@ const normShipNotes = (v) => {
   return m ? `${m[1]}:${m[2]}` : String(v || "").trim();
 };
 
-// Auto-détection du compendium de règles : un pack JournalEntry dont le titre
-// évoque les règles (priorité aux packs monde), sinon celui embarqué au module.
+// Auto-détection du compendium de règles À IMPORTER : un pack JournalEntry dont
+// le titre évoque les règles (priorité aux packs monde), sinon celui du module.
+// (L'app web, elle, lit le DOSSIER des règles importées — catégorie kind "rules".)
 function detectRulesPack() {
   const packs = game.packs.filter((p) => p.documentName === "JournalEntry" && /r[eè]gle/i.test(p.title || p.metadata?.label || ""));
   packs.sort((a, b) => (a.metadata?.packageType === "world" ? -1 : 1) - (b.metadata?.packageType === "world" ? -1 : 1));
@@ -221,10 +241,31 @@ export async function pushSettingsToConfig() {
   apply("flags.holocron.config.journals.shipNotes", cfg.journals?.shipNotes, "shipNotesPage", normShipNotes);
   apply("flags.holocron.config.pcFolder", cfg.pcFolder, "folderPcs", () => folderSettingName("folderPcs"));
   apply("flags.holocron.config.npcsWorldFolder", cfg.npcsWorldFolder, "folderNpcs", () => folderSettingName("folderNpcs"));
-  if (!cfg.packs?.rules && !updates["flags.holocron.config.packs.rules"]) {
-    updates["flags.holocron.config.packs.rules"] = detectRulesPack(); // zéro-config
+  // notes du vaisseau : défaut = la page notes du journal POI vaisseau (créée au besoin)
+  if (!cfg.journals?.shipNotes && !updates["flags.holocron.config.journals.shipNotes"]) {
+    const ref = await ensureShipNotesPage();
+    if (ref) updates["flags.holocron.config.journals.shipNotes"] = ref;
   }
   if (Object.keys(updates).length) await j.update(updates);
+}
+
+/** Page « notes » du journal POI vaisseau : page taguée bound=shipNotes, sinon
+ * première page texte hors fiche MEJ (attrape la page notes d'un monde existant),
+ * sinon création de « 📓 Notes d'équipage » APRÈS la page de statut. → "<jid>:<pid>". */
+export async function ensureShipNotesPage() {
+  const j = await shipJournal();
+  if (!j) return "";
+  let page = j.pages.find((p) => p.flags?.[MOD]?.bound === "shipNotes")
+    || j.pages.find((p, i) => i > 0 && p.type === "text" && !p.flags?.["monks-enhanced-journal"]);
+  if (!page && game.user.isGM) {
+    const maxSort = Math.max(0, ...j.pages.map((p) => p.sort || 0));
+    [page] = await j.createEmbeddedDocuments("JournalEntryPage", [{
+      name: t("ship.notesPageName"), type: "text", sort: maxSort + 100000,
+      text: { content: "", format: 1 },
+      flags: { [MOD]: { bound: "shipNotes" } },
+    }]);
+  }
+  return page ? `${j.id}:${page.id}` : "";
 }
 
 export async function installHolocron({ silent = false } = {}) {
@@ -236,25 +277,28 @@ export async function installHolocron({ silent = false } = {}) {
     const spec = KEY_FOLDERS[key];
     if (!findFolder(spec.type, game.settings.get(MOD, key) || spec.def)) { await keyFolder(key); folders++; }
   }
+  // 2. dossier SYSTÈME résolu/créé AVANT les fiches liées : elles naissent
+  // directement dedans (plus de dépôt à la racine puis déplacement).
+  const sys = await systemFolder();
   const eventsF = await eventsFolder();
 
-  // 2. la config de campagne se complète toute seule : catégories/timeline (ensureConfig)
+  // 3. fiches liées du poste de commande : POI vaisseau (fiche MEJ), codex, HoloNet
+  try { await shipJournal(); await codexJournal(); await boundJournal("holonetJournal"); }
+  catch (e) { console.warn("swffg-holocron | journaux liés", e); }
+
+  // 4. la config de campagne se complète toute seule : catégories (règles/timeline)
   // puis champs pilotés par les OPTIONS du module (packs, bible, notes du vaisseau…)
   await ensureConfig(eventsF);
   await pushSettingsToConfig();
 
-  // 3. fiches liées du poste de commande : POI vaisseau (fiche MEJ), codex, HoloNet
-  // (créées dans le dossier système — no-op si déjà présentes)
-  try { await shipJournal(); await codexJournal(); await boundJournal("holonetJournal"); }
-  catch (e) { console.warn("swffg-holocron | journaux liés", e); }
-
-  // 4. règles : copiées depuis le compendium déclaré par la config (packs.rules,
-  // ex. world.regles-and-references-fr) — repli sur le pack embarqué du module
+  // 5. imports dans le monde : règles (compendium source → dossier règles),
+  // événements canon (→ dossier événements), tables critiques (→ RollTables)
   const rulesF = await keyFolder("folderRules");
   const rules = await importPack(rulesPackId(), rulesF.id);
   const events = await importPack(`${MOD}.evenements`, eventsF.id);
+  await importTables();
 
-  const sys = await systemFolder();
+  // 6. rangement des journaux techniques préexistants (no-op sur un monde neuf)
   let moved = 0;
   for (const j of utilityJournals()) {
     if (j.folder?.id !== sys.id) { await j.update({ folder: sys.id }); moved++; }

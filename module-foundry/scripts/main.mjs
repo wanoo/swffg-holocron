@@ -46,7 +46,7 @@ Hooks.once("init", () => {
   // volée + à chaque installation) : compendiums, bible MJ, notes du vaisseau.
   const SC = (key, def) => S(key, def, { onChange: () => { if (game.user.isGM) pushSettingsToConfig().catch((e) => console.warn("swffg-holocron | config", e)); } });
   SC("rulesPack", "");                             // vide : auto-détection (pack « règles »)
-  SC("adversariesPack", "");
+  SC("adversariesPack", "world.star-wars-adversaries");
   SC("gmBibleFolder", "🎲 MJ — Bible de campagne");
   SC("shipNotesPage", "");                         // "<jid>:<pid>" OU uuid JournalEntry.….JournalEntryPage.…
   // Répertoires clés de la campagne (nom OU uuid « Folder.<id> ») — créés/adoptés

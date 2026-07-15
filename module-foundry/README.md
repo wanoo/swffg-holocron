@@ -67,10 +67,16 @@ le journal du vaisseau prend le relais (dégradation gracieuse).
 - **🧪 Échantillon de test** — deux fiches MEJ d'exemple (une *organisation*, un *contact*)
   pour vérifier l'installation d'un coup d'œil.
 - **📅 Événements canon** — 20 dates clés de la galaxie (232 BBY → 9 ABY) en fiches MEJ
-  *event* avec attributs `date` (BBY/ABY) et `position: Canon`. **À importer dans le
-  dossier d'événements du monde** (catégorie `kind:"timeline"` de ⚙️ Holocron Config) :
-  la frise de l'Archive Holocron les mêle à vos événements de campagne
-  (`position: Campagne`).
+  *event* : champ natif **Date** en BBY/ABY, champ natif **Position** = `Canon`.
+  Importées automatiquement dans le dossier d'événements du monde ; la frise de
+  l'Archive Holocron les mêle à vos événements de campagne (`Position: Campagne`).
+- **🎲 Tables critiques (FR)** — les deux RollTables d100 utilisées par la boîte à
+  outils MJ (🩸 Blessures critiques, 🔥 Avaries critiques véhicules), avec plages,
+  libellés FR et effets condensés. Importées automatiquement dans le monde.
+
+> 💡 **Bestiaire** : le compendium d'adversaires attendu par l'app web
+> (`world.star-wars-adversaries`, réglage « Compendium des adversaires ») s'importe
+> avec l'outil **SW Adversaries** du système starwarsffg (importeur de données).
 
 ---
 

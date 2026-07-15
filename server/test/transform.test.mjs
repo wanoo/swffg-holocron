@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
 import { transformCharacter, transformAdversary, transformVehicle } from '../lib/transform/actors.mjs';
-import { parseDateBBY, buildTimelineView } from '../lib/transform/journals.mjs';
+import { parseDateBBY, buildTimelineView, buildJournalsView } from '../lib/transform/journals.mjs';
 
 test('transformCharacter tolère une fiche vide', () => {
   const out = transformCharacter({ _id: 'x', name: 'Test', type: 'character' });
@@ -118,4 +118,22 @@ test('buildTimelineView : tri par date, position Canon/Campagne, dossier par uui
   assert.deepEqual(out.events.map((e) => e.source), ['canon', 'campagne', 'campagne'], 'Position → source, défaut campagne');
   assert.equal(out.events[0].dateValue, -19);
   assert.equal(out.events[0].location, 'Coruscant', "le lieu réel vient de l'attribut lieu");
+});
+
+test('buildJournalsView : catégorie DOSSIER kind rules — préfixe retiré, pack ignoré', () => {
+  const doc = (id, name) => ({ _id: id, name, pages: [{ _id: 'p' + id, type: 'text', text: { content: '<p>.</p>' } }] });
+  const out = buildJournalsView({
+    config: { categories: [{ folder: 'Folder.FR', kind: 'rules', label: 'Règles du jeu' }], packs: {} },
+    folders: [{ _id: 'FR', type: 'JournalEntry', name: '📖 Règles & Références (FR)' }],
+    journalsIndex: [
+      { _id: 'r2', folder: 'FR', sort: 1, flags: {} }, // sort Foundry inversé exprès
+      { _id: 'r1', folder: 'FR', sort: 2, flags: {} },
+    ],
+    getJournal: (id) => ({ r1: doc('r1', '01 Mécanique de base'), r2: doc('r2', '02 Compétences') })[id],
+    rulesPack: [doc('pk', '01 · Doublon du pack')], // doit être IGNORÉ (catégorie rules déclarée)
+    visibleFilter: null,
+    gm: false,
+  });
+  assert.equal(out.categories.length, 1, 'pas de catégorie __rules__ en plus du dossier');
+  assert.deepEqual(out.journals.map((j) => j.name), ['Mécanique de base', 'Compétences'], 'préfixe « NN » retiré, tri alphanumérique');
 });

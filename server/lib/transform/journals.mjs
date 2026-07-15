@@ -146,8 +146,12 @@ export function buildJournalsView({ config, folders, journalsIndex, getJournal, 
     cats.push({ id: f._id, label, kind: c.kind || 'misc', editable: Boolean(c.editable) });
   }
 
-  // Journaux monde des dossiers déclarés (ordre du sort Foundry).
+  // Journaux monde des dossiers déclarés (ordre du sort Foundry ; les catégories
+  // kind « rules » — dossier de règles importées — reçoivent le même traitement
+  // que le pack : préfixe de tri « NN · » retiré, ordre alphanumérique).
   const catIds = new Set(cats.map((c) => c.id));
+  const rulesCatIds = new Set(cats.filter((c) => c.kind === 'rules').map((c) => c.id));
+  const prefixRe = new RegExp(config?.packs?.rulesNamePrefix || '^\\d+\\s*·?\\s*');
   const sorted = [...(journalsIndex || [])].sort((a, b) => (a.sort || 0) - (b.sort || 0));
   for (const entry of sorted) {
     if (!catIds.has(entry.folder)) continue;
@@ -161,16 +165,24 @@ export function buildJournalsView({ config, folders, journalsIndex, getJournal, 
     // pas encore typé MEJ.
     const statut = MEJ_ROLE_STATUT[String(mej?.role || '').toLowerCase()] || fh.statut || '';
     const mort = /mort|décéd|décès|deceased|dead/i.test(String(mej?.attributes?.life || mej?.attributes?.vie || '')) || Boolean(fh.mort);
+    const isRules = rulesCatIds.has(entry.folder);
     journals.push({
       id: fh.legacyId || doc._id,
       foundryId: doc._id,
-      name: doc.name,
+      name: isRules ? doc.name.replace(prefixRe, '') : doc.name,
       categoryId: entry.folder,
+      ...(isRules ? { _sortName: doc.name } : {}),
       ...(statut ? { statut } : {}),
       ...(mort ? { mort: true } : {}),
       ...(mej ? { mej } : {}),
       pages: (doc.pages || []).filter((p) => (p.type === 'text' || p.text) && !isRawHelperPage(p)).map(pageView),
     });
+  }
+  if (rulesCatIds.size) {
+    // tri « 01, 02, … » sur le nom BRUT (le sort Foundry d'un dossier importé est plat)
+    journals.sort((a, b) => (a._sortName && b._sortName)
+      ? a._sortName.localeCompare(b._sortName, 'fr', { numeric: true }) : 0);
+    for (const j of journals) delete j._sortName;
   }
 
   // Résout les relations MEJ vers les ids de vue (lien si la cible est visible,
@@ -189,8 +201,9 @@ export function buildJournalsView({ config, folders, journalsIndex, getJournal, 
   }
 
   // Pack règles → catégorie dédiée (préfixe « NN · » retiré, ordre par préfixe).
-  if (rulesPack && rulesPack.length) {
-    const prefixRe = new RegExp(config?.packs?.rulesNamePrefix || '^\\d+\\s*·\\s*');
+  // Ignoré si une catégorie DOSSIER kind « rules » est déclarée (règles importées
+  // dans le monde — sinon la même aide de jeu sortirait en double).
+  if (rulesPack && rulesPack.length && !rulesCatIds.size) {
     cats.unshift({ id: RULES_CAT_ID, label: 'Règles du jeu', kind: 'rules', editable: false });
     const sortedRules = [...rulesPack].sort((a, b) => a.name.localeCompare(b.name, 'fr', { numeric: true }));
     for (const doc of sortedRules) {

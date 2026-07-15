@@ -45,7 +45,8 @@
         "refuel": "Provisions restocked to maximum.",
         "fuel": "Fuel tank refilled.",
         "repair": "Full overhaul: wear back to 0%."
-      }
+      },
+      "notesPageName": "📓 Crew notes"
     },
     "deck": {
       "title": "Holocron",
@@ -261,11 +262,11 @@
       },
       "rulesPack": {
         "name": "Rules compendium (web app)",
-        "hint": "Id of the journal compendium served as “Game rules” in the Archive Holocron (e.g. world.regles-and-references-fr). Empty: auto-detected (pack whose title contains “rules/règles”), else the module's own."
+        "hint": "Journal compendium SOURCE of the rules import into the world (empty: auto-detect a “rules” pack, else the module's own). The web app reads the imported rules FOLDER (“Folder — Imported rules” option)."
       },
       "adversariesPack": {
         "name": "Adversaries compendium (web app)",
-        "hint": "Id of the actor compendium served as the GM bestiary (e.g. world.star-wars-adversaries)."
+        "hint": "Id of the actor compendium served as the GM bestiary. Default: world.star-wars-adversaries — import it with the starwarsffg system's SW Adversaries importer."
       },
       "gmBibleFolder": {
         "name": "GM bible folder (web app)",
@@ -273,7 +274,7 @@
       },
       "shipNotesPage": {
         "name": "Ship notes page (web app)",
-        "hint": "Journal page displayed/editable in the Ship view. Paste the Foundry uuid (JournalEntry.….JournalEntryPage.…) or the <journalId>:<pageId> form."
+        "hint": "Journal page displayed/editable in the Ship view. Empty: the 📓 Crew notes page of the ship POI journal (created if needed). Otherwise paste the Foundry uuid (JournalEntry.….JournalEntryPage.…) or <journalId>:<pageId>."
       },
       "folderActes": {
         "name": "Folder — Campaign acts",
