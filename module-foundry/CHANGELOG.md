@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.2 — Nettoyage des pages de calendrier paddées (résidu 2.0.0)
+
+- L'installation supprime les pages « 0068-01-01 » (année paddée, créées par la
+  2.0.0 avec l'ancienne époque) du journal Mini Calendar : invisibles pour le
+  calendrier et mal datées sur la frise. Les événements canon sont réinstallés
+  aux bonnes années (époque 35 BBY, pages non paddées).
+
 ## 2.0.1 — Alignement sur le calendrier « Grande ReSynchronisation »
 
 - **Époque par défaut : 35 BBY** (an 0 du calendrier de la République/Empire) au

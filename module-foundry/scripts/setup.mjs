@@ -202,7 +202,11 @@ export async function ensureCalendarEvents() {
   }
   let journal = game.journal.getName(CAL_JOURNAL);
   if (!journal) journal = await JournalEntry.create({ name: CAL_JOURNAL, ownership: { default: 2 } });
-  const epoch = Number(game.settings.get(MOD, "calendarEpochBBY")) || 300;
+  // nettoyage 2.0.0 : les pages à année PADDÉE (« 0068-01-01 ») étaient créées par
+  // l'installeur seul et sont invisibles pour Mini Calendar — on les supprime.
+  const padded = journal.pages.filter((p) => /^0\d{3}-\d{2}-\d{2}$/.test(p.name)).map((p) => p.id);
+  if (padded.length) await journal.deleteEmbeddedDocuments("JournalEntryPage", padded);
+  const epoch = Number(game.settings.get(MOD, "calendarEpochBBY")) || 35;
 
   const sources = [];
   try {
