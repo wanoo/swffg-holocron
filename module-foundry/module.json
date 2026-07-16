@@ -2,9 +2,11 @@
   "id": "swffg-holocron",
   "title": "SWFFG Holocron — Poste de commande de campagne",
   "description": "Le poste de commande de votre campagne Star Wars FFG : vaisseau partagé du groupe (vivres, carburant, usure — voyages appliqués depuis l'Astronav), tableau de bord holographique (allégeance, équipage, alignement des PNJ, HoloNet, mondes d'intérêt) et boîte à outils MJ (test de Peur, points de Destin, dégâts de groupe, blessures critiques, fin de rencontre, initiative, générateur de boutiques). Your Star Wars FFG campaign command deck: shared party ship, holographic dashboard and GM toolbox.",
-  "version": "1.8.0",
+  "version": "2.0.0",
   "authors": [
-    { "name": "wanoo" }
+    {
+      "name": "wanoo"
+    }
   ],
   "compatibility": {
     "minimum": "12",
@@ -12,32 +14,137 @@
   },
   "relationships": {
     "systems": [
-      { "id": "starwarsffg", "type": "system", "compatibility": {} }
+      {
+        "id": "starwarsffg",
+        "type": "system",
+        "compatibility": {}
+      }
     ],
     "requires": [
-      { "id": "swffg-astronavigation", "type": "module", "reason": "Calculateur d'astrogation, carte galactique, atlas MEJ des mondes et marqueur « vous êtes ici » du vaisseau.", "compatibility": { "minimum": "1.7.2" } },
-      { "id": "fvtt-party-resources", "type": "module", "reason": "Pool de ressources partagé du groupe (vivres, carburant, usure) alimenté par les voyages.", "manifest": "https://github.com/davelens/fvtt-party-resources/releases/latest/download/module.json", "compatibility": { "minimum": "1.8.0" } },
-      { "id": "monks-enhanced-journal", "type": "module", "reason": "Fiches de mondes et système de favoris (marque-pages) utilisés comme mondes d'intérêt.", "compatibility": {} }
+      {
+        "id": "swffg-astronavigation",
+        "type": "module",
+        "reason": "Calculateur d'astrogation, carte galactique, atlas MEJ des mondes et marqueur « vous êtes ici » du vaisseau.",
+        "compatibility": {
+          "minimum": "1.7.2"
+        }
+      },
+      {
+        "id": "fvtt-party-resources",
+        "type": "module",
+        "reason": "Pool de ressources partagé du groupe (vivres, carburant, usure) alimenté par les voyages.",
+        "manifest": "https://github.com/davelens/fvtt-party-resources/releases/latest/download/module.json",
+        "compatibility": {
+          "minimum": "1.8.0"
+        }
+      },
+      {
+        "id": "campaign-codex",
+        "type": "module",
+        "reason": "Fiches typées liées (PNJ, lieux, organisations, boutiques, quêtes) — remplace Monk's Enhanced Journal.",
+        "compatibility": {}
+      },
+      {
+        "id": "wgtgm-mini-calendar",
+        "type": "module",
+        "reason": "Calendrier galactique et événements datés (frise chronologique BBY/ABY de l'Archive Holocron).",
+        "compatibility": {}
+      }
     ],
     "recommends": [
-      { "id": "swffg-sabacc", "type": "module", "reason": "Écosystème de campagne : deux jeux de Sabacc jouables (Spike de Corellia & Kessel). Les règles sont aussi consultables dans l'Archive Holocron (item « 🎴 Sabacc »).", "manifest": "https://github.com/wanoo/swffg-sabacc/releases/latest/download/module.json", "compatibility": {} },
-      { "id": "swffg-workshops", "type": "module", "reason": "Écosystème de campagne : ateliers de fabrication interactifs (sabre laser, accessoires & mods, potions & talismans). Les règles sont aussi consultables dans l'Archive Holocron (item « ⚒️ Ateliers »).", "manifest": "https://github.com/wanoo/swffg-workshops/releases/latest/download/module.json", "compatibility": {} }
+      {
+        "id": "swffg-sabacc",
+        "type": "module",
+        "reason": "Écosystème de campagne : deux jeux de Sabacc jouables (Spike de Corellia & Kessel). Les règles sont aussi consultables dans l'Archive Holocron (item « 🎴 Sabacc »).",
+        "manifest": "https://github.com/wanoo/swffg-sabacc/releases/latest/download/module.json",
+        "compatibility": {}
+      },
+      {
+        "id": "swffg-workshops",
+        "type": "module",
+        "reason": "Écosystème de campagne : ateliers de fabrication interactifs (sabre laser, accessoires & mods, potions & talismans). Les règles sont aussi consultables dans l'Archive Holocron (item « ⚒️ Ateliers »).",
+        "manifest": "https://github.com/wanoo/swffg-workshops/releases/latest/download/module.json",
+        "compatibility": {}
+      },
+      {
+        "id": "asset-librarian",
+        "type": "module",
+        "reason": "Navigation et étiquetage des assets du monde et des compendiums (suite wgtnGM).",
+        "compatibility": {}
+      }
     ]
   },
   "esmodules": [
     "scripts/main.mjs"
   ],
   "languages": [
-    { "lang": "en", "name": "English", "path": "lang/en.json" },
-    { "lang": "fr", "name": "Français", "path": "lang/fr.json" }
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    },
+    {
+      "lang": "fr",
+      "name": "Français",
+      "path": "lang/fr.json"
+    }
   ],
   "packs": [
-    { "name": "regles", "label": "📖 Règles & Références (FR)", "path": "packs/regles", "type": "JournalEntry", "system": "starwarsffg", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
-    { "name": "macros", "label": "🎲 Macros — Holocron", "path": "packs/macros", "type": "Macro", "system": "starwarsffg", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
-    { "name": "structure", "label": "⚙️ Structure & Config", "path": "packs/structure", "type": "JournalEntry", "system": "starwarsffg", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
-    { "name": "sample", "label": "🧪 Échantillon de test", "path": "packs/sample", "type": "JournalEntry", "system": "starwarsffg", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
-    { "name": "evenements", "label": "📅 Événements canon", "path": "packs/evenements", "type": "JournalEntry", "system": "starwarsffg", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } },
-    { "name": "tables", "label": "🎲 Tables critiques (FR)", "path": "packs/tables", "type": "RollTable", "system": "starwarsffg", "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" } }
+    {
+      "name": "regles",
+      "label": "📖 Règles & Références (FR)",
+      "path": "packs/regles",
+      "type": "JournalEntry",
+      "system": "starwarsffg",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "macros",
+      "label": "🎲 Macros — Holocron",
+      "path": "packs/macros",
+      "type": "Macro",
+      "system": "starwarsffg",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "structure",
+      "label": "⚙️ Structure & Config",
+      "path": "packs/structure",
+      "type": "JournalEntry",
+      "system": "starwarsffg",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "sample",
+      "label": "🧪 Échantillon de test",
+      "path": "packs/sample",
+      "type": "JournalEntry",
+      "system": "starwarsffg",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "tables",
+      "label": "🎲 Tables critiques (FR)",
+      "path": "packs/tables",
+      "type": "RollTable",
+      "system": "starwarsffg",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    }
   ],
   "url": "https://github.com/wanoo/swffg-holocron",
   "manifest": "https://github.com/wanoo/swffg-holocron/releases/latest/download/module.json",

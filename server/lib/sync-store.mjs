@@ -225,6 +225,33 @@ export function createStore({ dataDir, logger = console }) {
     return j || null;
   }
 
+  // Événements Mini Calendar : journal « Calendar Events - Mini Calendar » —
+  // une page par date (nom "YYYY-MM-DD"), notes dans flags["wgtgm-mini-calendar"].notes.
+  // Pullé par NOM (pattern dice_helper), aplati en événements datés pour la frise.
+  const CALENDAR_JOURNAL = 'Calendar Events - Mini Calendar';
+  async function syncCalendar() {
+    const list = await mcpCall('get_journals', { where: { name: CALENDAR_JOURNAL } });
+    const j = (Array.isArray(list) ? list : []).find((x) => x && x.name === CALENDAR_JOURNAL);
+    const events = [];
+    for (const page of (j?.pages || [])) {
+      const m = /^(\d+)-(\d+)-(\d+)$/.exec(String(page.name || ''));
+      if (!m) continue; // (0000-Recurring et pages diverses : ignorées — pas de récurrence en frise)
+      const notes = page.flags?.['wgtgm-mini-calendar']?.notes || [];
+      for (const n of notes) {
+        if (!n || typeof n !== 'object') continue;
+        events.push({
+          id: String(n.id || ''),
+          year: +m[1], month: +m[2], day: +m[3],
+          title: String(n.title || ''),
+          content: String(n.content || ''),
+          icon: String(n.icon || ''),
+          playerVisible: Boolean(n.playerVisible),
+        });
+      }
+    }
+    set('calendarEvents', events);
+  }
+
   // Page de notes du vaisseau (config.journals.shipNotes = "<jid>:<pid>") : son
   // journal peut vivre hors des dossiers synchronisés → pull ciblé à chaque tick.
   async function syncShipNotes() {
@@ -264,6 +291,7 @@ export function createStore({ dataDir, logger = console }) {
       ['diceHelper', () => syncDiceHelper()],
       ['journals', () => syncJournalsFull()],   // 1 appel/dossier : cache journal + index (le plus long → en dernier)
       ['shipNotes', () => syncShipNotes()],      // pull ciblé (journal possiblement hors allowlist)
+      ['calendar', () => syncCalendar()],        // événements Mini Calendar (frise chronologique)
     ];
     for (const [name, job] of jobs) {
       try { await job(); }

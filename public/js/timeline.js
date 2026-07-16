@@ -14,7 +14,7 @@ function itemHTML(ev, i) {
   const src = SOURCE[ev.source] || SOURCE.campagne;
   const dateTxt = ev.date ? esc(ev.date).replace(/\s*(BBY|ABY)\s*$/i, ' $1') : '· · ·';
   return `
-    <li class="tl-item ${src.cls}" data-i="${i}" title="${esc(ev.excerpt || '')}">
+    <li class="tl-item ${src.cls}${ev.id ? '' : ' tl-nolink'}" data-i="${i}" title="${esc(ev.excerpt || '')}">
       <span class="tl-date">${dateTxt}${ev.dateEnd ? `<small>→ ${esc(ev.dateEnd)}</small>` : ''}</span>
       <span class="tl-dot" aria-hidden="true"></span>
       <span class="tl-body">
@@ -75,7 +75,7 @@ export async function mountTimeline(container) {
     const li = e.target.closest('.tl-item');
     if (!li) return;
     const ev = events[+li.dataset.i];
-    if (ev) location.hash = `#/journal/${ev.id}`;
+    if (ev?.id) location.hash = `#/journal/${ev.id}`; // les événements Mini Calendar n'ont pas de fiche
   });
   for (const box of wrap.querySelectorAll('.tl-filters input')) {
     box.addEventListener('change', () => {

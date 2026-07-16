@@ -164,3 +164,20 @@ test('sheetView : fiche Campaign Codex → même modèle de vue que MEJ', async 
   assert.equal(mej.type, 'person');
   assert.equal(mej.role, 'Ami');
 });
+
+test('buildTimelineView : événements Mini Calendar (année → BBY/ABY, icône = canon)', () => {
+  const out = buildTimelineView({
+    config: { categories: [], calendar: { epochBBY: 300 } },
+    folders: [], journalsIndex: [], getJournal: () => null,
+    calendarEvents: [
+      { id: 'a', year: 281, month: 1, day: 1, title: 'Ordre 66', content: '<p>Chute des Jedi.</p>', icon: 'fas fa-jedi', playerVisible: true },
+      { id: 'b', year: 303, month: 1, day: 1, title: 'Bataille de Hoth', content: '', icon: 'fas fa-book', playerVisible: true },
+      { id: 'c', year: 305, month: 1, day: 1, title: 'Secret MJ', content: '', icon: 'fas fa-book', playerVisible: false },
+    ],
+    visibleFilter: null, gm: false,
+  });
+  assert.deepEqual(out.events.map((e) => [e.date, e.source]), [['19 BBY', 'canon'], ['3 ABY', 'campagne']], 'tri, conversion époque, note MJ masquée');
+  const gmOut = buildTimelineView({ config: { categories: [], calendar: { epochBBY: 300 } }, folders: [], journalsIndex: [], getJournal: () => null,
+    calendarEvents: [{ year: 305, month: 1, day: 1, title: 'Secret MJ', content: '', icon: 'fas fa-book', playerVisible: false }], visibleFilter: null, gm: true });
+  assert.equal(gmOut.events.length, 1, 'le MJ voit les notes masquées');
+});

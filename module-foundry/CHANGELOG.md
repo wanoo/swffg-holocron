@@ -1,5 +1,30 @@
 # Changelog
 
+## 2.0.0 — MASTER SWITCH : Campaign Codex + Mini Calendar remplacent MEJ
+
+**Rupture assumée** : le module ne dépend plus de Monk's Enhanced Journal.
+Nouvelles dépendances : **Campaign Codex** (fiches typées liées) et
+**Mini Calendar** (calendrier & événements) ; Asset Librarian recommandé.
+(L'astronavigation garde MEJ jusqu'à sa propre 2.0 — les deux coexistent.)
+
+- **Conversion automatique des fiches MEJ** (installation + menu « Convertir les
+  fiches MEJ ») : person→npc, organization→group, place→location, shop→shop,
+  quest→quest ; rôle → statut holocron, attribut vie → pastille †, attributs
+  libres conservés (flags.holocron.attrs), relations → liens CC, pages texte et
+  droits repris, `legacyId` pour les ancres web. **Originaux archivés dans
+  🗄️ Archive MEJ, jamais supprimés.** Idempotent.
+- **Événements → Mini Calendar** : les fiches MEJ « event » et les 20 dates
+  canon deviennent des événements du journal « Calendar Events - Mini Calendar »
+  (année calendrier = époque BBY + valeur ; réglage « Époque du calendrier
+  galactique », défaut 300 BBY ; icône jedi = Canon). Le pack JournalEntry
+  `evenements` est supprimé au profit de `data/canon-events.json`. La frise web
+  lit le calendrier (notes MJ masquées aux joueurs) + les fiches MEJ legacy.
+- **Vaisseau 100 % holocron** : la page de statut est ancrée par
+  `flags.swffg-holocron.bound:"status"` (plus de pagetype MEJ) ; legacy lu.
+- **App web** : `sheetView` lit les fiches Campaign Codex ET MEJ (legacy) —
+  carte d'identité, statut, relations cliquables identiques quelle que soit la
+  source. Packs d'exemple au format CC.
+
 ## 1.8.0 — Règles lues depuis le monde, tables critiques embarquées, install sans détour
 
 - **L'app web lit les règles depuis le DOSSIER importé** (catégorie `kind:"rules"`

@@ -5,6 +5,7 @@
  *     MJ, rencontres, dossiers, dice_helper) dans le dossier SYSTÈME.
  *  Ne recrée jamais l'existant (repérage par nom) — relançable sans risque. */
 import { MOD, t, boundJournal, shipJournal, codexJournal } from "./util.mjs";
+import { convertMejToCC } from "./convert-mej.mjs";
 
 // Dossiers clés de la campagne — chaque réglage accepte un NOM ou un uuid
 // « Folder.<id> » ; le nom par défaut sert à la création si rien n'existe.
@@ -166,6 +167,95 @@ function rulesPackId() {
 // Nom normalisé pour la déduplication : préfixe de tri « NN · » ignoré, casse pliée.
 const normName = (n) => String(n || "").toLowerCase().replace(/^\d+\s*[·.\-–—]?\s*/, "").trim();
 
+/* ------------------------------------------ événements → Mini Calendar ------- */
+const CAL_MOD = "wgtgm-mini-calendar";
+const CAL_JOURNAL = "Calendar Events - Mini Calendar";
+export const CANON_ICON = "fas fa-jedi";     // icône = classement Canon (frise web)
+const CAMPAIGN_ICON = "fas fa-book";
+
+// « 232 BBY » / « 9 ABY » → valeur signée (BBY négatif). null si illisible.
+const parseBBY = (s) => {
+  const m = /^(-?\d+(?:[.,]\d+)?)\s*(BBY|ABY)?/i.exec(String(s || "").trim());
+  if (!m) return null;
+  const n = Number(m[1].replace(",", "."));
+  return Number.isFinite(n) ? (/bby/i.test(m[2] || "") ? -n : n) : null;
+};
+
+// id STABLE (16 alphanum) dérivé d'une graine — idempotence des installations.
+const stableId = (seed) => {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  const A = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let s = "", x = h;
+  for (let i = 0; i < 16; i++) { x = Math.imul(x ^ (x >>> 15), 0x2c1b3c6d) >>> 0; s += A[x % A.length]; }
+  return s;
+};
+
+/** Installe les événements dans Mini Calendar : 20 dates canon embarquées
+ * (data/canon-events.json) + conversion des fiches MEJ « event » du dossier
+ * d'événements (archivées ensuite dans 🗄️ Archive MEJ). Idempotent (ids stables
+ * + marqueur calendarConverted). Année calendrier = epochBBY + valeur signée. */
+export async function ensureCalendarEvents() {
+  if (!game.modules.get(CAL_MOD)?.active) {
+    console.warn("swffg-holocron | Mini Calendar absent — événements de frise non installés");
+    return 0;
+  }
+  let journal = game.journal.getName(CAL_JOURNAL);
+  if (!journal) journal = await JournalEntry.create({ name: CAL_JOURNAL, ownership: { default: 2 } });
+  const epoch = Number(game.settings.get(MOD, "calendarEpochBBY")) || 300;
+
+  const sources = [];
+  try {
+    const canon = await (await fetch(`modules/${MOD}/data/canon-events.json`)).json();
+    for (const c of canon) sources.push({ ...c, value: parseBBY(c.date), icon: CANON_ICON, playerVisible: true });
+  } catch (e) { console.warn("swffg-holocron | canon-events.json illisible", e); }
+
+  // fiches MEJ « event » legacy du dossier d'événements → converties puis archivées
+  const eventsF = await eventsFolder();
+  for (const j of game.journal.filter((x) => x.folder?.id === eventsF?.id)) {
+    if (j.flags?.[MOD]?.calendarConverted) continue;
+    const mf = j.pages.find((p) => p.flags?.["monks-enhanced-journal"])?.flags?.["monks-enhanced-journal"];
+    if (mf?.type !== "event") continue;
+    const value = parseBBY(mf.date || mf.attributes?.date);
+    if (value == null) continue;
+    sources.push({
+      value,
+      title: j.name.replace(/^\s*[\d.,]+\s*(BBY|ABY)\s*[—–-]\s*/i, ""),
+      content: j.pages.find((p) => p.text?.content)?.text?.content || "",
+      icon: /^canon/i.test(String(mf.location || mf.attributes?.position || "")) ? CANON_ICON : CAMPAIGN_ICON,
+      playerVisible: (j.ownership?.default ?? 0) >= 2,
+      legacy: j,
+    });
+  }
+
+  let added = 0;
+  for (const ev of sources) {
+    if (ev.value == null) continue;
+    const year = epoch + Math.trunc(ev.value);
+    if (year < 0) { console.warn(`swffg-holocron | ${ev.title} : antérieur à l'époque du calendrier (${epoch} BBY)`); continue; }
+    const pageName = `${String(year).padStart(4, "0")}-01-01`;
+    let page = journal.pages.getName(pageName);
+    if (!page) [page] = await journal.createEmbeddedDocuments("JournalEntryPage", [{ name: pageName, type: "text", text: { content: "", format: 1 } }]);
+    const nid = stableId(`swh-cal:${ev.title}:${ev.value}`);
+    const notes = foundry.utils.deepClone(page.getFlag(CAL_MOD, "notes") || []);
+    if (!notes.some((n) => n?.id === nid)) {
+      notes.push({
+        id: nid, title: ev.title, icon: ev.icon, content: ev.content || "",
+        playerVisible: ev.playerVisible !== false, hour: null, minute: null,
+        repeatUnit: "none", repeatInterval: 1, repeatCount: 0,
+        advancedRule: "none", advParams: {}, autoExecuteMacros: false, playerTimeDisplay: "exact",
+      });
+      await page.setFlag(CAL_MOD, "notes", notes);
+      added++;
+    }
+    if (ev.legacy) {
+      const arch = await ensureFolder("JournalEntry", "🗄️ Archive MEJ");
+      await ev.legacy.update({ folder: arch.id, [`flags.${MOD}.calendarConverted`]: true });
+    }
+  }
+  return added;
+}
+
 /** Importe les RollTables du pack tables absentes du monde (les réglages
  * critTableCharacter/critTableVehicle pointent ces noms par défaut). */
 async function importTables() {
@@ -197,6 +287,7 @@ const SETTING_DEFAULTS = {
   rulesPack: "", adversariesPack: "world.star-wars-adversaries",
   gmBibleFolder: "🎲 MJ — Bible de campagne", shipNotesPage: "",
   folderPcs: "👥 Personnages joueurs", folderNpcs: "🎭 PNJ de campagne",
+  calendarEpochBBY: "300",
 };
 
 // Réglage de dossier → valeur écrite en config : le NOM du dossier résolu
@@ -241,6 +332,7 @@ export async function pushSettingsToConfig() {
   apply("flags.holocron.config.journals.shipNotes", cfg.journals?.shipNotes, "shipNotesPage", normShipNotes);
   apply("flags.holocron.config.pcFolder", cfg.pcFolder, "folderPcs", () => folderSettingName("folderPcs"));
   apply("flags.holocron.config.npcsWorldFolder", cfg.npcsWorldFolder, "folderNpcs", () => folderSettingName("folderNpcs"));
+  apply("flags.holocron.config.calendar.epochBBY", cfg.calendar?.epochBBY, "calendarEpochBBY", (v) => Number(v) || 300);
   // notes du vaisseau : défaut = la page notes du journal POI vaisseau (créée au besoin)
   if (!cfg.journals?.shipNotes && !updates["flags.holocron.config.journals.shipNotes"]) {
     const ref = await ensureShipNotesPage();
@@ -256,7 +348,8 @@ export async function ensureShipNotesPage() {
   const j = await shipJournal();
   if (!j) return "";
   let page = j.pages.find((p) => p.flags?.[MOD]?.bound === "shipNotes")
-    || j.pages.find((p, i) => i > 0 && p.type === "text" && !p.flags?.["monks-enhanced-journal"]);
+    || j.pages.find((p, i) => i > 0 && p.type === "text"
+      && !p.flags?.["monks-enhanced-journal"] && p.flags?.[MOD]?.bound !== "status");
   if (!page && game.user.isGM) {
     const maxSort = Math.max(0, ...j.pages.map((p) => p.sort || 0));
     [page] = await j.createEmbeddedDocuments("JournalEntryPage", [{
@@ -295,8 +388,10 @@ export async function installHolocron({ silent = false } = {}) {
   // événements canon (→ dossier événements), tables critiques (→ RollTables)
   const rulesF = await keyFolder("folderRules");
   const rules = await importPack(rulesPackId(), rulesF.id);
-  const events = await importPack(`${MOD}.evenements`, eventsF.id);
+  const events = await ensureCalendarEvents(); // canon + conversion des fiches MEJ event
   await importTables();
+  // master switch : les fiches MEJ du monde deviennent des fiches Campaign Codex
+  try { await convertMejToCC(); } catch (e) { console.warn("swffg-holocron | conversion MEJ→CC", e); }
 
   // 6. rangement des journaux techniques préexistants (no-op sur un monde neuf)
   let moved = 0;

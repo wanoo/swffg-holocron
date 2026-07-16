@@ -26,20 +26,7 @@
       "ownership": {
         "default": -1
       },
-      "flags": {
-        "monks-enhanced-journal": {
-          "type": "organization",
-          "role": "",
-          "location": "Nal Hutta",
-          "attributes": {
-            "alignment": "Neutre mauvais",
-            "reputation": "Crainte",
-            "faction": "Syndicat du crime"
-          },
-          "relationships": {},
-          "items": {}
-        }
-      },
+      "flags": {},
       "_stats": {},
       "_key": "!journal.pages!GuPHL4wPNK4Zg0ZE.Uy9bTB3h9QppXCTZ"
     }
@@ -50,8 +37,18 @@
     "default": 0
   },
   "flags": {
-    "monks-enhanced-journal": {
-      "pagetype": "organization"
+    "campaign-codex": {
+      "type": "group",
+      "data": {
+        "description": "<p><em>Fiche d'exemple — supprimez-la ou dupliquez-la comme modèle.</em></p><p>Un cartel Hutt tentaculaire contrôlant contrebande, jeux et trafic d'esclaves sur une portion de la Bordure Extérieure. Rien ne bouge dans le secteur sans que le Cartel n'en prélève sa part.</p><ul><li><strong>Type :</strong> Syndicat du crime</li><li><strong>Fief :</strong> Nal Hutta</li><li><strong>Alignement :</strong> Neutre mauvais</li></ul>"
+      }
+    },
+    "holocron": {
+      "attrs": {
+        "alignment": "Neutre mauvais",
+        "reputation": "Crainte",
+        "faction": "Syndicat du crime"
+      }
     }
   },
   "_stats": {},

@@ -9,7 +9,6 @@ const PACKS = [
   ["packs/_src_macros", "packs/macros"],
   ["packs/_src_structure", "packs/structure"],
   ["packs/_src_sample", "packs/sample"],
-  ["packs/_src_evenements", "packs/evenements"],
   ["packs/_src_tables", "packs/tables"],
 ];
 

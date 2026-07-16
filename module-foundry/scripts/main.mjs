@@ -1,6 +1,7 @@
 /** SWFFG Holocron — entry point: settings, API, scene buttons, astronav ↔ ship bridge. */
 import { MOD, t, applyTrip, shipJournal, readShip, setShipWorld, astronavApi, favoriteWorlds, ensurePartyResources } from "./util.mjs";
 import { installHolocron, pushSettingsToConfig } from "./setup.mjs";
+import { convertMejToCC } from "./convert-mej.mjs";
 import { HolocronApp } from "./deck.mjs";
 import { openToolbox, TOOLS } from "./gm-tools.mjs";
 
@@ -11,6 +12,10 @@ class PartyResSetupMenu extends foundry.applications.api.ApplicationV2 {
 /** Menu de réglage : (ré)installe la structure Holocron (dossiers, règles, rangement). */
 class InstallMenu extends foundry.applications.api.ApplicationV2 {
   async render() { await installHolocron(); return this; }
+}
+/** Menu de réglage : convertit les fiches MEJ du monde en fiches Campaign Codex. */
+class ConvertMenu extends foundry.applications.api.ApplicationV2 {
+  async render() { await convertMejToCC(); return this; }
 }
 
 /** Dernier coût d'astrogation calculé par l'astronav (hook swffgAstronav.cost). */
@@ -49,6 +54,8 @@ Hooks.once("init", () => {
   SC("adversariesPack", "world.star-wars-adversaries");
   SC("gmBibleFolder", "🎲 MJ — Bible de campagne");
   SC("shipNotesPage", "");                         // "<jid>:<pid>" OU uuid JournalEntry.….JournalEntryPage.…
+  // Calendrier galactique Mini Calendar : année calendrier N = (N − epochBBY) BBY/ABY.
+  SC("calendarEpochBBY", "300");
   // Répertoires clés de la campagne (nom OU uuid « Folder.<id> ») — créés/adoptés
   // à l'installation (menu « Installer / réinstaller » ou mise à jour du module).
   S("folderActes", "🎬 Campagne — Actes");
@@ -72,6 +79,10 @@ Hooks.once("init", () => {
     name: "SWH.settings.installMenu.name", label: "SWH.settings.installMenu.label",
     hint: "SWH.settings.installMenu.hint", icon: "fa-solid fa-boxes-packing", type: InstallMenu, restricted: true,
   });
+  game.settings.registerMenu(MOD, "convertMenu", {
+    name: "SWH.settings.convertMenu.name", label: "SWH.settings.convertMenu.label",
+    hint: "SWH.settings.convertMenu.hint", icon: "fa-solid fa-arrows-rotate", type: ConvertMenu, restricted: true,
+  });
 
   game.modules.get(MOD).api = {
     open: () => new HolocronApp().render(true),
@@ -84,6 +95,7 @@ Hooks.once("init", () => {
     importAtlas: () => astronavApi()?.importToWorld?.({ confirm: true }),
     setupPartyResources: ensurePartyResources,
     install: installHolocron,
+    convertMej: convertMejToCC,
     lastCost: () => LAST_COST,
     HolocronApp,
   };

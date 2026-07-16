@@ -26,21 +26,7 @@
       "ownership": {
         "default": -1
       },
-      "flags": {
-        "monks-enhanced-journal": {
-          "type": "person",
-          "role": "Ami",
-          "location": "",
-          "attributes": {
-            "race": "Humain",
-            "gender": "M",
-            "life": "Vivant",
-            "faction": "Alliance Rebelle"
-          },
-          "relationships": {},
-          "items": {}
-        }
-      },
+      "flags": {},
       "_stats": {},
       "_key": "!journal.pages!uyjbwb8p7pqocPXR.MgvyzoII49o3I1Mz"
     }
@@ -51,8 +37,20 @@
     "default": 0
   },
   "flags": {
-    "monks-enhanced-journal": {
-      "pagetype": "person"
+    "campaign-codex": {
+      "type": "npc",
+      "data": {
+        "description": "<p><em>Fiche d'exemple — supprimez-la ou dupliquez-la comme modèle.</em></p><p>Un contact discret de l'Alliance Rebelle, rencontré dans une cantina de la Bordure. Fournit renseignements et caches d'armes en échange de services rendus à la cause.</p><ul><li><strong>Espèce :</strong> Humain</li><li><strong>Allégeance :</strong> Alliance Rebelle</li><li><strong>Attitude :</strong> Ami</li></ul>"
+      }
+    },
+    "holocron": {
+      "attrs": {
+        "race": "Humain",
+        "gender": "M",
+        "life": "Vivant",
+        "faction": "Alliance Rebelle"
+      },
+      "statut": "allie"
     }
   },
   "_stats": {},

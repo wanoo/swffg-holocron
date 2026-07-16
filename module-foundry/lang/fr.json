@@ -307,12 +307,22 @@
       "folderNpcs": {
         "name": "Dossier d'acteurs — PNJ",
         "hint": "Dossier des PNJ custom du monde (bestiaire MJ). Nom ou uuid « Folder.<id> » ; créé s'il n'existe pas (appliqué à l'installation)."
+      },
+      "calendarEpochBBY": {
+        "name": "Époque du calendrier galactique (BBY)",
+        "hint": "Année 0 du calendrier Mini Calendar exprimée en BBY : l'année calendrier N s'affiche (N − époque) BBY/ABY dans la frise. Défaut : 300 (couvre la Haute République)."
+      },
+      "convertMenu": {
+        "name": "Conversion MEJ → Campaign Codex",
+        "label": "Convertir les fiches MEJ",
+        "hint": "Convertit les fiches Monk's Enhanced Journal du monde (PNJ, organisations, lieux, boutiques) en fiches Campaign Codex. Idempotent ; les originaux sont archivés, jamais supprimés."
       }
     },
     "setup": {
       "done": "Holocron installé : {folders} dossier(s) créé(s), {rules} règle(s) et {events} événement(s) importés, {moved} journal(aux) rangé(s) dans « {sys} ».",
       "dupRemoved": "Doublon « {name} » quasi vide supprimé (la vraie configuration est conservée).",
-      "cfgRenamed": "Journal de configuration renommé en « {name} » (nom attendu par l'app web)."
+      "cfgRenamed": "Journal de configuration renommé en « {name} » (nom attendu par l'app web).",
+      "ccConverted": "{n} fiche(s) MEJ convertie(s) en fiches Campaign Codex (originaux archivés dans 🗄️ Archive MEJ)."
     }
   }
 }

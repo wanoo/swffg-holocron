@@ -78,6 +78,7 @@ export function createContentService({ store, config }) {
       folders: store.get('folders'),
       journalsIndex: store.get('journalsIndex'),
       getJournal: (id) => store.get(`journal:${id}`),
+      calendarEvents: store.get('calendarEvents'),
       visibleFilter: (entry) => canSee(session, entry),
       gm: isGM(session),
     });
@@ -114,7 +115,7 @@ export function createContentService({ store, config }) {
       vehicle: S + store.version('actors') * 31 + store.version('folders') + 3,
       npcs: S + store.version('actors') * 31 + store.version('folders') + 7,
       adversaries: S + store.version(`pack:${cc.packs.adversaries}`),
-      timeline: S + store.version('journalsIndex') * 31 + store.version('folders') + store.version('config'),
+      timeline: S + store.version('journalsIndex') * 31 + store.version('calendarEvents') * 7 + store.version('folders') + store.version('config'),
       diceHelper: S + diceHelperVersion(),
     };
   }

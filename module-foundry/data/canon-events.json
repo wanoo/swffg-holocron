@@ -1,0 +1,122 @@
+[
+  {
+    "date": "232 BBY",
+    "title": "La Grande Catastrophe hyperspatiale",
+    "lieu": "Bordure Extérieure",
+    "content": "<p>Un désastre en hyperespace disloque le vaisseau <em>Legacy Run</em> ; les débris frappent plusieurs systèmes. L'apogée de la Haute République est ébranlée et les Jedi mobilisés à grande échelle.</p><p><em>📍 Bordure Extérieure</em></p>"
+  },
+  {
+    "date": "200 BBY",
+    "title": "Naissance de Chewbacca",
+    "lieu": "Kashyyyk",
+    "content": "<p>Le Wookiee Chewbacca naît sur Kashyyyk. Deux siècles plus tard, il deviendra l'un des contrebandiers puis héros de l'Alliance les plus célèbres de la galaxie.</p><p><em>📍 Kashyyyk</em></p>"
+  },
+  {
+    "date": "57 BBY",
+    "title": "Naissance d'Obi-Wan Kenobi",
+    "lieu": "Stewjon",
+    "content": "<p>Naissance du futur Chevalier puis Maître Jedi Obi-Wan Kenobi, général de la Guerre des Clones et mentor des Skywalker.</p><p><em>📍 Stewjon</em></p>"
+  },
+  {
+    "date": "41 BBY",
+    "title": "Naissance d'Anakin Skywalker",
+    "lieu": "Tatooine",
+    "content": "<p>Naissance d'Anakin Skywalker, esclave sur Tatooine — l'« Élu » de la prophétie Jedi, futur Dark Vador.</p><p><em>📍 Tatooine</em></p>"
+  },
+  {
+    "date": "32 BBY",
+    "title": "Bataille de Naboo",
+    "lieu": "Naboo",
+    "content": "<p>La Fédération du Commerce envahit Naboo. La reine Amidala reprend Theed avec l'aide des Gungans ; Qui-Gon Jinn tombe face à Dark Maul. Palpatine devient Chancelier Suprême.</p><p><em>📍 Naboo</em></p>"
+  },
+  {
+    "date": "24 BBY",
+    "title": "Discours de Raxus — la crise séparatiste",
+    "lieu": "Raxus",
+    "content": "<p>Le comte Dooku proclame la Confédération des Systèmes Indépendants : des milliers de systèmes font sécession. La République vacille, le réarmement commence.</p><p><em>📍 Raxus</em></p>"
+  },
+  {
+    "date": "22 BBY",
+    "title": "Bataille de Géonosis — début de la Guerre des Clones",
+    "lieu": "Géonosis",
+    "content": "<p>Première bataille de la Guerre des Clones : l'armée de clones de la République affronte les droïdes séparatistes. Le conflit embrase la galaxie pour trois ans.</p><p><em>📍 Géonosis</em></p>"
+  },
+  {
+    "date": "19 BBY",
+    "title": "Ordre 66 — proclamation de l'Empire",
+    "lieu": "Coruscant",
+    "content": "<p>L'Ordre 66 anéantit l'Ordre Jedi ; Palpatine se proclame Empereur galactique. Anakin Skywalker devient Dark Vador. Naissance cachée de Luke et Leia.</p><p><em>📍 Coruscant</em></p>"
+  },
+  {
+    "date": "13 BBY",
+    "title": "Han Solo quitte Corellia",
+    "lieu": "Corellia",
+    "content": "<p>Le jeune Han fuit les gangs de Corellia et s'engage dans la Marine impériale — début d'un parcours qui fera de lui le contrebandier le plus connu de la Bordure.</p><p><em>📍 Corellia</em></p>"
+  },
+  {
+    "date": "10 BBY",
+    "title": "Raid de Kessel",
+    "lieu": "Kessel",
+    "content": "<p>Le casse des mines d'épice de Kessel : premier exploit du <em>Faucon Millenium</em>, qui boucle le « Kessel Run » en moins de douze parsecs sous Lando puis Han Solo.</p><p><em>📍 Kessel</em></p>"
+  },
+  {
+    "date": "9 BBY",
+    "title": "Obi-Wan sort de l'ombre",
+    "lieu": "Tatooine / Jabiim",
+    "content": "<p>Traqué par l'Inquisitorius, Obi-Wan Kenobi quitte son exil pour sauver la jeune Leia Organa et affronte de nouveau Dark Vador.</p><p><em>📍 Tatooine / Jabiim</em></p>"
+  },
+  {
+    "date": "5 BBY",
+    "title": "Casse d'Aldhani — l'étincelle rebelle",
+    "lieu": "Aldhani",
+    "content": "<p>Le vol de la paie impériale d'Aldhani révèle qu'on peut frapper l'Empire. Les cellules dispersées commencent à se coordonner ; la répression impériale se durcit.</p><p><em>📍 Aldhani</em></p>"
+  },
+  {
+    "date": "4 BBY",
+    "title": "Les Spectres rejoignent la rébellion",
+    "lieu": "Lothal",
+    "content": "<p>L'équipage du <em>Ghost</em>, qui harcelait l'Empire depuis Lothal, intègre le réseau rebelle naissant coordonné par Fulcrum.</p><p><em>📍 Lothal</em></p>"
+  },
+  {
+    "date": "2 BBY",
+    "title": "Massacre de Ghorman & Déclaration de l'Alliance",
+    "lieu": "Ghorman / Yavin 4",
+    "content": "<p>L'Empire massacre les manifestants de Ghorman. Mon Mothma dénonce l'Empereur au Sénat et entre en clandestinité : l'Alliance pour la Restauration de la République est proclamée.</p><p><em>📍 Ghorman / Yavin 4</em></p>"
+  },
+  {
+    "date": "1 BBY",
+    "title": "Libération de Lothal",
+    "lieu": "Lothal",
+    "content": "<p>Les Spectres et la résistance locale chassent l'Empire de Lothal. Ezra Bridger disparaît dans l'hyperespace avec le Grand Amiral Thrawn.</p><p><em>📍 Lothal</em></p>"
+  },
+  {
+    "date": "0 BBY",
+    "title": "Scarif & Yavin — l'Étoile Noire détruite",
+    "lieu": "Scarif / Yavin",
+    "content": "<p>Les rebelles de Rogue One volent les plans de l'Étoile Noire à Scarif. Quelques jours plus tard, Luke Skywalker détruit la station lors de la bataille de Yavin — l'an 0 du calendrier galactique.</p><p><em>📍 Scarif / Yavin</em></p>"
+  },
+  {
+    "date": "3 ABY",
+    "title": "Bataille de Hoth",
+    "lieu": "Hoth / Bespin",
+    "content": "<p>L'Empire écrase la base Echo sur Hoth ; l'Alliance se disperse. À Bespin, Vador révèle à Luke qu'il est son père.</p><p><em>📍 Hoth / Bespin</em></p>"
+  },
+  {
+    "date": "4 ABY",
+    "title": "Bataille d'Endor — chute de l'Empereur",
+    "lieu": "Endor",
+    "content": "<p>L'Alliance détruit la seconde Étoile Noire au-dessus d'Endor. L'Empereur Palpatine périt, trahi par Vador qui meurt en Anakin Skywalker. L'Empire se fracture.</p><p><em>📍 Endor</em></p>"
+  },
+  {
+    "date": "5 ABY",
+    "title": "Bataille de Jakku — Concordance Galactique",
+    "lieu": "Jakku / Chandrila",
+    "content": "<p>La flotte impériale est anéantie au-dessus de Jakku. L'Empire capitule et signe la Concordance Galactique : la Nouvelle République s'installe.</p><p><em>📍 Jakku / Chandrila</em></p>"
+  },
+  {
+    "date": "9 ABY",
+    "title": "L'ère de la Nouvelle République",
+    "lieu": "Bordure Extérieure",
+    "content": "<p>Cinq ans après Endor, la Nouvelle République peine à pacifier la Bordure : seigneurs de guerre impériaux, guildes de chasseurs de primes et vestiges de l'Empire s'y disputent le vide laissé.</p><p><em>📍 Bordure Extérieure</em></p>"
+  }
+]

@@ -1675,6 +1675,7 @@ body.gm-session .gm-doc h2, body.gm-session .gm-doc h3, body.gm-session .gm-doc 
   padding: 0.28rem 0.4rem 0.28rem 0; margin: 0; border-radius: 8px; cursor: pointer; position: relative;
 }
 .tl-item:hover { background: linear-gradient(90deg, transparent, rgba(90,190,255,0.07) 30%, transparent); }
+.tl-item.tl-nolink { cursor: default; }
 .tl-item:hover .tl-name { color: #eaf6ff; text-shadow: 0 0 12px rgba(90,190,255,0.45); }
 .tl-date {
   text-align: right; font: 800 0.78rem var(--font-display); letter-spacing: 0.04em;

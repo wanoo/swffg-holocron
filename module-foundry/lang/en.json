@@ -307,12 +307,22 @@
       "folderNpcs": {
         "name": "Actor folder — NPCs",
         "hint": "World custom NPCs folder (GM bestiary). Name or “Folder.<id>” uuid; created if missing (applied at install)."
+      },
+      "calendarEpochBBY": {
+        "name": "Galactic calendar epoch (BBY)",
+        "hint": "Year 0 of the Mini Calendar calendar expressed in BBY: calendar year N displays as (N − epoch) BBY/ABY on the timeline. Default: 300 (covers the High Republic)."
+      },
+      "convertMenu": {
+        "name": "MEJ → Campaign Codex conversion",
+        "label": "Convert MEJ sheets",
+        "hint": "Converts the world's Monk's Enhanced Journal sheets (NPCs, organizations, places, shops) into Campaign Codex sheets. Idempotent; originals are archived, never deleted."
       }
     },
     "setup": {
       "done": "Holocron installed: {folders} folder(s) created, {rules} rule(s) and {events} event(s) imported, {moved} journal(s) filed into “{sys}”.",
       "dupRemoved": "Removed near-empty duplicate “{name}” (the real configuration is kept).",
-      "cfgRenamed": "Configuration journal renamed to “{name}” (name expected by the web app)."
+      "cfgRenamed": "Configuration journal renamed to “{name}” (name expected by the web app).",
+      "ccConverted": "{n} MEJ sheet(s) converted to Campaign Codex (originals archived in 🗄️ Archive MEJ)."
     }
   }
 }

@@ -83,12 +83,29 @@ export function resolveFolder(folders, ref) {
   return list.find((f) => f.name === ref || f._id === ref || `Folder.${f._id}` === ref) || null;
 }
 
-// Timeline de campagne : fiches MEJ « event » des catégories kind === 'timeline'
-// (UN dossier monde porte canon ET campagne). L'attribut `date` est en BBY/ABY ;
-// l'attribut `position` (canon / campagne) classe l'événement — défaut : campagne.
+// Icône Mini Calendar qui marque un événement CANON (le reste = campagne).
+export const CANON_ICON = 'fas fa-jedi';
+
+// Timeline de campagne — deux sources fusionnées :
+//  1. Mini Calendar (`calendarEvents` : notes du journal « Calendar Events - Mini
+//     Calendar », année calendrier → BBY/ABY via calendar.epochBBY, icône jedi = canon) ;
+//  2. LEGACY : fiches MEJ « event » des catégories kind === 'timeline' (transition).
 // Tri chronologique croissant, non-datés en fin de frise.
-export function buildTimelineView({ config, folders, journalsIndex, getJournal, visibleFilter, gm = false }) {
+export function buildTimelineView({ config, folders, journalsIndex, getJournal, calendarEvents, visibleFilter, gm = false }) {
   const events = [];
+  const epoch = Number(config?.calendar?.epochBBY) || 300;
+  const bbyLabel = (v) => (v < 0 ? `${-v} BBY` : `${v} ABY`);
+  for (const n of (calendarEvents || [])) {
+    if (!gm && !n.playerVisible) continue; // notes MJ masquées aux joueurs
+    const value = n.year - epoch; // année calendrier → BBY (négatif) / ABY (positif)
+    const excerpt = String(n.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    events.push({
+      name: n.title || excerpt.slice(0, 60) || 'Événement',
+      source: n.icon === CANON_ICON ? 'canon' : 'campagne',
+      date: bbyLabel(value), dateValue: value,
+      excerpt: excerpt.length > 240 ? excerpt.slice(0, 240) + '…' : excerpt,
+    });
+  }
   const tlFolderIds = new Set((config?.categories || [])
     .filter((c) => c && c.kind === 'timeline' && c.folder)
     .map((c) => resolveFolder(folders, c.folder)?._id)
@@ -160,8 +177,9 @@ export function ccView(doc) {
     }
   }
   // champs simples de data affichables en « carte d'identité » (chaînes courtes non-HTML)
+  // + attributs holocron posés par le convertisseur MEJ→CC (flags.holocron.attrs)
   const attributes = {};
-  for (const [k, v] of Object.entries(data)) {
+  for (const [k, v] of Object.entries({ ...(doc.flags?.holocron?.attrs || {}), ...data })) {
     if (typeof v === 'string' && v.trim() && v.length <= 120 && !/[<>]/.test(v)
       && !(k in CC_LINK_FIELDS) && !CC_SKIP_ATTRS.has(k)) attributes[k] = v.trim();
   }

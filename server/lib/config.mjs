@@ -40,6 +40,8 @@ export const CAMPAIGN_DEFAULTS = {
   registry: [],
   advLinks: { externalUrl: '', map: [] },
   campaignPlanets: [],
+  // calendrier galactique Mini Calendar : année calendrier N = (N − epochBBY) BBY/ABY
+  calendar: { epochBBY: 300 },
   cfg: {},
 };
 
@@ -51,6 +53,7 @@ export function campaignConfig(store) {
     packs: { ...CAMPAIGN_DEFAULTS.packs, ...(raw.packs || {}) },
     journals: { ...CAMPAIGN_DEFAULTS.journals, ...(raw.journals || {}) },
     meta: { ...CAMPAIGN_DEFAULTS.meta, ...(raw.meta || {}) },
+    calendar: { ...CAMPAIGN_DEFAULTS.calendar, ...(raw.calendar || {}) },
   };
   // shipNotes : uuid Foundry copié tel quel (« JournalEntry.X.JournalEntryPage.Y ») → « X:Y »
   const m = /JournalEntry\.([A-Za-z0-9]{16})\.JournalEntryPage\.([A-Za-z0-9]{16})/.exec(cc.journals.shipNotes || '');

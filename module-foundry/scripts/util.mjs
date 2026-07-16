@@ -83,13 +83,12 @@ export function clampShip(s) {
 }
 
 export async function shipJournal() {
-  // Le vaisseau est un POI Monk's Enhanced Journal (« poi », point d'intérêt) : il
-  // apparaît comme entité et sa position sur la carte est portée par l'astronav
-  // (setCurrentWorld). Cf. la fiche de référence 🚀 du monde (type poi).
+  // Le vaisseau est un journal 100 % holocron : la page de STATUT est ancrée par
+  // flags.swffg-holocron.bound = "status" (plus aucun flag MEJ — master switch).
+  // Sa position sur la carte reste portée par l'astronav (setCurrentWorld).
   return boundJournal("shipJournal",
     [{ name: t("ship.pageName"), type: "text", text: { content: "", format: 1 },
-       flags: { "monks-enhanced-journal": { type: "poi" } } }],
-    { "monks-enhanced-journal": { pagetype: "poi" } });
+       flags: { [MOD]: { bound: "status" } } }]);
 }
 
 export function readShip(j) {
@@ -120,9 +119,10 @@ export async function writeShip(j, ship, logHTML = null) {
     } catch (e) { console.warn("swffg-holocron | sync usure→astronav", e); }
   }
   const pct = (v, m) => Math.round((v / m) * 100);
-  // page de STATUT = la page POI (flag MEJ) — jamais la page notes d'équipage,
-  // même si l'ordre des pages change (repli : nom lié, puis première page).
-  const pg = j.pages.find((p) => p.flags?.["monks-enhanced-journal"])
+  // page de STATUT = ancrage holocron (bound:"status"), legacy MEJ en repli —
+  // jamais la page notes d'équipage, même si l'ordre des pages change.
+  const pg = j.pages.find((p) => p.flags?.[MOD]?.bound === "status")
+    || j.pages.find((p) => p.flags?.["monks-enhanced-journal"])
     || j.pages.getName?.(t("ship.pageName"))
     || j.pages.contents[0];
   if (pg) await pg.update({ "text.content":

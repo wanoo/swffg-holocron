@@ -1,25 +1,14 @@
-// gen_events.mjs — génère les sources JSON du pack « 📅 Événements canon »
-// (packs/_src_evenements) : ~20 fiches MEJ « event » datées en BBY/ABY.
-// Usage : node gen_events.mjs — idempotent (ids stables dérivés du nom).
+// gen_events.mjs — génère data/canon-events.json : les 20 dates clés du canon
+// (ères République & Empire), installées comme événements Mini Calendar par
+// l'installeur (setup.mjs ensureCalendarEvents). Usage : node gen_events.mjs.
+// (Remplace l'ancien pack JournalEntry « evenements », déprécié depuis la 2.0.0.)
 import { mkdir, writeFile } from "node:fs/promises";
-import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
-const OUT = path.join(root, "packs", "_src_evenements");
 
-// id Foundry (16 alphanum) STABLE, dérivé d'une graine — regénérer ne casse pas les refs.
-const ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-function fid(seed) {
-  const h = createHash("sha256").update(seed).digest();
-  let s = "";
-  for (let i = 0; i < 16; i++) s += ALPHA[h[i] % ALPHA.length];
-  return s;
-}
-
-// 20 dates clés du canon (ères République & Empire — cf. Wookieepedia, Years in
-// the Republic/Imperial Era). Résumés volontairement neutres et sans spoiler fin.
+// [date BBY/ABY, titre, lieu, résumé] — résumés neutres, sans spoiler fin.
 const EVENTS = [
   ["232 BBY", "La Grande Catastrophe hyperspatiale", "Bordure Extérieure",
     "Un désastre en hyperespace disloque le vaisseau <em>Legacy Run</em> ; les débris frappent plusieurs systèmes. L'apogée de la Haute République est ébranlée et les Jedi mobilisés à grande échelle."],
@@ -63,52 +52,10 @@ const EVENTS = [
     "Cinq ans après Endor, la Nouvelle République peine à pacifier la Bordure : seigneurs de guerre impériaux, guildes de chasseurs de primes et vestiges de l'Empire s'y disputent le vide laissé."],
 ];
 
-await mkdir(OUT, { recursive: true });
-for (const [date, name, location, body] of EVENTS) {
-  const jid = fid(`swh-event:${name}`);
-  const pid = fid(`swh-event-page:${name}`);
-  const doc = {
-    _id: jid,
-    // clés LevelDB Foundry : !journal!<id> + !journal.pages!<jid>.<pid> — le format
-    // !journalentry! (bug historique) rend le compendium invisible dans Foundry.
-    _key: `!journal!${jid}`,
-    name: `${date} — ${name}`,
-    pages: [{
-      _id: pid,
-      _key: `!journal.pages!${jid}.${pid}`,
-      name,
-      type: "text",
-      title: { show: true, level: 1 },
-      image: {},
-      text: { format: 1, content: `<p>${body}</p>`, markdown: "" },
-      video: { controls: true, volume: 0.5 },
-      src: null,
-      system: {},
-      sort: 0,
-      ownership: { default: -1 },
-      flags: {
-        "monks-enhanced-journal": {
-          type: "event",
-          role: "",
-          // champs NATIFS de la fiche event MEJ : date (BBY/ABY) et location
-          // (affiché « Position » en FR) = Canon / Campagne. Le lieu réel est
-          // un attribut `lieu` (affiché par l'Holocron, pas par la fiche MEJ).
-          date,
-          location: "Canon",
-          attributes: { lieu: location },
-          relationships: {},
-          items: {},
-        },
-      },
-      _stats: {},
-    }],
-    folder: null,
-    sort: 0,
-    ownership: { default: 2 }, // OBSERVER : le canon est public (visible joueurs)
-    flags: { "monks-enhanced-journal": { pagetype: "event" } },
-    _stats: {},
-  };
-  await writeFile(path.join(OUT, `${jid}.json`), JSON.stringify(doc, null, 2) + "\n");
-  console.log(`${jid}  ${doc.name}`);
-}
-console.log(`\n${EVENTS.length} événements → ${OUT}`);
+const out = EVENTS.map(([date, title, lieu, body]) => ({
+  date, title, lieu,
+  content: `<p>${body}</p><p><em>📍 ${lieu}</em></p>`,
+}));
+await mkdir(path.join(root, "data"), { recursive: true });
+await writeFile(path.join(root, "data", "canon-events.json"), JSON.stringify(out, null, 2) + "\n");
+console.log(`${out.length} événements canon → data/canon-events.json`);
