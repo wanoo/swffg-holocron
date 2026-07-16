@@ -66,8 +66,9 @@ https://github.com/wanoo/swffg-holocron/releases/latest/download/module.json
 
 Foundry will offer to install the required dependencies:
 [swffg-astronavigation](https://github.com/wanoo/swffg-astronavigation) (galaxy map &
-astrogation), [Monk's Enhanced Journal](https://foundryvtt.com/packages/monks-enhanced-journal)
-(typed sheets & bookmarks) and
+astrogation), [Campaign Codex](https://foundryvtt.com/packages/campaign-codex)
+(typed linked sheets), [Mini Calendar](https://foundryvtt.com/packages/wgtgm-mini-calendar)
+(galactic calendar & timeline events) and
 [fvtt-party-resources](https://foundryvtt.com/packages/fvtt-party-resources) (shared pools).
 System: `starwarsffg` (v12/13).
 

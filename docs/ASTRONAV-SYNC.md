@@ -1,4 +1,35 @@
-# Astronav ↔ Holocron — Contrat d'intégration & décisions (sync)
+# ASTRONAV-SYNC — contrat d'intégration
+
+> ## ⚡ CONTRAT v2 (2026-07-16) — MASTER SWITCH Campaign Codex
+>
+> Monk's Enhanced Journal est REMPLACÉ par la suite wgtnGM. Versions publiées :
+> **holocron 2.0.0**, **astronav 2.0.0**. Tout ce qui suit cette section décrit
+> l'ancien contrat MEJ (conservé pour l'historique) — les formats normatifs sont :
+>
+> - **Atlas** : compendium `swffg-astronavigation.planetes` = 6 849 fiches
+>   **Campaign Codex `location`** + 10 fiches **`region`** (une par région
+>   galactique). Format : `flags.campaign-codex = { type, data: { description,
+>   region, secteur, coord, parentRegion: "JournalEntry.<idRegion>", tags },
+>   image }` + `flags.swffg-astronavigation` (region/sector/coord/grid/xy,
+>   inchangé, source canonique). **Ids des planètes stables** (jamais régénérés).
+> - **Favoris** : tag **« Favori »** sur la fiche (`campaign-codex.data.tags`,
+>   sinon `asset-librarian.filterTag`) + **index compact**
+>   `flags.holocron.config.favorites = [{id, name}]` maintenu en write-through
+>   par l'app web et l'★ étoile MJ de l'astronav. `api.favorites()` lit
+>   index + tags (repli marque-pages MEJ legacy) ; `api.toggleFavorite(name)`.
+> - **Événements/frise** : journal « Calendar Events - Mini Calendar »
+>   (`wgtgm-mini-calendar`), pages `YYYY-MM-DD`, notes dans
+>   `flags["wgtgm-mini-calendar"].notes` ; année calendrier = epochBBY (réglage
+>   holocron, défaut 300) + valeur BBY/ABY ; icône `fas fa-jedi` = Canon.
+> - **Fiches de campagne** : Campaign Codex (npc/group/location/shop/quest) ;
+>   l'app web lit CC ET MEJ (legacy) via `sheetView`. Statut/mort des PNJ :
+>   `flags.holocron.statut/mort`.
+> - **Dépendances** : holocron requiert campaign-codex + wgtgm-mini-calendar ;
+>   astronav requiert campaign-codex. **MEJ n'est plus requis nulle part** et
+>   peut être désactivé (conflit de sheets CC/MEJ documenté).
+> - Le POI vaisseau est un journal holocron pur (page statut ancrée par
+>   `flags.swffg-holocron.bound:"status"`).
+
 
 > Mémo de synchronisation entre **ce projet (`swffg-holocron`)** et le module Foundry
 > **`swffg-astronavigation`** (`~/Documents/Dev/star-wars JDR/swffg-astronavigation`, publié sur
