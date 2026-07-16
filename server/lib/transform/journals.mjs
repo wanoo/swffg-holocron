@@ -130,6 +130,55 @@ export function buildTimelineView({ config, folders, journalsIndex, getJournal, 
   return { events };
 }
 
+// --- Campaign Codex : lecture des fiches typées CC (flags.campaign-codex) -------
+// Même modèle de vue que mejView — le front ne voit pas la différence de source.
+// Types CC : region/location/shop/npc/group/quest/tag ; liens par uuid dans data.
+const CC_TYPE_MAP = { npc: 'person', location: 'place', region: 'place', shop: 'shop', group: 'organization', quest: 'quest', tag: 'misc' };
+const CC_LINK_FIELDS = {
+  linkedNPCs: 'PNJ', associates: 'Associé', members: 'Membre',
+  linkedLocations: 'Lieu', linkedLocation: 'Lieu', parentRegion: 'Région',
+  linkedShops: 'Boutique', linkedQuests: 'Quête', linkedStandardJournals: 'Journal',
+};
+const CC_SKIP_ATTRS = new Set(['description', 'notes', 'markup', 'enrichedDescription', 'inventory', 'inventoryCash', 'widgets', 'sheetTypeLabelOverride']);
+// lien CC → id de JournalEntry (uuid "JournalEntry.<id>", id nu, ou objet {uuid})
+const ccRef = (v) => {
+  const s = typeof v === 'string' ? v : String(v?.uuid || v?.id || '');
+  const m = /JournalEntry\.([A-Za-z0-9]{16})/.exec(s);
+  return m ? m[1] : (/^[A-Za-z0-9]{16}$/.test(s) ? s : null);
+};
+
+export function ccView(doc) {
+  const cf = doc.flags?.['campaign-codex'];
+  if (!cf?.type) return null;
+  const data = cf.data || {};
+  const relationships = [];
+  for (const [field, rel] of Object.entries(CC_LINK_FIELDS)) {
+    const raw = data[field];
+    for (const v of (Array.isArray(raw) ? raw : (raw ? [raw] : []))) {
+      const ref = ccRef(v);
+      if (ref) relationships.push({ ref, rel });
+    }
+  }
+  // champs simples de data affichables en « carte d'identité » (chaînes courtes non-HTML)
+  const attributes = {};
+  for (const [k, v] of Object.entries(data)) {
+    if (typeof v === 'string' && v.trim() && v.length <= 120 && !/[<>]/.test(v)
+      && !(k in CC_LINK_FIELDS) && !CC_SKIP_ATTRS.has(k)) attributes[k] = v.trim();
+  }
+  return {
+    source: 'cc',
+    type: CC_TYPE_MAP[cf.type] || String(cf.type),
+    ccType: String(cf.type),
+    ...(Object.keys(attributes).length ? { attributes } : {}),
+    ...(relationships.length ? { relationships } : {}),
+  };
+}
+
+/** Vue de fiche UNIFIÉE : Campaign Codex d'abord, Monk's Enhanced Journal en legacy. */
+export function sheetView(doc, gm) {
+  return ccView(doc) || mejView(doc, gm);
+}
+
 // journalsIndex + journaux complets (store) + pack règles → vue front.
 // `visibleFilter(doc)` applique l'ownership de la session (auth.canSee).
 export function buildJournalsView({ config, folders, journalsIndex, getJournal, rulesPack, visibleFilter, gm = false }) {
@@ -159,10 +208,9 @@ export function buildJournalsView({ config, folders, journalsIndex, getJournal, 
     const doc = getJournal(entry._id);
     if (!doc) continue; // pas encore synchronisé — apparaîtra au prochain tick
     const fh = entry.flags?.holocron || {};
-    const mej = mejView(doc, gm);
-    // statut/mort : MEJ (role → statut, attribut life « mort » → pastille †) est la
-    // SOURCE PAR DÉFAUT ; flags.holocron ne sert plus que de repli pour un journal
-    // pas encore typé MEJ.
+    const mej = sheetView(doc, gm); // Campaign Codex d'abord, MEJ en legacy
+    // statut/mort : rôle MEJ → statut en legacy ; pour les fiches CC (pas de rôle),
+    // flags.holocron.statut/mort est la source (posé par le convertisseur).
     const statut = MEJ_ROLE_STATUT[String(mej?.role || '').toLowerCase()] || fh.statut || '';
     const mort = /mort|décéd|décès|deceased|dead/i.test(String(mej?.attributes?.life || mej?.attributes?.vie || '')) || Boolean(fh.mort);
     const isRules = rulesCatIds.has(entry.folder);

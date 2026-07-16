@@ -137,3 +137,30 @@ test('buildJournalsView : catégorie DOSSIER kind rules — préfixe retiré, pa
   assert.equal(out.categories.length, 1, 'pas de catégorie __rules__ en plus du dossier');
   assert.deepEqual(out.journals.map((j) => j.name), ['Mécanique de base', 'Compétences'], 'préfixe « NN » retiré, tri alphanumérique');
 });
+
+test('sheetView : fiche Campaign Codex → même modèle de vue que MEJ', async () => {
+  const { sheetView } = await import('../lib/transform/journals.mjs');
+  const doc = {
+    _id: 'cc1', name: 'Jabba',
+    flags: { 'campaign-codex': { type: 'npc', data: {
+      description: '<p>Long HTML ignoré des attributs</p>',
+      faction: 'Cartel Hutt',
+      linkedLocation: 'JournalEntry.AAAAAAAAAAAAAAAA',
+      associates: ['JournalEntry.BBBBBBBBBBBBBBBB', { uuid: 'JournalEntry.CCCCCCCCCCCCCCCC' }],
+    } } },
+    pages: [],
+  };
+  const v = sheetView(doc, false);
+  assert.equal(v.source, 'cc');
+  assert.equal(v.type, 'person', 'npc CC → person (modèle commun)');
+  assert.equal(v.attributes.faction, 'Cartel Hutt');
+  assert.equal(v.attributes.description, undefined, 'HTML/description exclus');
+  assert.deepEqual(v.relationships.map((r) => r.ref).sort(), ['AAAAAAAAAAAAAAAA', 'BBBBBBBBBBBBBBBB', 'CCCCCCCCCCCCCCCC']);
+  assert.equal(v.relationships.find((r) => r.ref === 'AAAAAAAAAAAAAAAA').rel, 'Lieu');
+  assert.equal(v.relationships.find((r) => r.ref === 'BBBBBBBBBBBBBBBB').rel, 'Associé');
+  // une fiche MEJ passe toujours (legacy)
+  const mej = sheetView({ _id: 'm1', name: 'X', flags: {}, pages: [{ _id: 'p', type: 'text', text: { content: '' },
+    flags: { 'monks-enhanced-journal': { type: 'person', role: 'Ami', attributes: {}, relationships: {} } } }] }, false);
+  assert.equal(mej.type, 'person');
+  assert.equal(mej.role, 'Ami');
+});
