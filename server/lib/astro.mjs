@@ -4,16 +4,15 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import * as Astro from '../../public/js/astro-core.js';
 import { mcpCall } from './mcp.mjs';
-import { mejView } from './transform/journals.mjs';
+import { sheetView } from './transform/journals.mjs';
 
-// id à la Foundry/MEJ (makeid) : 16 caractères alphanumériques.
-const AL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-const makeId16 = () => { let s = ''; for (let i = 0; i < 16; i++) s += AL[Math.floor(Math.random() * AL.length)]; return s; };
-// Est-ce la fiche MEJ « Place » d'une planète de l'astronav ?
+// Est-ce la fiche d'une planète de l'astronav ? (CC location, MEJ Place legacy,
+// ou flag astronav posé à l'import de l'atlas.)
 const isPlanetPlace = (d) => {
+  const cc = d?.flags?.['campaign-codex']?.type;
   const jf = d?.flags?.['monks-enhanced-journal'];
   const pagePlace = (d?.pages || []).some((p) => p.flags?.['monks-enhanced-journal']?.type === 'place');
-  return jf?.pagetype === 'place' || pagePlace || !!d?.flags?.['swffg-astronavigation'];
+  return cc === 'location' || cc === 'region' || jf?.pagetype === 'place' || pagePlace || !!d?.flags?.['swffg-astronavigation'];
 };
 
 export function createAstroService({ publicDir, config, store, logger = console }) {
@@ -85,20 +84,20 @@ export function createAstroService({ publicDir, config, store, logger = console 
   }
 
   function buildFiche(doc, gm) {
-    const mv = mejView(doc, gm) || {};
+    const mv = sheetView(doc, gm) || {}; // CC location d'abord, MEJ Place en legacy
     const page = (doc.pages || []).find((p) => p.flags?.['monks-enhanced-journal']) || (doc.pages || [])[0] || {};
     return {
       name: doc.name,
       uuid: `JournalEntry.${doc._id}`,
-      img: page.src || doc.img || doc.flags?.['monks-enhanced-journal']?.img || null,
+      img: page.src || doc.img || doc.flags?.['campaign-codex']?.image || doc.flags?.['monks-enhanced-journal']?.img || null,
       html: page.text?.content || '',
-      region: mv.placetype || '',                       // MEJ Place : placetype = région
-      sector: mv.location || '',                        // location = secteur
-      coord: mv.attributes?.districts || mv.attributes?.coordonnées || '',
+      region: mv.placetype || mv.attributes?.region || '',       // MEJ : placetype ; CC : data/attrs.region
+      sector: mv.location || mv.attributes?.secteur || mv.attributes?.rattachement || '',
+      coord: mv.attributes?.districts || mv.attributes?.coordonnées || mv.attributes?.coord || '',
       attributes: mv.attributes || {},
       relationships: mv.relationships || [],
       type: mv.type || 'place',
-      source: 'mej',
+      source: mv.source === 'cc' ? 'cc' : 'mej',
     };
   }
 
@@ -138,18 +137,82 @@ export function createAstroService({ publicDir, config, store, logger = console 
     return Array.isArray(bm) ? bm : [];
   };
 
-  // Favoris MEJ d'un utilisateur → noms de planètes (résout chaque bookmark entityId).
+  /* --- Favoris (master switch) : tag « Favori » posé SUR la fiche planète -------
+   * (flags.campaign-codex.data.tags pour une fiche CC, sinon
+   * flags.asset-librarian.filterTag — les deux indexés par Asset Librarian).
+   * Index compact `flags.holocron.config.favorites = [{id, name}]` maintenu en
+   * write-through : le web et l'astronav le lisent sans scanner l'atlas. */
+  const FAV_TAG = 'Favori';
+  const configEntry = () => (store.get('journalsIndex') || [])
+    .find((j) => j.name === (process.env.CONFIG_JOURNAL_NAME || '⚙️ Holocron Config'));
+  const favIndex = () => {
+    const cfg = store.get('config') || {};
+    return Array.isArray(cfg.favorites) ? cfg.favorites : null;
+  };
+  const normTags = (raw) => (Array.isArray(raw) ? raw : String(raw || '').split(','))
+    .map((s) => String(s).trim()).filter(Boolean);
+
+  // Pose/retire le tag « Favori » sur la fiche (par id de JournalEntry).
+  async function tagFavorite(id, on) {
+    const list = await getJournals({ _id: id }, ['_id', 'name', 'flags']);
+    const doc = list.find((d) => d && d._id === id);
+    if (!doc) return false;
+    const isCC = Boolean(doc.flags?.['campaign-codex']?.type);
+    const path = isCC ? 'flags.campaign-codex.data.tags' : 'flags.asset-librarian.filterTag';
+    const tags = normTags(isCC ? doc.flags?.['campaign-codex']?.data?.tags : doc.flags?.['asset-librarian']?.filterTag);
+    const has = tags.some((t) => t.toLowerCase() === FAV_TAG.toLowerCase());
+    const next = on && !has ? [...tags, FAV_TAG]
+      : (!on && has ? tags.filter((t) => t.toLowerCase() !== FAV_TAG.toLowerCase()) : null);
+    if (next) await mcpCall('modify_document', { type: 'JournalEntry', _id: id, updates: [{ [path]: next }] });
+    return true;
+  }
+
+  async function writeFavIndex(favs) {
+    const entry = configEntry();
+    if (!entry) return false;
+    await mcpCall('modify_document', { type: 'JournalEntry', _id: entry._id, updates: [{ 'flags.holocron.config.favorites': favs }] });
+    store.patch('config', (cfg) => { cfg.favorites = favs; });
+    return true;
+  }
+
+  // Migration one-shot : marque-pages MEJ (tous utilisateurs) → tags + index config.
+  let favMigrating = false;
+  async function migrateBookmarks() {
+    if (favIndex() || !configEntry()) return;
+    const res = await mcpCall('get_users', { requested_fields: ['_id', 'name', 'flags'] });
+    const users = Array.isArray(res) ? res : (res?.users || res?.results || res?.documents || []);
+    const map = new Map();
+    for (const u of users) for (const b of readBookmarks(u)) {
+      const m = /^JournalEntry\.([A-Za-z0-9]+)/.exec(String(b?.entityId || b?.uuid || ''));
+      if (m && !map.has(m[1])) map.set(m[1], b?.text || null);
+    }
+    const favs = [];
+    for (const [id, text] of map) {
+      const nm = text || await nameFromUuid(`JournalEntry.${id}`);
+      if (nm) favs.push({ id, name: nm });
+    }
+    await writeFavIndex(favs);
+    for (const f of favs) { try { await tagFavorite(f.id, true); } catch { /* fiche absente : l'index fait foi */ } }
+    logger.log?.(`[astro] favoris migrés depuis les marque-pages MEJ : ${favs.length}`);
+  }
+
+  // Favoris partagés de la table → noms de planètes (index config, legacy en repli).
   async function favorites(userId) {
+    const idx = favIndex();
+    if (idx) return [...new Set(idx.map((f) => f?.name).filter(Boolean))];
+    // pré-migration : marque-pages MEJ de l'utilisateur + migration en tâche de fond
+    if (!favMigrating) {
+      favMigrating = true;
+      migrateBookmarks().catch((e) => logger.warn?.('[astro] migration favoris:', String(e.message || e)))
+        .finally(() => { favMigrating = false; });
+    }
     if (!userId) return [];
     const c = favCache.get(userId);
     if (c && Date.now() - c.t < FRESH) return c.names;
     const u = await userDoc(userId);
-    const bm = readBookmarks(u);
     const names = [];
-    for (const b of bm) {
-      const uuid = b?.entityId || b?.uuid || null;
-      if (!uuid) continue;
-      const nm = await nameFromUuid(uuid);
+    for (const b of readBookmarks(u)) {
+      const nm = await nameFromUuid(b?.entityId || b?.uuid || null);
       if (nm) names.push(nm);
     }
     const uniq = [...new Set(names)];
@@ -157,31 +220,20 @@ export function createAstroService({ publicDir, config, store, logger = console 
     return uniq;
   }
 
-  async function allUsers() {
-    const res = await mcpCall('get_users', { requested_fields: ['_id', 'name', 'flags'] });
-    return Array.isArray(res) ? res : (res?.users || res?.results || res?.documents || []);
-  }
-
-  // Ajoute/retire un favori MEJ (marque-page) — PARTAGÉ : écrit le flag bookmarks de
-  // TOUS les utilisateurs (joueurs + MJ). Forme du bookmark identique à MEJ (addBookmark).
+  // Bascule un favori : tag sur la fiche + index config (write-through).
   async function toggleFavorite(name, on) {
     if (!name) throw Object.assign(new Error('nom de monde requis'), { code: 400 });
     const uuid = await planetUuid(name);
-    if (!uuid) throw Object.assign(new Error(`fiche MEJ absente pour « ${name} » — importe l'atlas dans Foundry`), { code: 404 });
-    const users = await allUsers();
-    let changed = 0;
-    for (const u of users) {
-      const bm = readBookmarks(u);
-      const present = bm.some((b) => b?.entityId === uuid);
-      let next = null;
-      if (on && !present) next = [...bm, { id: makeId16(), entityId: uuid, text: name, icon: 'fa-place-of-worship' }];
-      else if (!on && present) next = bm.filter((b) => b?.entityId !== uuid);
-      if (!next) continue;
-      await mcpCall('modify_document', { type: 'User', _id: u._id, updates: [{ 'flags.monks-enhanced-journal.bookmarks': next }] });
-      favCache.delete(u._id);
-      changed++;
-    }
-    return { ok: true, name, on: !!on, changed, users: users.length };
+    if (!uuid) throw Object.assign(new Error(`fiche absente pour « ${name} » — importe l'atlas dans Foundry`), { code: 404 });
+    const id = uuid.split('.')[1];
+    await tagFavorite(id, !!on);
+    const cur = favIndex() || [];
+    const next = on
+      ? (cur.some((f) => f?.id === id) ? cur : [...cur, { id, name }])
+      : cur.filter((f) => f?.id !== id);
+    const wrote = await writeFavIndex(next);
+    if (!wrote) throw Object.assign(new Error('⚙️ Holocron Config introuvable (index des favoris)'), { code: 500 });
+    return { ok: true, name, on: !!on };
   }
 
   return { astroData, route, fiche, favorites, toggleFavorite, planetUuid };
