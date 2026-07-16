@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0.1 — Alignement sur le calendrier « Grande ReSynchronisation »
+
+- **Époque par défaut : 35 BBY** (an 0 du calendrier de la République/Empire) au
+  lieu de 300 — colle au calendrier Mini Calendar réel de la campagne (10 mois
+  × 35 jours, notes preset fusionnées dans le journal).
+- **Nommage des pages aligné sur Mini Calendar** : année NON paddée et années
+  NÉGATIVES acceptées (ex. « -197-01-01 » pour 232 BBY) — les événements canon
+  installés sont désormais visibles dans le calendrier lui-même.
+- App web : la frise trie **au jour près** (mois/jour du calendrier), lit les
+  pages d'années négatives, et affiche les **tags CC** (Terrain/Climat/Favori)
+  sur les cartes de fiches.
+
 ## 2.0.0 — MASTER SWITCH : Campaign Codex + Mini Calendar remplacent MEJ
 
 **Rupture assumée** : le module ne dépend plus de Monk's Enhanced Journal.

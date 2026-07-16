@@ -54,8 +54,9 @@ Hooks.once("init", () => {
   SC("adversariesPack", "world.star-wars-adversaries");
   SC("gmBibleFolder", "🎲 MJ — Bible de campagne");
   SC("shipNotesPage", "");                         // "<jid>:<pid>" OU uuid JournalEntry.….JournalEntryPage.…
-  // Calendrier galactique Mini Calendar : année calendrier N = (N − epochBBY) BBY/ABY.
-  SC("calendarEpochBBY", "300");
+  // Calendrier galactique Mini Calendar (« Grande ReSynchronisation », an 0 = 35 BBY) :
+  // année calendrier N = (N − epochBBY) → BBY si négatif, ABY sinon.
+  SC("calendarEpochBBY", "35");
   // Répertoires clés de la campagne (nom OU uuid « Folder.<id> ») — créés/adoptés
   // à l'installation (menu « Installer / réinstaller » ou mise à jour du module).
   S("folderActes", "🎬 Campagne — Actes");

@@ -234,8 +234,10 @@ export function createStore({ dataDir, logger = console }) {
     const j = (Array.isArray(list) ? list : []).find((x) => x && x.name === CALENDAR_JOURNAL);
     const events = [];
     for (const page of (j?.pages || [])) {
-      const m = /^(\d+)-(\d+)-(\d+)$/.exec(String(page.name || ''));
-      if (!m) continue; // (0000-Recurring et pages diverses : ignorées — pas de récurrence en frise)
+      // nom de page Mini Calendar : "<année>-MM-DD", année NON paddée et
+      // possiblement NÉGATIVE (calendrier Grande ReSynchronisation, an 0 = 35 BBY)
+      const m = /^(-?\d+)-(\d+)-(\d+)$/.exec(String(page.name || ''));
+      if (!m) continue; // (0000-Recurring : ignorée — pas de récurrence en frise)
       const notes = page.flags?.['wgtgm-mini-calendar']?.notes || [];
       for (const n of notes) {
         if (!n || typeof n !== 'object') continue;

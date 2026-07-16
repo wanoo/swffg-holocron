@@ -310,7 +310,7 @@
       },
       "calendarEpochBBY": {
         "name": "Époque du calendrier galactique (BBY)",
-        "hint": "Année 0 du calendrier Mini Calendar exprimée en BBY : l'année calendrier N s'affiche (N − époque) BBY/ABY dans la frise. Défaut : 300 (couvre la Haute République)."
+        "hint": "Année 0 du calendrier Mini Calendar exprimée en BBY. Défaut : 35 (« Grande ReSynchronisation », an 0 = 35 BBY) — l'année calendrier N s'affiche (N − époque) en BBY/ABY dans la frise. Années négatives acceptées."
       },
       "convertMenu": {
         "name": "Conversion MEJ → Campaign Codex",

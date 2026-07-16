@@ -231,9 +231,9 @@ export async function ensureCalendarEvents() {
   let added = 0;
   for (const ev of sources) {
     if (ev.value == null) continue;
+    // nommage Mini Calendar : année NON paddée, négative acceptée (ex. "-197-01-01")
     const year = epoch + Math.trunc(ev.value);
-    if (year < 0) { console.warn(`swffg-holocron | ${ev.title} : antérieur à l'époque du calendrier (${epoch} BBY)`); continue; }
-    const pageName = `${String(year).padStart(4, "0")}-01-01`;
+    const pageName = `${year}-01-01`;
     let page = journal.pages.getName(pageName);
     if (!page) [page] = await journal.createEmbeddedDocuments("JournalEntryPage", [{ name: pageName, type: "text", text: { content: "", format: 1 } }]);
     const nid = stableId(`swh-cal:${ev.title}:${ev.value}`);
@@ -287,7 +287,7 @@ const SETTING_DEFAULTS = {
   rulesPack: "", adversariesPack: "world.star-wars-adversaries",
   gmBibleFolder: "🎲 MJ — Bible de campagne", shipNotesPage: "",
   folderPcs: "👥 Personnages joueurs", folderNpcs: "🎭 PNJ de campagne",
-  calendarEpochBBY: "300",
+  calendarEpochBBY: "35", // Grande ReSynchronisation : an 0 du calendrier = 35 BBY
 };
 
 // Réglage de dossier → valeur écrite en config : le NOM du dossier résolu

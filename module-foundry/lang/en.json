@@ -310,7 +310,7 @@
       },
       "calendarEpochBBY": {
         "name": "Galactic calendar epoch (BBY)",
-        "hint": "Year 0 of the Mini Calendar calendar expressed in BBY: calendar year N displays as (N − epoch) BBY/ABY on the timeline. Default: 300 (covers the High Republic)."
+        "hint": "Year 0 of the Mini Calendar calendar expressed in BBY. Default: 35 (“Great ReSynchronization”, year 0 = 35 BBY) — calendar year N displays as (N − epoch) BBY/ABY on the timeline. Negative years supported."
       },
       "convertMenu": {
         "name": "MEJ → Campaign Codex conversion",

@@ -155,7 +155,7 @@ function pageHead(page, journalName) {
 // Carte d'identité Monk's Enhanced Journal : type de fiche, attributs,
 // rattachement et relations (liens vers les journaux visibles).
 const MEJ_TYPES = { person: '👤 Personnage', place: '🌍 Lieu', organization: '🏛️ Organisation', shop: '🏪 Boutique', quest: '🎯 Quête', poi: '📍 Point d\'intérêt', event: '📅 Événement', loot: '💰 Butin' };
-const MEJ_ATTR_LABELS = { race: 'Espèce', gender: 'Genre', life: 'Vie', faction: 'Faction', age: 'Âge', size: 'Taille', government: 'Gouvernement', inhabitants: 'Habitants', districts: 'Districts', alignment: 'Alignement', ancestry: 'Origine', profession: 'Profession', voice: 'Voix', date: 'Date', datefin: 'Fin', position: 'Position', lieu: 'Lieu' };
+const MEJ_ATTR_LABELS = { race: 'Espèce', gender: 'Genre', life: 'Vie', faction: 'Faction', age: 'Âge', size: 'Taille', government: 'Gouvernement', inhabitants: 'Habitants', districts: 'Districts', alignment: 'Alignement', ancestry: 'Origine', profession: 'Profession', voice: 'Voix', date: 'Date', datefin: 'Fin', position: 'Position', lieu: 'Lieu', tags: 'Tags', region: 'Région', secteur: 'Secteur', coord: 'Coordonnées' };
 const MEJ_ROLE_FR = { enemy: 'Ennemi', ennemi: 'Ennemi', ally: 'Allié', allié: 'Allié', allie: 'Allié', ami: 'Ami', amie: 'Amie', neutral: 'Neutre', neutre: 'Neutre', mentor: 'Mentor', maitre: 'Maître', 'maître': 'Maître', contact: 'Contact', friend: 'Ami', rival: 'Rival' };
 function mejCard(journal) {
   const m = journal.mej;

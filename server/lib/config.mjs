@@ -40,8 +40,9 @@ export const CAMPAIGN_DEFAULTS = {
   registry: [],
   advLinks: { externalUrl: '', map: [] },
   campaignPlanets: [],
-  // calendrier galactique Mini Calendar : année calendrier N = (N − epochBBY) BBY/ABY
-  calendar: { epochBBY: 300 },
+  // calendrier galactique Mini Calendar (« Grande ReSynchronisation ») :
+  // année calendrier N = (N − epochBBY) → BBY si négatif / ABY sinon. An 0 = 35 BBY.
+  calendar: { epochBBY: 35 },
   cfg: {},
 };
 
