@@ -1,14 +1,11 @@
 /** SWFFG Holocron — entry point: settings, API, scene buttons, astronav ↔ ship bridge. */
-import { MOD, t, applyTrip, shipJournal, readShip, setShipWorld, astronavApi, favoriteWorlds, ensurePartyResources } from "./util.mjs";
+import { MOD, t, applyTrip, shipJournal, readShip, setShipWorld, astronavApi, favoriteWorlds } from "./util.mjs";
 import { installHolocron, pushSettingsToConfig } from "./setup.mjs";
 import { convertMejToCC } from "./convert-mej.mjs";
+import { registerHolocronWidgets } from "./widgets/register.mjs";
 import { HolocronApp } from "./deck.mjs";
 import { openToolbox, TOOLS } from "./gm-tools.mjs";
 
-/** Menu de réglage : (ré)installe les ressources party-resources du groupe. */
-class PartyResSetupMenu extends foundry.applications.api.ApplicationV2 {
-  async render() { await ensurePartyResources({ force: true }); return this; }
-}
 /** Menu de réglage : (ré)installe la structure Holocron (dossiers, règles, rangement). */
 class InstallMenu extends foundry.applications.api.ApplicationV2 {
   async render() { await installHolocron(); return this; }
@@ -41,10 +38,6 @@ Hooks.once("init", () => {
   S("critTableCharacter", "🩸 Blessures critiques (d100)");
   S("critTableVehicle", "🔥 Avaries critiques — véhicules (d100)");
   S("shopPacks", "world.oggdudeweapons, world.oggdudearmor, world.oggdudegear");
-  // fvtt-party-resources : id des ressources partagées mappées aux trois jauges du vaisseau.
-  S("resFoodId", "vivres");
-  S("resFuelId", "carburant");
-  S("resWearId", "usure");
   // dossier SYSTÈME (journaux techniques rangés là) : nom OU uuid « Folder.<id> ».
   S("systemFolder", "🛠️ Holocron — Système");
   // Champs de la config web PILOTÉS par les options du module (appliqués à la
@@ -65,17 +58,12 @@ Hooks.once("init", () => {
   S("folderNotes", "📓 Notes des joueurs");
   S("folderRules", "📖 Règles & Références (FR)");
   S("folderEvents", "📅 Événements");
+  S("folderQuests", "🎯 Quêtes");
   SC("folderPcs", "👥 Personnages joueurs");
   SC("folderNpcs", "🎭 PNJ de campagne");
-  // marqueurs d'installation auto : party-resources (une fois) ; structure Holocron
-  // (une fois PAR VERSION du module — l'install est idempotente, chaque mise à jour
-  // rejoue donc les compléments de structure/config sans rien écraser).
-  game.settings.register(MOD, "partyResSetup", { scope: "world", config: false, type: Boolean, default: false });
+  // marqueur d'installation auto : structure Holocron, une fois PAR VERSION du
+  // module (l'install est idempotente, chaque mise à jour rejoue les compléments).
   game.settings.register(MOD, "installedVersion", { scope: "world", config: false, type: String, default: "" });
-  game.settings.registerMenu(MOD, "partyResMenu", {
-    name: "SWH.settings.partyResMenu.name", label: "SWH.settings.partyResMenu.label",
-    hint: "SWH.settings.partyResMenu.hint", icon: "fa-solid fa-gauge-high", type: PartyResSetupMenu, restricted: true,
-  });
   game.settings.registerMenu(MOD, "installMenu", {
     name: "SWH.settings.installMenu.name", label: "SWH.settings.installMenu.label",
     hint: "SWH.settings.installMenu.hint", icon: "fa-solid fa-boxes-packing", type: InstallMenu, restricted: true,
@@ -94,7 +82,6 @@ Hooks.once("init", () => {
     ship: async () => readShip(await shipJournal()),
     favorites: favoriteWorlds,
     importAtlas: () => astronavApi()?.importToWorld?.({ confirm: true }),
-    setupPartyResources: ensurePartyResources,
     install: installHolocron,
     convertMej: convertMejToCC,
     lastCost: () => LAST_COST,
@@ -156,21 +143,11 @@ Hooks.on("createChatMessage", async (msg) => {
   finally { await msg.delete().catch(() => {}); }
 });
 
-/* Au chargement : setup auto des ressources party-resources + cale le POI « vous êtes ici ». */
+/* Au chargement : widgets Campaign Codex + installation + POI « vous êtes ici ». */
 Hooks.once("ready", async () => {
-  // Setup/install automatique du pool du groupe : sur TOUT client MJ (idempotent).
-  // NE dépend PAS de « MJ actif » — le connecteur MCP headless peut être l'activeGM
-  // et ne lance jamais le code du module, donc les ressources ne se créaient jamais.
-  if (game.user.isGM) {
-    try {
-      if (!game.settings.get(MOD, "partyResSetup")) {
-        const ok = await ensurePartyResources({ silent: false });
-        if (ok) await game.settings.set(MOD, "partyResSetup", true);
-      } else {
-        await ensurePartyResources({ silent: true });   // idempotent : recrée seulement si supprimées
-      }
-    } catch (e) { console.warn("swffg-holocron | setup party-resources", e); }
-  }
+  // Widgets CC embarqués (Resource Bar, Quest Graph, Ressources du vaisseau) —
+  // enregistrés AVANT l'installation (qui pose le widget vaisseau sur la fiche).
+  try { registerHolocronWidgets(); } catch (e) { console.warn("swffg-holocron | widgets", e); }
   // Installation auto de la structure Holocron (dossiers clés, import des règles
   // et événements canon, config complétée, rangement des journaux techniques).
   // Un seul MJ « actif » l'exécute, une fois par version du module (idempotent,

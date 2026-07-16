@@ -93,7 +93,7 @@ export function createStore({ dataDir, logger = console }) {
   // déclarées + Bible MJ + dossiers MJ/outils connus. On EXCLUT tout le reste — en
   // particulier les milliers de journaux hors-scope (planètes MEJ de la nouvelle
   // astronav, gérées par leur propre module), qui sinon submergent la synchro.
-  const GM_FOLDER_NAMES = ['🎭 PNJ & fronts', '🖥️ Poste de commande', '🧰 Ressources MJ', '🎬 Actes & scénarios', '🛠️ Ateliers', '🎴 Sabacc', 'Boutiques'];
+  const GM_FOLDER_NAMES = ['🎭 PNJ & fronts', '🖥️ Poste de commande', '🧰 Ressources MJ', '🎬 Actes & scénarios', '🛠️ Ateliers', '🎴 Sabacc', 'Boutiques', '🎯 Quêtes'];
   function relevantJournalFolderIds() {
     const cfg = get('config') || {};
     const refs = new Set(GM_FOLDER_NAMES);

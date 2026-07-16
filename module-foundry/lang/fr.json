@@ -316,6 +316,10 @@
         "name": "Conversion MEJ → Campaign Codex",
         "label": "Convertir les fiches MEJ",
         "hint": "Convertit les fiches Monk's Enhanced Journal du monde (PNJ, organisations, lieux, boutiques) en fiches Campaign Codex. Idempotent ; les originaux sont archivés, jamais supprimés."
+      },
+      "folderQuests": {
+        "name": "Dossier — Quêtes",
+        "hint": "Fiches Campaign Codex « quête » (graphe des quêtes du cockpit MJ web). Garder ce nom pour la synchronisation. Nom ou uuid « Folder.<id> » ; créé s'il n'existe pas (appliqué à l'installation)."
       }
     },
     "setup": {

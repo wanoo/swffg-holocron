@@ -4,7 +4,7 @@
  *  3. rangement des journaux techniques (vaisseau, codex, HoloNet, config, notes
  *     MJ, rencontres, dossiers, dice_helper) dans le dossier SYSTÈME.
  *  Ne recrée jamais l'existant (repérage par nom) — relançable sans risque. */
-import { MOD, t, boundJournal, shipJournal, codexJournal } from "./util.mjs";
+import { MOD, t, boundJournal, shipJournal, codexJournal, migratePartyResources } from "./util.mjs";
 import { convertMejToCC } from "./convert-mej.mjs";
 
 // Dossiers clés de la campagne — chaque réglage accepte un NOM ou un uuid
@@ -16,6 +16,7 @@ export const KEY_FOLDERS = {
   folderNotes: { type: "JournalEntry", def: "📓 Notes des joueurs", kind: "notes", editable: true },
   folderRules: { type: "JournalEntry", def: "📖 Règles & Références (FR)" },
   folderEvents: { type: "JournalEntry", def: "📅 Événements" },
+  folderQuests: { type: "JournalEntry", def: "🎯 Quêtes" }, // fiches CC quest (graphe MJ)
   gmBibleFolder: { type: "JournalEntry", def: "🎲 MJ — Bible de campagne" },
   folderPcs: { type: "Actor", def: "👥 Personnages joueurs" },
   folderNpcs: { type: "Actor", def: "🎭 PNJ de campagne" },
@@ -166,6 +167,21 @@ function rulesPackId() {
 
 // Nom normalisé pour la déduplication : préfixe de tri « NN · » ignoré, casse pliée.
 const normName = (n) => String(n || "").toLowerCase().replace(/^\d+\s*[·.\-–—]?\s*/, "").trim();
+
+/** Fiche vaisseau = fiche Campaign Codex « location » portant le widget
+ * « Ressources du vaisseau » (jauges liées à flags.holocron.ship). */
+async function ensureShipWidget() {
+  if (!game.modules.get("campaign-codex")?.active) return;
+  const j = await shipJournal();
+  if (!j) return;
+  if (!j.flags?.["campaign-codex"]?.type) {
+    await j.update({ "flags.campaign-codex": { type: "location", data: { description: `<p>${t("ship.pageName")}</p>`, tags: [] } } });
+  }
+  const wid = stableId("swh-widget:ship-resources");
+  if (!j.flags?.["campaign-codex"]?.data?.widgets?.shipresourcebar?.[wid]) {
+    await j.update({ [`flags.campaign-codex.data.widgets.shipresourcebar.${wid}`]: { title: "" } });
+  }
+}
 
 /* ------------------------------------------ événements → Mini Calendar ------- */
 const CAL_MOD = "wgtgm-mini-calendar";
@@ -379,9 +395,13 @@ export async function installHolocron({ silent = false } = {}) {
   const sys = await systemFolder();
   const eventsF = await eventsFolder();
 
-  // 3. fiches liées du poste de commande : POI vaisseau (fiche MEJ), codex, HoloNet
-  try { await shipJournal(); await codexJournal(); await boundJournal("holonetJournal"); }
-  catch (e) { console.warn("swffg-holocron | journaux liés", e); }
+  // 3. fiches liées du poste de commande : vaisseau (fiche CC + widget jauges),
+  // codex, HoloNet
+  try {
+    await shipJournal(); await codexJournal(); await boundJournal("holonetJournal");
+    await migratePartyResources();   // one-shot si l'ancien module est encore là
+    await ensureShipWidget();        // fiche CC location + widget « Ressources du vaisseau »
+  } catch (e) { console.warn("swffg-holocron | journaux liés", e); }
 
   // 4. la config de campagne se complète toute seule : catégories (règles/timeline)
   // puis champs pilotés par les OPTIONS du module (packs, bible, notes du vaisseau…)

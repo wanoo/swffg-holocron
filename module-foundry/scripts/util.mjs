@@ -16,22 +16,12 @@ export const gp = (d, p) => foundry.utils.getProperty(d, p);
 export const astronavActive = () => game.modules.get("swffg-astronavigation")?.active ?? false;
 export const astronavApi = () => (astronavActive() ? game.modules.get("swffg-astronavigation")?.api : null) ?? null;
 
-/* -------------------------------------------- pont fvtt-party-resources ------ */
-// Le pool de ressources partagé (vivres/carburant/usure) vit dans fvtt-party-resources
-// quand il est présent ; sinon le flag du journal fait foi (dégradation gracieuse).
-export const PR_MOD = "fvtt-party-resources";
-export const prActive = () => game.modules.get(PR_MOD)?.active ?? false;
-const _pr = () => globalThis.pr || (typeof window !== "undefined" ? window.pr : null) || null;
-// ids party-resources mappés à nos trois jauges (configurables via réglages du module)
-export const resId = (kind) => game.settings.get(MOD, { vivres: "resFoodId", fuel: "resFuelId", usure: "resWearId" }[kind]) || kind;
-export function prGet(kind) {
-  if (!prActive()) return null;
-  try { const v = _pr()?.api?.get?.(resId(kind)); return v == null ? null : Number(v); } catch { return null; }
-}
-export function prSet(kind, value, notify = false) {
-  if (!prActive()) return false;
-  try { _pr()?.api?.set?.(resId(kind), Math.round(value), { notify }); _pr()?.status_bar?.render?.(); return true; } catch { return false; }
-}
+/* ------------------------------------------------------------------------------
+ * L'état vaisseau (vivres/carburant/usure) vit dans flags.holocron.ship — SEULE
+ * source de vérité depuis la 2.1.0. L'UI Foundry est le widget Campaign Codex
+ * « Ressources du vaisseau » (widgets/register.mjs), qui lit/écrit ce flag.
+ * (fvtt-party-resources n'est plus une dépendance.)
+ * ---------------------------------------------------------------------------- */
 
 /** FFG dice glyphs (inline, chat-safe). */
 const DIE = { di: ["◆", "#8850c8"], ch: ["◆", "#d6595a"], bo: ["■", "#8fd4ff"], se: ["■", "#666"] };
@@ -97,19 +87,12 @@ export function readShip(j) {
   const legacy = j ? (gp(j, `flags.${MOD}.ship`) || gp(j, "flags.swffg-command-deck.ship")) : null;
   const s = clampShip(own || legacy || {});
   if (!s.name) s.name = game.settings.get(MOD, "shipJournal");
-  // party-resources = pool live partagé : sa valeur courante prime sur le flag (bornée par les max du vaisseau)
-  const pv = prGet("vivres"), pf = prGet("fuel"), pu = prGet("usure");
-  if (pv != null) s.vivres = Math.max(0, Math.min(s.vivresMax, Math.round(pv)));
-  if (pf != null) s.fuel = Math.max(0, Math.min(s.fuelMax, Math.round(pf)));
-  if (pu != null) s.usure = Math.max(0, Math.min(100, Math.round(pu)));
   return s;
 }
 
 export async function writeShip(j, ship, logHTML = null) {
   const s = clampShip(ship);
   await j.update({ [`flags.${FLAG_SCOPE}.ship`]: s, [`flags.${MOD}.-=ship`]: null });
-  // miroir du pool vers party-resources (si présent) — la barre de statut se rafraîchit d'elle-même
-  prSet("vivres", s.vivres); prSet("fuel", s.fuel); prSet("usure", s.usure);
   // l'usure accumulée pilote la difficulté d'astrogation de l'astronav (>50 % : +1 ; >80 % : +2)
   if (game.user.isGM) {
     try {
@@ -229,43 +212,29 @@ export async function setShipWorld(name, from = "") {
   return name;
 }
 
-/* ------------------------------------------ setup automatique party-resources */
+/* ---------------------------------- migration depuis fvtt-party-resources ----- */
 /**
- * Crée (si absentes) les trois ressources party-resources adossées au vaisseau — vivres,
- * carburant, usure — avec leurs libellés et bornes. Idempotent (MJ) : ne réécrit pas une
- * ressource déjà présente sauf `force:true`. C'est l'install/setup automatique du pool.
+ * Migration one-shot : si l'ancien module fvtt-party-resources est encore actif,
+ * son pool (potentiellement plus frais que le flag après édition manuelle) est
+ * recopié UNE fois dans flags.holocron.ship, qui devient la seule vérité.
  */
-export async function ensurePartyResources({ force = false, silent = false } = {}) {
-  if (!prActive()) { if (!silent) ui.notifications?.warn(t("pr.absent")); return false; }
-  if (!game.user.isGM) return false;
-  const api = _pr()?.api;
-  if (!api?.register_resource || !api?.get || !api?.set) { if (!silent) ui.notifications?.warn(t("pr.noApi")); return false; }
-  const s = readShip(await shipJournal());
-  const specs = [
-    { id: resId("vivres"), name: t("ship.provisions"), value: s.vivres, max: s.vivresMax, min: 0 },
-    { id: resId("fuel"),   name: t("ship.fuel"),       value: s.fuel,   max: s.fuelMax,   min: 0 },
-    // Usure = pourcentage (0 → 100) qui MONTE avec les voyages ; l'augmentation est « mauvaise ».
-    { id: resId("usure"),  name: t("ship.wearPct"),    value: s.usure,  max: 100,         min: 0,
-      incMsg: t("pr.wearUp"), decMsg: t("pr.wearDown") },
-  ];
-  const list = [...(api.get("resource_list") || [])];
-  let created = 0;
-  for (const r of specs) {
-    api.register_resource(r.id);                 // enregistre les sous-réglages (idempotent)
-    const exists = list.includes(r.id);
-    if (!exists) { list.push(r.id); created++; }
-    if (!exists || force) {                       // ne personnalise que si nouvelle (ou forcé)
-      api.set(r.id + "_name", r.name);
-      api.set(r.id + "_max", r.max);
-      api.set(r.id + "_min", r.min);
-      api.set(r.id + "_visible", true);
-      if (r.incMsg) api.set(r.id + "_notify_chat_increment_message", r.incMsg);
-      if (r.decMsg) api.set(r.id + "_notify_chat_decrement_message", r.decMsg);
-      api.set(r.id, Math.max(r.min, Math.min(r.max, Math.round(r.value))));
-    }
-  }
-  if (created) { api.set("resource_list", list); api.update_positions?.(); }
-  try { _pr()?.status_bar?.render?.(); _pr()?.dashboard?.redraw?.(true); } catch { /* UI best-effort */ }
-  if (!silent && (force || created)) ui.notifications?.info(t("pr.done", { n: created }));
+export async function migratePartyResources() {
+  const pr = globalThis.pr || (typeof window !== "undefined" ? window.pr : null);
+  if (!game.modules.get("fvtt-party-resources")?.active || !pr?.api?.get || !game.user.isGM) return false;
+  const j = await shipJournal();
+  if (!j || j.flags?.[MOD]?.prMigrated) return false;
+  const s = readShip(j);
+  const take = (id, cur, max) => {
+    const v = Number(pr.api.get(id));
+    return Number.isFinite(v) ? Math.max(0, Math.min(max, Math.round(v))) : cur;
+  };
+  await writeShip(j, {
+    ...s,
+    vivres: take("vivres", s.vivres, s.vivresMax),
+    fuel: take("carburant", s.fuel, s.fuelMax),
+    usure: take("usure", s.usure, 100),
+  });
+  await j.update({ [`flags.${MOD}.prMigrated`]: true });
+  console.log("swffg-holocron | pool fvtt-party-resources migré dans flags.holocron.ship");
   return true;
 }

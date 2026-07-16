@@ -105,6 +105,37 @@ export function createContentService({ store, config }) {
     return (store.get(`pack:${packId}`) || []).map((d) => transformAdversary(d, packId));
   }
 
+  // Graphe des quêtes (MJ) : fiches CC « quest » des dossiers synchronisés +
+  // liens unlocks/dépendances (refs « <uuid>::<questId> » du Quest Graph) +
+  // layout du widget questgraph s'il est posé quelque part.
+  function questsView() {
+    const refId = (v) => {
+      const s = String(v || '').split('::')[0];
+      const m = /JournalEntry\.([A-Za-z0-9]{16})/.exec(s);
+      return m ? m[1] : (/^[A-Za-z0-9]{16}$/.test(s) ? s : null);
+    };
+    const quests = [];
+    let layout = null;
+    for (const entry of (store.get('journalsIndex') || [])) {
+      const ccf = entry.flags?.['campaign-codex'];
+      if (ccf?.type === 'quest') {
+        const doc = store.get(`journal:${entry._id}`) || entry;
+        const q = (doc.flags?.['campaign-codex']?.data?.quests || [])[0] || {};
+        quests.push({
+          id: entry._id,
+          name: entry.name,
+          status: q.failed ? 'failed' : q.completed ? 'completed' : q.inactive ? 'inactive' : 'active',
+          pinned: Boolean(q.pinned),
+          unlocks: (Array.isArray(q.unlocks) ? q.unlocks : []).map(refId).filter(Boolean),
+          dependencies: (Array.isArray(q.dependencies) ? q.dependencies : []).map(refId).filter(Boolean),
+        });
+      }
+      const wg = ccf?.data?.widgets?.questgraph;
+      if (wg && !layout) layout = Object.values(wg)[0] || null;
+    }
+    return { quests, layout };
+  }
+
   function versions() {
     const cc = config();
     const S = SCHEMA_VERSION * 1000; // décale toutes les versions quand le schéma change
@@ -120,5 +151,5 @@ export function createContentService({ store, config }) {
     };
   }
 
-  return { manifest, journalsView, pcsView, vehicleView, npcsView, adversariesView, timelineView, diceHelper, versions };
+  return { manifest, journalsView, pcsView, vehicleView, npcsView, adversariesView, timelineView, questsView, diceHelper, versions };
 }

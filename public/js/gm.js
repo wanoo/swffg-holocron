@@ -13,6 +13,7 @@ import { mountNotes, openNotes } from './notes.js';
 import { openLoginModal } from './login.js';
 import { openScreen } from './gm-screen.js';
 import { renderGmHome } from './gm-home.js';
+import { mountGmQuests } from './gm-quests.js';
 import { addShowButton } from './show-image.js';
 import { initSession, isSessionOn, toggleSession, teardownSession, refreshSessionBar, injectPins } from './gm-session.js';
 
@@ -329,6 +330,10 @@ async function renderDocs(container, list, scrollTo, cleanup) {
   homeLink.href = '#/mj';
   homeLink.addEventListener('click', (e) => { e.preventDefault(); selectChap('home'); });
   nav.appendChild(homeLink);
+  const questsLink = el('a', 'gm-chap-link gm-home-link', '🎯 Quêtes');
+  questsLink.href = '#/mj/quetes';
+  questsLink.addEventListener('click', (e) => { e.preventDefault(); selectChap('quetes'); });
+  nav.appendChild(questsLink);
 
   // Champ de filtre.
   const filter = el('input', 'gm-filter');
@@ -407,6 +412,22 @@ async function renderDocs(container, list, scrollTo, cleanup) {
   // Sélectionne (et rend si besoin) UN chapitre — ou le poste de pilotage —
   // puis scrolle vers son heading.
   function selectChap(chapId, headingId) {
+    if (chapId === 'quetes') { // 🎯 graphe des quêtes Campaign Codex
+      if (currentChap !== 'quetes') {
+        disposeChap();
+        currentChap = 'quetes';
+        mountGmQuests(main, chapCleanup);
+        for (const r of present) rubBlocks.get(r.key).details.open = false;
+        try { history.replaceState(null, '', '#/mj/quetes'); } catch { /* sandbox */ }
+      }
+      for (const [, a] of chapLinks) a.classList.remove('active');
+      homeLink.classList.remove('active');
+      questsLink.classList.add('active');
+      activeChapter = null;
+      refreshSessionBar();
+      window.scrollTo(0, 0);
+      return;
+    }
     if (chapId === 'home' || !chapId) {
       if (currentChap !== 'home') {
         disposeChap();

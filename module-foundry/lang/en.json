@@ -316,6 +316,10 @@
         "name": "MEJ → Campaign Codex conversion",
         "label": "Convert MEJ sheets",
         "hint": "Converts the world's Monk's Enhanced Journal sheets (NPCs, organizations, places, shops) into Campaign Codex sheets. Idempotent; originals are archived, never deleted."
+      },
+      "folderQuests": {
+        "name": "Folder — Quests",
+        "hint": "Campaign Codex “quest” sheets (web GM cockpit quest graph). Keep this name for sync. Name or “Folder.<id>” uuid; created if missing (applied at install)."
       }
     },
     "setup": {

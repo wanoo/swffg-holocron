@@ -1636,6 +1636,20 @@ body.gm-session .gm-doc h2, body.gm-session .gm-doc h3, body.gm-session .gm-doc 
 .enc-track { border-top: 1px solid var(--line); padding-top: 0.7rem; }
 .an-map { border: 1px solid #57c7ff; color: #57c7ff; background: transparent; border-radius: 999px; padding: 0.4rem 0.8rem; cursor: pointer; font-weight: 700; }
 
+/* --- 🎯 Graphe des quêtes (cockpit MJ) ---------------------------------------- */
+.gmq-wrap { max-width: 100%; }
+.gmq-legend { display: flex; gap: 1rem; align-items: center; margin: 0 0 0.6rem; font-size: 0.75rem; color: var(--fg-muted); flex-wrap: wrap; }
+.gmq-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 0.3rem; vertical-align: middle; }
+.gmq-count { margin-left: auto; color: var(--fg-dim); }
+.gmq-scroll { overflow: auto; border: 1px solid var(--line); border-radius: 12px; background: radial-gradient(circle at 30% 20%, rgba(18,38,54,0.5), rgba(8,16,24,0.6)); max-height: 75vh; }
+.gmq-edge { fill: none; stroke: rgba(87,199,255,0.4); stroke-width: 1.6; }
+.gmq-node { cursor: pointer; }
+.gmq-node rect { fill: rgba(12,20,30,0.92); stroke: color-mix(in srgb, var(--st) 55%, transparent); stroke-width: 1.4; }
+.gmq-node:hover rect, .gmq-node:focus-visible rect { stroke: var(--st); filter: drop-shadow(0 0 6px color-mix(in srgb, var(--st) 60%, transparent)); }
+.gmq-node.pinned rect { stroke: var(--gold); stroke-width: 2; }
+.gmq-node .gmq-name { fill: #eaf6ff; font: 600 12px var(--font-body, sans-serif); }
+.gmq-node .gmq-st { fill: #8b9bc0; font: 500 10px var(--font-body, sans-serif); }
+
 /* --- 📡 Montrer aux joueurs (bouton d'overlay image, profil MJ) --------------- */
 .show-players-btn {
   position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);

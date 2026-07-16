@@ -1,5 +1,22 @@
 # Changelog
 
+## 2.1.0 — Widgets embarqués : Ressources du vaisseau & Quest Graph
+
+- **Deux widgets Campaign Codex fondus dans le module** (addon tom3086 intégré,
+  bug d'enregistrement corrigé — la Resource Bar était écrasée par le Quest Graph) :
+  **Resource Bar** (jauges segmentées génériques) et **Quest Graph** (graphe des
+  quêtes : unlocks/dépendances, statuts, canvas infini).
+- **Le widget « Ressources du vaisseau » remplace fvtt-party-resources** : posé
+  automatiquement sur la fiche vaisseau (devenue fiche CC location), il lit/écrit
+  DIRECTEMENT `flags.holocron.ship` — une seule source de vérité, partagée avec
+  l'app web et les voyages astronav. Clic ±1 (Shift 10, Ctrl 5). Migration
+  one-shot du pool party-resources si l'ancien module est encore actif ;
+  `fvtt-party-resources` retiré des dépendances (désactivable).
+- **🎯 Graphe des quêtes dans le cockpit MJ web** : nouvelle section « Quêtes »
+  (fiches CC quest du dossier 🎯 Quêtes — synchronisé MJ, jamais exposé aux
+  joueurs), graphe SVG statuts colorés + flèches « débloque », positions du
+  widget reprises quand disponibles, clic → fiche.
+
 ## 2.0.2 — Nettoyage des pages de calendrier paddées (résidu 2.0.0)
 
 - L'installation supprime les pages « 0068-01-01 » (année paddée, créées par la
