@@ -1,12 +1,13 @@
 // content.mjs — vues de contenu servies depuis le SyncStore (jamais de MCP dans
 // le chemin de requête). Formes = celles des anciens JSON statiques du front.
 import { transformCharacter, transformAdversary, transformVehicle } from './transform/actors.mjs';
-import { buildJournalsView, buildTimelineView } from './transform/journals.mjs';
+import { buildJournalsView, buildTimelineView, resolveFolder } from './transform/journals.mjs';
+import { matchNotes } from './transform/notes.mjs';
 import { canSee, isGM } from './auth.mjs';
 
 // Version de SCHÉMA : à incrémenter dès que la FORME des vues change (transform), pour
 // invalider les ETag/caches clients même si les données Foundry n'ont pas bougé.
-const SCHEMA_VERSION = 10;
+const SCHEMA_VERSION = 11;
 
 export function createContentService({ store, config }) {
   const actorFolderId = (name) => {
@@ -44,14 +45,34 @@ export function createContentService({ store, config }) {
   }
 
   // Le vaisseau du groupe : premier actor « vehicle » du dossier PJ (repli : du monde).
-  function vehicleView() {
+  // Enrichi des NOTES DE GROUPE (journaux de notes tagués équipage/groupe/vaisseau),
+  // filtrées par la visibilité de la session (canSee — aucune règle d'accès nouvelle).
+  function vehicleView(session) {
     const cc = config();
     const fid = actorFolderId(cc.pcFolder);
     const actors = store.get('actors') || [];
     const v = actors.find((a) => a.type === 'vehicle' && (!fid || a.folder === fid))
       || actors.find((a) => a.type === 'vehicle');
-    return v ? transformVehicle(v) : null;
+    if (!v) return null;
+    const out = transformVehicle(v);
+    const { group } = matchNotes({ pcs: pcsRaw(), entries: notesEntries(), users: store.get('users') || [] });
+    out.groupNotes = group.filter((e) => canSee(session, e)).map(noteRef);
+    return out;
   }
+
+  // Journaux de la/des catégorie(s) de notes déclarées (config kind « notes »).
+  function notesEntries() {
+    const cc = config();
+    const folders = store.get('folders');
+    const ids = new Set((cc.categories || [])
+      .filter((c) => c && c.kind === 'notes' && c.folder)
+      .map((c) => resolveFolder(folders, c.folder)?._id)
+      .filter(Boolean));
+    if (!ids.size) return [];
+    return (store.get('journalsIndex') || []).filter((e) => ids.has(e.folder));
+  }
+  // Référence de note pour le front : id de vue (ancre legacy préservée) + nom.
+  const noteRef = (e) => ({ id: e.flags?.holocron?.legacyId || e._id, foundryId: e._id, name: e.name });
 
   function journalsView(session) {
     const cc = config();
@@ -67,7 +88,17 @@ export function createContentService({ store, config }) {
     });
   }
 
-  const pcsView = () => pcsRaw().map(transformCharacter);
+  // Fiches PJ, chacune enrichie de SES journaux de notes (tag prioritaire, repli
+  // ownership — voir transform/notes.mjs), filtrés par canSee(session).
+  function pcsView(session) {
+    const pcs = pcsRaw();
+    const { byPc } = matchNotes({ pcs, entries: notesEntries(), users: store.get('users') || [] });
+    return pcs.map((a) => {
+      const out = transformCharacter(a);
+      out.notes = (byPc.get(a._id) || []).filter((e) => canSee(session, e)).map(noteRef);
+      return out;
+    });
+  }
 
   // Frise chronologique : fiches MEJ « event » des dossiers de catégories kind
   // « timeline » — datées en BBY/ABY (attribut `date`), classées canon/campagne
@@ -142,8 +173,10 @@ export function createContentService({ store, config }) {
     return {
       manifest: S + store.version('config') * 31 + store.version('actors') + store.version('journalsIndex') + store.version(`pack:${cc.packs.adversaries}`),
       journals: S + store.version('journalsIndex') * 31 + store.version('folders') + store.version('config'),
-      pcs: S + store.version('actors') * 31 + store.version('folders'),
-      vehicle: S + store.version('actors') * 31 + store.version('folders') + 3,
+      // pcs/vehicle embarquent les notes associées → sensibles aussi aux journaux,
+      // aux users (ownership/assignations) et à la config (catégories notes).
+      pcs: S + store.version('actors') * 31 + store.version('folders') + store.version('journalsIndex') * 7 + store.version('users') * 3 + store.version('config'),
+      vehicle: S + store.version('actors') * 31 + store.version('folders') + store.version('journalsIndex') * 7 + store.version('users') * 3 + store.version('config') + 3,
       npcs: S + store.version('actors') * 31 + store.version('folders') + 7,
       adversaries: S + store.version(`pack:${cc.packs.adversaries}`),
       timeline: S + store.version('journalsIndex') * 31 + store.version('calendarEvents') * 7 + store.version('folders') + store.version('config'),
