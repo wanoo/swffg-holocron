@@ -74,6 +74,11 @@ export async function convertMejToCC({ dryRun = false } = {}) {
         },
       },
     });
+    // Campaign Codex reclasse toute nouvelle fiche CC dans SES dossiers
+    // (« Campaign Codex - NPCs »…) via son hook de création : on remet la
+    // fiche dans le dossier d'origine de la fiche MEJ.
+    const wanted = j.folder?.id ?? null;
+    if ((cc.folder?.id ?? null) !== wanted) await cc.update({ folder: wanted });
     mapping.set(j.id, cc.uuid);
     made.push({ from: j, to: cc, rels: Object.values(mf.relationships || {}) });
   }
@@ -89,5 +94,28 @@ export async function convertMejToCC({ dryRun = false } = {}) {
     await m.from.update({ folder: arch.id, [`flags.${MOD}.ccConverted`]: true });
   }
   if (made.length) ui.notifications.info(t("setup.ccConverted", { n: made.length }));
-  return { converted: made.length };
+  const repaired = await repairCCFolders();
+  return { converted: made.length, repaired };
+}
+
+/** Réparation : les fiches converties (flags.holocron.legacyId) que Campaign
+ * Codex a parquées dans ses dossiers « Campaign Codex - * » sont ramenées dans
+ * les répertoires clés du Holocron d'après leur type CC. Idempotent. */
+export async function repairCCFolders() {
+  const findFolder = (ref) => (ref ? game.folders.find((f) =>
+    f.type === "JournalEntry" && (f.name === ref || f.id === ref || `Folder.${f.id}` === ref)) : null) || null;
+  const DEST = {
+    npc: findFolder(game.settings.get(MOD, "folderPnj")),
+    group: findFolder(game.settings.get(MOD, "folderOrgs")),
+    quest: findFolder(game.settings.get(MOD, "folderQuests")),
+  };
+  let moved = 0;
+  for (const j of game.journal) {
+    if (!j.flags?.[CC]?.type || !j.flags?.holocron?.legacyId) continue;
+    if (!/^Campaign Codex - /.test(j.folder?.name || "")) continue;
+    const dest = DEST[j.flags[CC].type];
+    if (dest && j.folder?.id !== dest.id) { await j.update({ folder: dest.id }); moved++; }
+  }
+  if (moved) console.log(`swffg-holocron | ${moved} fiche(s) CC rangée(s) dans les dossiers Holocron`);
+  return moved;
 }
