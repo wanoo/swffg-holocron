@@ -2,6 +2,7 @@
 import { loadData, Data, compendiumEntry, ensureNpcs, ensureAdversaries, ensureCompendium, foundryAsset } from './data.js';
 import { mountLoginButton } from './login.js';
 import { mountThemeSwitcher } from './theme.js';
+import { homeView } from './home.js';
 import { mountSidebar, setActiveTreeLink } from './tree.js';
 import { initSearch, openPalette } from './search.js';
 import { buildTOC, setupScrollSpy } from './toc.js';
@@ -37,98 +38,10 @@ function esc(s = '') {
 
 // --- Vues -----------------------------------------------------------------
 
+// Accueil : tableau de bord en widgets (voir home.js).
 function viewHome() {
-  const m = Data.meta;
-  const wrap = document.createElement('div');
-  const hero = document.createElement('section');
-  hero.className = 'home-hero holo-frame';
-  hero.innerHTML = `
-    <p class="eyebrow">${esc(m.system)}</p>
-    <h1>${esc(m.title)} — Archive Holocron</h1>
-    <div class="sep-aurebesh" aria-hidden="true"></div>
-    <div class="crawl">${m.description || ''}</div>`;
-  wrap.appendChild(hero);
-
-  // Bannière de reprise : « où en est-on » (dernier acte joué) + accès direct aux fiches PJ.
-  const recaps = Data.journals
-    .filter((j) => /^recap-acte-\d+$/.test(j.id))
-    .sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
-  const lastRecap = recaps[recaps.length - 1];
-  if (lastRecap || Data.pcs.length) {
-    const resume = document.createElement('section');
-    resume.className = 'home-resume';
-    let html = '';
-    if (lastRecap) {
-      html +=
-        `<div class="hr-where"><p class="eyebrow">Où en est-on ?</p>` +
-        `<h2>${esc(lastRecap.name)}</h2>` +
-        `<a class="hr-cta" href="#/journal/${lastRecap.id}">Lire le dernier résumé →</a></div>`;
-    }
-    if (Data.pcs.length) {
-      const links = Data.pcs
-        .map((p) => `<a class="hr-pc" href="#/pc/${p.id}">${esc(p.name)}</a>`)
-        .join('');
-      html += `<div class="hr-mine"><p class="eyebrow">Ma fiche de personnage</p><div class="hr-pcs">${links}</div></div>`;
-    }
-    resume.innerHTML = html;
-    wrap.appendChild(resume);
-  }
-
-  // Cartes catégories.
-  wrap.insertAdjacentHTML('beforeend', '<h2 class="section-title">Journaux</h2>');
-  const grid = document.createElement('div');
-  grid.className = 'home-grid';
-  for (const cat of Data.categories) {
-    const n = Data.journals.filter((j) => j.categoryId === cat.id).length;
-    if (!n) continue;
-    const first = Data.journals.find((j) => j.categoryId === cat.id);
-    const a = document.createElement('a');
-    a.className = 'home-card';
-    a.href = `#/journal/${first.id}`;
-    a.innerHTML = `<div class="hc-count">${n}</div><div class="hc-title">${esc(cat.label)}</div>`;
-    grid.appendChild(a);
-  }
-  wrap.appendChild(grid);
-
-  // Personnages joueurs.
-  if (Data.pcs.length) {
-    wrap.insertAdjacentHTML('beforeend', '<h2 class="section-title">Personnages joueurs</h2>');
-    const pg = document.createElement('div');
-    pg.className = 'home-players';
-    for (const p of Data.pcs) {
-      const a = document.createElement('a');
-      a.className = 'home-card';
-      a.href = `#/pc/${p.id}`;
-      a.innerHTML = `<div class="hc-title">${esc(p.name)}</div><div class="hc-sub">${esc([p.species, p.career].filter(Boolean).join(' · ') || 'Fiche')}</div>`;
-      pg.appendChild(a);
-    }
-    wrap.appendChild(pg);
-  }
-
-  // Outils joueurs.
-  wrap.insertAdjacentHTML('beforeend', '<h2 class="section-title">Outils</h2>');
-  const tg = document.createElement('div');
-  tg.className = 'home-grid';
-  tg.innerHTML = `<a class="home-card" href="#/vaisseau"><div class="hc-count">🚀</div><div class="hc-title">Vaisseau</div><div class="hc-sub">État, position, fiche technique & notes</div></a>`
-    + `<a class="home-card" href="#/astronav"><div class="hc-count">🪐</div><div class="hc-title">Astronav</div><div class="hc-sub">Calculateur d'astrogation · 6 750 systèmes</div></a>`
-    + `<a class="home-card" href="#/sabacc"><div class="hc-count">🎴</div><div class="hc-title">Sabacc</div><div class="hc-sub">Règles — Spike de Corellia & Kessel</div></a>`
-    + `<a class="home-card" href="#/ateliers"><div class="hc-count">⚒️</div><div class="hc-title">Ateliers</div><div class="hc-sub">Fabrication — sabre laser, mods, potions</div></a>`
-    + `<a class="home-card" href="#/timeline"><div class="hc-count">📅</div><div class="hc-title">Chronologie</div><div class="hc-sub">Frise galactique — canon & campagne (BBY/ABY)</div></a>`;
-  wrap.appendChild(tg);
-
-  // Bestiaire / PNJ — RÉSERVÉ AU MJ (stats/spoilers). Masqué côté joueur.
-  if (getGMKey() || Data.gm) {
-    wrap.insertAdjacentHTML('beforeend', '<h2 class="section-title">Bestiaire (MJ)</h2>');
-    const bg = document.createElement('div');
-    bg.className = 'home-grid';
-    bg.innerHTML =
-      `<a class="home-card" href="#/npc"><div class="hc-count">${Data.worldNpcs.length}</div><div class="hc-title">PNJ du monde</div></a>` +
-      `<a class="home-card" href="#/bestiaire"><div class="hc-count">${Data.adversaries.length}</div><div class="hc-title">Adversaires</div></a>`;
-    wrap.appendChild(bg);
-  }
-
-  mount(wrap);
-  document.title = 'Archive Holocron — Star Wars FFG';
+  mount(homeView());
+  document.title = (Data.meta?.title ? Data.meta.title + ' — ' : '') + 'Archive Holocron';
 }
 
 function pageHead(page, journalName) {

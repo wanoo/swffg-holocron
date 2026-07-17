@@ -447,74 +447,9 @@ a.mej-rel:hover { background: color-mix(in srgb, var(--gold, #d9b45b) 24%, trans
 .modal-body .rich p { margin: 0 0 0.7em; }
 .card-meta { color: var(--fg-muted); font-size: 0.85rem; margin-bottom: 0.6rem; }
 
-/* --- Accueil --- */
-.home-hero {
-  border: 1px solid color-mix(in srgb, var(--gold-soft) 30%, var(--line));
-  border-radius: 14px;
-  padding: clamp(1.2rem, 4vw, 2.4rem);
-  background:
-    radial-gradient(90% 120% at 85% -20%, color-mix(in srgb, var(--gold) 8%, transparent), transparent 55%),
-    linear-gradient(180deg, var(--bg-3), var(--panel));
-  margin-bottom: 1.4rem;
-  box-shadow: 0 0 40px color-mix(in srgb, var(--gold) 5%, transparent) inset;
-}
-.home-hero > h1 { font-family: var(--font-display); font-weight: 600; letter-spacing: 0.04em; }
-.home-hero .sep-aurebesh { margin: 0.8rem 0; max-width: 300px; }
-/* Le « crawl » (description) garde la typo de lecture, même s'il contient des titres. */
-.home-hero .crawl h1, .home-hero .crawl h2, .home-hero .crawl h3 { font-family: var(--font-ui); font-size: 1.15rem; margin: 0 0 0.4em; color: var(--fg); }
-.home-hero .eyebrow { color: var(--gold); letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; }
-.home-hero h1 { margin: 0.3rem 0 0.6rem; font-size: clamp(1.8rem, 4vw, 2.6rem); }
-.home-hero .crawl { color: var(--fg-muted); max-width: 60ch; line-height: 1.6; }
-.home-hero .crawl p { margin: 0 0 0.6em; }
-.home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.9rem; }
-.home-card {
-  display: block;
-  padding: 1rem;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--panel);
-  color: var(--fg);
-  text-decoration: none;
-  transition: border-color 0.15s, transform 0.15s;
-}
-.home-card:hover { border-color: var(--gold-soft); transform: translateY(-2px); }
-.home-card .hc-title { font-weight: 700; }
-.home-card .hc-sub { color: var(--fg-muted); font-size: 0.85rem; margin-top: 0.2rem; }
-.home-card .hc-count { color: var(--gold); font-size: 1.6rem; font-weight: 700; }
-
-.home-players { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 0.8rem; margin-top: 0.6rem; }
-
-/* --- Bannière de reprise (« où en est-on » + accès fiche) --- */
-.home-resume {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1.4rem;
-}
-.home-resume > div {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 1rem 1.2rem;
-  background: var(--panel);
-}
-.home-resume .hr-where { border-left: 3px solid var(--gold); }
-.home-resume .eyebrow { color: var(--gold); letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.72rem; font-weight: 700; }
-.home-resume h2 { margin: 0.3rem 0 0.7rem; font-size: 1.25rem; }
+/* --- Accueil : voir home.css (widgets). Reste ici le lien CTA partagé. --- */
 .hr-cta { display: inline-block; font-weight: 700; color: var(--gold); text-decoration: none; }
 .hr-cta:hover { text-decoration: underline; }
-.hr-pcs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
-.hr-pc {
-  padding: 0.35rem 0.7rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--bg-3);
-  color: var(--fg);
-  text-decoration: none;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-.hr-pc:hover { border-color: var(--gold-soft); }
-@media (max-width: 720px) { .home-resume { grid-template-columns: 1fr; } }
 
 .section-title { margin: 1.8rem 0 0.7rem; font-size: 1.1rem; color: var(--fg); }
 .muted { color: var(--fg-muted); }
@@ -1366,7 +1301,6 @@ body.gm-session .gm-doc h2, body.gm-session .gm-doc h3, body.gm-session .gm-doc 
   .modal { max-height: 88vh; }
   .modal-body { padding: 0.9rem; }
   .view-head h1 { font-size: 1.5rem; }
-  .home-hero h1 { font-size: 1.6rem; }
   .brand-text { font-size: 0.95rem; }
   .dg-actions { flex-direction: column; }
 }
