@@ -8,7 +8,8 @@ import { apiBase, getGMKey } from './collab.js';
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 // Palette alignée sur le widget Quest Graph (statuts) + or pour les quêtes épinglées.
-const STATUS = {
+// Exportée : le widget « Quêtes » de la home réutilise couleurs et libellés.
+export const STATUS = {
   active: { color: '#57c7ff', label: 'Active' },
   completed: { color: '#3d8f5b', label: 'Terminée' },
   failed: { color: '#c0392b', label: 'Échouée' },
