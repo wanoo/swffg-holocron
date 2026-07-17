@@ -32,6 +32,8 @@
   <body>
     <a class="skip-link" href="#content">Aller au contenu</a>
 
+    <!-- Barre mobile : uniquement le burger (ouvre le tiroir) + la marque.
+         Sur desktop la topbar n'existe plus : tout vit dans la sidebar. -->
     <header class="topbar">
       <button class="icon-btn hamburger" id="btn-menu" aria-label="Ouvrir le menu" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -40,38 +42,22 @@
         <span class="brand-mark" aria-hidden="true">◈</span>
         <span class="brand-text">Archive Holocron</span>
       </a>
-      <div class="topbar-spacer"></div>
-      <button class="search-trigger" id="btn-search" aria-label="Rechercher (Ctrl+K)">
-        <i class="ico" style="--ico: url('/img/icons/search.svg')" aria-hidden="true"></i>
-        <span class="search-trigger-label">Rechercher</span>
-        <kbd>Ctrl K</kbd>
-      </button>
-      <button
-        class="icon-btn"
-        id="btn-theme"
-        aria-label="Choisir le thème d'interface"
-        aria-haspopup="menu"
-        aria-expanded="false"
-        title="Thème"
-      >
-        <span class="theme-dot" aria-hidden="true"></span>
-      </button>
-      <button class="icon-btn" id="btn-generator" aria-label="Générateur de dés" title="Générateur de dés">
-        <span aria-hidden="true">🎲</span>
-      </button>
-      <button class="icon-btn" id="btn-gm" aria-label="Espace Maître du Jeu" title="Espace MJ (clé requise)">
-        <i class="ico" style="--ico: url('/img/icons/profile.svg')" aria-hidden="true"></i>
-      </button>
-      <button class="icon-btn" id="btn-legend" aria-label="Légende des dés et symboles" title="Dés &amp; Symboles">
-        <span class="ffg-die dt-proficiency" aria-hidden="true">c</span>
-      </button>
     </header>
 
     <div class="layout">
       <aside class="sidebar" id="sidebar" aria-label="Navigation">
-        <!-- Emblème de la gamme (masque SVG teinté par le thème) -->
+        <!-- Emblème du site (choisi par l'utilisateur, masque SVG teinté par le thème) -->
         <div class="sidebar-brand">
-          <span class="sb-emblem" aria-hidden="true"></span>
+          <button
+            class="sb-emblem-btn"
+            id="btn-emblem"
+            aria-label="Choisir l'emblème du site"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            title="Emblème"
+          >
+            <span class="sb-emblem" aria-hidden="true"></span>
+          </button>
           <span class="sb-word">Archive<br />Holocron</span>
         </div>
         <div class="sidebar-search">
@@ -82,6 +68,31 @@
             placeholder="Rechercher…  (Ctrl K)"
             aria-label="Ouvrir la recherche"
           />
+        </div>
+        <!-- Actions rapides (ex-topbar) : dés, thème, compte, MJ -->
+        <div class="sidebar-actions" id="sidebar-actions" role="group" aria-label="Actions rapides">
+          <button
+            class="icon-btn"
+            id="btn-dice"
+            aria-label="Dés : lancer et légende des symboles"
+            aria-haspopup="dialog"
+            title="Dés &amp; symboles"
+          >
+            <span class="ffg-die dt-proficiency" aria-hidden="true">c</span>
+          </button>
+          <button
+            class="icon-btn"
+            id="btn-theme"
+            aria-label="Choisir le thème d'interface"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            title="Thème"
+          >
+            <span class="theme-dot" aria-hidden="true"></span>
+          </button>
+          <button class="icon-btn" id="btn-gm" aria-label="Espace Maître du Jeu" title="Espace MJ (clé requise)">
+            <i class="ico" style="--ico: url('/img/icons/profile.svg')" aria-hidden="true"></i>
+          </button>
         </div>
         <!-- Deux zones : sélecteur de parties (haut) + chapitrage (bas, scroll indépendant) -->
         <nav class="sidebar-parts" id="parts" aria-label="Sections de l'archive"></nav>
@@ -115,22 +126,11 @@
       </div>
     </div>
 
-    <!-- Modale légende -->
-    <div class="modal-backdrop on-dark" id="legend" hidden>
+    <!-- Modale dés : générateur + légende des symboles (fusionnés) -->
+    <div class="modal-backdrop on-dark" id="generator" hidden>
       <div class="modal" role="dialog" aria-modal="true" aria-label="Dés et symboles">
         <div class="modal-head">
           <h2>Dés &amp; Symboles</h2>
-          <button class="icon-btn" data-close aria-label="Fermer">✕</button>
-        </div>
-        <div class="modal-body" id="legend-body"></div>
-      </div>
-    </div>
-
-    <!-- Modale générateur de dés -->
-    <div class="modal-backdrop on-dark" id="generator" hidden>
-      <div class="modal" role="dialog" aria-modal="true" aria-label="Générateur de dés">
-        <div class="modal-head">
-          <h2>Générateur de dés</h2>
           <button class="icon-btn" data-close aria-label="Fermer">✕</button>
         </div>
         <div class="modal-body" id="generator-body"></div>

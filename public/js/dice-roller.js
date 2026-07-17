@@ -1,6 +1,7 @@
 // dice-roller.js — générateur de dés FFG : construction de pool, lancer simulé
-// (vraies faces du système), résolution nette, et aide de dépense par compétence.
-import { makeGlyph } from './render-dice.js';
+// (vraies faces du système), résolution nette, aide de dépense par compétence,
+// et légende des dés & symboles (repliée en pied de modale — ex-modale légende).
+import { makeGlyph, legendHTML } from './render-dice.js';
 import { renderRichHTML } from './render-journal.js';
 import { Data } from './data.js';
 
@@ -329,6 +330,13 @@ function rebuild() {
 
   const help = renderSpendHelp();
   if (help) body.appendChild(help);
+
+  // Légende des dés & symboles (fusion de l'ancienne modale « Légende ») :
+  // repliée pour ne pas alourdir le lancer, dépliable d'un clic/Entrée.
+  const legend = el('details', 'dg-legend');
+  legend.appendChild(el('summary', 'dg-legend-sum', 'Légende des dés &amp; symboles'));
+  legend.appendChild(el('div', 'dg-legend-body', legendHTML()));
+  body.appendChild(legend);
 
   // Visibilité du bouton Foundry : connecteur actif + joueur connecté sur SA fiche.
   foundryAvailable().then((on) => {

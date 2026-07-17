@@ -1,5 +1,5 @@
 // theme.js — système de thèmes : métadonnées, application (persistée) et
-// sélecteur accessible dans la topbar. Le thème est posé sur <html data-theme>
+// sélecteur accessible dans la sidebar. Le thème est posé sur <html data-theme>
 // avant le premier rendu par le script inline de index.html (anti-flash).
 
 export const THEMES = [
@@ -71,10 +71,11 @@ export function mountThemeSwitcher(button) {
     sync();
     menu.hidden = false;
     button.setAttribute('aria-expanded', 'true');
-    // ancre le menu sous le bouton, aligné à droite
+    // ancre le menu sous le bouton, aligné à gauche (le bouton vit dans la sidebar)
     const r = button.getBoundingClientRect();
     menu.style.top = `${r.bottom + 6}px`;
-    menu.style.right = `${Math.max(8, window.innerWidth - r.right)}px`;
+    menu.style.left = `${Math.max(8, Math.min(r.left, window.innerWidth - menu.offsetWidth - 8))}px`;
+    menu.style.right = 'auto';
     (items().find((i) => i.getAttribute('aria-checked') === 'true') || items()[0])?.focus();
   }
   function close() {

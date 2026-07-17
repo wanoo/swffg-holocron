@@ -22,7 +22,9 @@
   --sw-red: #5a1614; /* rouge FFG unifié (tables, accents Empire) */
   --danger: var(--status-danger);
   --radius: var(--radius-medium);
-  --topbar-h: var(--topbar-height);
+  /* La topbar n'existe plus sur desktop (tout vit dans la sidebar) : hauteur 0.
+     En mobile, la barre burger la réactive (voir media query plus bas). */
+  --topbar-h: 0px;
   --sidebar-w: var(--sidebar-width);
   --toc-w: 220px;
   --gm-nav-w: 288px;
@@ -92,13 +94,13 @@ kbd {
   color: var(--fg-muted);
 }
 
-/* --- Barre supérieure --- */
+/* --- Barre mobile (ex-topbar) : burger + marque, visible < 760px seulement --- */
 .topbar {
   position: sticky;
   top: 0;
   z-index: 40;
   height: var(--topbar-h);
-  display: flex;
+  display: none;
   align-items: center;
   gap: 0.75rem;
   padding: 0 0.9rem;
@@ -129,7 +131,6 @@ kbd {
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }
-.topbar-spacer { flex: 1; }
 
 /* --- Cadre facetté « holocron » (coins biseautés ; 0 = rectangle imprimé) --- */
 .holo-frame {
@@ -157,27 +158,10 @@ kbd {
 }
 .icon-btn:hover { background: var(--panel-2); }
 .icon-btn:focus-visible,
-.search-trigger:focus-visible,
 .citem:focus-visible,
 a:focus-visible,
 button:focus-visible,
 input:focus-visible { outline: 2px solid var(--holo); outline-offset: 2px; }
-
-.search-trigger {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  height: 38px;
-  padding: 0 0.7rem;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  color: var(--fg-muted);
-  cursor: pointer;
-  font-family: var(--font-ui);
-}
-.search-trigger:hover { border-color: var(--holo-soft); color: var(--fg); }
-.search-trigger-label { font-size: 0.9rem; }
 
 .hamburger { flex-direction: column; gap: 4px; display: none; }
 .hamburger span { width: 18px; height: 2px; background: var(--fg); border-radius: 2px; }
@@ -209,13 +193,29 @@ input:focus-visible { outline: 2px solid var(--holo); outline-offset: 2px; }
   gap: 0.65rem;
   padding: 0.15rem 0.3rem 0.85rem;
 }
+/* Bouton emblème (ouvre le picker) : l'emblème choisi par l'utilisateur
+   (--user-emblem, posé par le script anti-flash puis emblem.js) prime sur
+   l'emblème de gamme du thème (--sidebar-emblem, repli). */
+.sb-emblem-btn {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  cursor: pointer;
+}
+.sb-emblem-btn:hover { border-color: color-mix(in srgb, var(--gold) 45%, transparent); }
 .sb-emblem {
   flex: 0 0 auto;
   width: 38px;
   height: 38px;
   background: var(--gold);
-  -webkit-mask: var(--sidebar-emblem) center / contain no-repeat;
-  mask: var(--sidebar-emblem) center / contain no-repeat;
+  -webkit-mask: var(--user-emblem, var(--sidebar-emblem)) center / contain no-repeat;
+  mask: var(--user-emblem, var(--sidebar-emblem)) center / contain no-repeat;
   filter: drop-shadow(0 0 6px color-mix(in srgb, var(--gold) 40%, transparent));
 }
 .sb-word {
@@ -239,6 +239,24 @@ input:focus-visible { outline: 2px solid var(--holo); outline-offset: 2px; }
   cursor: pointer;
   font-family: var(--font-ui);
 }
+
+/* Rangée d'actions rapides (ex-topbar) : dés, thème, compte, MJ — compacte,
+   sous la recherche, pour laisser la place au sélecteur de parties. */
+.sidebar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.55rem 0.1rem 0;
+}
+.sidebar-actions .icon-btn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  font-size: 0.95rem;
+}
+.sidebar-actions .icon-btn:hover { border-color: var(--gold-soft); background: var(--panel-2); }
+.sidebar-actions .ffg-die { font-size: 1.05rem; }
 
 /* En-tête de section à filet latéral (« NAVIGATION », partie active…) */
 .side-sec-head {
@@ -609,9 +627,12 @@ a.mej-rel:hover { background: color-mix(in srgb, var(--gold, #d9b45b) 24%, trans
 }
 
 @media (max-width: 760px) {
+  /* La barre mobile (burger + marque) reprend une hauteur : tout ce qui se
+     cale sous elle (tiroir, scrim, ancres sticky) suit via --topbar-h. */
+  :root { --topbar-h: var(--topbar-height); }
   .layout { grid-template-columns: 1fr; }
+  .topbar { display: flex; }
   .hamburger { display: inline-flex; }
-  .search-trigger-label, .search-trigger kbd { display: none; }
   .sidebar {
     position: fixed;
     top: var(--topbar-h);

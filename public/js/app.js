@@ -9,7 +9,6 @@ import { buildTOC, setupScrollSpy } from './toc.js';
 import { renderJournalHTML, renderRichHTML } from './render-journal.js';
 import { renderSheet, openImageFull } from './sheet.js';
 import { renderBestiary, renderNpcList } from './bestiary.js';
-import { legendHTML } from './render-dice.js';
 import { initGenerator, openGenerator } from './dice-roller.js';
 import { mountAstronav } from './astronav.js';
 import { mountSpendHelp } from './spendhelp.js';
@@ -279,12 +278,6 @@ function route() {
 
 // --- Modales --------------------------------------------------------------
 
-function openModal(id) {
-  document.getElementById(id).hidden = false;
-}
-function closeModal(id) {
-  document.getElementById(id).hidden = true;
-}
 function openCompendiumCard(ref) {
   const entry = compendiumEntry(ref);
   if (!entry) return;
@@ -317,7 +310,7 @@ async function init() {
   try {
     await loadData();
   ensureCompendium();
-  if (Data.authEnabled) mountLoginButton(document.querySelector('.topbar'));
+  if (Data.authEnabled) mountLoginButton(document.getElementById('sidebar-actions'));
   document.addEventListener('holocron:session', () => { mountSidebar(); });
   if (Data.meta?.title) {
     document.title = Data.meta.title + ' — Holocron';
@@ -331,14 +324,11 @@ async function init() {
   mountSidebar();
   initSearch();
   initGenerator();
-  document.getElementById('legend-body').innerHTML = legendHTML();
 
-  // Boutons.
-  document.getElementById('btn-search').addEventListener('click', openPalette);
+  // Boutons (rangée d'actions de la sidebar).
   document.getElementById('sidebar-search-box').addEventListener('focus', openPalette);
   document.getElementById('sidebar-search-box').addEventListener('click', openPalette);
-  document.getElementById('btn-legend').addEventListener('click', () => openModal('legend'));
-  document.getElementById('btn-generator').addEventListener('click', () => openGenerator());
+  document.getElementById('btn-dice').addEventListener('click', () => openGenerator());
   document.getElementById('btn-gm').addEventListener('click', () => { location.hash = '#/mj'; });
   document.getElementById('btn-menu').addEventListener('click', () =>
     document.body.classList.contains('drawer-open') ? closeDrawer() : openDrawer()

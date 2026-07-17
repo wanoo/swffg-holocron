@@ -6,15 +6,15 @@ import { Data, login, logout, listUsers, reloadJournals } from './data.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-export function mountLoginButton(topbar) {
+export function mountLoginButton(container) {
   const btn = document.createElement('button');
   btn.className = 'icon-btn';
   btn.id = 'btn-login';
   updateButton(btn);
   btn.addEventListener('click', () => (Data.me ? openAccountMenu(btn) : openLoginModal()));
-  // insère avant le bouton MJ (cadenas)
-  const gmBtn = topbar.querySelector('#btn-gm');
-  topbar.insertBefore(btn, gmBtn || null);
+  // insère avant le bouton MJ (cadenas) de la rangée d'actions de la sidebar
+  const gmBtn = container.querySelector('#btn-gm');
+  container.insertBefore(btn, gmBtn || null);
   document.addEventListener('holocron:session', () => updateButton(btn));
   return btn;
 }
@@ -95,9 +95,10 @@ function openAccountMenu(anchor) {
     <p><b>${esc(Data.me.name)}</b>${Data.me.role >= 3 ? ' · <span class="login-gm">MJ</span>' : ''}</p>
     <button type="button" id="login-out">Se déconnecter</button>`;
   const rect = anchor.getBoundingClientRect();
-  menu.style.top = `${rect.bottom + 6}px`;
-  menu.style.right = `${window.innerWidth - rect.right}px`;
   document.body.appendChild(menu);
+  // ancré sous le bouton, aligné à gauche (le bouton vit dans la sidebar)
+  menu.style.top = `${rect.bottom + 6}px`;
+  menu.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - menu.offsetWidth - 8))}px`;
   const close = (e) => { if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', close, true); } };
   setTimeout(() => document.addEventListener('click', close, true), 0);
   menu.querySelector('#login-out').addEventListener('click', async () => {
