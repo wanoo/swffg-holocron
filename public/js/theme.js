@@ -24,13 +24,37 @@ export function currentTheme() {
   return THEMES.some((x) => x.id === t) ? t : DEFAULT_THEME;
 }
 
-export function applyTheme(id) {
+// persist=false : application « de monde » (défaut/verrou MJ) — on ne pollue
+// pas le choix personnel du navigateur avec un thème imposé par la config.
+export function applyTheme(id, { persist = true } = {}) {
   if (!THEMES.some((x) => x.id === id)) id = DEFAULT_THEME;
   document.documentElement.dataset.theme = id;
-  try { localStorage.setItem(STORE_KEY, id); } catch { /* stockage indisponible */ }
+  if (persist) { try { localStorage.setItem(STORE_KEY, id); } catch { /* stockage indisponible */ } }
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.content = META_COLOR[id] || META_COLOR[DEFAULT_THEME];
   document.dispatchEvent(new CustomEvent('holocron:theme', { detail: { theme: id } }));
+}
+
+// Applique la politique de thème du MONDE (config ui, arrivée APRÈS le script
+// anti-flash — qui ne connaît que le localStorage : une correction visible au
+// premier chargement est acceptée, et le script inline lit aussi le cache
+// localStorage de /content/config pour l'éviter dès la 2e visite).
+//  · ui.theme + ui.themeLocked : imposé aux joueurs (le MJ garde son choix) ;
+//  · ui.theme seul : défaut pour qui n'a pas de préférence locale ;
+//  · sinon : comportement historique (localStorage).
+// Le bouton du sélecteur est masqué pour les joueurs quand le thème est verrouillé.
+export function applyWorldTheme(ui, gm) {
+  const worldTheme = THEMES.some((x) => x.id === ui?.theme) ? ui.theme : '';
+  const locked = Boolean(worldTheme && ui?.themeLocked);
+  let stored = null;
+  try { stored = localStorage.getItem(STORE_KEY); } catch { /* stockage indisponible */ }
+  if (locked && !gm) {
+    if (currentTheme() !== worldTheme) applyTheme(worldTheme, { persist: false });
+  } else if (worldTheme && !THEMES.some((x) => x.id === stored)) {
+    if (currentTheme() !== worldTheme) applyTheme(worldTheme, { persist: false });
+  }
+  const btn = document.getElementById('btn-theme');
+  if (btn) btn.hidden = locked && !gm;
 }
 
 // Monte le menu du sélecteur sur le bouton #btn-theme (pastille + menu radio,

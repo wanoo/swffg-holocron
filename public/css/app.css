@@ -213,6 +213,9 @@ input:focus-visible { outline: 2px solid var(--holo); outline-offset: 2px; }
   cursor: pointer;
 }
 .sb-emblem-btn:hover { border-color: color-mix(in srgb, var(--gold) 45%, transparent); }
+/* Joueur : l'emblème est choisi par le MJ — le bouton devient un insigne inerte. */
+.sb-emblem-btn:disabled { cursor: default; }
+.sb-emblem-btn:disabled:hover { border-color: transparent; }
 .sb-emblem {
   flex: 0 0 auto;
   width: 38px;

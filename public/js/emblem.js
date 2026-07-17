@@ -1,9 +1,11 @@
-// emblem.js — emblème du site (tête de sidebar) : choisi par l'utilisateur
-// parmi le pack public/img/emblems, rendu en MASQUE CSS (--user-emblem) donc
-// teinté automatiquement par le thème actif. Persisté en localStorage et posé
-// avant le premier rendu par le script inline de index.html (anti-flash).
-// L'emblème choisi prime sur l'emblème de gamme du thème (--sidebar-emblem),
-// qui ne sert plus que de repli CSS.
+// emblem.js — emblème du site (tête de sidebar), rendu en MASQUE CSS
+// (--user-emblem) donc teinté automatiquement par le thème actif.
+// Depuis la config ui de monde : l'emblème est CENTRALISÉ (ui.emblem, choisi
+// par le MJ, appliqué à tous). Le picker n'est actif que pour le MJ et ÉCRIT
+// via PUT /api/gm/config/ui ; le localStorage ne sert plus que de repli
+// (rétrocompat mondes sans bloc ui + secours MJ si la route échoue).
+// L'emblème choisi prime sur l'emblème de gamme du thème (--sidebar-emblem).
+import { uiConfig, isGMActive, saveUiConfig } from './ui-config.js';
 
 export const EMBLEMS = [
   { id: 'rebel-alliance', label: 'Alliance Rebelle' },
@@ -32,30 +34,44 @@ export const DEFAULT_EMBLEM = 'rebel-alliance';
 const STORE_KEY = 'holocron-emblem'; // miroir : liste dupliquée dans le script inline de index.html
 const COLS = 5; // colonnes de la grille du picker (navigation clavier ↑/↓)
 
+const valid = (id) => EMBLEMS.some((e) => e.id === id);
 const emblemUrl = (id) => `url('/img/emblems/${id}.svg')`;
 
+// Emblème effectif : celui du MONDE (ui.emblem) s'il est posé, sinon le choix
+// local historique (localStorage), sinon le défaut.
 export function currentEmblem() {
+  const world = uiConfig().emblem;
+  if (valid(world)) return world;
   let v = null;
   try { v = localStorage.getItem(STORE_KEY); } catch { /* stockage indisponible */ }
-  return EMBLEMS.some((e) => e.id === v) ? v : DEFAULT_EMBLEM;
+  return valid(v) ? v : DEFAULT_EMBLEM;
 }
 
-export function applyEmblem(id) {
-  if (!EMBLEMS.some((e) => e.id === id)) id = DEFAULT_EMBLEM;
+export function applyEmblem(id, { persist = false } = {}) {
+  if (!valid(id)) id = DEFAULT_EMBLEM;
   document.documentElement.style.setProperty('--user-emblem', emblemUrl(id));
-  try { localStorage.setItem(STORE_KEY, id); } catch { /* stockage indisponible */ }
+  if (persist) { try { localStorage.setItem(STORE_KEY, id); } catch { /* stockage indisponible */ } }
   document.dispatchEvent(new CustomEvent('holocron:emblem', { detail: { emblem: id } }));
 }
 
+// Ré-applique l'emblème effectif + l'affordance MJ du picker (appelé quand la
+// config ou la session change — au boot par app.js, puis via holocron:ui/session).
+const gateHooks = [];
+export function syncEmblem() {
+  applyEmblem(currentEmblem());
+  for (const f of gateHooks) f();
+}
+
 // Monte le picker (grille d'aperçus teintés au thème) sur le bouton-emblème.
+// MJ uniquement : pour les joueurs le bouton devient un simple insigne inerte.
 export function mountEmblemPicker(button) {
   if (!button) return;
-  applyEmblem(currentEmblem()); // normalise le stockage au boot
+  syncEmblem(); // normalise l'affichage au boot (config pas forcément chargée)
 
   const menu = document.createElement('div');
   menu.className = 'emblem-menu';
   menu.setAttribute('role', 'menu');
-  menu.setAttribute('aria-label', 'Emblème du site');
+  menu.setAttribute('aria-label', 'Emblème du monde');
   menu.hidden = true;
   const grid = document.createElement('div');
   grid.className = 'emblem-grid';
@@ -72,11 +88,20 @@ export function mountEmblemPicker(button) {
     sw.setAttribute('aria-hidden', 'true');
     sw.style.setProperty('--em', emblemUrl(e.id));
     item.appendChild(sw);
-    item.addEventListener('click', () => { applyEmblem(e.id); close(); button.focus(); });
+    item.addEventListener('click', () => { pick(e.id); close(); button.focus(); });
     grid.appendChild(item);
   }
   menu.appendChild(grid);
   document.body.appendChild(menu);
+
+  // Choix MJ : application immédiate + écriture de MONDE. Le localStorage sert
+  // de repli local (MJ seulement) si la route échoue (hors-ligne, clé expirée).
+  function pick(id) {
+    applyEmblem(id, { persist: true });
+    saveUiConfig({ emblem: id }).catch(() => {
+      console.warn('[holocron] emblème : écriture serveur refusée — gardé localement seulement');
+    });
+  }
 
   const items = () => [...menu.querySelectorAll('.emblem-item')];
   function sync() {
@@ -84,7 +109,18 @@ export function mountEmblemPicker(button) {
     for (const it of items()) it.setAttribute('aria-checked', String(it.dataset.emblemId === cur));
   }
 
+  // Gating MJ : le bouton n'est un CONTRÔLE que pour le MJ (la sécurité réelle
+  // est côté serveur — ceci n'est que de l'affordance).
+  function syncGate() {
+    const gm = isGMActive();
+    button.disabled = !gm;
+    button.title = gm ? 'Emblème du monde' : 'Emblème du monde (choisi par le MJ)';
+    button.setAttribute('aria-label', gm ? "Choisir l'emblème du monde" : 'Emblème du monde');
+    if (!gm && !menu.hidden) close();
+  }
+
   function open() {
+    if (!isGMActive()) return;
     sync();
     menu.hidden = false;
     button.setAttribute('aria-expanded', 'true');
@@ -119,5 +155,8 @@ export function mountEmblemPicker(button) {
   });
 
   document.addEventListener('holocron:emblem', sync);
+  document.addEventListener('holocron:session', syncGate);
+  gateHooks.push(syncGate);
+  syncGate();
   sync();
 }

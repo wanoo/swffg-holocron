@@ -14,19 +14,27 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
     <script>
       // Anti-flash : applique le thème ET l'emblème persistés AVANT le premier rendu.
+      // La config ui de MONDE (thème verrouillé, emblème MJ) n'est connue que du
+      // serveur : on lit son CACHE localStorage (posé par data.js) pour l'appliquer
+      // sans flash dès la 2e visite ; la 1re visite est corrigée à l'arrivée de la
+      // config (accepté). Le cas « MJ + thème verrouillé » est affiné par app.js.
       (function () {
-        var t = null, e = null;
+        var t = null, e = null, ui = null;
         try {
           t = localStorage.getItem('holocron-theme');
           e = localStorage.getItem('holocron-emblem');
+          var cfg = JSON.parse(localStorage.getItem('holocron-cache:/content/config') || 'null');
+          ui = (cfg && cfg.body && cfg.body.ui) || null;
         } catch (err) { /* stockage indisponible */ }
         var ok = ['force-jedi', 'force-sith', 'age-of-rebellion', 'edge-of-the-empire'];
+        if (ui && ok.indexOf(ui.theme) >= 0 && (ui.themeLocked || ok.indexOf(t) < 0)) t = ui.theme;
         document.documentElement.setAttribute('data-theme', ok.indexOf(t) >= 0 ? t : 'force-jedi');
         // Miroir de la liste de js/emblem.js (source du picker).
         var eok = ['rebel-alliance', 'galactic-empire', 'jedi-order', 'jedi', 'new-jedi-order',
           'sith', 'sith-empire', 'galactic-republic', 'old-republic', 'new-republic',
           'galactic-senate', 'separatists', 'first-order', 'phoenix-squadron', 'mandalorian',
           'nite-owls', 'black-sun', 'crimson-dawn', 'pyke-syndicate', 'hutt-clan', 'credits'];
+        if (ui && eok.indexOf(ui.emblem) >= 0) e = ui.emblem; // l'emblème de monde prime
         document.documentElement.style.setProperty(
           '--user-emblem',
           "url('/img/emblems/" + (eok.indexOf(e) >= 0 ? e : 'rebel-alliance') + ".svg')"

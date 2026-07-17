@@ -1,9 +1,10 @@
 // app.js — bootstrap, routeur (hash), rendu des vues, modales, responsive.
 import { loadData, Data, compendiumEntry, ensureNpcs, ensureAdversaries, ensureCompendium, foundryAsset } from './data.js';
 import { mountLoginButton } from './login.js';
-import { mountThemeSwitcher } from './theme.js';
-import { mountEmblemPicker } from './emblem.js';
-import { homeView } from './home.js';
+import { mountThemeSwitcher, applyWorldTheme } from './theme.js';
+import { mountEmblemPicker, syncEmblem } from './emblem.js';
+import { uiConfig, isGMActive, worldTitle } from './ui-config.js';
+import { homeView, applyDashboardArt } from './home.js';
 import { mountSidebar, setActiveTreeLink } from './tree.js';
 import { initSearch, openPalette } from './search.js';
 import { buildTOC, setupScrollSpy } from './toc.js';
@@ -41,7 +42,18 @@ function esc(s = '') {
 // Accueil : tableau de bord en widgets (voir home.js).
 function viewHome() {
   mount(homeView());
-  document.title = (Data.meta?.title ? Data.meta.title + ' — ' : '') + 'Archive Holocron';
+  document.title = worldTitle() + ' — Holocron';
+}
+
+// Applique la personnalisation de monde (config ui) : thème (défaut/verrou),
+// titre affiché (sidebar + barre mobile) — rappelée quand le MJ enregistre.
+function applyUiConfig() {
+  applyWorldTheme(uiConfig(), isGMActive());
+  syncEmblem();
+  const t = worldTitle();
+  const sw = document.querySelector('.sb-word'); if (sw) sw.textContent = t;
+  const bt = document.querySelector('.brand-text'); if (bt) bt.textContent = t;
+  applyDashboardArt();
 }
 
 function pageHead(page, journalName) {
@@ -314,11 +326,12 @@ async function init() {
     await loadData();
   ensureCompendium();
   if (Data.authEnabled) mountLoginButton(document.getElementById('sidebar-actions'));
-  document.addEventListener('holocron:session', () => { mountSidebar(); });
-  if (Data.meta?.title) {
-    document.title = Data.meta.title + ' — Holocron';
-    const bt = document.querySelector('.brand-text'); if (bt) bt.textContent = Data.meta.title;
-  }
+  document.addEventListener('holocron:session', () => { mountSidebar(); applyUiConfig(); });
+  // Personnalisation de monde enregistrée par le MJ : sidebar (parties, titre),
+  // thème, décor — resynchronisés à chaud.
+  document.addEventListener('holocron:ui', () => { mountSidebar(); applyUiConfig(); });
+  document.title = worldTitle() + ' — Holocron';
+  applyUiConfig();
   } catch (err) {
     content.innerHTML = `<div class="view-head"><h1>Erreur de chargement</h1><p class="muted">${esc(err.message)}<br>Servez le site via <code>npx serve public</code> (le protocole file:// bloque le chargement des données).</p></div>`;
     return;
