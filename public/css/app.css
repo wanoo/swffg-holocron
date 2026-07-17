@@ -778,6 +778,7 @@ body.gm-mode .main { padding: 0; }
   font-size: 0.82rem; font-weight: 700; line-height: 1;
 }
 .gm-tool:hover { border-color: var(--gold); }
+a.gm-tool { display: inline-grid; place-items: center; text-decoration: none; font-size: 1rem; }
 .gm-tool.danger:hover { border-color: var(--danger); color: var(--danger); }
 .gm-tool.active { background: var(--gold); color: var(--on-gold); border-color: var(--gold); }
 

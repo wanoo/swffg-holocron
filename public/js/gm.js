@@ -296,6 +296,8 @@ async function renderDocs(container, list, scrollTo, cleanup) {
   const navHead = el('div', 'gm-nav-head');
   navHead.innerHTML = '<p class="eyebrow">🔒 Maître du Jeu · confidentiel</p>';
   const tools = el('div', 'gm-tools');
+  // Retour à l'Archive SANS verrouiller (la topbar qui portait ce retour a disparu).
+  const homeBtn = el('a', 'gm-tool', '⌂'); homeBtn.href = '#/'; homeBtn.title = "Retour à l'Archive (reste déverrouillé)";
   const lockBtn = el('button', 'gm-tool danger', '🔒'); lockBtn.type = 'button'; lockBtn.title = 'Verrouiller';
   lockBtn.addEventListener('click', () => { clearGMKey(); location.hash = '#/'; });
   const aMinus = el('button', 'gm-tool', 'A−'); aMinus.type = 'button'; aMinus.title = 'Réduire le texte';
@@ -321,7 +323,7 @@ async function renderDocs(container, list, scrollTo, cleanup) {
   sessionBtn.addEventListener('click', () => paintSession(toggleSession()));
   paintSession(isSessionOn());
   cleanup.push(() => teardownSession());
-  tools.append(lockBtn, aMinus, aPlus, readBtn, screenBtn, sessionBtn, printBtn, notesBtn);
+  tools.append(homeBtn, lockBtn, aMinus, aPlus, readBtn, screenBtn, sessionBtn, printBtn, notesBtn);
   navHead.appendChild(tools);
   nav.appendChild(navHead);
 
