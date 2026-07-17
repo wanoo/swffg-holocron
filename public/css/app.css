@@ -1,34 +1,34 @@
-/* app.css — châssis « datapad » sombre + mise en page globale. */
+/* app.css — châssis + mise en page globale. Les couleurs viennent des tokens
+   sémantiques de themes.css : les alias historiques ci-dessous les redirigent
+   pour que tout le CSS existant suive le thème actif sans réécriture. */
 
 :root {
-  --bg: #0e1116;
-  --bg-2: #141922;
-  --bg-3: #1b2230;
-  --bg-glow: #182234; /* halo bleuté du fond */
-  --panel: #161c26;
-  --panel-2: #1e2632;
-  --line: #2a3342;
-  --line-soft: #232b38;
-  --fg: #e7e3d6;
-  --fg-muted: #9aa4b4;
-  --fg-dim: #6c7686;
-  --gold: #d9b45b; /* or holocron */
-  --gold-soft: #b7923f;
-  --gold-bright: #e6c66c; /* or survolé / accent vif */
-  --on-gold: #1a1400; /* texte posé sur fond or */
-  --holo: #57c7ff; /* bleu hologramme */
-  --holo-soft: #2f9fe0;
+  --bg: var(--app-background);
+  --bg-2: var(--surface-default);
+  --bg-3: var(--surface-raised);
+  --panel: var(--surface-default);
+  --panel-2: var(--surface-raised);
+  --line: var(--border-default);
+  --line-soft: var(--border-muted);
+  --fg: var(--text-primary);
+  --fg-muted: var(--text-secondary);
+  --fg-dim: var(--text-muted);
+  --gold: var(--accent-primary);
+  --gold-soft: var(--accent-muted);
+  --gold-bright: var(--accent-bright);
+  --on-gold: var(--text-on-accent);
+  --holo: var(--accent-secondary);
+  --holo-soft: var(--accent-secondary-muted);
   --sw-red: #5a1614; /* rouge FFG unifié (tables, accents Empire) */
-  --danger: #e5544b;
-  --radius: 10px;
-  --topbar-h: 56px;
-  --sidebar-w: 300px;
+  --danger: var(--status-danger);
+  --radius: var(--radius-medium);
+  --topbar-h: var(--topbar-height);
+  --sidebar-w: var(--sidebar-width);
   --toc-w: 220px;
   --gm-nav-w: 288px;
   --gm-font-scale: 1;
   --font-ui: 'Signika', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   --font-body: 'Roboto', system-ui, sans-serif;
-  --font-display: 'Orbitron', var(--font-ui);
 }
 
 * { box-sizing: border-box; }
@@ -39,11 +39,28 @@
 html, body { height: 100%; }
 body {
   margin: 0;
-  background: radial-gradient(1200px 600px at 80% -10%, var(--bg-glow) 0%, var(--bg) 55%) fixed;
+  background-color: var(--app-background);
+  background-image: var(--texture-page);
+  background-size: var(--texture-size, auto);
+  background-attachment: fixed;
   color: var(--fg);
   font-family: var(--font-ui);
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
+}
+/* Fond configurable (décor par défaut du thème ; surchargé en JS depuis la
+   config — TODO : game.settings Foundry `dashboardBackground`). */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--dashboard-overlay), var(--dashboard-overlay)),
+    var(--dashboard-background-image);
+  background-size: cover;
+  background-position: center top;
 }
 
 a { color: var(--holo); }
@@ -81,7 +98,7 @@ kbd {
   align-items: center;
   gap: 0.75rem;
   padding: 0 0.9rem;
-  background: rgba(14, 17, 22, 0.9);
+  background: color-mix(in srgb, var(--sidebar-background) 92%, transparent);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid transparent;
   /* Liséré or holocron qui s'estompe vers les bords. */
@@ -110,9 +127,9 @@ kbd {
 }
 .topbar-spacer { flex: 1; }
 
-/* --- Cadre facetté « holocron » (coins biseautés) --- */
+/* --- Cadre facetté « holocron » (coins biseautés ; 0 = rectangle imprimé) --- */
 .holo-frame {
-  --bevel: 12px;
+  --bevel: var(--panel-cut-size, 12px);
   clip-path: polygon(
     var(--bevel) 0, calc(100% - var(--bevel)) 0, 100% var(--bevel),
     100% calc(100% - var(--bevel)), calc(100% - var(--bevel)) 100%,
@@ -366,7 +383,7 @@ a.mej-rel:hover { background: color-mix(in srgb, var(--gold, #d9b45b) 24%, trans
   background: var(--panel);
   border: 1px solid color-mix(in srgb, var(--gold-soft) 35%, var(--line));
   border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--shadow-floating);
   overflow: hidden;
 }
 #palette-input {
@@ -414,7 +431,7 @@ a.mej-rel:hover { background: color-mix(in srgb, var(--gold, #d9b45b) 24%, trans
   background: var(--panel);
   border: 1px solid color-mix(in srgb, var(--gold-soft) 35%, var(--line));
   border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--shadow-floating);
   overflow: hidden;
 }
 .modal-head {

@@ -1,0 +1,275 @@
+/* themes.css — design system : tokens sémantiques (niveau 1), tokens de
+   composition (niveau 2) et 4 thèmes interchangeables via <html data-theme="…">.
+   Les composants ne consomment QUE ces tokens (ou les alias historiques
+   --bg/--panel/--gold/--holo… redéfinis dans app.css à partir d'eux).
+   Thème par défaut : force-jedi (valeurs posées dans :root). */
+
+:root {
+  /* ---- Niveau 1 — tokens sémantiques (valeurs force-jedi) ---- */
+  --app-background: #050d17;
+  --surface-default: #0b1723;
+  --surface-raised: #11202f;
+  --surface-reading: #0e1b2a;       /* dalle de lecture des journaux */
+  --border-default: #1d3547;
+  --border-muted: #152838;
+  --border-active: #d5a55c;
+
+  --text-primary: #ecf3fa;
+  --text-secondary: #97abbc;
+  --text-muted: #64798c;
+  --text-on-accent: #201503;
+
+  --accent-primary: #d5a55c;        /* or holocron : titres, actifs, CTA */
+  --accent-muted: #a37f45;
+  --accent-bright: #e9c377;
+  --accent-secondary: #4fc3ff;      /* bleu holo : liens, info, focus */
+  --accent-secondary-muted: #2d89c8;
+
+  --status-success: #58c99a;
+  --status-warning: #e0a23f;
+  --status-danger: #e05561;
+  --status-info: #4fc3ff;
+
+  /* Identité de la sidebar / topbar (peut diverger du contenu, cf. thèmes clairs) */
+  --sidebar-background: #04090f;
+  --sidebar-surface: #0a1420;
+  --sidebar-surface-raised: #101d2c;
+  --sidebar-border: #17293a;
+  --sidebar-text: #e9f0f7;
+  --sidebar-text-secondary: #8ea3b5;
+  --sidebar-text-muted: #5d7284;
+  --sidebar-accent: #d5a55c;
+
+  --shadow-panel: 0 1px 0 color-mix(in srgb, var(--accent-primary) 12%, transparent) inset,
+                  0 10px 36px rgba(0, 0, 0, 0.4);
+  --shadow-floating: 0 20px 60px rgba(0, 0, 0, 0.6);
+  --glow-accent: 0 0 16px color-mix(in srgb, var(--accent-primary) 35%, transparent);
+
+  /* Matières : une seule texture légère par thème (jamais un mockup complet). */
+  --texture-page:
+    radial-gradient(1px 1px at 12% 24%, rgba(214, 232, 255, 0.5) 48%, transparent 52%),
+    radial-gradient(1px 1px at 38% 71%, rgba(214, 232, 255, 0.35) 48%, transparent 52%),
+    radial-gradient(1px 1px at 64% 12%, rgba(214, 232, 255, 0.42) 48%, transparent 52%),
+    radial-gradient(1px 1px at 87% 51%, rgba(214, 232, 255, 0.3) 48%, transparent 52%),
+    radial-gradient(1px 1px at 25% 92%, rgba(214, 232, 255, 0.28) 48%, transparent 52%);
+  --texture-size: 480px 480px;
+
+  /* Fond & image d'en-tête : PAS d'URL en dur — surchargées en JS depuis la
+     config (TODO : game.settings Foundry). Les thèmes ne fixent que le décor
+     par défaut et le voile appliqué par-dessus une éventuelle image. */
+  --dashboard-background-image:
+    radial-gradient(1100px 620px at 82% -12%, #14273f 0%, transparent 62%);
+  --dashboard-overlay: rgba(5, 13, 23, 0);
+  --dashboard-header-image:
+    radial-gradient(90% 130% at 85% -25%, color-mix(in srgb, var(--accent-primary) 10%, transparent), transparent 55%);
+  --hero-overlay-start: rgba(5, 13, 23, 0);
+  --hero-overlay-end: rgba(5, 13, 23, 0);
+
+  /* ---- Niveau 2 — tokens de composition ---- */
+  --sidebar-width: 300px;
+  --topbar-height: 56px;
+  --content-max-width: 1200px;
+  --section-gap: 1.6rem;
+  --card-padding: 1rem;
+  --radius-small: 6px;
+  --radius-medium: 10px;
+  --radius-large: 14px;
+  --panel-cut-size: 12px;           /* biseau « holocron » (0 = rectangle) */
+  --transition-fast: 150ms;
+  --transition-normal: 220ms;
+  --font-display: 'Orbitron', 'Signika', system-ui, sans-serif;
+}
+
+/* ============================ force-sith ============================ */
+[data-theme='force-sith'] {
+  --app-background: #070404;
+  --surface-default: #130808;
+  --surface-raised: #1a0d0d;
+  --surface-reading: #150a0a;
+  --border-default: #401619;
+  --border-muted: #2b1013;
+  --border-active: #ff3c43;
+
+  --text-primary: #f4eeee;
+  --text-secondary: #b79b9d;
+  --text-muted: #816e70;
+  --text-on-accent: #1c0304;
+
+  --accent-primary: #e8474e;
+  --accent-muted: #8f2328;
+  --accent-bright: #ff6b6e;
+  --accent-secondary: #f08a8a;
+  --accent-secondary-muted: #b05050;
+
+  --status-success: #8fbd86;
+  --status-warning: #dd9a3c;
+  --status-danger: #ff2532;
+  --status-info: #f08a8a;
+
+  --sidebar-background: #090303;
+  --sidebar-surface: #120707;
+  --sidebar-surface-raised: #1a0b0b;
+  --sidebar-border: #341114;
+  --sidebar-text: #f2e9e9;
+  --sidebar-text-secondary: #ae9092;
+  --sidebar-text-muted: #766163;
+  --sidebar-accent: #ff4b4f;
+
+  --glow-accent: 0 0 12px color-mix(in srgb, var(--accent-primary) 40%, transparent);
+  --texture-page:
+    radial-gradient(1px 1px at 18% 32%, rgba(255, 120, 120, 0.22) 48%, transparent 52%),
+    radial-gradient(1px 1px at 52% 78%, rgba(255, 120, 120, 0.15) 48%, transparent 52%),
+    radial-gradient(1px 1px at 79% 18%, rgba(255, 160, 160, 0.18) 48%, transparent 52%);
+  --texture-size: 520px 520px;
+  --dashboard-background-image:
+    radial-gradient(1000px 560px at 78% -12%, #250b0e 0%, transparent 60%);
+  --dashboard-overlay: rgba(7, 4, 4, 0);
+  --hero-overlay-start: rgba(7, 4, 4, 0);
+  --hero-overlay-end: rgba(7, 4, 4, 0);
+}
+
+/* ========================= age-of-rebellion ========================= */
+/* Papier ivoire + sidebar rouge rebelle : imprimé militaire, mat, sans glow. */
+[data-theme='age-of-rebellion'] {
+  --app-background: #d8cbb6;
+  --surface-default: #e8decb;
+  --surface-raised: #f0e7d8;
+  --surface-reading: #f2ead9;
+  --border-default: #b7a082;
+  --border-muted: #c9b699;
+  --border-active: #9d1d1b;
+
+  --text-primary: #2b211c;
+  --text-secondary: #65584e;
+  --text-muted: #8a7a6c;
+  --text-on-accent: #f6ede0;
+
+  --accent-primary: #9f201e;
+  --accent-muted: #ad5a50;
+  --accent-bright: #b8322f;
+  --accent-secondary: #7a1815;
+  --accent-secondary-muted: #a34844;
+
+  --status-success: #4c6b47;
+  --status-warning: #96660f;
+  --status-danger: #a4211f;
+  --status-info: #345c78;
+
+  --sidebar-background: #50120f;
+  --sidebar-surface: #5d1712;
+  --sidebar-surface-raised: #6b1c16;
+  --sidebar-border: #7d2d24;
+  --sidebar-text: #f4e5da;
+  --sidebar-text-secondary: #d8b4a7;
+  --sidebar-text-muted: #b18d80;
+  --sidebar-accent: #f0d9a8;
+
+  --shadow-panel: 0 1px 2px rgba(43, 33, 28, 0.16);
+  --shadow-floating: 0 14px 40px rgba(43, 33, 28, 0.3);
+  --glow-accent: none;
+  /* grain papier discret (bruit SVG inline, une seule texture) */
+  --texture-page: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  --texture-size: 140px 140px;
+  --dashboard-background-image: linear-gradient(180deg, rgba(43, 33, 28, 0.05), transparent 32%);
+  --dashboard-overlay: rgba(232, 222, 203, 0);
+  --dashboard-header-image: linear-gradient(105deg, rgba(159, 32, 30, 0.1), transparent 55%);
+  --hero-overlay-start: rgba(240, 231, 216, 0);
+  --hero-overlay-end: rgba(240, 231, 216, 0);
+
+  --radius-small: 3px;
+  --radius-medium: 6px;
+  --radius-large: 8px;
+  --panel-cut-size: 0px;
+  --font-display: 'Signika', system-ui, sans-serif;
+}
+
+/* ======================== edge-of-the-empire ======================== */
+/* Datapad beige + châssis métal noir/cuivre : industriel, mat, ambre. */
+[data-theme='edge-of-the-empire'] {
+  --app-background: #c9baa3;
+  --surface-default: #e4d9c7;
+  --surface-raised: #eee5d7;
+  --surface-reading: #ede3d1;
+  --border-default: #a38a6a;
+  --border-muted: #b89f80;
+  --border-active: #c45d1b;
+
+  --text-primary: #282019;
+  --text-secondary: #6d5b4d;
+  --text-muted: #8d7a68;
+  --text-on-accent: #f8efe2;
+
+  --accent-primary: #a04a12;
+  --accent-muted: #b97c4c;
+  --accent-bright: #c45d1b;
+  --accent-secondary: #7a3416;
+  --accent-secondary-muted: #a3653d;
+
+  --status-success: #5c7040;
+  --status-warning: #96660f;
+  --status-danger: #a63824;
+  --status-info: #3f637d;
+
+  --sidebar-background: #16120d;
+  --sidebar-surface: #201a12;
+  --sidebar-surface-raised: #2a2218;
+  --sidebar-border: #3c3020;
+  --sidebar-text: #ead9c0;
+  --sidebar-text-secondary: #a89478;
+  --sidebar-text-muted: #7d6d57;
+  --sidebar-accent: #d98a3d;
+
+  --shadow-panel: 0 1px 2px rgba(40, 32, 25, 0.2);
+  --shadow-floating: 0 14px 40px rgba(40, 32, 25, 0.35);
+  --glow-accent: none;
+  --texture-page: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  --texture-size: 140px 140px;
+  --dashboard-background-image: linear-gradient(180deg, rgba(40, 32, 25, 0.07), transparent 30%);
+  --dashboard-overlay: rgba(228, 217, 199, 0);
+  --dashboard-header-image: linear-gradient(105deg, rgba(196, 93, 27, 0.12), transparent 55%);
+  --hero-overlay-start: rgba(238, 229, 215, 0);
+  --hero-overlay-end: rgba(238, 229, 215, 0);
+
+  --radius-small: 4px;
+  --radius-medium: 8px;
+  --radius-large: 10px;
+  --panel-cut-size: 8px;
+  --font-display: 'Signika', system-ui, sans-serif;
+}
+
+/* ---- Zone latérale & topbar : re-scope des alias historiques ----
+   La sidebar garde sa propre identité (rouge rebelle / métal noir sur les
+   thèmes clairs) : on redirige les alias vers les tokens --sidebar-* pour que
+   tous les composants existants (arbo, chips, inputs) suivent sans réécriture. */
+.topbar,
+.sidebar,
+.gm-nav {
+  --bg: var(--sidebar-background);
+  --bg-2: var(--sidebar-background);
+  --bg-3: var(--sidebar-surface-raised);
+  --panel: var(--sidebar-surface);
+  --panel-2: var(--sidebar-surface-raised);
+  --line: var(--sidebar-border);
+  --line-soft: var(--sidebar-border);
+  --fg: var(--sidebar-text);
+  --fg-muted: var(--sidebar-text-secondary);
+  --fg-dim: var(--sidebar-text-muted);
+  --gold: var(--sidebar-accent);
+  --gold-soft: color-mix(in srgb, var(--sidebar-accent) 72%, var(--sidebar-background));
+  --gold-bright: var(--sidebar-accent);
+  color: var(--fg);
+}
+
+/* ---- Pastilles d'aperçu des thèmes (sélecteur) ---- */
+.theme-dot {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1px solid rgba(127, 127, 127, 0.55);
+  background: linear-gradient(135deg, var(--td-a, var(--app-background)) 50%, var(--td-b, var(--accent-primary)) 50%);
+}
+.theme-dot[data-theme-dot='force-jedi'] { --td-a: #071527; --td-b: #d5a55c; }
+.theme-dot[data-theme-dot='force-sith'] { --td-a: #0c0505; --td-b: #f32632; }
+.theme-dot[data-theme-dot='age-of-rebellion'] { --td-a: #e8decb; --td-b: #9f201e; }
+.theme-dot[data-theme-dot='edge-of-the-empire'] { --td-a: #e4d9c7; --td-b: #c45d1b; }

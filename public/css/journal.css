@@ -3,7 +3,7 @@
    (color-mix) et repasse à blanc à l'impression. */
 
 .reader {
-  --page-bg: #121826; /* dalle holocron, un cran au-dessus de --bg */
+  --page-bg: var(--surface-reading, #121826); /* dalle de lecture (token thème) */
   --page-fg: var(--fg);
   --page-muted: var(--fg-muted);
   --page-rule: var(--line);
@@ -18,7 +18,7 @@
   color: var(--page-fg);
   border-radius: 10px;
   border: 1px solid color-mix(in srgb, var(--gold-soft) 26%, var(--line));
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--gold) 14%, transparent) inset, 0 10px 40px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--shadow-panel);
   padding: clamp(1.25rem, 3vw, 2.75rem);
   max-width: 62rem;
   margin: 0 auto 2rem;

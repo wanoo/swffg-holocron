@@ -12,6 +12,16 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <script>
+      // Anti-flash : applique le thème persisté AVANT le premier rendu.
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('holocron-theme'); } catch (e) { /* stockage indisponible */ }
+        var ok = ['force-jedi', 'force-sith', 'age-of-rebellion', 'edge-of-the-empire'];
+        document.documentElement.setAttribute('data-theme', ok.indexOf(t) >= 0 ? t : 'force-jedi');
+      })();
+    </script>
+    <link rel="stylesheet" href="css/themes.css" />
     <link rel="stylesheet" href="css/fonts.css" />
     <link rel="stylesheet" href="css/dice.css" />
     <link rel="stylesheet" href="css/journal.css" />
@@ -34,6 +44,16 @@
         <span aria-hidden="true">⌕</span>
         <span class="search-trigger-label">Rechercher</span>
         <kbd>Ctrl K</kbd>
+      </button>
+      <button
+        class="icon-btn"
+        id="btn-theme"
+        aria-label="Choisir le thème d'interface"
+        aria-haspopup="menu"
+        aria-expanded="false"
+        title="Thème"
+      >
+        <span class="theme-dot" aria-hidden="true"></span>
       </button>
       <button class="icon-btn" id="btn-generator" aria-label="Générateur de dés" title="Générateur de dés">
         <span aria-hidden="true">🎲</span>
