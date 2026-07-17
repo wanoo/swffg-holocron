@@ -37,6 +37,7 @@ export function applyTheme(id) {
 // navigation clavier complète, choix persisté).
 export function mountThemeSwitcher(button) {
   if (!button) return;
+  applyTheme(currentTheme()); // normalise le stockage + meta theme-color au boot
   const dot = button.querySelector('.theme-dot');
 
   const menu = document.createElement('div');
