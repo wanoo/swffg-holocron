@@ -260,6 +260,42 @@
   color: var(--fg);
 }
 
+/* ---- Menu du sélecteur de thème (topbar) ---- */
+.theme-menu {
+  position: fixed;
+  z-index: 90;
+  min-width: 270px;
+  padding: 0.35rem;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-floating);
+}
+.theme-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 0;
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.theme-menu-item:hover,
+.theme-menu-item:focus-visible {
+  background: color-mix(in srgb, var(--accent-primary) 12%, transparent);
+}
+.theme-menu-txt { flex: 1; min-width: 0; }
+.theme-menu-txt b { display: block; font-size: 0.86rem; font-weight: 600; }
+.theme-menu-txt small { color: var(--text-secondary); font-size: 0.74rem; }
+.theme-menu-check { visibility: hidden; color: var(--accent-primary); font-weight: 700; }
+.theme-menu-item[aria-checked='true'] .theme-menu-check { visibility: visible; }
+.theme-menu-item[aria-checked='true'] { box-shadow: inset 2px 0 0 var(--accent-primary); }
+
 /* ---- Pastilles d'aperçu des thèmes (sélecteur) ---- */
 .theme-dot {
   flex: 0 0 auto;

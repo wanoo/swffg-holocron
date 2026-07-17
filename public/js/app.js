@@ -1,6 +1,7 @@
 // app.js — bootstrap, routeur (hash), rendu des vues, modales, responsive.
 import { loadData, Data, compendiumEntry, ensureNpcs, ensureAdversaries, ensureCompendium, foundryAsset } from './data.js';
 import { mountLoginButton } from './login.js';
+import { mountThemeSwitcher } from './theme.js';
 import { mountSidebar, setActiveTreeLink } from './tree.js';
 import { initSearch, openPalette } from './search.js';
 import { buildTOC, setupScrollSpy } from './toc.js';
@@ -398,6 +399,8 @@ function closeDrawer() {
 // --- Init -----------------------------------------------------------------
 
 async function init() {
+  // Sélecteur de thème : indépendant des données (reste utilisable en cas d'erreur).
+  mountThemeSwitcher(document.getElementById('btn-theme'));
   try {
     await loadData();
   ensureCompendium();
