@@ -326,7 +326,8 @@
       "done": "Holocron installé : {folders} dossier(s) créé(s), {rules} règle(s) et {events} événement(s) importés, {moved} journal(aux) rangé(s) dans « {sys} ».",
       "dupRemoved": "Doublon « {name} » quasi vide supprimé (la vraie configuration est conservée).",
       "cfgRenamed": "Journal de configuration renommé en « {name} » (nom attendu par l'app web).",
-      "ccConverted": "{n} fiche(s) MEJ convertie(s) en fiches Campaign Codex (originaux archivés dans 🗄️ Archive MEJ)."
+      "ccConverted": "{n} fiche(s) MEJ convertie(s) en fiches Campaign Codex (originaux archivés dans 🗄️ Archive MEJ).",
+      "ccMissing": "Campaign Codex est inactif : la conversion des fiches MEJ n'a pas pu s'exécuter. Activez le module puis relancez « Installer / réinstaller »."
     }
   }
 }

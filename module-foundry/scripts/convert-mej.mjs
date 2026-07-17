@@ -24,6 +24,7 @@ export async function convertMejToCC({ dryRun = false } = {}) {
   if (!game.user.isGM) return { converted: 0 };
   if (!game.modules.get(CC)?.active) {
     console.warn("swffg-holocron | Campaign Codex absent — conversion MEJ ignorée");
+    ui.notifications.warn(t("setup.ccMissing"));
     return { converted: 0 };
   }
   const candidates = game.journal.filter((j) => {

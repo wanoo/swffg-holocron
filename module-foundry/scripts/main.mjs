@@ -150,14 +150,21 @@ Hooks.once("ready", async () => {
   try { registerHolocronWidgets(); } catch (e) { console.warn("swffg-holocron | widgets", e); }
   // Installation auto de la structure Holocron (dossiers clés, import des règles
   // et événements canon, config complétée, rangement des journaux techniques).
-  // Un seul MJ « actif » l'exécute, une fois par version du module (idempotent,
-  // relançable à tout moment via le menu de réglage).
+  // Exécutée par TOUT client MJ navigateur, une fois par version — PAS par
+  // isTripApplier() : le bot MCP (connecteur headless) est souvent l'activeGM
+  // mais n'exécute jamais le code du module. Le marqueur est posé AVANT
+  // l'installation (garde de réentrance entre clients MJ) et restauré en cas
+  // d'échec pour retenter au prochain chargement.
   const version = game.modules.get(MOD)?.version || "";
-  if (game.user.isGM && isTripApplier() && game.settings.get(MOD, "installedVersion") !== version) {
+  const installed = game.settings.get(MOD, "installedVersion");
+  if (game.user.isGM && installed !== version) {
+    await game.settings.set(MOD, "installedVersion", version);
     try {
       await installHolocron();
-      await game.settings.set(MOD, "installedVersion", version);
-    } catch (e) { console.warn("swffg-holocron | installation auto", e); }
+    } catch (e) {
+      console.warn("swffg-holocron | installation auto", e);
+      await game.settings.set(MOD, "installedVersion", installed).catch(() => {});
+    }
   }
   // Marqueur « vous êtes ici » (un seul applicateur pour éviter les races).
   if (!isTripApplier()) return;
