@@ -1,10 +1,13 @@
-// tree.js — barre latérale : filtres par catégorie + arborescence des journaux
-// et sections fiches / bestiaire.
+// tree.js — barre latérale en deux zones :
+//  · haut (1/3)  : sélecteur de « parties » — les grandes sections de l'app ;
+//  · bas  (2/3)  : chapitrage de la partie active (scroll indépendant).
+// La sélection suit la route hash (deep-link compris) et survit aux re-montages.
 import { Data } from './data.js';
 import { statutPill } from './statut.js';
 import { getGMKey } from './collab.js';
 
-// Couleur par type de catégorie (pastilles + surlignage).
+// Couleur par type de catégorie (pastilles + surlignage) — identique dans les
+// 4 thèmes : la sidebar garde un fond sombre partout (tokens --sidebar-*).
 const KIND_COLOR = {
   rules: '#57c7ff',
   story: '#d9b45b',
@@ -17,122 +20,22 @@ const KIND_COLOR = {
   bestiary: '#e5544b',
 };
 
-const hidden = new Set(); // catégories désactivées par les filtres
+// Routes rattachées à la partie « Outils » (miroir de toolItems()).
+const TOOL_ROUTES = new Set(['navicomputer', 'vaisseau', 'astronav', 'aidejeu', 'timeline', 'sabacc', 'ateliers', 'rencontres']);
 
-function el(tag, cls, html) {
+let parts = [];           // parties construites au dernier montage
+let currentPartId = null; // partie active — survit aux re-montages (session, MJ)
+
+const isGM = () => Boolean(getGMKey() || Data.gm);
+
+function el(tag, cls, text) {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
-  if (html != null) e.innerHTML = html;
+  if (text != null) e.textContent = text;
   return e;
 }
 
-function journalsByCategory(catId) {
-  return Data.journals.filter((j) => j.categoryId === catId);
-}
-
-function buildFilters(container) {
-  container.innerHTML = '';
-  for (const cat of Data.categories) {
-    const count = journalsByCategory(cat.id).length;
-    if (!count) continue;
-    const chip = el('button', 'filter-chip');
-    chip.type = 'button';
-    chip.setAttribute('aria-pressed', 'true');
-    chip.style.setProperty('--k', KIND_COLOR[cat.kind] || '#888');
-    chip.innerHTML = `<span class="dot"></span>${cat.label}`;
-    chip.addEventListener('click', () => {
-      const on = chip.getAttribute('aria-pressed') === 'true';
-      chip.setAttribute('aria-pressed', String(!on));
-      if (on) hidden.add(cat.id);
-      else hidden.delete(cat.id);
-      applyFilters();
-    });
-    chip.dataset.cat = cat.id;
-    container.appendChild(chip);
-  }
-}
-
-function applyFilters() {
-  for (const group of document.querySelectorAll('.tree-group[data-cat]')) {
-    group.style.display = hidden.has(group.dataset.cat) ? 'none' : '';
-  }
-}
-
-function makeGroup(title, kind, count, items, catId) {
-  const group = el('div', 'tree-group');
-  if (catId) group.dataset.cat = catId;
-  const head = el('button', 'tree-group-head');
-  head.type = 'button';
-  head.innerHTML = `<span class="caret" aria-hidden="true">▾</span><span class="g-dot" style="--k:${KIND_COLOR[kind] || '#888'}"></span>${title}<span class="g-count">${count}</span>`;
-  head.setAttribute('aria-expanded', 'true');
-  head.addEventListener('click', () => {
-    const collapsed = group.classList.toggle('collapsed');
-    head.setAttribute('aria-expanded', String(!collapsed));
-  });
-  const ul = el('ul', 'tree-items');
-  for (const it of items) {
-    const li = el('li', 'tree-item');
-    const a = el('a');
-    a.href = it.href;
-    a.dataset.route = it.href;
-    a.textContent = it.label;
-    const pill = statutPill(it, { compact: true });
-    if (pill) a.appendChild(pill);
-    li.appendChild(a);
-    ul.appendChild(li);
-  }
-  group.append(head, ul);
-  return group;
-}
-
-// Rend le groupe d'une catégorie de journaux (si non vide).
-function appendCategory(tree, catId) {
-  const cat = Data.categories.find((c) => c.id === catId);
-  if (!cat) return;
-  const journals = journalsByCategory(catId);
-  if (!journals.length) return;
-  const items = journals.map((j) => ({ href: `#/journal/${j.id}`, label: j.name, statut: j.statut, mort: j.mort }));
-  tree.appendChild(makeGroup(cat.label, cat.kind, journals.length, items, catId));
-}
-
-export function mountSidebar() {
-  const filters = document.getElementById('filters');
-  const tree = document.getElementById('tree');
-  buildFilters(filters);
-  tree.innerHTML = '';
-
-  // Ordre : Règles → PJ → puis les catégories de la config (notes, actes, PNJ,
-  // orgs…) dans l'ordre des kinds — plus aucun id de campagne en dur.
-  const KIND_ORDER = ['rules', 'notes', 'story', 'timeline', 'pc', 'org', 'misc'];
-  const cats = [...Data.categories].sort((a, b) => {
-    const ka = KIND_ORDER.indexOf(a.kind), kb = KIND_ORDER.indexOf(b.kind);
-    return (ka < 0 ? 99 : ka) - (kb < 0 ? 99 : kb);
-  });
-  for (const cat of cats.filter((c) => c.kind === 'rules')) appendCategory(tree, cat.id);
-
-  const pcItems = Data.pcs.map((p) => ({ href: `#/pc/${p.id}`, label: p.name }));
-  tree.appendChild(makeGroup('Personnages joueurs', 'players', Data.pcs.length, pcItems));
-
-  for (const cat of cats.filter((c) => c.kind !== 'rules')) appendCategory(tree, cat.id);
-
-  // En bas : PNJ du monde + Adversaires (vues listes) — RÉSERVÉ AU MJ.
-  // Les stats d'adversaires/boss sont des spoilers : le groupe n'apparaît que
-  // clé MJ présente (la sidebar est re-montée au déverrouillage).
-  if (getGMKey() || Data.gm) {
-    // comptes depuis le manifest (connus au boot) ; les tableaux lazy priment une
-    // fois chargés — évite l'affichage « (0) » avant le lazy-load.
-    const cnt = Data.meta?.counts || {};
-    const nNpc = Data.worldNpcs.length || cnt.npcs || 0;
-    const nAdv = Data.adversaries.length || cnt.adversaries || 0;
-    tree.appendChild(
-      makeGroup('PNJ & Bestiaire (MJ)', 'bestiary', nNpc + nAdv, [
-        { href: '#/npc', label: `PNJ du monde (${nNpc})` },
-        { href: '#/bestiaire', label: `Adversaires (${nAdv})` },
-      ])
-    );
-  }
-
-  // Outils transverses (toujours visibles) — calculateur d'astrogation.
+function toolItems() {
   const tools = [
     { href: '#/navicomputer', label: '🖥️ Navi-Computer' },
     { href: '#/vaisseau', label: '🚀 Vaisseau' },
@@ -142,17 +45,186 @@ export function mountSidebar() {
     { href: '#/sabacc', label: '🎴 Sabacc' },
     { href: '#/ateliers', label: '⚒️ Ateliers' },
   ];
-  if (getGMKey() || Data.gm) tools.push({ href: '#/rencontres', label: '⚔️ Rencontres (MJ)' });
-  tree.appendChild(makeGroup('Outils', 'misc', tools.length, tools));
-
-  applyFilters();
+  if (isGM()) tools.push({ href: '#/rencontres', label: '⚔️ Rencontres (MJ)' });
+  return tools;
 }
 
-// Surligne l'entrée d'arbo correspondant à la route active.
-export function setActiveTreeLink(hash) {
-  const base = '#/journal/' + (hash.split('/')[2] || '');
-  for (const a of document.querySelectorAll('.tree-item a')) {
-    const r = a.dataset.route;
-    a.classList.toggle('active', r === hash || (hash.startsWith('#/journal/') && r === base));
+// Construit la liste des parties : Tableau de bord, une partie par catégorie
+// non vide (ordre des kinds — aucun id de campagne en dur), PJ, MJ, Outils.
+function buildParts() {
+  const list = [];
+  list.push({
+    id: 'home', label: 'Tableau de bord', kind: 'misc', route: '#/', chapters: [],
+    empty: 'Le tableau de bord s’affiche dans la page principale.',
+  });
+
+  const KIND_ORDER = ['rules', 'notes', 'story', 'timeline', 'pc', 'org', 'misc'];
+  const cats = [...Data.categories].sort((a, b) => {
+    const ka = KIND_ORDER.indexOf(a.kind), kb = KIND_ORDER.indexOf(b.kind);
+    return (ka < 0 ? 99 : ka) - (kb < 0 ? 99 : kb);
+  });
+  for (const cat of cats) {
+    const journals = Data.journals.filter((j) => j.categoryId === cat.id);
+    const isTimeline = cat.kind === 'timeline';
+    if (!journals.length && !isTimeline) continue; // catégorie vide : pas de partie
+    const chapters = journals.map((j) => ({ href: `#/journal/${j.id}`, label: j.name, statut: j.statut, mort: j.mort }));
+    // Événements : la donnée vit dans la frise → renvoi épinglé en tête
+    // (non compté comme chapitre).
+    const count = journals.length;
+    if (isTimeline) chapters.unshift({ href: '#/timeline', label: '📅 Ouvrir la chronologie' });
+    list.push({ id: 'cat:' + cat.id, catId: cat.id, label: cat.label, kind: cat.kind, chapters, count });
   }
+
+  if (Data.pcs.length) {
+    list.push({
+      id: 'pj', label: 'Personnages joueurs', kind: 'players',
+      chapters: Data.pcs.map((p) => ({ href: `#/pc/${p.id}`, label: p.name })),
+    });
+  }
+
+  // PNJ du monde + Adversaires — RÉSERVÉ AU MJ (stats = spoilers ; la sidebar
+  // est re-montée au déverrouillage). Comptes du manifest tant que le lazy-load
+  // n'a pas eu lieu — évite l'affichage « (0) ».
+  if (isGM()) {
+    const cnt = Data.meta?.counts || {};
+    const nNpc = Data.worldNpcs.length || cnt.npcs || 0;
+    const nAdv = Data.adversaries.length || cnt.adversaries || 0;
+    list.push({
+      id: 'mj', label: 'PNJ & Bestiaire (MJ)', kind: 'bestiary', count: nNpc + nAdv,
+      chapters: [
+        { href: '#/npc', label: `PNJ du monde (${nNpc})` },
+        { href: '#/bestiaire', label: `Adversaires (${nAdv})` },
+      ],
+    });
+  }
+
+  list.push({ id: 'tools', label: 'Outils', kind: 'misc', chapters: toolItems() });
+  return list;
+}
+
+// Route hash → id de partie. null = route non rattachée (on garde la sélection).
+function partForHash(hash) {
+  const seg = String(hash || '').replace(/^#\/?/, '').split('/').filter(Boolean);
+  const [a, b] = seg;
+  if (!a) return 'home';
+  if (a === 'journal' && b) {
+    const j = Data.journalById.get(b);
+    return j ? 'cat:' + j.categoryId : null;
+  }
+  if (a === 'pc') return 'pj';
+  if (a === 'npc' || a === 'adv' || a === 'bestiaire') return 'mj';
+  if (a === 'timeline') {
+    // La frise appartient à la partie « Événements » si elle existe, sinon Outils.
+    const t = parts.find((p) => p.kind === 'timeline');
+    if (t) return t.id;
+  }
+  if (TOOL_ROUTES.has(a)) return 'tools';
+  return null;
+}
+
+// --- Rendu -----------------------------------------------------------------
+
+function renderChapters(part) {
+  const zone = document.getElementById('chapters');
+  zone.innerHTML = '';
+  zone.setAttribute('aria-label', `Chapitres — ${part.label}`);
+
+  const head = el('div', 'chapters-head');
+  const dot = el('span', 'g-dot');
+  dot.style.setProperty('--k', KIND_COLOR[part.kind] || '#888');
+  dot.setAttribute('aria-hidden', 'true');
+  head.append(dot, el('span', 'chapters-title', part.label));
+  const n = part.count ?? part.chapters.length;
+  if (n) head.appendChild(el('span', 'g-count', String(n)));
+  zone.appendChild(head);
+
+  if (!part.chapters.length) {
+    zone.appendChild(el('p', 'chapters-empty', part.empty || 'Rien à parcourir dans cette section pour l’instant.'));
+    return;
+  }
+  const ul = el('ul', 'tree-items');
+  for (const it of part.chapters) {
+    const li = el('li', 'tree-item');
+    const a = el('a', null, it.label);
+    a.href = it.href;
+    a.dataset.route = it.href;
+    const pill = statutPill(it, { compact: true });
+    if (pill) a.appendChild(pill);
+    li.appendChild(a);
+    ul.appendChild(li);
+  }
+  zone.appendChild(ul);
+  highlightChapter(location.hash || '#/');
+}
+
+// Sélectionne une partie : état + aria + chapitrage.
+function selectPart(id) {
+  const part = parts.find((p) => p.id === id);
+  if (!part) return;
+  currentPartId = id;
+  for (const btn of document.querySelectorAll('.part-btn')) {
+    const on = btn.dataset.part === id;
+    if (on) btn.setAttribute('aria-current', 'true');
+    else btn.removeAttribute('aria-current');
+  }
+  renderChapters(part);
+}
+
+// Surligne le chapitre correspondant à la route active (aria-current="page").
+function highlightChapter(hash) {
+  const base = '#/journal/' + (hash.split('/')[2] || '');
+  for (const a of document.querySelectorAll('.sidebar-chapters a[data-route]')) {
+    const r = a.dataset.route;
+    const on = r === hash || (hash.startsWith('#/journal/') && r === base);
+    a.classList.toggle('active', on);
+    if (on) a.setAttribute('aria-current', 'page');
+    else a.removeAttribute('aria-current');
+  }
+}
+
+export function mountSidebar() {
+  parts = buildParts();
+  const nav = document.getElementById('parts');
+  nav.innerHTML = '';
+  const ul = el('ul', 'parts-list');
+  for (const part of parts) {
+    const li = el('li');
+    const btn = el('button', 'part-btn');
+    btn.type = 'button';
+    btn.dataset.part = part.id;
+    btn.style.setProperty('--k', KIND_COLOR[part.kind] || '#888');
+    const dot = el('span', 'g-dot');
+    dot.setAttribute('aria-hidden', 'true');
+    btn.append(dot, el('span', 'part-label', part.label));
+    const n = part.count ?? part.chapters.length;
+    if (n) btn.appendChild(el('span', 'g-count', String(n)));
+    btn.addEventListener('click', () => {
+      selectPart(part.id);
+      if (part.route) location.hash = part.route; // parties-vues (Tableau de bord)
+    });
+    li.appendChild(btn);
+    ul.appendChild(li);
+  }
+  // Navigation clavier ↑/↓ entre les parties (le focus suit).
+  ul.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const btns = [...ul.querySelectorAll('.part-btn')];
+    const i = btns.indexOf(document.activeElement);
+    if (i < 0) return;
+    e.preventDefault();
+    btns[(i + (e.key === 'ArrowDown' ? 1 : -1) + btns.length) % btns.length].focus();
+  });
+  nav.appendChild(ul);
+
+  // Sélection initiale : la route courante prime, sinon la sélection précédente.
+  if (!parts.some((p) => p.id === currentPartId)) currentPartId = null;
+  selectPart(partForHash(location.hash || '#/') || currentPartId || 'home');
+}
+
+// Synchronise la sidebar sur la route active : partie + chapitre surligné.
+// Route non rattachée (ex. #/mj) : on ne touche pas à la sélection.
+export function setActiveTreeLink(hash) {
+  const pid = partForHash(hash);
+  if (pid && pid !== currentPartId) selectPart(pid);
+  highlightChapter(hash);
 }
