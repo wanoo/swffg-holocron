@@ -80,7 +80,26 @@ let child = null;
 let childReady = null;
 const pending = new Map(); // id → {resolve, reject}
 
+// Chien de garde : quand le monde Foundry redémarre, le child reste vivant
+// mais sa session WebSocket est morte — tous les appels échouent (« Response
+// does not contain … array ») sans que 'exit' ne se déclenche jamais. Au bout
+// de FAIL_LIMIT échecs consécutifs on tue le child : le handler 'exit' le
+// relance avec une session fraîche (plus besoin de redémarrer l'app).
+const FAIL_LIMIT = 8;
+let failStreak = 0;
+function noteResult(ok) {
+  if (cfg.mode !== 'stdio') return;
+  if (ok) { failStreak = 0; return; }
+  failStreak += 1;
+  if (failStreak >= FAIL_LIMIT && child) {
+    cfg.logger.error(`[mcp] ${failStreak} échecs consécutifs — session Foundry supposée morte, redémarrage du connecteur`);
+    failStreak = 0;
+    try { child.kill(); } catch { /* déjà mort */ }
+  }
+}
+
 function startChild() {
+  failStreak = 0;
   cfg.logger.log(`[mcp] démarrage du connecteur embarqué : ${cfg.childCmd.join(' ')}`);
   child = spawn(cfg.childCmd[0], cfg.childCmd.slice(1), {
     stdio: ['pipe', 'pipe', 'pipe'],
@@ -153,10 +172,11 @@ function unpack(msg) {
   return parsed;
 }
 
-// Appel d'outil, TOUJOURS via la file séquentielle.
+// Appel d'outil, TOUJOURS via la file séquentielle (+ chien de garde stdio).
 export function mcpCall(name, args = {}) {
   if (cfg.mode === 'none') return Promise.reject(new Error('connecteur Foundry non configuré'));
-  return mcpQueue(() => (cfg.mode === 'http' ? httpCall(name, args) : stdioCall(name, args)));
+  return mcpQueue(() => (cfg.mode === 'http' ? httpCall(name, args) : stdioCall(name, args)))
+    .then((v) => { noteResult(true); return v; }, (e) => { noteResult(false); throw e; });
 }
 
 // Id du user Foundry du bot (author des ChatMessages, requis en v13).
