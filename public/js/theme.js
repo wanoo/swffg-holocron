@@ -61,7 +61,10 @@ export function applyWorldTheme(ui, gm) {
 // navigation clavier complète, choix persisté).
 export function mountThemeSwitcher(button) {
   if (!button) return;
-  applyTheme(currentTheme()); // normalise le stockage + meta theme-color au boot
+  // Normalise l'affichage + meta theme-color au boot SANS persister : le
+  // localStorage ne doit contenir qu'un choix EXPLICITE de l'utilisateur,
+  // sinon le thème par défaut du monde (config ui) ne s'appliquerait jamais.
+  applyTheme(currentTheme(), { persist: false });
   const dot = button.querySelector('.theme-dot');
 
   const menu = document.createElement('div');

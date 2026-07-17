@@ -442,15 +442,24 @@ export function homeView() {
       });
   }
 
+  // Parties masquées aux joueurs (F) : leurs widgets miroirs de la home suivent
+  // (tools → widget Outils, pj → widget Personnages joueurs). Le MJ voit tout.
+  const PART_WIDGET = { tools: 'tools', pj: 'pcs' };
+  function hiddenPartWidgets() {
+    if (isGM()) return new Set();
+    return new Set((uiConfig().partsHidden || []).map((p) => PART_WIDGET[p]).filter(Boolean));
+  }
+
   // focusId : widget à re-focus après re-rendu (les déplacements re-rendent tout).
   function renderAll(focusId) {
     wrap.classList.toggle('editing', editing);
     editbar.hidden = !editing;
     customize?.setAttribute('aria-pressed', String(editing));
+    const partHidden = hiddenPartWidgets();
     grid.innerHTML = '';
     for (const id of layout.order) {
       const def = WIDGETS.find((w) => w.id === id);
-      if (!def || (def.gmOnly && !isGM())) continue;
+      if (!def || (def.gmOnly && !isGM()) || partHidden.has(id)) continue;
       if (layout.hidden.has(id) && !editing) continue;
       grid.appendChild(widgetEl(def, layout, editing, renderAll, saveLayout));
     }
