@@ -168,8 +168,8 @@ async function handleApi(req, res, urlPath) {
     if (req.method !== 'GET') return sendJSON(res, 405, { error: 'GET uniquement' });
     if (kind === 'manifest') return sendVersioned(req, res, content.manifest(), v.manifest);
     if (kind === 'journals') return sendVersioned(req, res, content.journalsView(session), v.journals * 13 + (session ? 1 : 0) + (isGM(session) ? 7 : 0));
-    if (kind === 'pcs') return sendVersioned(req, res, content.pcsView(), v.pcs);
-    if (kind === 'vehicle') return sendVersioned(req, res, content.vehicleView(), v.vehicle);
+    if (kind === 'pcs') return sendVersioned(req, res, content.pcsView(session), v.pcs * 13 + (session ? 1 : 0) + (isGM(session) ? 7 : 0));
+    if (kind === 'vehicle') return sendVersioned(req, res, content.vehicleView(session), v.vehicle * 13 + (session ? 1 : 0) + (isGM(session) ? 7 : 0));
     if (kind === 'timeline') return sendVersioned(req, res, content.timelineView(session), v.timeline * 13 + (session ? 1 : 0) + (isGM(session) ? 7 : 0));
     if (kind === 'dice-helper') return sendVersioned(req, res, content.diceHelper(), v.diceHelper);
     if (kind === 'config') return sendVersioned(req, res, publicConfig(cc(), ENV.foundryBaseUrl), store.version('config'));

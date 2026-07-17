@@ -1885,3 +1885,7 @@ body.gm-session .gm-doc h2, body.gm-session .gm-doc h3, body.gm-session .gm-doc 
 .shipv-stat b { color: var(--gold); font-size: 0.95rem; }
 .shipv-attach { margin: 0.4rem 0 0; padding-left: 1.1rem; }
 .shipv-attach li { margin: 0.15rem 0; }
+/* Notes de groupe (journaux tagués équipage/groupe/vaisseau) sous les notes d'équipage */
+.shipv-groupnote { margin-top: 1.2rem; padding-top: 0.9rem; border-top: 1px solid var(--line); }
+.shipv-groupnote .sheet-section-title a { color: inherit; text-decoration: none; }
+.shipv-groupnote .sheet-section-title a:hover { color: var(--gold); text-decoration: underline; }
