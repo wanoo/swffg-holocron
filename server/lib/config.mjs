@@ -21,6 +21,60 @@ export function envConfig(env = process.env) {
   };
 }
 
+// --- Bloc `ui` : personnalisation CENTRALISÉE de l'app web (thème, emblème,
+// titre, dashboard, visibilité des parties) — écrite par le MJ depuis l'app
+// (PUT /api/gm/config/ui), lue par tous via /api/content/config. Sans ce bloc
+// (mondes pas encore configurés), le front retombe sur le localStorage.
+export const UI_THEMES = ['force-jedi', 'force-sith', 'age-of-rebellion', 'edge-of-the-empire'];
+export const UI_DEFAULTS = {
+  theme: '',            // '' = pas de thème de monde (choix libre par navigateur)
+  themeLocked: false,   // true = thème imposé aux joueurs (le MJ garde la main)
+  emblem: '',           // id d'emblème (public/img/emblems) pour tout le monde
+  title: '',            // nom du monde affiché (sidebar/hero) ; '' = meta.title
+  dashboard: {
+    order: [],            // ordre des widgets de la home (vide = défaut)
+    hidden: [],           // widgets masqués
+    resumeJournalId: '',  // journal « Où en est-on ? » ('' = dernier acte auto)
+    headerImage: '',      // bannière du héro (URL ou chemin d'asset Foundry)
+    background: '',       // fond de page ('' = décor du thème)
+  },
+  partsHidden: [],      // parties de la sidebar masquées aux joueurs
+};
+
+const uiStr = (v, max) => (typeof v === 'string' ? v.slice(0, max) : undefined);
+const uiStrList = (v, max = 60, n = 64) => (Array.isArray(v)
+  ? v.filter((x) => typeof x === 'string' && x).map((x) => x.slice(0, max)).slice(0, n)
+  : undefined);
+
+// Fusion + assainissement du bloc ui : `base` (état courant ou défauts) mis à
+// jour par `patch` (partiel — seules les clés PRÉSENTES sont touchées). Sert à
+// la fois à normaliser la config lue de Foundry et à appliquer un PUT MJ.
+export function mergeUiConfig(base, patch) {
+  const b = base && typeof base === 'object' ? base : {};
+  const cur = {
+    ...UI_DEFAULTS,
+    ...b,
+    dashboard: { ...UI_DEFAULTS.dashboard, ...(b.dashboard && typeof b.dashboard === 'object' ? b.dashboard : {}) },
+    partsHidden: uiStrList(b.partsHidden) ?? [],
+  };
+  if (!patch || typeof patch !== 'object') return cur;
+  const out = { ...cur, dashboard: { ...cur.dashboard } };
+  if ('theme' in patch) out.theme = UI_THEMES.includes(patch.theme) ? patch.theme : '';
+  if ('themeLocked' in patch) out.themeLocked = Boolean(patch.themeLocked);
+  if ('emblem' in patch) out.emblem = (uiStr(patch.emblem, 40) ?? '').replace(/[^a-z0-9-]/g, '');
+  if ('title' in patch) out.title = (uiStr(patch.title, 80) ?? '').trim();
+  if ('partsHidden' in patch) out.partsHidden = uiStrList(patch.partsHidden) ?? [];
+  const d = patch.dashboard;
+  if (d && typeof d === 'object') {
+    if ('order' in d) out.dashboard.order = uiStrList(d.order, 40) ?? [];
+    if ('hidden' in d) out.dashboard.hidden = uiStrList(d.hidden, 40) ?? [];
+    if ('resumeJournalId' in d) out.dashboard.resumeJournalId = (uiStr(d.resumeJournalId, 40) ?? '').replace(/[^A-Za-z0-9_-]/g, '');
+    if ('headerImage' in d) out.dashboard.headerImage = (uiStr(d.headerImage, 400) ?? '').trim();
+    if ('background' in d) out.dashboard.background = (uiStr(d.background, 400) ?? '').trim();
+  }
+  return out;
+}
+
 // Défauts de la config de campagne (fusionnés sous le flag Foundry).
 export const CAMPAIGN_DEFAULTS = {
   v: 1,
@@ -43,6 +97,7 @@ export const CAMPAIGN_DEFAULTS = {
   // calendrier galactique Mini Calendar (« Grande ReSynchronisation ») :
   // année calendrier N = (N − epochBBY) → BBY si négatif / ABY sinon. An 0 = 35 BBY.
   calendar: { epochBBY: 35 },
+  ui: UI_DEFAULTS,
   cfg: {},
 };
 
@@ -55,6 +110,7 @@ export function campaignConfig(store) {
     journals: { ...CAMPAIGN_DEFAULTS.journals, ...(raw.journals || {}) },
     meta: { ...CAMPAIGN_DEFAULTS.meta, ...(raw.meta || {}) },
     calendar: { ...CAMPAIGN_DEFAULTS.calendar, ...(raw.calendar || {}) },
+    ui: mergeUiConfig(raw.ui, null),
   };
   // shipNotes : uuid Foundry copié tel quel (« JournalEntry.X.JournalEntryPage.Y ») → « X:Y »
   const m = /JournalEntry\.([A-Za-z0-9]{16})\.JournalEntryPage\.([A-Za-z0-9]{16})/.exec(cc.journals.shipNotes || '');
@@ -67,6 +123,7 @@ export function publicConfig(cc, foundryBaseUrl = '') {
   return {
     foundryBaseUrl,
     meta: cc.meta,
+    ui: cc.ui, // personnalisation de monde (thème, emblème, titre, dashboard, parties)
     registry: cc.registry,
     advLinks: cc.advLinks,
     campaignPlanets: cc.campaignPlanets,

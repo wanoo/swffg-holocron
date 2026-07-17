@@ -340,6 +340,15 @@ async function handleApi(req, res, urlPath) {
       return sendJSON(res, 405, { error: 'méthode non supportée' });
     }
 
+    // Personnalisation de monde (thème/emblème/titre/dashboard/parties) :
+    // patch partiel fusionné dans flags.holocron.config.ui du journal ⚙️.
+    if (parts[1] === 'config' && parts[2] === 'ui') {
+      if (req.method !== 'PUT') return sendJSON(res, 405, { error: 'PUT uniquement' });
+      let body; try { body = JSON.parse(await readBody(req, 50_000)); } catch { return sendJSON(res, 400, { error: 'JSON invalide' }); }
+      try { return sendJSON(res, 200, await writer.uiSave(body)); }
+      catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
+    }
+
     if (parts[1] === 'quests' && req.method === 'GET') return sendJSON(res, 200, content.questsView());
     if (parts[1] === 'docs' && req.method === 'GET' && !id) return sendJSON(res, 200, { docs: writer.gmList() });
     if (parts[1] === 'dossiers' && req.method === 'GET') return sendJSON(res, 200, { dossiers: writer.dossiers() });
