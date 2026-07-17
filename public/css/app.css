@@ -218,6 +218,43 @@ input:focus-visible { outline: 2px solid var(--holo); outline-offset: 2px; }
   mask: var(--user-emblem, var(--sidebar-emblem)) center / contain no-repeat;
   filter: drop-shadow(0 0 6px color-mix(in srgb, var(--gold) 40%, transparent));
 }
+/* Picker d'emblème : grille d'aperçus, tous teintés au thème courant (masques) */
+.emblem-menu {
+  position: fixed;
+  z-index: 90;
+  padding: 0.5rem;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-floating);
+}
+.emblem-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 46px); /* = COLS de emblem.js (nav clavier) */
+  gap: 4px;
+}
+.emblem-item {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+.emblem-item:hover,
+.emblem-item:focus-visible { background: color-mix(in srgb, var(--accent-primary) 12%, transparent); }
+.emblem-item[aria-checked='true'] { border-color: var(--accent-primary); }
+.emblem-swatch {
+  width: 32px;
+  height: 32px;
+  background: var(--accent-primary);
+  -webkit-mask: var(--em) center / contain no-repeat;
+  mask: var(--em) center / contain no-repeat;
+}
+
 .sb-word {
   font-family: var(--font-display);
   font-weight: 700;

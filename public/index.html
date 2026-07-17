@@ -13,12 +13,24 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
     <script>
-      // Anti-flash : applique le thème persisté AVANT le premier rendu.
+      // Anti-flash : applique le thème ET l'emblème persistés AVANT le premier rendu.
       (function () {
-        var t = null;
-        try { t = localStorage.getItem('holocron-theme'); } catch (e) { /* stockage indisponible */ }
+        var t = null, e = null;
+        try {
+          t = localStorage.getItem('holocron-theme');
+          e = localStorage.getItem('holocron-emblem');
+        } catch (err) { /* stockage indisponible */ }
         var ok = ['force-jedi', 'force-sith', 'age-of-rebellion', 'edge-of-the-empire'];
         document.documentElement.setAttribute('data-theme', ok.indexOf(t) >= 0 ? t : 'force-jedi');
+        // Miroir de la liste de js/emblem.js (source du picker).
+        var eok = ['rebel-alliance', 'galactic-empire', 'jedi-order', 'jedi', 'new-jedi-order',
+          'sith', 'sith-empire', 'galactic-republic', 'old-republic', 'new-republic',
+          'galactic-senate', 'separatists', 'first-order', 'phoenix-squadron', 'mandalorian',
+          'nite-owls', 'black-sun', 'crimson-dawn', 'pyke-syndicate', 'hutt-clan', 'credits'];
+        document.documentElement.style.setProperty(
+          '--user-emblem',
+          "url('/img/emblems/" + (eok.indexOf(e) >= 0 ? e : 'rebel-alliance') + ".svg')"
+        );
       })();
     </script>
     <link rel="stylesheet" href="css/themes.css" />

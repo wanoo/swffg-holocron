@@ -2,6 +2,7 @@
 import { loadData, Data, compendiumEntry, ensureNpcs, ensureAdversaries, ensureCompendium, foundryAsset } from './data.js';
 import { mountLoginButton } from './login.js';
 import { mountThemeSwitcher } from './theme.js';
+import { mountEmblemPicker } from './emblem.js';
 import { homeView } from './home.js';
 import { mountSidebar, setActiveTreeLink } from './tree.js';
 import { initSearch, openPalette } from './search.js';
@@ -305,8 +306,10 @@ function closeDrawer() {
 // --- Init -----------------------------------------------------------------
 
 async function init() {
-  // Sélecteur de thème : indépendant des données (reste utilisable en cas d'erreur).
+  // Sélecteurs de thème et d'emblème : indépendants des données (restent
+  // utilisables en cas d'erreur de chargement).
   mountThemeSwitcher(document.getElementById('btn-theme'));
+  mountEmblemPicker(document.getElementById('btn-emblem'));
   try {
     await loadData();
   ensureCompendium();

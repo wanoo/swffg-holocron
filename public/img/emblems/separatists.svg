@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="600"
+   height="519.61526"
+   viewBox="-300 -259.80763 600 519.61526"
+   version="1.1"
+   id="svg5"
+   sodipodi:docname="separatiste.svg"
+   inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs5" />
+  <sodipodi:namedview
+     id="namedview5"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.25248765"
+     inkscape:cx="-198.02949"
+     inkscape:cy="772.31499"
+     inkscape:window-width="1120"
+     inkscape:window-height="731"
+     inkscape:window-x="0"
+     inkscape:window-y="39"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg5" />
+  <mask
+     id="cutouts">
+    <rect
+       x="-301"
+       y="-260"
+       width="602"
+       height="520"
+       fill="#FFF"
+       id="rect1" />
+    <polygon
+       id="panel"
+       points="124.7631,-233.8295 -124.7631,-233.8295 -39.7835,-86.6035 39.7835,-86.6035" />
+    <use
+       href="#panel"
+       transform="rotate(60)"
+       id="use1" />
+    <use
+       href="#panel"
+       transform="rotate(120)"
+       id="use2" />
+    <use
+       href="#panel"
+       transform="rotate(180)"
+       id="use3" />
+    <use
+       href="#panel"
+       transform="rotate(240)"
+       id="use4" />
+    <use
+       href="#panel"
+       transform="rotate(300)"
+       id="use5" />
+  </mask>
+  <polygon
+     points="300,0 150,-259.80763 -150,-259.80763 -300,0 -150,259.80763 150,259.80763 "
+     fill="#15155f"
+     mask="url(#cutouts)"
+     id="polygon5"
+     style="display:inline;fill:#000000" />
+</svg>
