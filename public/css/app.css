@@ -59,8 +59,12 @@ body::before {
   background-image:
     linear-gradient(var(--dashboard-overlay), var(--dashboard-overlay)),
     var(--dashboard-background-image);
-  background-size: cover;
-  background-position: center top;
+  /* La 1re valeur de chaque liste = le voile ; les suivantes viennent du thème
+     (fonds procéduraux multi-couches : dégradés + tuiles SVG à taille native).
+     Une image configurée (Foundry) repasse en « cover » via applyDashboardArt(). */
+  background-size: auto, var(--dashboard-background-size, cover);
+  background-position: center top, var(--dashboard-background-position, center top);
+  background-repeat: no-repeat, var(--dashboard-background-repeat, no-repeat);
 }
 
 a { color: var(--holo); }

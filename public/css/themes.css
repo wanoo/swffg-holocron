@@ -60,12 +60,27 @@
     radial-gradient(1px 1px at 25% 92%, rgba(214, 232, 255, 0.28) 48%, transparent 52%);
   --texture-size: 480px 480px;
 
-  /* Fond & image d'en-tête : assets fournis par gamme (public/img/themes) —
-     la config Foundry (dashboardBackground / headerImage) reste prioritaire
-     via applyDashboardArt(). Le voile préserve la lisibilité : le texte n'est
-     jamais posé directement sur l'image. */
-  --dashboard-background-image: url('../img/themes/force-destiny-jedi-background.png');
-  --dashboard-overlay: rgba(3, 10, 18, 0.45);
+  /* Fond de page : PROCÉDURAL par gamme (dégradés CSS + tuiles/tracés SVG en
+     data-URI, rendus à taille native → nets à toute résolution, contrairement
+     aux anciens PNG 723 px upscalés). La config Foundry (dashboardBackground /
+     headerImage) reste prioritaire via applyDashboardArt(), qui repasse alors
+     en « cover » + voile. Les listes size/position/repeat sont alignées couche
+     à couche (le voile est géré à part dans app.css). */
+  /* force-jedi : champ d'étoiles (2 tuiles SVG désynchronisées) + nébuleuse
+     bleutée + carte d'astrogation ultra-discrète (cercles or / bleu holo). */
+  --bgart-stars-fine: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='460' height='460'%3E%3Cg fill='%23d8e9ff'%3E%3Ccircle cx='23' cy='44' r='.7' opacity='.5'/%3E%3Ccircle cx='91' cy='132' r='.6' opacity='.35'/%3E%3Ccircle cx='167' cy='61' r='.9' opacity='.6'/%3E%3Ccircle cx='240' cy='17' r='.6' opacity='.4'/%3E%3Ccircle cx='305' cy='88' r='.7' opacity='.5'/%3E%3Ccircle cx='388' cy='41' r='1.2' opacity='.75'/%3E%3Ccircle cx='441' cy='150' r='.6' opacity='.35'/%3E%3Ccircle cx='58' cy='231' r='.8' opacity='.55'/%3E%3Ccircle cx='139' cy='297' r='.6' opacity='.4'/%3E%3Ccircle cx='219' cy='214' r='1.1' opacity='.7'/%3E%3Ccircle cx='334' cy='266' r='.7' opacity='.45'/%3E%3Ccircle cx='415' cy='321' r='.9' opacity='.6'/%3E%3Ccircle cx='36' cy='376' r='.6' opacity='.4'/%3E%3Ccircle cx='172' cy='428' r='.8' opacity='.5'/%3E%3Ccircle cx='297' cy='394' r='.6' opacity='.35'/%3E%3Ccircle cx='430' cy='437' r='.7' opacity='.5'/%3E%3C/g%3E%3C/svg%3E");
+  --bgart-stars-large: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='700'%3E%3Cg fill='%23eaf3ff'%3E%3Ccircle cx='77' cy='103' r='1.4' opacity='.8'/%3E%3Ccircle cx='253' cy='47' r='1' opacity='.55'/%3E%3Ccircle cx='431' cy='139' r='1.6' opacity='.85'/%3E%3Ccircle cx='613' cy='71' r='1' opacity='.5'/%3E%3Ccircle cx='157' cy='309' r='1.1' opacity='.6'/%3E%3Ccircle cx='529' cy='343' r='1.3' opacity='.7'/%3E%3Ccircle cx='347' cy='471' r='1.7' opacity='.9'/%3E%3Ccircle cx='81' cy='557' r='1' opacity='.5'/%3E%3Ccircle cx='611' cy='593' r='1.2' opacity='.65'/%3E%3Ccircle cx='259' cy='647' r='1' opacity='.55'/%3E%3C/g%3E%3C/svg%3E");
+  --bgart-chart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='920' height='920' fill='none' stroke='%23d9a54f' stroke-width='1'%3E%3Cg opacity='.18'%3E%3Ccircle cx='460' cy='460' r='445' stroke-dasharray='2 9'/%3E%3Ccircle cx='460' cy='460' r='386'/%3E%3Ccircle cx='460' cy='460' r='318' stroke='%232f9fe6' stroke-dasharray='1 6'/%3E%3Ccircle cx='460' cy='460' r='232' opacity='.7'/%3E%3Ccircle cx='460' cy='460' r='120' stroke='%232f9fe6' stroke-dasharray='4 12'/%3E%3Cline x1='460' y1='8' x2='460' y2='84'/%3E%3Cline x1='60' y1='460' x2='150' y2='460'/%3E%3Cline x1='142' y1='142' x2='205' y2='205' opacity='.6'/%3E%3C/g%3E%3C/svg%3E");
+  --dashboard-background-image:
+    var(--bgart-stars-fine),
+    var(--bgart-stars-large),
+    var(--bgart-chart),
+    radial-gradient(1300px 720px at 82% -12%, #142c47 0%, rgba(20, 44, 71, 0) 62%),
+    radial-gradient(1000px 640px at 8% 108%, #0b1c30 0%, rgba(11, 28, 48, 0) 58%);
+  --dashboard-background-size: 460px 460px, 700px 700px, 920px 920px, auto, auto;
+  --dashboard-background-position: 0 0, 0 0, right -280px bottom -280px, center, center;
+  --dashboard-background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat;
+  --dashboard-overlay: rgba(3, 10, 18, 0);
   --dashboard-header-image: url('../img/themes/force-destiny-jedi-ornament.png');
   --hero-overlay-start: color-mix(in srgb, var(--surface-default) 97%, transparent);
   --hero-overlay-end: color-mix(in srgb, var(--surface-default) 8%, transparent);
@@ -131,8 +146,21 @@
     radial-gradient(1px 1px at 52% 78%, rgba(255, 120, 120, 0.15) 48%, transparent 52%),
     radial-gradient(1px 1px at 79% 18%, rgba(255, 160, 160, 0.18) 48%, transparent 52%);
   --texture-size: 520px 520px;
-  --dashboard-background-image: url('../img/themes/force-destiny-sith-background.png');
-  --dashboard-overlay: rgba(6, 4, 4, 0.4);
+  /* Fond procédural : braises/étoiles rougies éparses + nébuleuse sombre
+     chaude + réticule de visée vermillon en filigrane. */
+  --bgart-stars-fine: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='460' height='460'%3E%3Cg fill='%23ffb4a3'%3E%3Ccircle cx='31' cy='57' r='.7' opacity='.3'/%3E%3Ccircle cx='171' cy='24' r='.6' opacity='.22'/%3E%3Ccircle cx='287' cy='96' r='.9' opacity='.35'/%3E%3Ccircle cx='409' cy='49' r='.6' opacity='.24'/%3E%3Ccircle cx='97' cy='201' r='.8' opacity='.3'/%3E%3Ccircle cx='243' cy='262' r='1.1' opacity='.4'/%3E%3Ccircle cx='377' cy='219' r='.6' opacity='.22'/%3E%3Ccircle cx='53' cy='343' r='.7' opacity='.28'/%3E%3Ccircle cx='189' cy='411' r='.9' opacity='.34'/%3E%3Ccircle cx='331' cy='372' r='.6' opacity='.22'/%3E%3Ccircle cx='433' cy='428' r='.7' opacity='.3'/%3E%3C/g%3E%3C/svg%3E");
+  --bgart-stars-large: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='700'%3E%3Cg fill='%23ffc9ba'%3E%3Ccircle cx='113' cy='87' r='1.3' opacity='.4'/%3E%3Ccircle cx='417' cy='153' r='1' opacity='.3'/%3E%3Ccircle cx='607' cy='63' r='1.5' opacity='.45'/%3E%3Ccircle cx='217' cy='351' r='1.1' opacity='.32'/%3E%3Ccircle cx='541' cy='433' r='1.6' opacity='.5'/%3E%3Ccircle cx='89' cy='527' r='1' opacity='.28'/%3E%3Ccircle cx='363' cy='613' r='1.2' opacity='.36'/%3E%3Ccircle cx='629' cy='657' r='1' opacity='.3'/%3E%3C/g%3E%3C/svg%3E");
+  --bgart-chart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='920' height='920' fill='none' stroke='%23c93b2d' stroke-width='1'%3E%3Cg opacity='.14'%3E%3Ccircle cx='460' cy='460' r='445' stroke-dasharray='2 9'/%3E%3Ccircle cx='460' cy='460' r='372'/%3E%3Ccircle cx='460' cy='460' r='294' stroke-dasharray='1 6'/%3E%3Ccircle cx='460' cy='460' r='196' opacity='.7'/%3E%3Cline x1='460' y1='8' x2='460' y2='120'/%3E%3Cline x1='460' y1='800' x2='460' y2='912'/%3E%3Cline x1='8' y1='460' x2='120' y2='460'/%3E%3Cline x1='800' y1='460' x2='912' y2='460'/%3E%3C/g%3E%3C/svg%3E");
+  --dashboard-background-image:
+    var(--bgart-stars-fine),
+    var(--bgart-stars-large),
+    var(--bgart-chart),
+    radial-gradient(1200px 700px at 80% -12%, #260b09 0%, rgba(38, 11, 9, 0) 60%),
+    radial-gradient(900px 600px at 6% 110%, #170605 0%, rgba(23, 6, 5, 0) 58%);
+  --dashboard-background-size: 460px 460px, 700px 700px, 920px 920px, auto, auto;
+  --dashboard-background-position: 0 0, 0 0, right -300px bottom -300px, center, center;
+  --dashboard-background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat;
+  --dashboard-overlay: rgba(6, 4, 4, 0);
   --dashboard-header-image: url('../img/themes/force-destiny-sith-ornament.png');
   --hero-overlay-start: color-mix(in srgb, var(--surface-default) 97%, transparent);
   --hero-overlay-end: color-mix(in srgb, var(--surface-default) 8%, transparent);
@@ -187,8 +215,20 @@
   /* grain papier discret (bruit SVG inline, une seule texture) */
   --texture-page: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
   --texture-size: 140px 140px;
-  --dashboard-background-image: url('../img/themes/age-of-rebellion-background.png');
-  --dashboard-overlay: rgba(201, 179, 155, 0.35);
+  /* Fond procédural : papier ivoire propre — grain très fin (bruit SVG à
+     taille native) + variation de ton douce + trace de plan technique encre
+     brique ultra-discrète en bas à gauche. Sobre, comme le mockup. */
+  --bgart-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  --bgart-print: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='460' fill='none' stroke='%238f2318' stroke-width='1'%3E%3Cg opacity='.05'%3E%3Ccircle cx='150' cy='300' r='96' stroke-dasharray='3 6'/%3E%3Ccircle cx='150' cy='300' r='58'/%3E%3Cline x1='150' y1='188' x2='150' y2='412'/%3E%3Cline x1='38' y1='300' x2='262' y2='300'/%3E%3Crect x='330' y='90' width='170' height='120'/%3E%3Cline x1='330' y1='130' x2='500' y2='130'/%3E%3Cline x1='388' y1='90' x2='388' y2='210'/%3E%3Cline x1='300' y1='390' x2='520' y2='390' stroke-dasharray='8 5'/%3E%3C/g%3E%3C/svg%3E");
+  --dashboard-background-image:
+    var(--bgart-grain),
+    var(--bgart-print),
+    radial-gradient(1200px 700px at 22% -10%, rgba(240, 228, 208, 0.7) 0%, rgba(240, 228, 208, 0) 62%),
+    radial-gradient(1150px 780px at 88% 108%, rgba(146, 118, 88, 0.34) 0%, rgba(146, 118, 88, 0) 62%);
+  --dashboard-background-size: 180px 180px, auto, auto, auto;
+  --dashboard-background-position: 0 0, left -120px bottom -70px, center, center;
+  --dashboard-background-repeat: repeat, no-repeat, no-repeat, no-repeat;
+  --dashboard-overlay: rgba(201, 179, 155, 0);
   --dashboard-header-image: url('../img/themes/age-of-rebellion-ornament.png');
   --hero-overlay-start: color-mix(in srgb, var(--surface-default) 96%, transparent);
   --hero-overlay-end: color-mix(in srgb, var(--surface-default) 6%, transparent);
@@ -246,8 +286,20 @@
   --glow-accent: none;
   --texture-page: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
   --texture-size: 140px 140px;
-  --dashboard-background-image: url('../img/themes/edge-of-the-empire-background.png');
-  --dashboard-overlay: rgba(177, 152, 119, 0.45);
+  /* Fond procédural : parchemin technique cuivré — grain fin + tons chauds +
+     schéma mécanique sépia discret côté droit. La matière métal/châssis reste
+     réservée à la sidebar : aucun bruit marqué derrière le contenu. */
+  --bgart-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  --bgart-print: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='460' fill='none' stroke='%236b4526' stroke-width='1'%3E%3Cg opacity='.06'%3E%3Ccircle cx='500' cy='120' r='84'/%3E%3Ccircle cx='500' cy='120' r='48' stroke-dasharray='4 7'/%3E%3Cline x1='500' y1='16' x2='500' y2='224'/%3E%3Cline x1='396' y1='120' x2='604' y2='120'/%3E%3Crect x='60' y='250' width='200' height='130'/%3E%3Cline x1='60' y1='294' x2='260' y2='294'/%3E%3Cline x1='128' y1='250' x2='128' y2='380'/%3E%3Cline x1='260' y1='315' x2='430' y2='315'/%3E%3Cline x1='430' y1='315' x2='430' y2='204'/%3E%3C/g%3E%3C/svg%3E");
+  --dashboard-background-image:
+    var(--bgart-grain),
+    var(--bgart-print),
+    radial-gradient(1200px 700px at 20% -8%, rgba(224, 201, 166, 0.6) 0%, rgba(224, 201, 166, 0) 60%),
+    radial-gradient(1100px 720px at 86% 108%, rgba(96, 72, 46, 0.36) 0%, rgba(96, 72, 46, 0) 62%);
+  --dashboard-background-size: 180px 180px, auto, auto, auto;
+  --dashboard-background-position: 0 0, right -140px center, center, center;
+  --dashboard-background-repeat: repeat, no-repeat, no-repeat, no-repeat;
+  --dashboard-overlay: rgba(177, 152, 119, 0);
   --dashboard-header-image: url('../img/themes/edge-of-the-empire-ornament.png');
   --hero-overlay-start: color-mix(in srgb, var(--surface-default) 96%, transparent);
   --hero-overlay-end: color-mix(in srgb, var(--surface-default) 6%, transparent);

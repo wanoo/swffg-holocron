@@ -25,6 +25,11 @@ export function applyDashboardArt() {
   if (d.background) {
     root.setProperty('--dashboard-background-image', `url("${foundryAsset(d.background)}")`);
     root.setProperty('--dashboard-overlay', 'color-mix(in srgb, var(--app-background) 62%, transparent)');
+    // Le défaut du thème est procédural (multi-couches à tailles natives) :
+    // une image fournie reprend le plein cadre classique.
+    root.setProperty('--dashboard-background-size', 'cover');
+    root.setProperty('--dashboard-background-position', 'center top');
+    root.setProperty('--dashboard-background-repeat', 'no-repeat');
   }
   if (d.headerImage) {
     root.setProperty('--dashboard-header-image', `url("${foundryAsset(d.headerImage)}")`);
