@@ -1372,7 +1372,7 @@ body.gm-session .gm-doc h2, body.gm-session .gm-doc h3, body.gm-session .gm-doc 
 .gm-doc .ct-head {
   display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; align-items: center; justify-content: space-between;
   padding: 0.7rem 0.9rem;
-  background: color-mix(in srgb, var(--sw-red) 30%, transparent);
+  background: color-mix(in srgb, var(--table-head-bg) 30%, transparent);
   border-bottom: 1px solid var(--line);
 }
 .gm-doc .ct-title { font-weight: 700; font-size: 1.02rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }

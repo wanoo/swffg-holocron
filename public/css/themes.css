@@ -51,6 +51,16 @@
   --shadow-floating: 0 20px 60px rgba(0, 0, 0, 0.6);
   --glow-accent: 0 0 16px color-mix(in srgb, var(--accent-primary) 35%, transparent);
 
+  /* Tableaux (thead) et activation des talents : défauts pour thèmes SOMBRES —
+     les thèmes papier (AoR/EotE) surchargent avec des encres plus contrastées. */
+  --table-head-bg: #5a1614;            /* rouge FFG historique */
+  --table-head-fg: #f4e6cf;
+  --act-passive: #5b8fd6;              /* talents passifs (bleu) */
+  --act-active: #d67a5b;               /* talents actifs (rouge) */
+  --act-passive-ink: #7aa8e6;          /* texte associé */
+  --act-active-ink: #e69a7a;
+  --force-accent: #4fbf7a;             /* arbres de Force (vert) */
+
   /* Matières : une seule texture légère par thème (jamais un mockup complet). */
   --texture-page:
     radial-gradient(1px 1px at 12% 24%, rgba(214, 232, 255, 0.5) 48%, transparent 52%),
@@ -212,6 +222,15 @@
   --shadow-panel: 0 1px 2px rgba(43, 33, 28, 0.16);
   --shadow-floating: 0 14px 40px rgba(43, 33, 28, 0.3);
   --glow-accent: none;
+
+  /* Sur papier : en-têtes = encre brique du thème, activation en encres foncées. */
+  --table-head-bg: #8f2318;
+  --table-head-fg: #f0e4d0;
+  --act-passive: #2f5c9c;
+  --act-active: #a03a1e;
+  --act-passive-ink: #2f5c9c;
+  --act-active-ink: #a03a1e;
+  --force-accent: #3d6f4a;
   /* grain papier discret (bruit SVG inline, une seule texture) */
   --texture-page: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
   --texture-size: 140px 140px;
@@ -278,6 +297,15 @@
   --shadow-panel: 0 1px 2px rgba(40, 32, 25, 0.2);
   --shadow-floating: 0 14px 40px rgba(40, 32, 25, 0.35);
   --glow-accent: none;
+
+  /* Sur parchemin : en-têtes = brun cuivré du thème, activation en encres foncées. */
+  --table-head-bg: #7a3416;
+  --table-head-fg: #f8efe2;
+  --act-passive: #2d567f;
+  --act-active: #96411d;
+  --act-passive-ink: #2d567f;
+  --act-active-ink: #96411d;
+  --force-accent: #4c6b39;
   --texture-page: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
   --texture-size: 140px 140px;
   /* Fond : illustration parchemin fournie par l'utilisateur (cargo léger et

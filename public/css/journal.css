@@ -134,13 +134,13 @@
 }
 .journal-table thead th,
 .journal-table th[scope='col'] {
-  background: var(--sw-red); /* en-têtes rouge Empire, fidèles au style FFG */
-  color: #f4e6cf;
+  background: var(--table-head-bg); /* en-tête aux couleurs du thème (rouge FFG sur les sombres) */
+  color: var(--table-head-fg);
   font-weight: 700;
 }
-/* Les liens/styles inline hérités de Foundry restent lisibles sur l'en-tête rouge. */
+/* Les liens/styles inline hérités de Foundry restent lisibles sur l'en-tête. */
 .journal-table thead a,
-.journal-table thead [style*='color'] { color: #f4e6cf !important; }
+.journal-table thead [style*='color'] { color: var(--table-head-fg) !important; }
 .journal-table tbody tr:nth-child(even),
 .journal-table tr:nth-child(even) { background: color-mix(in srgb, var(--gold) 6%, transparent); }
 
