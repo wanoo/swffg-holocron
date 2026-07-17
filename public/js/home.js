@@ -8,6 +8,8 @@ import { getGMKey } from './collab.js';
 import { fetchDash, planetInfo } from './navicomputer.js';
 
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+// Icône du pack (public/img/icons) en masque CSS, teintée par currentColor.
+const ico = (name) => `<i class="ico" style="--ico:url('/img/icons/${name}.svg')" aria-hidden="true"></i>`;
 const LAYOUT_KEY = 'holocron-home-layout';
 const SHIP_DEFAULTS = { name: 'Vaisseau du groupe', vivres: 60, vivresMax: 60, fuel: 30, fuelMax: 30, usure: 0, hyper: 1, lastTo: '' };
 const isGM = () => Boolean(getGMKey() || Data.gm);
@@ -28,6 +30,9 @@ export function applyDashboardArt() {
     root.setProperty('--dashboard-header-image', `url("${foundryAsset(d.headerImage)}")`);
     root.setProperty('--hero-overlay-start', 'color-mix(in srgb, var(--surface-default) 88%, transparent)');
     root.setProperty('--hero-overlay-end', 'color-mix(in srgb, var(--surface-default) 30%, transparent)');
+    // image de campagne : plein cadre (l'ornement de gamme par défaut, lui, est calé à droite)
+    root.setProperty('--hero-image-size', 'cover');
+    root.setProperty('--hero-image-position', 'center');
   }
 }
 
@@ -56,10 +61,10 @@ function saveLayout(l) {
 
 // --- Widgets ---------------------------------------------------------------
 
-function meter(label, val, max, kind) {
+function meter(label, val, max, kind, iconName) {
   const pct = Math.max(0, Math.min(100, (val / (max || 1)) * 100));
   return `<div class="meter">
-    <div class="meter-h"><span>${label}</span><b>${val}${max === 100 && label.includes('Usure') ? ' %' : ` / ${max}`}</b></div>
+    <div class="meter-h"><span>${iconName ? ico(iconName) + ' ' : ''}${label}</span><b>${val}${max === 100 && label.includes('Usure') ? ' %' : ` / ${max}`}</b></div>
     <div class="meter-track" role="img" aria-label="${esc(label)} : ${val} sur ${max}"><div class="meter-fill ${kind}" style="width:${pct}%"></div></div>
   </div>`;
 }
@@ -79,12 +84,12 @@ async function renderStatus(body) {
       <div class="tile">
         <p class="tile-k">Allégeance</p>
         <div class="tile-alleg">
-          <span class="tile-emblem" aria-hidden="true">◈</span>
+          <span class="tile-emblem" aria-hidden="true">${ico('allegiance')}</span>
           <b>${esc(alleg || 'Non définie')}</b>
         </div>
       </div>
       <div class="tile">
-        <p class="tile-k">Position actuelle</p>
+        <p class="tile-k">${ico('position')} Position actuelle</p>
         <b class="tile-v">${esc(ship.lastTo || 'Inconnue')}</b>
         <small class="tile-sub">${pl
           ? esc([pl.region, pl.sector].filter(Boolean).join(' · '))
@@ -93,9 +98,9 @@ async function renderStatus(body) {
       </div>
       <div class="tile tile-res">
         <p class="tile-k">Ressources — ${esc(ship.name)}</p>
-        ${meter('🥫 Vivres', ship.vivres, ship.vivresMax, kindOf(ratio(ship.vivres, ship.vivresMax)))}
-        ${meter('⛽ Carburant', ship.fuel, ship.fuelMax, kindOf(ratio(ship.fuel, ship.fuelMax)))}
-        ${meter('🔧 Usure', ship.usure, 100, wearKind)}
+        ${meter('Vivres', ship.vivres, ship.vivresMax, kindOf(ratio(ship.vivres, ship.vivresMax)), 'food')}
+        ${meter('Carburant', ship.fuel, ship.fuelMax, kindOf(ratio(ship.fuel, ship.fuelMax)), 'fuel')}
+        ${meter('Usure', ship.usure, 100, wearKind, 'wear')}
         <a class="tile-link" href="#/vaisseau">Fiche du vaisseau →</a>
       </div>
     </div>`;
@@ -210,7 +215,7 @@ function widgetEl(def, layout, editing, rerender) {
     ctrl.innerHTML =
       `<button type="button" class="w-btn" data-move="-1" aria-label="Monter « ${esc(def.label)} »" ${idx === 0 ? 'disabled' : ''}>↑</button>` +
       `<button type="button" class="w-btn" data-move="1" aria-label="Descendre « ${esc(def.label)} »" ${idx === layout.order.length - 1 ? 'disabled' : ''}>↓</button>` +
-      `<button type="button" class="w-btn w-vis" data-vis aria-pressed="${String(off)}">${off ? 'Afficher' : 'Masquer'}</button>`;
+      `<button type="button" class="w-btn w-vis" data-vis aria-pressed="${String(off)}">${ico(off ? 'eye' : 'eye-off')} ${off ? 'Afficher' : 'Masquer'}</button>`;
     ctrl.addEventListener('click', (e) => {
       const btn = e.target.closest('button');
       if (!btn) return;
@@ -266,7 +271,7 @@ export function homeView() {
       </div>
       <div class="dash-hero-side">
         <div class="dash-holocron" aria-hidden="true"><i></i></div>
-        <button type="button" class="dash-customize" id="dash-customize" aria-pressed="false">⚙ Personnaliser</button>
+        <button type="button" class="dash-customize" id="dash-customize" aria-pressed="false">${ico('settings')} Personnaliser</button>
       </div>
     </section>
     <div class="dash-editbar" id="dash-editbar" hidden>

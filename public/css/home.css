@@ -21,11 +21,16 @@
   border: 1px solid color-mix(in srgb, var(--accent-primary) 20%, var(--border-muted));
   border-radius: var(--radius-large);
   background-color: var(--surface-default);
+  /* Voile plein sur la moitié gauche (le texte n'est jamais posé sur l'image),
+     fondu vers la droite pour révéler l'ornement de l'image d'en-tête. */
   background-image:
-    linear-gradient(to right, var(--hero-overlay-start), var(--hero-overlay-end)),
+    linear-gradient(to right, var(--hero-overlay-start) 0%, var(--hero-overlay-start) 55%, var(--hero-overlay-end) 82%),
     var(--dashboard-header-image);
-  background-size: cover;
-  background-position: center;
+  /* Par défaut : ornement de gamme calé à droite (hauteur pleine). Une image
+     d'en-tête configurée (Foundry) repasse en cover via applyDashboardArt(). */
+  background-size: 100% 100%, var(--hero-image-size, auto 100%);
+  background-position: center, var(--hero-image-position, right center);
+  background-repeat: no-repeat;
   box-shadow: var(--shadow-panel);
 }
 .dash-hero .eyebrow {
@@ -56,30 +61,10 @@
   flex: 0 0 auto;
 }
 
-/* Holocron décoratif : cube CSS facetté, teinté par le thème (pas d'image). */
-.dash-holocron {
-  width: 74px;
-  height: 74px;
-  margin: 0.4rem 1rem 0 0;
-  transform: rotate(45deg);
-  border: 1px solid var(--accent-muted);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--accent-secondary) 16%, transparent), transparent 65%),
-    color-mix(in srgb, var(--surface-raised) 70%, transparent);
-  box-shadow: var(--glow-accent);
-  position: relative;
-  animation: holocron-pulse 7s ease-in-out infinite;
-}
-.dash-holocron i {
-  position: absolute;
-  inset: 15px;
-  border: 1px solid color-mix(in srgb, var(--accent-secondary) 55%, transparent);
-  background: color-mix(in srgb, var(--accent-secondary) 12%, transparent);
-}
-@keyframes holocron-pulse {
-  0%, 100% { opacity: 0.85; }
-  50% { opacity: 1; }
-}
+/* L'ornement décoratif (cube holocron, X-wing, cargo…) est désormais porté
+   par l'image d'en-tête du thème (voile fondu à droite) — plus de cube CSS.
+   On réserve simplement l'espace à droite pour laisser l'ornement respirer. */
+.dash-holocron { width: 150px; min-height: 74px; }
 
 .dash-customize {
   border: 1px solid var(--border-default);
@@ -133,12 +118,12 @@
   text-transform: uppercase;
   color: var(--accent-primary);
 }
-/* filet discret qui prolonge le titre (hiérarchie sans bordures de bloc) */
+/* filet latéral qui prolonge le titre (façon mockups, teinté accent) */
 .w-head::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, var(--border-muted), transparent);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent-primary) 40%, var(--border-muted)), transparent);
 }
 .w-empty,
 .w-loading {
@@ -226,6 +211,8 @@
   font-size: 1.25rem;
   box-shadow: var(--glow-accent);
 }
+.tile-emblem .ico { width: 22px; height: 22px; }
+.tile-k .ico { width: 0.95em; height: 0.95em; }
 
 /* Jauges de ressources (couleurs fonctionnelles, lisibles dans les 4 thèmes) */
 .meter { margin: 0.15rem 0; }

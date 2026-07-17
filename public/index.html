@@ -8,7 +8,7 @@
       name="description"
       content="Archive hors-ligne des journaux, fiches et bestiaire d'une campagne Star Wars — Force et Destinée (FFG)."
     />
-    <meta name="theme-color" content="#0e1116" />
+    <meta name="theme-color" content="#01070d" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
@@ -42,7 +42,7 @@
       </a>
       <div class="topbar-spacer"></div>
       <button class="search-trigger" id="btn-search" aria-label="Rechercher (Ctrl+K)">
-        <span aria-hidden="true">⌕</span>
+        <i class="ico" style="--ico: url('/img/icons/search.svg')" aria-hidden="true"></i>
         <span class="search-trigger-label">Rechercher</span>
         <kbd>Ctrl K</kbd>
       </button>
@@ -60,7 +60,7 @@
         <span aria-hidden="true">🎲</span>
       </button>
       <button class="icon-btn" id="btn-gm" aria-label="Espace Maître du Jeu" title="Espace MJ (clé requise)">
-        <span aria-hidden="true">🔒</span>
+        <i class="ico" style="--ico: url('/img/icons/profile.svg')" aria-hidden="true"></i>
       </button>
       <button class="icon-btn" id="btn-legend" aria-label="Légende des dés et symboles" title="Dés &amp; Symboles">
         <span class="ffg-die dt-proficiency" aria-hidden="true">c</span>
@@ -69,6 +69,11 @@
 
     <div class="layout">
       <aside class="sidebar" id="sidebar" aria-label="Navigation">
+        <!-- Emblème de la gamme (masque SVG teinté par le thème) -->
+        <div class="sidebar-brand">
+          <span class="sb-emblem" aria-hidden="true"></span>
+          <span class="sb-word">Archive<br />Holocron</span>
+        </div>
         <div class="sidebar-search">
           <input
             id="sidebar-search-box"
@@ -81,6 +86,11 @@
         <!-- Deux zones : sélecteur de parties (haut) + chapitrage (bas, scroll indépendant) -->
         <nav class="sidebar-parts" id="parts" aria-label="Sections de l'archive"></nav>
         <nav class="sidebar-chapters" id="chapters" aria-label="Chapitres"></nav>
+        <!-- Retour au tableau de bord, façon mockups -->
+        <a class="holocron-btn" id="holocron-home" href="#/">
+          <span class="hb-ico" aria-hidden="true"></span>
+          <span>Holocron central</span>
+        </a>
       </aside>
 
       <main class="main" id="content" tabindex="-1"></main>

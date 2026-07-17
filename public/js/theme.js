@@ -13,10 +13,10 @@ const STORE_KEY = 'holocron-theme';
 
 // Couleur de l'UI navigateur (barre d'onglet mobile) par thème.
 const META_COLOR = {
-  'force-jedi': '#050d17',
-  'force-sith': '#070404',
-  'age-of-rebellion': '#50120f',
-  'edge-of-the-empire': '#16120d',
+  'force-jedi': '#01070d',
+  'force-sith': '#040303',
+  'age-of-rebellion': '#cdb7a0',
+  'edge-of-the-empire': '#14110c',
 };
 
 export function currentTheme() {
