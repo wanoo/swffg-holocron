@@ -60,6 +60,38 @@ test('publicConfig expose le bloc ui normalisé', () => {
   assert.deepEqual(pub.ui.dashboard, UI_DEFAULTS.dashboard);
 });
 
+test('widgets : options par widget assainies — scalaires/listes bornés, objets imbriqués ignorés', () => {
+  const out = mergeUiConfig(null, { dashboard: { widgets: {
+    journals: { cats: ['abc', 42, null], max: 6.9, deep: { evil: true }, note: 'x'.repeat(500) },
+    'bad id!!': { a: 1 },
+    quests: { statuses: ['active', 'completed'], max: -3 },
+  } } });
+  assert.deepEqual(out.dashboard.widgets.journals, { cats: ['abc'], max: 6, note: 'x'.repeat(120) });
+  assert.deepEqual(out.dashboard.widgets.quests, { statuses: ['active', 'completed'], max: 0 });
+  assert.deepEqual(out.dashboard.widgets.badid, { a: 1 }); // clé nettoyée, pas perdue
+});
+
+test('widgets : patch = remplacement ENTIER du widget touché, les autres préservés', () => {
+  const base = { dashboard: { widgets: { journals: { cats: ['a'], max: 3 }, pcs: { compact: true } } } };
+  const out = mergeUiConfig(base, { dashboard: { widgets: { journals: { max: 5 } } } });
+  assert.deepEqual(out.dashboard.widgets.journals, { max: 5 }); // cats ne survit pas : formulaire complet
+  assert.deepEqual(out.dashboard.widgets.pcs, { compact: true }); // widget non touché préservé
+});
+
+test('widgets : null supprime les options d’un widget (retour aux défauts)', () => {
+  const base = { dashboard: { widgets: { keyNpcs: { ids: ['j1'] }, pcs: { compact: true } } } };
+  const out = mergeUiConfig(base, { dashboard: { widgets: { keyNpcs: null } } });
+  assert.equal(out.dashboard.widgets.keyNpcs, undefined);
+  assert.deepEqual(out.dashboard.widgets.pcs, { compact: true });
+});
+
+test('widgets : rétrocompat — monde sans le champ → {} ; base non-objet re-normalisée', () => {
+  assert.deepEqual(mergeUiConfig({ dashboard: { order: ['a'] } }, null).dashboard.widgets, {});
+  assert.deepEqual(mergeUiConfig({ dashboard: { widgets: 'pourri' } }, null).dashboard.widgets, {});
+  const cc = campaignConfig(fakeStore({ ui: { dashboard: { widgets: { quests: { max: 4 } } } } }));
+  assert.deepEqual(cc.ui.dashboard.widgets, { quests: { max: 4 } });
+});
+
 test('latestByName : tri naturel — « Acte 10 » après « Acte 2 »', () => {
   const acts = [{ name: 'Acte 1 — Départ' }, { name: 'Acte 10 — Chute' }, { name: 'Acte 2 — Fuite' }];
   assert.equal(latestByName(acts).name, 'Acte 10 — Chute');

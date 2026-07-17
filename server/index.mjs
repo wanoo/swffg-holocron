@@ -171,6 +171,8 @@ async function handleApi(req, res, urlPath) {
     if (kind === 'pcs') return sendVersioned(req, res, content.pcsView(session), v.pcs * 13 + (session ? 1 : 0) + (isGM(session) ? 7 : 0));
     if (kind === 'vehicle') return sendVersioned(req, res, content.vehicleView(session), v.vehicle * 13 + (session ? 1 : 0) + (isGM(session) ? 7 : 0));
     if (kind === 'timeline') return sendVersioned(req, res, content.timelineView(session), v.timeline * 13 + (session ? 1 : 0) + (isGM(session) ? 7 : 0));
+    // quêtes joueur-safe ({ id, name, status } filtrés canSee — jamais le graphe)
+    if (kind === 'quests') return sendVersioned(req, res, content.questsPlayerView(session), v.quests * 13 + (session ? 1 : 0) + (isGM(session) ? 7 : 0));
     if (kind === 'dice-helper') return sendVersioned(req, res, content.diceHelper(), v.diceHelper);
     if (kind === 'config') return sendVersioned(req, res, publicConfig(cc(), ENV.foundryBaseUrl), store.version('config'));
     if (kind === 'npcs') {

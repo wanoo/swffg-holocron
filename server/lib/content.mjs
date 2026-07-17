@@ -167,6 +167,28 @@ export function createContentService({ store, config }) {
     return { quests, layout };
   }
 
+  // Quêtes JOUEUR-SAFE (route /api/content/quests, widget « Quêtes » de la home) :
+  // fiches CC « quest » filtrées par la visibilité de la session (canSee — la
+  // liste d'ids éventuelle du MJ n'est JAMAIS de confiance côté front), réduites
+  // à { id, name, status } — SANS unlocks/dependencies ni uuids liés (spoilers
+  // de progression) : le graphe complet reste MJ-only (/api/gm/quests).
+  function questsPlayerView(session) {
+    const quests = [];
+    for (const entry of (store.get('journalsIndex') || [])) {
+      if (entry.flags?.['campaign-codex']?.type !== 'quest') continue;
+      if (!canSee(session, entry)) continue;
+      const doc = store.get(`journal:${entry._id}`) || entry;
+      const q = (doc.flags?.['campaign-codex']?.data?.quests || [])[0] || {};
+      quests.push({
+        id: entry.flags?.holocron?.legacyId || entry._id,
+        name: entry.name,
+        status: q.failed ? 'failed' : q.completed ? 'completed' : q.inactive ? 'inactive' : 'active',
+      });
+    }
+    quests.sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+    return { quests };
+  }
+
   function versions() {
     const cc = config();
     const S = SCHEMA_VERSION * 1000; // décale toutes les versions quand le schéma change
@@ -180,9 +202,10 @@ export function createContentService({ store, config }) {
       npcs: S + store.version('actors') * 31 + store.version('folders') + 7,
       adversaries: S + store.version(`pack:${cc.packs.adversaries}`),
       timeline: S + store.version('journalsIndex') * 31 + store.version('calendarEvents') * 7 + store.version('folders') + store.version('config'),
+      quests: S + store.version('journalsIndex') * 31 + store.version('config'),
       diceHelper: S + diceHelperVersion(),
     };
   }
 
-  return { manifest, journalsView, pcsView, vehicleView, npcsView, adversariesView, timelineView, questsView, diceHelper, versions };
+  return { manifest, journalsView, pcsView, vehicleView, npcsView, adversariesView, timelineView, questsView, questsPlayerView, diceHelper, versions };
 }

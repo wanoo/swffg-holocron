@@ -82,7 +82,18 @@ Toute la spécificité de VOTRE campagne vit dans un journal Foundry (nom par d�
       "hidden": [],          // widgets masqués (ex. "status")
       "resumeJournalId": "", // journal « Où en est-on ? » ; "" = dernier acte (kind story, tri naturel par nom)
       "headerImage": "",     // bannière du héro : URL ou chemin d'asset Foundry ; "" = ornement du thème
-      "background": ""       // fond de page : idem ; "" = décor du thème
+      "background": "",      // fond de page : idem ; "" = décor du thème
+      // Options PAR widget (bouton ⚙ Options de chaque widget en mode
+      // Personnaliser). Objets PLATS bornés (scalaires / listes de chaînes) ;
+      // un widget présent dans un patch est REMPLACÉ en entier, `null` le
+      // supprime (retour aux défauts). Absent = défauts historiques du widget.
+      "widgets": {
+        "status":  { "meters": [] },        // jauges visibles : vivres|carburant|usure ; [] = toutes
+        "journals": { "cats": [], "max": 0 }, // ids de catégories affichées ([] = TOUTES) + max de cartes (0 = toutes)
+        "quests":  { "statuses": [], "max": 0 }, // statuts affichés : active|completed|failed|inactive ; [] = actives seulement
+        "pcs":     { "compact": false },    // cartes PJ resserrées, sans espèce/carrière
+        "keyNpcs": { "ids": [] }            // fiches CC npc/group mises en avant (ids de vue) ; re-filtrées par session au rendu
+      }
     },
     "partsHidden": []        // parties de la sidebar masquées aux joueurs ("cat:<folderId>", "pj", "tools")
   },

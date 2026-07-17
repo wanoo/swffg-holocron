@@ -37,6 +37,7 @@ export const UI_DEFAULTS = {
     resumeJournalId: '',  // journal « Où en est-on ? » ('' = dernier acte auto)
     headerImage: '',      // bannière du héro (URL ou chemin d'asset Foundry)
     background: '',       // fond de page ('' = décor du thème)
+    widgets: {},          // options PAR widget : { <widgetId>: { …options plates } }
   },
   partsHidden: [],      // parties de la sidebar masquées aux joueurs
 };
@@ -46,6 +47,43 @@ const uiStrList = (v, max = 60, n = 64) => (Array.isArray(v)
   ? v.filter((x) => typeof x === 'string' && x).map((x) => x.slice(0, max)).slice(0, n)
   : undefined);
 
+// --- Options PAR widget (ui.dashboard.widgets) --------------------------------
+// Objet plat borné par widget : { journals: { cats: [...], max: 6 }, … }.
+// Le serveur ne connaît pas la sémantique de chaque widget (elle vit dans le
+// registre du front) : il garantit seulement la FORME (clés propres, scalaires
+// ou listes de chaînes, tailles bornées) — un monde reste sain quoi qu'envoie
+// un client. Sémantique de patch : les options d'un widget présent dans le
+// patch sont REMPLACÉES en entier (le panneau ⚙ envoie toujours tout son
+// formulaire) ; `null` supprime l'entrée (retour aux défauts du widget).
+const uiKey = (k) => String(k).replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
+const uiOptValue = (v) => {
+  if (typeof v === 'boolean') return v;
+  if (typeof v === 'number' && Number.isFinite(v)) return Math.max(0, Math.min(999, Math.trunc(v)));
+  if (typeof v === 'string') return v.slice(0, 120);
+  if (Array.isArray(v)) return uiStrList(v);
+  return undefined; // objets imbriqués & co : ignorés
+};
+function uiWidgetOpts(v) {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return undefined;
+  const out = {};
+  for (const [k, val] of Object.entries(v).slice(0, 16)) {
+    const key = uiKey(k);
+    const clean = uiOptValue(val);
+    if (key && clean !== undefined) out[key] = clean;
+  }
+  return out;
+}
+function uiWidgets(v) {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return {};
+  const out = {};
+  for (const [id, opts] of Object.entries(v).slice(0, 24)) {
+    const wid = uiKey(id);
+    const clean = uiWidgetOpts(opts);
+    if (wid && clean) out[wid] = clean;
+  }
+  return out;
+}
+
 // Fusion + assainissement du bloc ui : `base` (état courant ou défauts) mis à
 // jour par `patch` (partiel — seules les clés PRÉSENTES sont touchées). Sert à
 // la fois à normaliser la config lue de Foundry et à appliquer un PUT MJ.
@@ -54,7 +92,11 @@ export function mergeUiConfig(base, patch) {
   const cur = {
     ...UI_DEFAULTS,
     ...b,
-    dashboard: { ...UI_DEFAULTS.dashboard, ...(b.dashboard && typeof b.dashboard === 'object' ? b.dashboard : {}) },
+    dashboard: {
+      ...UI_DEFAULTS.dashboard,
+      ...(b.dashboard && typeof b.dashboard === 'object' ? b.dashboard : {}),
+      widgets: uiWidgets(b.dashboard?.widgets), // base re-normalisée (flag éditable dans Foundry)
+    },
     partsHidden: uiStrList(b.partsHidden) ?? [],
   };
   if (!patch || typeof patch !== 'object') return cur;
@@ -71,6 +113,17 @@ export function mergeUiConfig(base, patch) {
     if ('resumeJournalId' in d) out.dashboard.resumeJournalId = (uiStr(d.resumeJournalId, 40) ?? '').replace(/[^A-Za-z0-9_-]/g, '');
     if ('headerImage' in d) out.dashboard.headerImage = (uiStr(d.headerImage, 400) ?? '').trim();
     if ('background' in d) out.dashboard.background = (uiStr(d.background, 400) ?? '').trim();
+    if ('widgets' in d && d.widgets && typeof d.widgets === 'object' && !Array.isArray(d.widgets)) {
+      const w = { ...out.dashboard.widgets };
+      for (const [id, opts] of Object.entries(d.widgets).slice(0, 24)) {
+        const wid = uiKey(id);
+        if (!wid) continue;
+        if (opts === null) { delete w[wid]; continue; } // null = retour aux défauts du widget
+        const clean = uiWidgetOpts(opts);
+        if (clean !== undefined) w[wid] = clean; // remplacement ENTIER des options du widget
+      }
+      out.dashboard.widgets = Object.fromEntries(Object.entries(w).slice(0, 24));
+    }
   }
   return out;
 }
