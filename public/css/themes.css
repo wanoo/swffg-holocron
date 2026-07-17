@@ -215,19 +215,26 @@
   /* grain papier discret (bruit SVG inline, une seule texture) */
   --texture-page: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
   --texture-size: 140px 140px;
-  /* Fond procédural : papier ivoire propre — grain très fin (bruit SVG à
-     taille native) + variation de ton douce + trace de plan technique encre
-     brique ultra-discrète en bas à gauche. Sobre, comme le mockup. */
-  --bgart-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
-  --bgart-print: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='460' fill='none' stroke='%238f2318' stroke-width='1'%3E%3Cg opacity='.05'%3E%3Ccircle cx='150' cy='300' r='96' stroke-dasharray='3 6'/%3E%3Ccircle cx='150' cy='300' r='58'/%3E%3Cline x1='150' y1='188' x2='150' y2='412'/%3E%3Cline x1='38' y1='300' x2='262' y2='300'/%3E%3Crect x='330' y='90' width='170' height='120'/%3E%3Cline x1='330' y1='130' x2='500' y2='130'/%3E%3Cline x1='388' y1='90' x2='388' y2='210'/%3E%3Cline x1='300' y1='390' x2='520' y2='390' stroke-dasharray='8 5'/%3E%3C/g%3E%3C/svg%3E");
+  /* Fond procédural : papier de dossier tactique VÉCU — composition
+     multi-couches équivalente aux thèmes sombres : grain + rousseurs d'âge
+     éparses + moutonnement de fibre basse fréquence + GRAND plan technique
+     rebelle en filigrane (starbird maison, cotations) + vignette de bords.
+     Curseurs : opacités (grain .08, fibre .07, rousseurs .06, plan .085). */
+  --bgart-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  --bgart-fibre: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='420' height='420' filter='url(%23f)' opacity='0.07'/%3E%3C/svg%3E");
+  --bgart-foxing: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='640'%3E%3Cfilter id='b'%3E%3CfeGaussianBlur stdDeviation='7'/%3E%3C/filter%3E%3Cg fill='%23795238' filter='url(%23b)'%3E%3Ccircle cx='96' cy='150' r='34' fill-opacity='.06'/%3E%3Ccircle cx='430' cy='84' r='22' fill-opacity='.05'/%3E%3Ccircle cx='560' cy='420' r='46' fill-opacity='.06'/%3E%3Ccircle cx='230' cy='520' r='26' fill-opacity='.05'/%3E%3Ccircle cx='360' cy='300' r='16' fill-opacity='.04'/%3E%3C/g%3E%3C/svg%3E");
+  --bgart-print: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='760' fill='none' stroke='%238f2318' stroke-width='1'%3E%3Cg opacity='.085'%3E%3Ccircle cx='300' cy='400' r='250' stroke-dasharray='4 8'/%3E%3Ccircle cx='300' cy='400' r='178'/%3E%3Cline x1='300' y1='120' x2='300' y2='680'/%3E%3Cline x1='20' y1='400' x2='580' y2='400'/%3E%3Cg transform='translate(300 400) scale(17) translate(-12 -12.5)'%3E%3Cpath d='M12 4.5c-1.2 3.2-4 5.2-7.3 5.4C6 15.6 8.6 19 12 20.5 15.4 19 18 15.6 19.3 9.9 16 9.7 13.2 7.7 12 4.5z' stroke-width='0.12'/%3E%3Cpath d='M12 4.5V20.5' stroke-width='0.08'/%3E%3C/g%3E%3Crect x='620' y='120' width='200' height='140'/%3E%3Cline x1='620' y1='166' x2='820' y2='166'/%3E%3Cline x1='690' y1='120' x2='690' y2='260'/%3E%3Cpath d='M620 320h200M620 312v16M820 312v16'/%3E%3Ccircle cx='700' cy='540' r='40' stroke-dasharray='2 5'/%3E%3Cline x1='520' y1='640' x2='860' y2='640' stroke-dasharray='9 6'/%3E%3C/g%3E%3C/svg%3E");
   --dashboard-background-image:
     var(--bgart-grain),
+    var(--bgart-foxing),
+    var(--bgart-fibre),
     var(--bgart-print),
     radial-gradient(1200px 700px at 22% -10%, rgba(240, 228, 208, 0.7) 0%, rgba(240, 228, 208, 0) 62%),
-    radial-gradient(1150px 780px at 88% 108%, rgba(146, 118, 88, 0.34) 0%, rgba(146, 118, 88, 0) 62%);
-  --dashboard-background-size: 180px 180px, auto, auto, auto;
-  --dashboard-background-position: 0 0, left -120px bottom -70px, center, center;
-  --dashboard-background-repeat: repeat, no-repeat, no-repeat, no-repeat;
+    radial-gradient(1150px 780px at 88% 108%, rgba(146, 118, 88, 0.4) 0%, rgba(146, 118, 88, 0) 62%),
+    radial-gradient(150% 130% at 50% 38%, rgba(74, 52, 34, 0) 58%, rgba(74, 52, 34, 0.16) 100%);
+  --dashboard-background-size: 180px 180px, 640px 640px, 420px 420px, auto, auto, auto, auto;
+  --dashboard-background-position: 0 0, 0 0, 0 0, left -170px bottom -210px, center, center, center;
+  --dashboard-background-repeat: repeat, repeat, repeat, no-repeat, no-repeat, no-repeat, no-repeat;
   --dashboard-overlay: rgba(201, 179, 155, 0);
   --dashboard-header-image: url('../img/themes/age-of-rebellion-ornament.png');
   --hero-overlay-start: color-mix(in srgb, var(--surface-default) 96%, transparent);
@@ -286,19 +293,27 @@
   --glow-accent: none;
   --texture-page: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
   --texture-size: 140px 140px;
-  /* Fond procédural : parchemin technique cuivré — grain fin + tons chauds +
-     schéma mécanique sépia discret côté droit. La matière métal/châssis reste
-     réservée à la sidebar : aucun bruit marqué derrière le contenu. */
-  --bgart-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
-  --bgart-print: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='460' fill='none' stroke='%236b4526' stroke-width='1'%3E%3Cg opacity='.06'%3E%3Ccircle cx='500' cy='120' r='84'/%3E%3Ccircle cx='500' cy='120' r='48' stroke-dasharray='4 7'/%3E%3Cline x1='500' y1='16' x2='500' y2='224'/%3E%3Cline x1='396' y1='120' x2='604' y2='120'/%3E%3Crect x='60' y='250' width='200' height='130'/%3E%3Cline x1='60' y1='294' x2='260' y2='294'/%3E%3Cline x1='128' y1='250' x2='128' y2='380'/%3E%3Cline x1='260' y1='315' x2='430' y2='315'/%3E%3Cline x1='430' y1='315' x2='430' y2='204'/%3E%3C/g%3E%3C/svg%3E");
+  /* Fond procédural : parchemin d'atelier de la Bordure VÉCU — composition
+     multi-couches équivalente aux thèmes sombres : grain + auréoles huile /
+     rouille diffuses + moutonnement chaud basse fréquence + GRAND schéma
+     mécanique sépia (moteur / engrenage / plan de cargo) côté droit +
+     vignette chaude de bords. Curseurs : opacités (grain .085, chaleur .08,
+     smudges .07, schéma .095). */
+  --bgart-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.085'/%3E%3C/svg%3E");
+  --bgart-warm: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='440' height='440'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.011' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='440' height='440' filter='url(%23f)' opacity='0.08'/%3E%3C/svg%3E");
+  --bgart-smudge: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='680' height='680'%3E%3Cfilter id='b'%3E%3CfeGaussianBlur stdDeviation='9'/%3E%3C/filter%3E%3Cg filter='url(%23b)'%3E%3Ccircle cx='120' cy='200' r='52' fill='%236b4526' fill-opacity='.07'/%3E%3Ccircle cx='470' cy='120' r='30' fill='%238a4a1e' fill-opacity='.06'/%3E%3Ccircle cx='560' cy='470' r='60' fill='%236b4526' fill-opacity='.07'/%3E%3Ccircle cx='250' cy='560' r='34' fill='%238a4a1e' fill-opacity='.05'/%3E%3C/g%3E%3C/svg%3E");
+  --bgart-print: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='880' height='760' fill='none' stroke='%236b4526' stroke-width='1'%3E%3Cg opacity='.095'%3E%3Ccircle cx='620' cy='300' r='150'/%3E%3Ccircle cx='620' cy='300' r='96' stroke-dasharray='5 7'/%3E%3Ccircle cx='620' cy='300' r='40'/%3E%3Cg stroke-width='1.4'%3E%3Cpath d='M620 138v-26M620 488v26M458 300h-26M782 300h26M735 185l19-19M505 415l-19 19M735 415l19 19M505 185l-19-19'/%3E%3C/g%3E%3Crect x='120' y='120' width='230' height='150'/%3E%3Cline x1='120' y1='170' x2='350' y2='170'/%3E%3Cline x1='200' y1='120' x2='200' y2='270'/%3E%3Cpath d='M120 330h230M120 322v16M350 322v16'/%3E%3Cline x1='120' y1='560' x2='430' y2='560' stroke-dasharray='9 6'/%3E%3Crect x='430' y='600' width='120' height='80'/%3E%3C/g%3E%3C/svg%3E");
   --dashboard-background-image:
     var(--bgart-grain),
+    var(--bgart-smudge),
+    var(--bgart-warm),
     var(--bgart-print),
     radial-gradient(1200px 700px at 20% -8%, rgba(224, 201, 166, 0.6) 0%, rgba(224, 201, 166, 0) 60%),
-    radial-gradient(1100px 720px at 86% 108%, rgba(96, 72, 46, 0.36) 0%, rgba(96, 72, 46, 0) 62%);
-  --dashboard-background-size: 180px 180px, auto, auto, auto;
-  --dashboard-background-position: 0 0, right -140px center, center, center;
-  --dashboard-background-repeat: repeat, no-repeat, no-repeat, no-repeat;
+    radial-gradient(1100px 720px at 86% 108%, rgba(96, 72, 46, 0.42) 0%, rgba(96, 72, 46, 0) 62%),
+    radial-gradient(150% 130% at 50% 40%, rgba(60, 40, 22, 0) 56%, rgba(60, 40, 22, 0.2) 100%);
+  --dashboard-background-size: 180px 180px, 680px 680px, 440px 440px, auto, auto, auto, auto;
+  --dashboard-background-position: 0 0, 0 0, 0 0, right -150px center, center, center, center;
+  --dashboard-background-repeat: repeat, repeat, repeat, no-repeat, no-repeat, no-repeat, no-repeat;
   --dashboard-overlay: rgba(177, 152, 119, 0);
   --dashboard-header-image: url('../img/themes/edge-of-the-empire-ornament.png');
   --hero-overlay-start: color-mix(in srgb, var(--surface-default) 96%, transparent);
