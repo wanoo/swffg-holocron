@@ -6,7 +6,7 @@
 // à l'accent du thème (SVG inline, aucune dépendance).
 import { Data } from './data.js';
 import { statutPill } from './statut.js';
-import { getGMKey } from './collab.js';
+import { getGMKey, gmList } from './collab.js';
 
 // --- Icônes : pack SVG statique (public/img/icons, currentColor) -----------
 // Servies en masque CSS (.ico + --ico) pour être teintées par le thème.
@@ -29,6 +29,8 @@ const KIND_ICON = {
 
 // Icône d'un chapitre-outil selon sa route.
 const ROUTE_ICON = {
+  '#/mj': packIcon('dashboard'),
+  '#/mj/quetes': packIcon('campaign'),
   '#/navicomputer': packIcon('position'),
   '#/vaisseau': packIcon('ship'),
   '#/astronav': packIcon('astronav'),
@@ -48,6 +50,17 @@ let parts = [];           // parties construites au dernier montage
 let currentPartId = null; // partie active — survit aux re-montages (session, MJ)
 
 const isGM = () => Boolean(getGMKey() || Data.gm);
+
+// Chapitres du cockpit MJ (bible de campagne) : chargés paresseusement UNE fois
+// par session MJ — jamais sans clé/session (l'endpoint est gated côté serveur).
+let gmDocs = null;        // [{ id, name, rubrique }] | null tant que non chargé
+let gmDocsPromise = null;
+function ensureGmDocs() {
+  if (gmDocs || gmDocsPromise || !isGM()) return;
+  gmDocsPromise = gmList()
+    .then((list) => { gmDocs = list || []; if (gmDocs.length) mountSidebar(); })
+    .catch(() => { gmDocs = []; });
+}
 
 function el(tag, cls, text) {
   const e = document.createElement(tag);
@@ -118,11 +131,25 @@ function buildParts() {
     const nNpc = Data.worldNpcs.length || cnt.npcs || 0;
     const nAdv = Data.adversaries.length || cnt.adversaries || 0;
     list.push({
-      id: 'mj', label: 'Bestiaire (MJ)', kind: 'bestiary', count: nNpc + nAdv,
+      id: 'bestiaire', label: 'Bestiaire (MJ)', kind: 'bestiary', count: nNpc + nAdv,
       chapters: [
         { href: '#/npc', label: `PNJ du monde (${nNpc})`, icon: packIcon('npc') },
         { href: '#/bestiaire', label: `Adversaires (${nAdv})`, icon: packIcon('bestiary') },
       ],
+    });
+
+    // Espace MJ = une partie comme les autres (même gating que le Bestiaire).
+    // Chapitres : entrées fixes du cockpit + chapitres de la bible (gmList,
+    // chargés paresseusement — la sidebar se re-monte à leur arrivée).
+    ensureGmDocs();
+    const gmChapters = [
+      { href: '#/mj', label: 'Poste de pilotage', icon: ROUTE_ICON['#/mj'] },
+      { href: '#/mj/quetes', label: 'Quêtes', icon: ROUTE_ICON['#/mj/quetes'] },
+      ...(gmDocs || []).map((d) => ({ href: `#/mj/${d.id}`, label: d.name, icon: packIcon('journal') })),
+    ];
+    list.push({
+      id: 'gm', label: 'Espace MJ', kind: 'gm', icon: packIcon('dashboard'),
+      chapters: gmChapters, count: gmDocs?.length || undefined,
     });
   }
 
@@ -143,7 +170,8 @@ function partForHash(hash) {
     return j ? 'cat:' + j.categoryId : null;
   }
   if (a === 'pc') return 'pj';
-  if (a === 'npc' || a === 'adv' || a === 'bestiaire') return 'mj';
+  if (a === 'npc' || a === 'adv' || a === 'bestiaire') return 'bestiaire';
+  if (a === 'mj') return 'gm';
   if (a === 'timeline') {
     // La frise appartient à la partie « Événements » si elle existe, sinon Outils.
     const t = parts.find((p) => p.kind === 'timeline');
@@ -224,6 +252,14 @@ function highlightHome(hash) {
 }
 
 export function mountSidebar() {
+  // Session redevenue non-MJ (verrouillage, déconnexion) : purge le cache des
+  // chapitres MJ — ils seront rechargés au prochain déverrouillage.
+  if (!isGM()) { gmDocs = null; gmDocsPromise = null; }
+  // Le cadenas « Espace MJ » de la rangée d'actions ne sert qu'à atteindre la
+  // porte (clé/connexion) : une fois MJ, la partie « Espace MJ » le remplace.
+  const gmBtn = document.getElementById('btn-gm');
+  if (gmBtn) gmBtn.hidden = isGM();
+
   parts = buildParts();
   const nav = document.getElementById('parts');
   nav.innerHTML = '';

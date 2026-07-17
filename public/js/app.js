@@ -247,7 +247,7 @@ function route() {
     content.innerHTML = '';
     mountGM(content, b, cleanupEditors);
     content.focus({ preventScroll: true });
-    setActiveTreeLink('#/mj');
+    setActiveTreeLink(hash); // partie « Espace MJ » + chapitre deep-linké
     closeDrawer();
     return;
   }
