@@ -230,23 +230,6 @@
         "name": "Compendiums de boutique",
         "hint": "Ids de compendiums d'objets, séparés par des virgules (ex. world.oggdudegear)."
       },
-      "resFoodId": {
-        "name": "Ressource — Vivres (id party-resources)",
-        "hint": "Id de la ressource fvtt-party-resources qui suit les vivres du groupe."
-      },
-      "resFuelId": {
-        "name": "Ressource — Carburant (id party-resources)",
-        "hint": "Id de la ressource fvtt-party-resources qui suit le carburant."
-      },
-      "resWearId": {
-        "name": "Ressource — Usure (id party-resources)",
-        "hint": "Id de la ressource fvtt-party-resources qui suit l'usure du vaisseau (%)."
-      },
-      "partyResMenu": {
-        "name": "Ressources du groupe",
-        "label": "Installer dans Party Resources",
-        "hint": "Crée (ou réinitialise) les ressources Vivres / Carburant / Usure dans Party Resources d'après l'état du vaisseau."
-      },
       "systemFolder": {
         "name": "Dossier système (journaux techniques)",
         "hint": "Nom ou uuid (Folder.<id>) du dossier de journaux où ranger les journaux techniques du Holocron (vaisseau, codex, HoloNet, config, notes MJ…). Créé s'il n'existe pas."

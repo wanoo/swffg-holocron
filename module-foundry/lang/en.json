@@ -230,23 +230,6 @@
         "name": "Shop compendiums",
         "hint": "Item compendium ids, comma-separated (e.g. world.oggdudegear)."
       },
-      "resFoodId": {
-        "name": "Resource — Provisions (party-resources id)",
-        "hint": "Id of the fvtt-party-resources resource tracking party provisions."
-      },
-      "resFuelId": {
-        "name": "Resource — Fuel (party-resources id)",
-        "hint": "Id of the fvtt-party-resources resource tracking fuel."
-      },
-      "resWearId": {
-        "name": "Resource — Wear (party-resources id)",
-        "hint": "Id of the fvtt-party-resources resource tracking ship wear (%)."
-      },
-      "partyResMenu": {
-        "name": "Party pool",
-        "label": "Install into Party Resources",
-        "hint": "Creates (or resets) the Provisions / Fuel / Wear resources in Party Resources from the ship state."
-      },
       "systemFolder": {
         "name": "System folder (technical journals)",
         "hint": "Name or uuid (Folder.<id>) of the journal folder where the Holocron's technical journals are stored (ship, codex, HoloNet, config, GM notes…). Created if missing."

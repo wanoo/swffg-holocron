@@ -1,5 +1,5 @@
 // ship-view.js — vue « 🚀 Vaisseau » (#/vaisseau) : tout le vaisseau du groupe au
-// même endroit — jauges (pool party-resources, /api/foundry/ship), position
+// même endroit — jauges (flags.holocron.ship, /api/foundry/ship), position
 // « vous êtes ici » (astronav), fiche technique de l'actor véhicule Foundry
 // (/api/content/vehicle) et notes d'équipage (page Foundry configurable,
 // /api/foundry/ship-notes, éditée via l'éditeur partagé /api/docs).

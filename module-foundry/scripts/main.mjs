@@ -108,7 +108,7 @@ Hooks.on("swffgAstronav.cost", (cost) => {
 });
 
 /* Réception d'un voyage : un jet d'Astrogation RÉUSSI applique le coût au vaisseau et déplace le POI.
-   (L'astronav bouge déjà son marqueur ; ici on déduit le pool party-resources + met à jour le journal.) */
+   (L'astronav bouge déjà son marqueur ; ici on déduit flags.holocron.ship + met à jour le journal.) */
 Hooks.on("ffgDiceMessage", async (roll) => {
   if (!isTripApplier()) return;
   try {

@@ -3,7 +3,7 @@
 Module [Foundry VTT](https://foundryvtt.com/) pour le système **Star Wars FFG** (`starwarsffg`) :
 le **poste de commande** de votre campagne (vaisseau, tableau de bord holographique, boîte à
 outils MJ, pont vers l'astronav) **plus** une **structure de campagne prête à l'emploi**
-(dossiers, règles FR, macros, échantillon de test) et un **compagnon web optionnel**
+(dossiers, règles FR, macros, tables critiques, dates canon) et un **compagnon web optionnel**
 (l'« Archive Holocron ») qui affiche vos fiches/journaux hors de Foundry.
 
 ---
@@ -20,7 +20,7 @@ Trois briques, dont **une seule est obligatoire** :
 
 > **Tu veux juste jouer dans Foundry ?** Installe le module (partie 2) — c'est tout.
 > **Tu veux aussi l'app web (fiches consultables au téléphone, écran MJ, jets guidés) ?**
-> Ajoute le connecteur + l'app (partie 6).
+> Ajoute le connecteur + l'app (partie 7).
 
 ---
 
@@ -34,45 +34,53 @@ https://github.com/wanoo/swffg-holocron/releases/latest/download/module.json
 
 **Dépendances requises** — Foundry propose de les installer automatiquement :
 
-- [swffg-astronavigation](https://github.com/wanoo/swffg-astronavigation) (≥ 1.6.0) — astrogation, carte galactique, atlas MEJ des planètes, marqueur « vous êtes ici ».
-- [fvtt-party-resources](https://foundryvtt.com/packages/fvtt-party-resources) — pool partagé du groupe (vivres / carburant / usure).
-- [Monk's Enhanced Journal](https://foundryvtt.com/packages/monks-enhanced-journal) — fiches PNJ / organisations / lieux typées.
+- [swffg-astronavigation](https://github.com/wanoo/swffg-astronavigation) (≥ 1.7.2) — astrogation, carte galactique, atlas des mondes (fiches Campaign Codex), marqueur « vous êtes ici ».
+- [Campaign Codex](https://campaigncodex.wgtngm.com/) (`campaign-codex`) — fiches typées liées : PNJ, lieux, organisations, boutiques, quêtes.
+- [Mini Calendar](https://campaigncodex.wgtngm.com/minicalendar/) (`wgtgm-mini-calendar`) — calendrier galactique et événements datés (frise BBY/ABY de l'Archive Holocron).
 - Système **Star Wars FFG** (`starwarsffg`).
+
+**Recommandés** : [Asset Librarian](https://campaigncodex.wgtngm.com/asset-librarian/) (navigation
+et tags des fiches — les **favoris** de l'atlas s'appuient dessus), `swffg-sabacc`,
+`swffg-workshops` (écosystème de campagne).
+
+> ℹ️ **Plus besoin de** Monk's Enhanced Journal ni de fvtt-party-resources : les fiches sont
+> des fiches **Campaign Codex** et les ressources du vaisseau vivent dans le module
+> (`flags.holocron.ship`). À la première mise à jour, le module **convertit automatiquement**
+> les anciennes fiches MEJ (originaux archivés dans « 🗄️ Archive MEJ ») et **migre** l'ancien
+> pool party-resources — les deux modules peuvent ensuite être désactivés.
 
 Active le module dans ton monde. Deux boutons apparaissent dans les contrôles de scène
 (groupe *jetons*) : **📡 Holocron** (tout le monde) et **🧰 Boîte à outils** (MJ).
 
-### Ressources du vaisseau — 100 % automatique
-Au **premier lancement par le MJ**, le module **crée tout seul** les trois ressources dans
-Party Resources d'après l'état du vaisseau : **🥫 Vivres** (jours), **⛽ Carburant** (points),
-**🔧 Usure** (%). Rien à configurer. Pour (ré)installer à la main :
-*Configurer les réglages → Réglages du module → « Installer dans Party Resources »*.
-Les identifiants sont réglables (`resFoodId` / `resFuelId` / `resWearId`). Sans Party Resources,
-le journal du vaisseau prend le relais (dégradation gracieuse).
+### Installation automatique — zéro config
+Au **premier chargement par un MJ** (à chaque mise à jour du module), l'installation auto :
+crée les dossiers clés, importe les règles FR et les tables critiques, installe les **20 dates
+canon** dans le calendrier Mini Calendar, pose la fiche **Campaign Codex du vaisseau** avec son
+widget **« Ressources du vaisseau »** (vivres / carburant / usure), complète le journal
+**⚙️ Holocron Config** et range les journaux techniques. Relançable à tout moment :
+*Configurer les réglages → swffg-holocron → « Installer / réinstaller »*.
 
 ---
 
 ## 3. Ce que le module apporte à votre monde (compendiums)
 
-> Bundlés dans le module, à **importer dans le monde** au besoin (glisser depuis les
-> compendiums, ou via les macros d'installation).
+> Bundlés dans le module, **importés automatiquement** par l'installation (ou à la main
+> depuis les compendiums).
 
 - **📖 Règles & Références (FR)** — l'aide de jeu traduite : mécanique de base, compétences,
   combat, Force & Moralité, équipement, vaisseaux, fabrication, plus les fiches d'aide
   (dés & symboles, dépense d'avantages/menaces, etc.).
-- **⚙️ Structure & Config** — le journal **📁 Structure de campagne** qui décrit
-  l'arborescence de dossiers à recréer (voir §4). Le journal **⚙️ Holocron Config** est
-  créé par l'app web (`POST /api/gm/bootstrap`), pas par ce pack.
-- **🎲 Macros MJ** — voir §5.
-- **🧪 Échantillon de test** — deux fiches MEJ d'exemple (une *organisation*, un *contact*)
-  pour vérifier l'installation d'un coup d'œil.
-- **📅 Événements canon** — 20 dates clés de la galaxie (232 BBY → 9 ABY) en fiches MEJ
-  *event* : champ natif **Date** en BBY/ABY, champ natif **Position** = `Canon`.
-  Importées automatiquement dans le dossier d'événements du monde ; la frise de
-  l'Archive Holocron les mêle à vos événements de campagne (`Position: Campagne`).
 - **🎲 Tables critiques (FR)** — les deux RollTables d100 utilisées par la boîte à
   outils MJ (🩸 Blessures critiques, 🔥 Avaries critiques véhicules), avec plages,
-  libellés FR et effets condensés. Importées automatiquement dans le monde.
+  libellés FR et effets condensés.
+- **🎲 Macros MJ** — voir §5.
+- **⚙️ Structure & Config** — le journal **📁 Structure de campagne** qui décrit
+  l'arborescence de dossiers (voir §4).
+- **🧪 Échantillon de test** — fiches d'exemple pour vérifier l'installation d'un coup d'œil.
+
+Les **20 dates canon** de la galaxie (232 BBY → 9 ABY) ne sont plus un compendium : elles sont
+installées directement comme **notes du calendrier Mini Calendar** (source :
+`data/canon-events.json`), mêlées à vos événements de campagne dans la frise de l'Archive.
 
 > 💡 **Bestiaire** : le compendium d'adversaires attendu par l'app web
 > (`world.star-wars-adversaries`, réglage « Compendium des adversaires ») s'importe
@@ -83,17 +91,17 @@ le journal du vaisseau prend le relais (dégradation gracieuse).
 ## 4. Structure de campagne (dossiers)
 
 Le module et l'app web s'appuient sur une **convention de dossiers** (renommables via les
-réglages / le journal de config). **Depuis la 1.5.0, le module crée cette arborescence
-automatiquement au premier lancement MJ** (avec l'import des règles/événements et le
-rangement des journaux techniques dans le dossier système) — menu de réglage
-*« Installer / réinstaller »* pour relancer, réglage `systemFolder` (nom ou uuid
-`Folder.<id>`) pour choisir le dossier des journaux techniques.
+réglages — nom ou uuid `Folder.<id>`). L'installation auto crée l'arborescence, importe
+règles et dates canon, et range les journaux techniques dans le dossier système
+(réglage `systemFolder`).
 
 **Dossiers de JOURNAUX**
 - `🎬 Campagne — Actes` — la trame jouée (un journal par Acte).
-- `🏛️ Organisations` — fiches **MEJ *organization*** (factions, corporations).
-- `🎭 Personnages rencontrés` — fiches **MEJ *person*** (PNJ ; le *rôle* MEJ pilote la
-  pastille Allié / Ennemi / Mentor / Neutre / Contact, l'attribut *Vie* = « mort » → †).
+- `🏛️ Organisations` — fiches **Campaign Codex *group*** (factions, corporations).
+- `🎭 Personnages rencontrés` — fiches **CC *npc*** (PNJ ; `flags.holocron.statut` pilote la
+  pastille Allié / Ennemi / Mentor / Neutre / Contact, `flags.holocron.mort` → †).
+- `📅 Événements` — fiches événements héritées (les nouvelles dates vont dans Mini Calendar).
+- `🎯 Quêtes` — fiches **CC *quest*** (graphe des quêtes du cockpit MJ web).
 - `📓 Notes des joueurs` — notes libres par joueur.
 - `🎲 MJ — Bible de campagne` — le **contenu MJ** (voir §6), non exposé aux joueurs.
 - Journaux **nommés** (réglables) : `🚀 Vaisseau du groupe`, `🖥️ Codex du groupe`,
@@ -104,8 +112,10 @@ rangement des journaux techniques dans le dossier système) — menu de réglage
 - `🎭 PNJ de campagne` — les PNJ à statistiques (bestiaire du MJ).
 - `⚔️ Rencontres` — acteurs/tokens montés par la boîte à outils pour les combats.
 
-Chaque fiche **MEJ** (person/organization/place) est la **source de vérité** : type, rôle,
-attributs, **relations** (personne ↔ organisation, etc.) sont lus tels quels par l'app web.
+Chaque fiche **Campaign Codex** (npc/group/location/shop/quest) est la **source de vérité** :
+type, description, image, tags (`data.tags`) et **relations** (liens par uuid : associates,
+linkedNPCs, parentRegion…) sont lus tels quels par l'app web ; les surcouches Holocron
+(statut, mort, attributs libres) vivent dans `flags.holocron.*` sur la même fiche.
 
 ---
 
@@ -128,16 +138,22 @@ La plupart sont aussi accessibles sans macro via la **🧰 Boîte à outils** (b
 
 - **⚙️ Holocron Config** (journal, `flags.holocron.config`) — LE centre de configuration lu par
   l'app web : `categories` (dossiers → catégories affichées), `gmBibleFolder`, `packs`
-  (règles/adversaires), `journals` (ship/codex/holonet/poi), `npcsWorldFolder`, `registry`
-  (nom → acteur), `campaignPlanets`. Édite-le pour adapter les noms de dossiers.
+  (règles/adversaires), `journals` (ship/codex/holonet/poi/shipNotes), `calendar`
+  (`epochBBY`, 35 par défaut : an 0 du calendrier = 35 BBY), `favorites` (index des mondes
+  favoris), `npcsWorldFolder`, `registry` (nom → acteur), `campaignPlanets`. **Piloté par les
+  options du module** (appliquées à l'installation et à chaque changement de réglage).
 - **🎲 MJ — Bible de campagne** — les chapitres MJ (vérités, PNJ & fronts, suivi XP, visions,
   cockpit de table…). Réservé au MJ (ownership), non exposé aux joueurs.
 - **Dossiers narratifs** (`flags.holocron.dossiers`) — couche MJ « par fiche » (rôle, ce qu'il
   veut, attitude, réplique) superposée aux PNJ, éditable depuis l'app web.
-- **Statut / allégeance des PNJ** — porté par la fiche **MEJ** (rôle + attribut Vie) ; repli
-  `flags.holocron.statut` / `.mort` (écrit par la macro « 🎭 Statut PNJ »).
-- **Vaisseau / Codex / HoloNet** — vivent dans des `flags` de module sur leurs journaux liés ;
-  le pool de ressources vit dans **fvtt-party-resources** quand présent, sinon dans le flag.
+- **Statut / allégeance des PNJ** — `flags.holocron.statut` / `.mort` sur la fiche CC
+  (posés par la conversion MEJ ou la macro « 🎭 Statut PNJ »).
+- **Vaisseau** — l'état (vivres, carburant, usure, position) vit dans
+  **`flags.holocron.ship`** sur le journal du vaisseau : c'est la **seule source de vérité**,
+  affichée par le widget CC « Ressources du vaisseau », l'app web (`#/vaisseau`) et le deck,
+  et débitée par les voyages astronav.
+- **Favoris (mondes)** — tag **« Favori »** sur la fiche planète (CC `data.tags`, indexé par
+  Asset Librarian) + index compact `config.favorites` pour l'app web.
 
 ---
 
@@ -174,10 +190,11 @@ api.toolbox();                               // ouvre la boîte à outils MJ
 api.tools.fear();                            // lance un outil directement
 await api.applyTrip({ days: 3, fuel: 5, usure: 2, from: "Coruscant", to: "Tatooine" });
 await api.setShipWorld("Tatooine");          // déplace le vaisseau + POI « vous êtes ici »
-await api.ship();                            // état courant du vaisseau
-await api.favorites();                       // favoris MEJ (noms de mondes)
+await api.ship();                            // état courant du vaisseau (flags.holocron.ship)
+await api.favorites();                       // mondes favoris (tag « Favori » + index config)
 api.importAtlas();                           // importe le compendium des planètes dans le monde
-api.setupPartyResources({ force: true });    // (ré)installe les ressources du groupe
+await api.install();                         // (ré)installe la structure Holocron
+await api.convertMej();                      // convertit les fiches MEJ restantes en fiches CC
 api.lastCost();                              // dernier coût d'astrogation reçu
 ```
 

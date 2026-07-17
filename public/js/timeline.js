@@ -1,7 +1,7 @@
-// timeline.js — frise chronologique (#/timeline) : fiches MEJ « event » du dossier
-// d'événements du monde. Date = champ natif MEJ (BBY/ABY), Canon/Campagne = champ
-// natif « Position » (location). Tri serveur (/api/content/timeline), groupé par
-// ère (BBY / ABY / sans date) ; chaque événement est une fiche navigable.
+// timeline.js — frise chronologique (#/timeline) : notes du calendrier Mini Calendar
+// (« Grande ReSynchronisation », an 0 = 35 BBY) converties en BBY/ABY, plus les
+// éventuelles fiches événements héritées. Tri serveur (/api/content/timeline),
+// groupé par ère (BBY / ABY / sans date) ; les fiches liées restent navigables.
 
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -41,10 +41,10 @@ export async function mountTimeline(container) {
   const status = container.querySelector('#tl-status');
   const events = data?.events || [];
   if (!events.length) {
-    status.innerHTML = 'Aucun événement visible. Dans le dossier d\'événements (fiches MEJ '
-      + '<b>📅 Événement</b>), la <b>Date</b> se note en BBY/ABY (« 19 BBY ») et le champ '
-      + '<b>Position</b> vaut <i>Canon</i> ou <i>Campagne</i>. Le compendium « 📅 Événements canon » '
-      + 'du module fournit 20 fiches prêtes à l\'emploi (importées automatiquement à l\'installation).';
+    status.innerHTML = 'Aucun événement visible. La frise lit les notes du calendrier '
+      + '<b>Mini Calendar</b> (journal « Calendar Events - Mini Calendar ») : ajoutez des notes '
+      + 'datées depuis le calendrier en jeu — elles apparaissent ici en BBY/ABY. Les 20 dates '
+      + 'canon sont installées automatiquement par le module Holocron.';
     return;
   }
   status.remove();

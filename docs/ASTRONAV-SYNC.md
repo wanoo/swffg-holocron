@@ -19,8 +19,10 @@
 >   index + tags (repli marque-pages MEJ legacy) ; `api.toggleFavorite(name)`.
 > - **Événements/frise** : journal « Calendar Events - Mini Calendar »
 >   (`wgtgm-mini-calendar`), pages `YYYY-MM-DD`, notes dans
->   `flags["wgtgm-mini-calendar"].notes` ; année calendrier = epochBBY (réglage
->   holocron, défaut 300) + valeur BBY/ABY ; icône `fas fa-jedi` = Canon.
+>   `flags["wgtgm-mini-calendar"].notes` (pages `<année>-MM-JJ`, année NON paddée,
+>   négatifs admis) ; BBY/ABY = année calendrier − epochBBY (réglage holocron,
+>   défaut **35** : « Grande ReSynchronisation », an 0 = 35 BBY) ; icône
+>   `fas fa-jedi` = Canon.
 > - **Fiches de campagne** : Campaign Codex (npc/group/location/shop/quest) ;
 >   l'app web lit CC ET MEJ (legacy) via `sheetView`. Statut/mort des PNJ :
 >   `flags.holocron.statut/mort`.
@@ -31,9 +33,12 @@
 >   `flags.swffg-holocron.bound:"status"`).
 
 
+> ⚠️ **Tout ce qui suit est le CONTRAT v1 (MEJ), conservé pour l'historique — obsolète.**
+> Les formats normatifs sont ceux du bloc CONTRAT v2 ci-dessus.
+>
 > Mémo de synchronisation entre **ce projet (`swffg-holocron`)** et le module Foundry
-> **`swffg-astronavigation`** (`~/Documents/Dev/star-wars JDR/swffg-astronavigation`, publié sur
-> https://github.com/wanoo/swffg-astronavigation — actuellement **v1.5.2**).
+> **`swffg-astronavigation`** (`../swffg-astronavigation`, publié sur
+> https://github.com/wanoo/swffg-astronavigation).
 > Décisions verrouillées le 2026-07-12. But : que les deux projets avancent alignés.
 
 ## 1. Architecture décidée

@@ -68,9 +68,11 @@ Foundry will offer to install the required dependencies:
 [swffg-astronavigation](https://github.com/wanoo/swffg-astronavigation) (galaxy map &
 astrogation), [Campaign Codex](https://foundryvtt.com/packages/campaign-codex)
 (typed linked sheets), [Mini Calendar](https://foundryvtt.com/packages/wgtgm-mini-calendar)
-(galactic calendar & timeline events) and
-[fvtt-party-resources](https://foundryvtt.com/packages/fvtt-party-resources) (shared pools).
-System: `starwarsffg` (v12/13).
+(galactic calendar & timeline events). Recommended:
+[Asset Librarian](https://campaigncodex.wgtngm.com/asset-librarian/) (asset browsing & tags —
+world favorites build on it). System: `starwarsffg` (v12/13). Monk's Enhanced Journal and
+fvtt-party-resources are **no longer needed** — legacy MEJ sheets are converted automatically
+and ship resources live in the module (`flags.holocron.ship`).
 
 Enable the module and load your world as GM: **the bootstrap runs itself** — key campaign
 folders, 🚀 ship POI / codex / HoloNet journals, the full rules compendium imported into
