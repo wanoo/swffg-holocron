@@ -56,6 +56,10 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
+  /* Le décor commence au bord DROIT de la sidebar (desktop) : la sidebar garde
+     son identité opaque, le fond n'est jamais « dessous ». Mobile (tiroir) et
+     cockpit MJ plein écran repassent à 0 plus bas. */
+  left: var(--sidebar-w);
   z-index: -1;
   pointer-events: none;
   background-image:
@@ -668,6 +672,8 @@ a.mej-rel:hover { background: color-mix(in srgb, var(--gold, #d9b45b) 24%, trans
      cale sous elle (tiroir, scrim, ancres sticky) suit via --topbar-h. */
   :root { --topbar-h: var(--topbar-height); }
   .layout { grid-template-columns: 1fr; }
+  /* Sidebar en tiroir : le fond reprend tout l'écran comme avant. */
+  body::before { left: 0; }
   .topbar { display: flex; }
   .hamburger { display: inline-flex; }
   .sidebar {
@@ -747,6 +753,7 @@ a.mej-rel:hover { background: color-mix(in srgb, var(--gold, #d9b45b) 24%, trans
 /* En mode MJ, on masque la nav publique : l'espace MJ a sa propre sidebar. */
 body.gm-mode .layout { grid-template-columns: 1fr; }
 body.gm-mode .sidebar { display: none; }
+body.gm-mode::before { left: 0; } /* cockpit plein écran : fond plein cadre */
 body.gm-mode .main { padding: 0; }
 
 .gm-layout {
