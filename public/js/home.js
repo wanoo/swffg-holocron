@@ -1,67 +1,81 @@
 // home.js — tableau de bord d'accueil (#/) composé de widgets indépendants.
-// Chaque section passe par une enveloppe commune (titre, état vide/chargement) ;
-// l'utilisateur peut masquer/réordonner les widgets (persisté en localStorage).
-// Reste à faire (cahier des charges) : grille multi-largeurs drag & drop,
-// préférences par breakpoint, options fines par widget.
+// Chaque section passe par une enveloppe commune (titre, état vide/chargement).
+// La personnalisation (ordre/masquage des widgets, titre du monde, journal de
+// reprise, bannière, parties visibles) est de MONDE : éditée par le MJ seul
+// (mode « ⚙ Personnaliser ») et écrite dans la config ui (PUT /api/gm/config/ui),
+// donc synchronisée à tous. Rétrocompat : sans bloc ui, le layout localStorage
+// historique continue de s'appliquer en lecture.
 import { Data, foundryAsset } from './data.js';
-import { getGMKey } from './collab.js';
 import { fetchDash, planetInfo } from './navicomputer.js';
+import { renderJournalHTML } from './render-journal.js';
+import { uiConfig, isGMActive, saveUiConfig, worldTitle } from './ui-config.js';
+import { latestByName } from './ui-shared.js';
+import { THEMES } from './theme.js';
 
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 // Icône du pack (public/img/icons) en masque CSS, teintée par currentColor.
 const ico = (name) => `<i class="ico" style="--ico:url('/img/icons/${name}.svg')" aria-hidden="true"></i>`;
-const LAYOUT_KEY = 'holocron-home-layout';
+const LAYOUT_KEY = 'holocron-home-layout'; // legacy : lecture seule (rétrocompat)
 const SHIP_DEFAULTS = { name: 'Vaisseau du groupe', vivres: 60, vivresMax: 60, fuel: 30, fuelMax: 30, usure: 0, hyper: 1, lastTo: '' };
-const isGM = () => Boolean(getGMKey() || Data.gm);
+const isGM = isGMActive;
 
-// --- Fond & image d'en-tête configurables --------------------------------
-// Lus depuis la config publique si les clés existent (config.dashboard.*).
-// TODO Foundry : enregistrer dashboardBackground / dashboardHeaderImage via
-// game.settings (module-foundry) + FilePicker, et les exposer dans publicConfig ;
-// ici on ne fait que pousser les variables CSS (aucune URL en dur côté CSS).
+// --- Fond & bannière du héro configurables --------------------------------
+// Priorité : config ui de monde (ui.dashboard.headerImage / background, posés
+// par le MJ depuis « Personnaliser ») → legacy config.dashboard → décor du
+// thème (variables CSS de themes.css, restaurées par removeProperty).
 export function applyDashboardArt() {
-  const d = (Data.config && Data.config.dashboard) || {};
+  const legacy = (Data.config && Data.config.dashboard) || {};
+  const ud = uiConfig().dashboard || {};
   const root = document.documentElement.style;
-  if (d.background) {
-    root.setProperty('--dashboard-background-image', `url("${foundryAsset(d.background)}")`);
+  const bg = ud.background || legacy.background || '';
+  if (bg) {
+    root.setProperty('--dashboard-background-image', `url("${foundryAsset(bg)}")`);
     root.setProperty('--dashboard-overlay', 'color-mix(in srgb, var(--app-background) 62%, transparent)');
     // Le défaut du thème est procédural (multi-couches à tailles natives) :
     // une image fournie reprend le plein cadre classique.
     root.setProperty('--dashboard-background-size', 'cover');
     root.setProperty('--dashboard-background-position', 'center top');
     root.setProperty('--dashboard-background-repeat', 'no-repeat');
+  } else {
+    for (const p of ['--dashboard-background-image', '--dashboard-overlay', '--dashboard-background-size',
+      '--dashboard-background-position', '--dashboard-background-repeat']) root.removeProperty(p);
   }
-  if (d.headerImage) {
-    root.setProperty('--dashboard-header-image', `url("${foundryAsset(d.headerImage)}")`);
+  const hero = ud.headerImage || legacy.headerImage || '';
+  if (hero) {
+    root.setProperty('--dashboard-header-image', `url("${foundryAsset(hero)}")`);
     root.setProperty('--hero-overlay-start', 'color-mix(in srgb, var(--surface-default) 88%, transparent)');
     root.setProperty('--hero-overlay-end', 'color-mix(in srgb, var(--surface-default) 30%, transparent)');
     // image de campagne : plein cadre (l'ornement de gamme par défaut, lui, est calé à droite)
     root.setProperty('--hero-image-size', 'cover');
     root.setProperty('--hero-image-position', 'center');
+  } else {
+    for (const p of ['--dashboard-header-image', '--hero-overlay-start', '--hero-overlay-end',
+      '--hero-image-size', '--hero-image-position']) root.removeProperty(p);
   }
 }
 
 // --- Registre des widgets --------------------------------------------------
 // render(body) remplit l'enveloppe ; retourner false = état vide.
+// (« Ma fiche de personnage » a été retiré : les PJ vivent dans leur widget.)
 const WIDGETS = [
   { id: 'status', label: 'Synthèse de campagne', render: renderStatus },
-  { id: 'resume', label: 'Reprise de partie', render: renderResume },
+  { id: 'resume', label: 'Où en est-on ?', render: renderResume },
   { id: 'journals', label: 'Journaux', render: renderJournals },
   { id: 'pcs', label: 'Personnages joueurs', render: renderPcs },
   { id: 'tools', label: 'Outils', render: renderTools },
   { id: 'bestiary', label: 'Bestiaire (MJ)', gmOnly: true, render: renderBestiary },
 ];
 
+// Layout effectif : celui du MONDE (config ui) s'il existe, sinon le layout
+// localStorage historique (rétrocompat, lecture seule désormais).
 function loadLayout() {
-  let raw = null;
-  try { raw = JSON.parse(localStorage.getItem(LAYOUT_KEY) || 'null'); } catch { /* stockage indisponible */ }
   const ids = WIDGETS.map((w) => w.id);
+  const world = uiConfig().dashboard || {};
+  let raw = (world.order?.length || world.hidden?.length) ? world : null;
+  if (!raw) { try { raw = JSON.parse(localStorage.getItem(LAYOUT_KEY) || 'null'); } catch { /* stockage indisponible */ } }
   const order = (raw?.order || []).filter((id) => ids.includes(id));
   for (const id of ids) if (!order.includes(id)) order.push(id);
   return { order, hidden: new Set((raw?.hidden || []).filter((id) => ids.includes(id))) };
-}
-function saveLayout(l) {
-  try { localStorage.setItem(LAYOUT_KEY, JSON.stringify({ order: l.order, hidden: [...l.hidden] })); } catch { /* quota */ }
 }
 
 // --- Widgets ---------------------------------------------------------------
@@ -111,39 +125,76 @@ async function renderStatus(body) {
     </div>`;
 }
 
-// Bannière de reprise : dernier acte joué + accès direct aux fiches PJ.
-function renderResume(body) {
+// --- « Où en est-on ? » : LE journal de reprise, affiché en lecture compacte.
+// Choisi par le MJ (ui.dashboard.resumeJournalId) ; par défaut le DERNIER
+// journal des catégories kind « story » (tri NATUREL par nom : les actes sont
+// préfixés « Acte N », le max par nom est stable — contrairement à la date de
+// modif, qu'une retouche d'un vieil acte fausserait). Repli legacy : recap-acte-N.
+function storyJournals() {
+  const storyCats = new Set(Data.categories.filter((c) => c.kind === 'story').map((c) => c.id));
+  return Data.journals.filter((j) => storyCats.has(j.categoryId));
+}
+function resumeJournal() {
+  const id = uiConfig().dashboard?.resumeJournalId || '';
+  if (id) {
+    const j = Data.journalById.get(id);
+    if (j) return j;
+  }
+  const story = storyJournals();
+  if (story.length) return latestByName(story);
   const recaps = Data.journals
     .filter((j) => /^recap-acte-\d+$/.test(j.id))
     .sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
-  const last = recaps[recaps.length - 1];
-  if (!last && !Data.pcs.length) return false;
-  let html = '<div class="resume-grid">';
-  if (last) {
-    html += `<div class="tile resume-where">
-      <p class="tile-k">Où en est-on ?</p>
-      <b class="tile-v">${esc(last.name)}</b>
-      <a class="tile-link" href="#/journal/${last.id}">Lire le dernier résumé →</a>
-    </div>`;
+  return recaps[recaps.length - 1] || null;
+}
+function renderResume(body) {
+  const j = resumeJournal();
+  if (!j) return false;
+  const cat = Data.categories.find((c) => c.id === j.categoryId);
+  body.innerHTML = '';
+  const box = document.createElement('article');
+  box.className = 'resume-doc page-surface';
+  box.innerHTML = `
+    <header class="resume-doc-head">
+      <p class="eyebrow">${esc(cat?.label || 'Campagne')}</p>
+      <h3 class="resume-doc-title">${esc(j.name)}</h3>
+    </header>
+    <div class="resume-doc-body"></div>
+    <footer class="resume-doc-foot"><a class="tile-link" href="#/journal/${esc(j.id)}">Lire la fiche complète →</a></footer>`;
+  const target = box.querySelector('.resume-doc-body');
+  for (const p of j.pages) {
+    const d = document.createElement('div');
+    d.className = 'journal-content';
+    renderJournalHTML(d, p.html);
+    target.appendChild(d);
   }
-  if (Data.pcs.length) {
-    html += `<div class="tile">
-      <p class="tile-k">Ma fiche de personnage</p>
-      <div class="resume-pcs">${Data.pcs.map((p) => `<a class="resume-pc" href="#/pc/${p.id}">${esc(p.name)}</a>`).join('')}</div>
-    </div>`;
-  }
-  body.innerHTML = html + '</div>';
+  if (!target.textContent.trim()) target.innerHTML = '<p class="w-empty">Ce journal est encore vide.</p>';
+  body.appendChild(box);
 }
 
-// Cartes catégories de journaux (navigation rapide dans le contenu).
+// Cartes catégories de journaux (navigation rapide) — icône du pack teintée
+// selon le kind de la catégorie (même langage visuel que la sidebar).
+const KIND_ICON = {
+  rules: 'rules', story: 'campaign', notes: 'journal', timeline: 'events',
+  pc: 'npc', org: 'organizations', players: 'player-characters', bestiary: 'bestiary', misc: 'journal',
+};
+const KIND_LABEL = {
+  rules: 'Règles', story: 'Campagne', notes: 'Notes', timeline: 'Événements',
+  pc: 'Personnages', org: 'Organisations', misc: 'Journaux',
+};
 function renderJournals(body) {
+  const hidden = new Set(isGM() ? [] : (uiConfig().partsHidden || []));
   const cards = [];
   for (const cat of Data.categories) {
+    if (hidden.has('cat:' + cat.id)) continue; // partie masquée aux joueurs (F)
     const list = Data.journals.filter((j) => j.categoryId === cat.id);
     if (!list.length) continue;
-    cards.push(`<a class="dash-card" href="#/journal/${list[0].id}">
-      <span class="dc-count">${list.length}</span>
-      <span class="dc-title">${esc(cat.label)}</span>
+    cards.push(`<a class="dash-card cat-card" href="#/journal/${list[0].id}">
+      <span class="dc-emb" aria-hidden="true">${ico(KIND_ICON[cat.kind] || 'journal')}</span>
+      <span class="dc-body">
+        <span class="dc-title">${esc(cat.label)}</span>
+        <span class="dc-sub">${list.length} ${list.length > 1 ? 'journaux' : 'journal'}${KIND_LABEL[cat.kind] ? ' · ' + KIND_LABEL[cat.kind] : ''}</span>
+      </span>
     </a>`);
   }
   if (!cards.length) return false;
@@ -203,7 +254,7 @@ function renderBestiary(body) {
 
 // --- Enveloppe commune + rendu du tableau de bord ---------------------------
 
-function widgetEl(def, layout, editing, rerender) {
+function widgetEl(def, layout, editing, rerender, saveLayout) {
   const off = layout.hidden.has(def.id);
   const sec = document.createElement('section');
   sec.className = 'widget' + (off ? ' is-off' : '');
@@ -257,62 +308,171 @@ function widgetEl(def, layout, editing, rerender) {
   return sec;
 }
 
+// --- Panneau « Personnaliser » (MJ) : champs de la config ui de monde --------
+
+// Parties disponibles pour les cases « visibles des joueurs » (mêmes ids que
+// la sidebar : cat:<folderId>, pj, tools — les parties MJ ne sont pas listées).
+function availableParts() {
+  const list = Data.categories.map((c) => ({ id: 'cat:' + c.id, label: c.label }));
+  if (Data.pcs.length) list.push({ id: 'pj', label: 'Personnages joueurs' });
+  list.push({ id: 'tools', label: 'Outils' });
+  return list;
+}
+
+function gmConfigPanel(setStatus, rerenderWidgets) {
+  const ui = uiConfig();
+  const d = ui.dashboard || {};
+  const panel = document.createElement('div');
+  panel.className = 'dash-config';
+
+  const save = (patch, okMsg = 'Enregistré ✓') => {
+    setStatus('Enregistrement…');
+    return saveUiConfig(patch)
+      .then((next) => { setStatus(okMsg); return next; })
+      .catch((e) => { setStatus(`Échec de l'enregistrement — ${e.message}`); throw e; });
+  };
+
+  // Titre + journal de reprise + images
+  const story = storyJournals();
+  const themeOpts = ['<option value="">— aucun (choix libre) —</option>']
+    .concat(THEMES.map((t) => `<option value="${t.id}" ${ui.theme === t.id ? 'selected' : ''}>${esc(t.label)}</option>`)).join('');
+  const storyOpts = ['<option value="">Automatique — dernier acte</option>']
+    .concat(story.map((j) => `<option value="${esc(j.id)}" ${d.resumeJournalId === j.id ? 'selected' : ''}>${esc(j.name)}</option>`)).join('');
+  panel.innerHTML = `
+    <div class="cfg-grid">
+      <label class="cfg-field"><span>Titre du monde</span>
+        <input type="text" id="cfg-title" maxlength="80" value="${esc(ui.title || '')}"
+               placeholder="${esc(Data.meta?.title || 'Archive Holocron')}"></label>
+      <label class="cfg-field"><span>Journal « Où en est-on ? »</span>
+        <select id="cfg-resume">${storyOpts}</select></label>
+      <label class="cfg-field"><span>Thème du monde</span>
+        <select id="cfg-theme">${themeOpts}</select></label>
+      <label class="cfg-check"><input type="checkbox" id="cfg-theme-lock" ${ui.themeLocked ? 'checked' : ''}>
+        <span>Imposer le thème aux joueurs (leur sélecteur est masqué)</span></label>
+      <label class="cfg-field cfg-wide"><span>Bannière du héro (URL ou chemin d'asset Foundry)</span>
+        <input type="text" id="cfg-header" value="${esc(d.headerImage || '')}"
+               placeholder="vide = ornement du thème — ex. assets/bannieres/acte3.webp"></label>
+      <label class="cfg-field cfg-wide"><span>Fond de page (URL ou chemin d'asset Foundry)</span>
+        <input type="text" id="cfg-bg" value="${esc(d.background || '')}"
+               placeholder="vide = décor du thème"></label>
+    </div>
+    <fieldset class="cfg-parts">
+      <legend>Parties du menu visibles des joueurs</legend>
+      <div class="cfg-parts-grid"></div>
+      <p class="cfg-hint">Le MJ voit toujours tout — le masquage ne s'applique qu'aux joueurs (menu + accueil).</p>
+    </fieldset>`;
+
+  panel.querySelector('#cfg-title').addEventListener('change', (e) => { save({ title: e.target.value }); });
+  panel.querySelector('#cfg-resume').addEventListener('change', (e) => {
+    save({ dashboard: { resumeJournalId: e.target.value } }).then(() => rerenderWidgets());
+  });
+  panel.querySelector('#cfg-theme').addEventListener('change', (e) => { save({ theme: e.target.value }); });
+  panel.querySelector('#cfg-theme-lock').addEventListener('change', (e) => { save({ themeLocked: e.target.checked }); });
+  panel.querySelector('#cfg-header').addEventListener('change', (e) => { save({ dashboard: { headerImage: e.target.value.trim() } }); });
+  panel.querySelector('#cfg-bg').addEventListener('change', (e) => { save({ dashboard: { background: e.target.value.trim() } }); });
+
+  const grid = panel.querySelector('.cfg-parts-grid');
+  const hidden = new Set(ui.partsHidden || []);
+  for (const part of availableParts()) {
+    const lab = document.createElement('label');
+    lab.className = 'cfg-check';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = !hidden.has(part.id);
+    cb.addEventListener('change', () => {
+      if (cb.checked) hidden.delete(part.id); else hidden.add(part.id);
+      save({ partsHidden: [...hidden] });
+    });
+    lab.append(cb, Object.assign(document.createElement('span'), { textContent: part.label }));
+    grid.appendChild(lab);
+  }
+  return panel;
+}
+
 // Construit la vue d'accueil complète (héro + widgets) — montée par app.js.
 export function homeView() {
   applyDashboardArt();
-  const layout = loadLayout();
+  let layout = loadLayout();
   let editing = false;
 
   const m = Data.meta || {};
+  const gm = isGM();
   const wrap = document.createElement('div');
   wrap.className = 'dash';
   wrap.innerHTML = `
     <section class="dash-hero holo-frame">
       <div class="dash-hero-txt">
         <p class="eyebrow">${esc(m.system || 'Star Wars FFG')}</p>
-        <h1>${esc(m.title || 'Archive Holocron')}</h1>
+        <h1>${esc(worldTitle())}</h1>
         <div class="sep-aurebesh" aria-hidden="true"></div>
         <div class="crawl">${m.description || ''}</div>
       </div>
       <div class="dash-hero-side">
         <div class="dash-holocron" aria-hidden="true"><i></i></div>
-        <button type="button" class="dash-customize" id="dash-customize" aria-pressed="false">${ico('settings')} Personnaliser</button>
+        ${gm ? `<button type="button" class="dash-customize" id="dash-customize" aria-pressed="false">${ico('settings')} Personnaliser</button>` : ''}
       </div>
     </section>
     <div class="dash-editbar" id="dash-editbar" hidden>
-      <span>Personnalisation : réordonne (↑ ↓) ou masque les widgets — le choix est mémorisé sur cet appareil.</span>
-      <button type="button" class="w-btn" id="dash-reset">Réinitialiser</button>
-      <button type="button" class="w-btn w-done" id="dash-done">Terminé</button>
+      <div class="dash-edit-head">
+        <span>Personnalisation du <b>monde</b> : ces réglages s'appliquent à tous les joueurs (réordonne ↑ ↓ ou masque les widgets ci-dessous).</span>
+        <span class="cfg-status" id="cfg-status" role="status"></span>
+        <button type="button" class="w-btn" id="dash-reset">Réinitialiser les widgets</button>
+        <button type="button" class="w-btn w-done" id="dash-done">Terminé</button>
+      </div>
+      <div id="dash-config-slot"></div>
     </div>
     <div class="dash-widgets" id="dash-widgets"></div>`;
 
   const grid = wrap.querySelector('#dash-widgets');
   const editbar = wrap.querySelector('#dash-editbar');
   const customize = wrap.querySelector('#dash-customize');
+  const statusEl = wrap.querySelector('#cfg-status');
+  const setStatus = (msg) => { if (statusEl) statusEl.textContent = msg; };
+
+  // Écriture du layout de MONDE (MJ seul — le mode édition n'existe pas côté
+  // joueur). En cas d'échec (journal ⚙️ absent, hors-ligne), on garde le
+  // travail en localStorage et on l'affiche.
+  function saveLayout(l) {
+    setStatus('Enregistrement…');
+    saveUiConfig({ dashboard: { order: l.order, hidden: [...l.hidden] } })
+      .then(() => setStatus('Enregistré ✓'))
+      .catch((e) => {
+        try { localStorage.setItem(LAYOUT_KEY, JSON.stringify({ order: l.order, hidden: [...l.hidden] })); } catch { /* quota */ }
+        setStatus(`Échec de l'enregistrement (gardé localement) — ${e.message}`);
+      });
+  }
 
   // focusId : widget à re-focus après re-rendu (les déplacements re-rendent tout).
   function renderAll(focusId) {
     wrap.classList.toggle('editing', editing);
     editbar.hidden = !editing;
-    customize.setAttribute('aria-pressed', String(editing));
+    customize?.setAttribute('aria-pressed', String(editing));
     grid.innerHTML = '';
     for (const id of layout.order) {
       const def = WIDGETS.find((w) => w.id === id);
       if (!def || (def.gmOnly && !isGM())) continue;
       if (layout.hidden.has(id) && !editing) continue;
-      grid.appendChild(widgetEl(def, layout, editing, renderAll));
+      grid.appendChild(widgetEl(def, layout, editing, renderAll, saveLayout));
     }
     if (focusId) grid.querySelector(`[data-w="${focusId}"] .w-ctrl button:not([disabled])`)?.focus();
   }
 
-  customize.addEventListener('click', () => { editing = !editing; renderAll(); });
-  wrap.querySelector('#dash-done').addEventListener('click', () => { editing = false; renderAll(); });
-  wrap.querySelector('#dash-reset').addEventListener('click', () => {
-    layout.order = WIDGETS.map((w) => w.id);
-    layout.hidden = new Set();
-    saveLayout(layout);
-    renderAll();
-  });
+  if (customize) {
+    const slot = wrap.querySelector('#dash-config-slot');
+    customize.addEventListener('click', () => {
+      editing = !editing;
+      if (editing) { slot.innerHTML = ''; slot.appendChild(gmConfigPanel(setStatus, () => renderAll())); }
+      renderAll();
+    });
+    wrap.querySelector('#dash-done').addEventListener('click', () => { editing = false; renderAll(); });
+    wrap.querySelector('#dash-reset').addEventListener('click', () => {
+      layout.order = WIDGETS.map((w) => w.id);
+      layout.hidden = new Set();
+      try { localStorage.removeItem(LAYOUT_KEY); } catch { /* stockage indisponible */ }
+      saveLayout(layout);
+      renderAll();
+    });
+  }
 
   renderAll();
   return wrap;

@@ -157,6 +157,13 @@ function buildParts() {
     id: 'tools', label: 'Outils', kind: 'misc', icon: packIcon('tools'),
     chapters: toolItems().map((t) => ({ ...t, icon: ROUTE_ICON[t.href] })),
   });
+
+  // Visibilité des parties (config ui de monde, choix MJ) : les parties listées
+  // dans ui.partsHidden sont retirées pour les JOUEURS — le MJ voit tout.
+  if (!isGM()) {
+    const hidden = new Set(Data.config?.ui?.partsHidden || []);
+    if (hidden.size) return list.filter((p) => !hidden.has(p.id));
+  }
   return list;
 }
 
