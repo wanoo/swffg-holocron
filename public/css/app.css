@@ -518,6 +518,31 @@ input:focus-visible { outline: 2px solid var(--holo); outline-offset: 2px; }
 a.mej-rel:hover { background: color-mix(in srgb, var(--gold, #d9b45b) 24%, transparent); }
 .mej-rel small { opacity: 0.7; }
 
+/* --- 📜 Sommaire d'acte (récap de début d'acte, visible joueurs) -------------- */
+.act-summary { margin: 0.4rem auto 1.2rem; padding: 1rem 1.3rem; max-width: 62rem;
+  border-left: 3px solid var(--gold, #d9b45b); }
+.acts-eyebrow { margin: 0 0 0.6rem; font: 700 0.78rem var(--font-display, inherit);
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold, #d9b45b); }
+.acts-crawl { margin: 0 0 0.9rem; padding: 0.7rem 1rem; text-align: center; font-style: italic;
+  font-size: 1.02rem; line-height: 1.7; letter-spacing: 0.03em; color: var(--gold, #d9b45b);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--gold, #d9b45b) 8%, transparent), transparent);
+  border-radius: 8px; }
+.acts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.7rem 1.2rem; margin: 0; }
+.acts-grid > div { display: flex; flex-direction: column; gap: 0.25rem; }
+.acts-grid dt { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; opacity: 0.65; }
+.acts-grid dd { margin: 0; font-size: 0.94rem; }
+.acts-grid dd p { margin: 0; }
+.acts-list { margin: 0; padding-left: 1.1rem; }
+.acts-list li { margin: 0.15rem 0; }
+.acts-list.fronts li::marker { content: '⚔ '; color: var(--danger, #c0392b); }
+.acts-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.acts-chip { display: inline-flex; padding: 0.18rem 0.6rem; border-radius: 999px; font-size: 0.85rem;
+  background: color-mix(in srgb, var(--holo, #57c7ff) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--holo, #57c7ff) 30%, transparent);
+  text-decoration: none; color: inherit; }
+.acts-chip:hover { background: color-mix(in srgb, var(--holo, #57c7ff) 24%, transparent); }
+.acts-lock { font-size: 0.8rem; opacity: 0.8; }
+
 /* --- Zone principale --- */
 .main {
   padding: 1.4rem clamp(0.8rem, 3vw, 2.2rem);
@@ -1815,9 +1840,19 @@ body.gm-session .gm-doc h2, body.gm-session .gm-doc h3, body.gm-session .gm-doc 
 @media (max-width: 900px) { .gmc-wrap { grid-template-columns: 1fr; } }
 .gmc-canvas { position: relative; border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
   background: radial-gradient(circle at 30% 20%, rgba(18,38,54,0.5), rgba(8,16,24,0.6)); }
-.gmc-legend { display: flex; gap: 0.7rem; align-items: center; flex-wrap: wrap; padding: 0.45rem 0.7rem;
+.gmc-legend { display: flex; gap: 0.45rem; align-items: center; flex-wrap: wrap; padding: 0.45rem 0.7rem;
   border-bottom: 1px solid var(--line); font-size: 0.72rem; color: var(--fg-muted); }
 .gmc-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 0.25rem; vertical-align: middle; }
+.gmc-lens { border: 1px solid transparent; background: transparent; color: var(--fg-muted); font: inherit;
+  border-radius: 999px; padding: 0.12rem 0.5rem; cursor: pointer; }
+.gmc-lens:hover { border-color: var(--line); }
+.gmc-lens.off { opacity: 0.35; text-decoration: line-through; }
+.gmc-lens.strict.on { border-color: var(--gold); color: var(--gold); }
+.gmc-eye { font-size: 11px; }
+.gmc-node.gm-only rect { stroke-dasharray: 5 3; }
+.gmc-rels { border-top: 1px solid var(--line); padding-top: 0.45rem; }
+.gmc-rel { margin: 0.15rem 0; font-size: 0.82rem; color: var(--fg-muted); }
+.gmc-rel b { color: var(--fg); font-weight: 600; }
 .gmc-save { margin-left: auto; font-size: 0.95rem; color: var(--fg-dim); cursor: default; }
 .gmc-save[data-state="dirty"] { color: var(--gold); }
 .gmc-save[data-state="saving"] { color: #57c7ff; }
@@ -1869,6 +1904,14 @@ body.gm-session .gm-doc h2, body.gm-session .gm-doc h3, body.gm-session .gm-doc 
 .gmc-btn:hover { border-color: var(--gold); color: var(--gold); }
 .gmc-btn.danger { border-color: color-mix(in srgb, var(--danger) 55%, transparent); color: var(--danger); }
 .gmc-btn.gold { border-color: var(--gold); color: var(--gold); }
+.gmc-hint { color: var(--fg-dim); font-size: 0.75rem; margin: 0; }
+.gmc-field-head { display: flex; align-items: center; justify-content: space-between; margin-top: 0.2rem; }
+.gmc-field-lbl { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--fg-muted); font-weight: 700; }
+.gmc-hide { font-size: 0.75rem; color: var(--fg-dim); cursor: pointer; white-space: nowrap; }
+textarea.gmc-input { resize: vertical; font-size: 0.85rem; line-height: 1.4; }
+.gmc-picks { display: flex; flex-direction: column; gap: 0.15rem; max-height: 9rem; overflow: auto;
+  border: 1px solid var(--line); border-radius: 8px; padding: 0.4rem 0.55rem; }
+.gmc-pick { font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; }
 
 /* --- 📡 Montrer aux joueurs (bouton d'overlay image, profil MJ) --------------- */
 .show-players-btn {

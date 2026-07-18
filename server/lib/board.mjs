@@ -12,6 +12,20 @@ import { ccView, resolveFolder, sanitizeActSummary } from './transform/journals.
 
 export const BOARD_DEFAULTS = { nodes: {}, edges: [], hidden: [] };
 
+// Relations custom TYPÉES (table fermée) : libellé aller (fwd) ET retour (back),
+// affiché selon le sens de lecture. Un lien peut aussi porter un libellé libre
+// (`label`, prioritaire à l'affichage). Miroir front : gm-campaign.js.
+export const EDGE_TYPES = {
+  lien: { fwd: 'lié à', back: 'lié à' },
+  revele: { fwd: 'révèle', back: 'révélé par' },
+  mene: { fwd: 'mène à', back: 'accessible depuis' },
+  allie: { fwd: 'allié de', back: 'allié de' },
+  oppose: { fwd: 's’oppose à', back: 'visé par' },
+  dette: { fwd: 'doit une dette à', back: 'créancier de' },
+  membre: { fwd: 'membre de', back: 'compte dans ses rangs' },
+  possede: { fwd: 'possède', back: 'appartient à' },
+};
+
 // id de nœud : _id Foundry (16 alphanum) ou id technique court (« seq:x… »)
 const NODE_ID = /^[A-Za-z0-9:_-]{1,40}$/;
 const okId = (s) => typeof s === 'string' && NODE_ID.test(s);
@@ -37,7 +51,8 @@ export function sanitizeBoard(raw) {
       if (seen.has(key)) return null;
       seen.add(key);
       const label = String(e.label || '').slice(0, 80).trim();
-      return { from: e.from, to: e.to, ...(label ? { label } : {}) };
+      const type = EDGE_TYPES[e.type] ? e.type : '';
+      return { from: e.from, to: e.to, ...(type ? { type } : {}), ...(label ? { label } : {}) };
     })
     .filter(Boolean);
   const hidden = (Array.isArray(b.hidden) ? b.hidden : []).filter(okId).slice(0, 400);
@@ -99,6 +114,8 @@ export function buildCatalog({ config, folders, journalsIndex, getJournal }) {
       id: entry._id,
       name: entry.name,
       type,
+      // visible des joueurs ? (ownership Foundry — pastille 🙈 et lentille MJ-only)
+      playerVisible: (entry.ownership?.default ?? 0) >= 2,
       ...(fh.statut ? { statut: fh.statut } : {}),
       ...(fh.mort ? { mort: true } : {}),
       ...(img ? { img } : {}),

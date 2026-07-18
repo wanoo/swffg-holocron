@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { sanitizeBoard, sanitizeSequence, buildCatalog } from '../lib/board.mjs';
+import { sanitizeBoard, sanitizeSequence, buildCatalog, EDGE_TYPES } from '../lib/board.mjs';
 import { sanitizeActSummary, actSummaryView } from '../lib/transform/journals.mjs';
 
 /* ------------------------------------------------------------------- board -- */
@@ -44,6 +44,16 @@ test('sanitizeBoard : arêtes custom — libellé borné, doublons et boucles re
   assert.equal(out.edges.length, 2);
   assert.equal(out.edges[0].label.length, 80);
   assert.deepEqual(out.edges[1], { from: 'B2', to: 'A1' });
+});
+
+test('sanitizeBoard : type de relation — table fermée, inconnu retiré', () => {
+  const out = sanitizeBoard({ edges: [
+    { from: 'A1', to: 'B2', type: 'revele' },
+    { from: 'B2', to: 'C3', type: 'hack<script>' },
+  ] });
+  assert.equal(out.edges[0].type, 'revele');
+  assert.equal(out.edges[1].type, undefined);
+  assert.ok(EDGE_TYPES.revele.fwd && EDGE_TYPES.revele.back, 'libellés aller/retour');
 });
 
 test('sanitizeBoard : entrée vide/malveillante → board par défaut', () => {
@@ -113,8 +123,8 @@ test('actSummaryView : tout masqué → null pour le joueur', () => {
 
 /* ---------------------------------------------------------------- catalogue -- */
 const ID = (n) => n.padEnd(16, '0').slice(0, 16);
-const entry = (id, name, { folder = null, flags = {}, sort = 0 } = {}) =>
-  ({ _id: ID(id), name, folder, sort, flags });
+const entry = (id, name, { folder = null, flags = {}, sort = 0, ownership = { default: 2 } } = {}) =>
+  ({ _id: ID(id), name, folder, sort, flags, ownership });
 
 test('buildCatalog : actes + fiches CC, liens auto, atlas astronav exclu', () => {
   const F = { actes: ID('FACT'), atlas: ID('FATL') };
@@ -129,7 +139,7 @@ test('buildCatalog : actes + fiches CC, liens auto, atlas astronav exclu', () =>
     entry('LIEU', 'Ord Mantell', { flags: { 'campaign-codex': { type: 'location' } } }),
     entry('PLAN', 'Coruscant (atlas)', { flags: { 'campaign-codex': { type: 'location' }, 'swffg-astronavigation': { uid: 'coruscant' } } }),
     entry('QST1', 'Livrer', { flags: { 'campaign-codex': { type: 'quest' } } }),
-    entry('QST2', 'Prime', { flags: { 'campaign-codex': { type: 'quest' } } }),
+    entry('QST2', 'Prime', { flags: { 'campaign-codex': { type: 'quest' } }, ownership: { default: 0 } }),
     entry('CONF', '⚙️ Holocron Config', { flags: { holocron: { config: {} } } }),
   ];
   const docs = {
@@ -151,6 +161,8 @@ test('buildCatalog : actes + fiches CC, liens auto, atlas astronav exclu', () =>
   assert.equal(byId.get(lieuId).type, 'location');
   assert.ok(!byId.has(atlasId), 'atlas astronav exclu');
   assert.ok(!byId.has(ID('CONF')), 'journal technique exclu');
+  assert.equal(byId.get(npcId).playerVisible, true, 'ownership 2 → visible joueurs');
+  assert.equal(byId.get(q2).playerVisible, false, 'ownership 0 → MJ-only (pastille 🙈)');
 
   // liens auto : associates + linkedLocations (vers l'atlas : abandonné), quêtes dédupliquées
   const rels = cat.edges.map((e) => `${e.from}>${e.to}:${e.rel}`).sort();

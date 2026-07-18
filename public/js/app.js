@@ -24,6 +24,7 @@ import { mountEditablePage } from './editor.js';
 import { mountGM } from './gm.js';
 import { statutPill } from './statut.js';
 import { getGMKey, gmGetDossiers } from './collab.js';
+import { actSummaryCard } from './act-summary.js';
 
 // Catégories dont les pages sont éditables/collaboratives.
 // Catégories éditables : déclarées dans la config de campagne (⚙️ Holocron Config)
@@ -128,6 +129,10 @@ function viewJournal(jid, pid) {
   main.appendChild(header);
   const mejBox = mejCard(journal);
   if (mejBox) main.appendChild(mejBox);
+  // Sommaire d'acte (récap de début d'acte — visible joueurs, champs masqués
+  // déjà retirés côté serveur ; le MJ voit tout avec badge 🔒).
+  const actsBox = actSummaryCard(journal);
+  if (actsBox) main.appendChild(actsBox);
 
   const editable = editableCategoryIds().has(journal.categoryId);
   const pagesWrap = document.createElement('div');

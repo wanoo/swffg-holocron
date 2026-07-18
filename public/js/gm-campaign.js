@@ -20,6 +20,21 @@ export const NODE_TYPES = {
 };
 const NODE_W = 180, NODE_H = 46;
 
+// Relations custom TYPÉES — miroir de la table fermée serveur (board.mjs) :
+// libellé aller (fwd) affiché sur la carte, retour (back) selon le sens de
+// lecture dans la fiche d'identité. Un libellé libre reste prioritaire.
+export const EDGE_TYPES = {
+  lien: { fwd: 'lié à', back: 'lié à' },
+  revele: { fwd: 'révèle', back: 'révélé par' },
+  mene: { fwd: 'mène à', back: 'accessible depuis' },
+  allie: { fwd: 'allié de', back: 'allié de' },
+  oppose: { fwd: 's’oppose à', back: 'visé par' },
+  dette: { fwd: 'doit une dette à', back: 'créancier de' },
+  membre: { fwd: 'membre de', back: 'compte dans ses rangs' },
+  possede: { fwd: 'possède', back: 'appartient à' },
+};
+const edgeLabel = (e) => e.label || (EDGE_TYPES[e.type]?.fwd ?? '');
+
 async function api(path, opts = {}) {
   const res = await fetch(`${apiBase()}${path}`, {
     credentials: 'same-origin',
@@ -60,6 +75,9 @@ export async function mountGmCampaign(main, cleanup = []) {
     selected: null,        // { kind: 'node'|'edge', id | index }
     linkFrom: null,        // id du nœud d'origine pendant un tracé de lien
     view: { x: 20, y: 20, k: 1 },
+    // lentilles d'affichage (non persistées) : types de nœuds, familles d'arêtes,
+    // « MJ-only » (fiches invisibles des joueurs), « orphelins » (aucune arête).
+    filters: { types: new Set(Object.keys(NODE_TYPES)), auto: true, custom: true, mjOnly: false, orphans: false },
   };
   const catById = new Map(state.catalog.nodes.map((n) => [n.id, n]));
   const seqById = () => new Map(state.sequences.map((s) => ['seq:' + s.id, s]));
@@ -102,11 +120,34 @@ export async function mountGmCampaign(main, cleanup = []) {
   wrap.append(canvasBox, side);
   main.appendChild(wrap);
 
+  // Légende = barre de LENTILLES : chaque pastille de type se (dés)active au clic ;
+  // toggles arêtes CC / liens custom / 🙈 MJ-only / ⭘ orphelins.
   const legend = el('div', 'gmc-legend');
-  legend.innerHTML = Object.entries(NODE_TYPES)
-    .map(([, t]) => `<span><i style="background:${t.color}"></i>${t.icon} ${t.label}</span>`).join('')
-    + '<span class="gmc-save" id="gmc-save" title="État de sauvegarde">●</span>';
   canvasBox.appendChild(legend);
+  function paintLegend() {
+    const f = state.filters;
+    legend.innerHTML = Object.entries(NODE_TYPES)
+      .map(([k, t]) => `<button type="button" class="gmc-lens${f.types.has(k) ? '' : ' off'}" data-lens-type="${k}"
+        title="Afficher/masquer les ${t.plural}"><i style="background:${t.color}"></i>${t.icon} ${t.label}</button>`).join('')
+      + `<button type="button" class="gmc-lens${f.auto ? '' : ' off'}" data-lens="auto" title="Arêtes dérivées des liens Campaign Codex">— liens CC</button>`
+      + `<button type="button" class="gmc-lens${f.custom ? '' : ' off'}" data-lens="custom" title="Liens tracés à la main">┄ custom</button>`
+      + `<button type="button" class="gmc-lens strict${f.mjOnly ? ' on' : ''}" data-lens="mjOnly" title="Ne montrer que les fiches INVISIBLES des joueurs">🙈 MJ-only</button>`
+      + `<button type="button" class="gmc-lens strict${f.orphans ? ' on' : ''}" data-lens="orphans" title="Ne montrer que les nœuds sans aucune arête">⭘ orphelins</button>`
+      + '<span class="gmc-save" id="gmc-save" title="État de sauvegarde">●</span>';
+    paintSaveDot(saveState); // le point de sauvegarde vient d'être recréé
+  }
+  paintLegend();
+  legend.addEventListener('click', (ev) => {
+    const b = ev.target.closest('.gmc-lens');
+    if (!b) return;
+    const f = state.filters;
+    if (b.dataset.lensType) {
+      const k = b.dataset.lensType;
+      f.types.has(k) ? f.types.delete(k) : f.types.add(k);
+    } else if (b.dataset.lens) f[b.dataset.lens] = !f[b.dataset.lens];
+    paintLegend();
+    paint();
+  });
   function paintSaveDot(st, msg) {
     saveState = st;
     const dot = canvasBox.querySelector('#gmc-save');
@@ -148,29 +189,53 @@ export async function mountGmCampaign(main, cleanup = []) {
     return `M ${a.x} ${a.y} C ${mx} ${a.y}, ${mx} ${b.y}, ${b.x} ${b.y}`;
   }
 
+  // Ids visibles selon les lentilles actives (types, MJ-only, orphelins).
+  function visibleIds() {
+    const f = state.filters;
+    const all = placed();
+    const ids = new Set(all.filter((id) => {
+      const m = nodeMeta(id);
+      if (!f.types.has(m.type) && !m.ghost) return false;
+      if (f.mjOnly && m.playerVisible !== false) return false;
+      return true;
+    }));
+    if (f.orphans) {
+      const linked = new Set();
+      for (const e of state.catalog.edges) if (ids.has(e.from) && ids.has(e.to)) { linked.add(e.from); linked.add(e.to); }
+      for (const e of state.board.edges) if (ids.has(e.from) && ids.has(e.to)) { linked.add(e.from); linked.add(e.to); }
+      for (const id of [...ids]) if (linked.has(id)) ids.delete(id);
+    }
+    return ids;
+  }
+
   function paint() {
-    const ids = new Set(placed());
+    const ids = visibleIds();
     // arêtes AUTO (liens CC) entre nœuds posés
     let eh = '';
-    for (const e of state.catalog.edges) {
-      if (!ids.has(e.from) || !ids.has(e.to)) continue;
-      const a = anchor(e.from), b = anchor(e.to);
-      eh += `<g class="gmc-edge auto"><path d="${edgePath(a, b)}" marker-end="url(#gmc-arrow)"><title>${esc(e.rel)}</title></path></g>`;
+    if (state.filters.auto) {
+      for (const e of state.catalog.edges) {
+        if (!ids.has(e.from) || !ids.has(e.to)) continue;
+        const a = anchor(e.from), b = anchor(e.to);
+        eh += `<g class="gmc-edge auto"><path d="${edgePath(a, b)}" marker-end="url(#gmc-arrow)"><title>${esc(e.rel)}</title></path></g>`;
+      }
     }
     // liens CUSTOM du MJ
-    state.board.edges.forEach((e, i) => {
-      if (!ids.has(e.from) || !ids.has(e.to)) return;
-      const a = anchor(e.from), b = anchor(e.to);
-      const sel = state.selected?.kind === 'edge' && state.selected.index === i;
-      eh += `<g class="gmc-edge custom${sel ? ' selected' : ''}" data-edge="${i}">
-        <path class="hit" d="${edgePath(a, b)}"></path>
-        <path d="${edgePath(a, b)}" marker-end="url(#gmc-arrow-custom)"></path>
-        ${e.label ? `<text x="${(a.x + b.x) / 2}" y="${(a.y + b.y) / 2 - 6}" class="gmc-edge-lbl">${esc(e.label)}</text>` : ''}
-      </g>`;
-    });
+    if (state.filters.custom) {
+      state.board.edges.forEach((e, i) => {
+        if (!ids.has(e.from) || !ids.has(e.to)) return;
+        const a = anchor(e.from), b = anchor(e.to);
+        const sel = state.selected?.kind === 'edge' && state.selected.index === i;
+        const lbl = edgeLabel(e);
+        eh += `<g class="gmc-edge custom${sel ? ' selected' : ''}" data-edge="${i}">
+          <path class="hit" d="${edgePath(a, b)}"></path>
+          <path d="${edgePath(a, b)}" marker-end="url(#gmc-arrow-custom)"></path>
+          ${lbl ? `<text x="${(a.x + b.x) / 2}" y="${(a.y + b.y) / 2 - 6}" class="gmc-edge-lbl">${esc(lbl)}</text>` : ''}
+        </g>`;
+      });
+    }
     edgesG.innerHTML = eh;
 
-    // nœuds
+    // nœuds (data-type = accroche des lentilles/CSS)
     let nh = '';
     for (const id of ids) {
       const p = state.board.nodes[id];
@@ -178,12 +243,14 @@ export async function mountGmCampaign(main, cleanup = []) {
       const t = NODE_TYPES[m.type] || NODE_TYPES.quest;
       const sel = state.selected?.kind === 'node' && state.selected.id === id;
       const name = m.name.length > 20 ? m.name.slice(0, 19) + '…' : m.name;
-      nh += `<g class="gmc-node${sel ? ' selected' : ''}${m.ghost ? ' ghost' : ''}${p.pinned ? ' pinned' : ''}"
-          data-id="${esc(id)}" transform="translate(${p.x},${p.y})" tabindex="0" role="button" aria-label="${esc(m.name)}">
+      const gmOnly = m.playerVisible === false;
+      nh += `<g class="gmc-node${sel ? ' selected' : ''}${m.ghost ? ' ghost' : ''}${p.pinned ? ' pinned' : ''}${gmOnly ? ' gm-only' : ''}"
+          data-id="${esc(id)}" data-type="${esc(m.type)}" transform="translate(${p.x},${p.y})" tabindex="0" role="button" aria-label="${esc(m.name)}">
         <rect width="${NODE_W}" height="${NODE_H}" rx="9" style="--tc:${t.color}"/>
         <text x="12" y="${NODE_H / 2 - 3}" class="gmc-ico">${t.icon}</text>
         <text x="36" y="${NODE_H / 2 - 3}" class="gmc-name">${esc(name)}</text>
         <text x="36" y="${NODE_H / 2 + 13}" class="gmc-type">${t.label}${m.statut ? ' · ' + esc(m.statut) : ''}${m.mort ? ' · ✝' : ''}${p.sound ? ' · 🎵' : ''}</text>
+        ${gmOnly ? `<text x="${NODE_W - 14}" y="15" class="gmc-eye" aria-label="Invisible des joueurs">🙈</text>` : ''}
         <circle class="gmc-port" cx="${NODE_W}" cy="${NODE_H / 2}" r="7"><title>Tirer pour créer un lien</title></circle>
       </g>`;
     }
@@ -381,8 +448,19 @@ export async function mountGmCampaign(main, cleanup = []) {
     const a = nodeMeta(e.from), b = nodeMeta(e.to);
     panel.appendChild(el('p', 'eyebrow', '🔗 Lien custom'));
     panel.appendChild(el('p', 'gmc-id-name', `${esc(a.name)} → ${esc(b.name)}`));
+    // relation typée (table fermée, libellés aller/retour) — le libellé libre prime
+    const sel = el('select', 'gmc-input');
+    sel.innerHTML = '<option value="">— relation non typée —</option>'
+      + Object.entries(EDGE_TYPES).map(([k, t]) =>
+        `<option value="${k}"${e.type === k ? ' selected' : ''}>${esc(t.fwd)} → / ← ${esc(t.back)}</option>`).join('');
+    sel.addEventListener('change', () => {
+      if (sel.value) e.type = sel.value; else delete e.type;
+      scheduleSave();
+      paint();
+    });
+    panel.appendChild(sel);
     const lbl = el('input', 'gmc-input');
-    lbl.placeholder = 'Libellé (optionnel) — ex. « doit une dette à »';
+    lbl.placeholder = 'Libellé libre (prime sur le type)';
     lbl.value = e.label || '';
     lbl.addEventListener('change', () => {
       if (lbl.value.trim()) e.label = lbl.value.trim().slice(0, 80); else delete e.label;
@@ -418,13 +496,37 @@ export async function mountGmCampaign(main, cleanup = []) {
     card.appendChild(el('p', 'eyebrow', `${t.icon} ${t.label}`));
     card.appendChild(el('p', 'gmc-id-name', esc(m.name)));
     if (m.statut || m.mort) card.appendChild(el('p', 'gmc-id-sub', `${esc(m.statut || '')}${m.mort ? ' · ✝ mort' : ''}`));
+    if (m.playerVisible !== undefined) {
+      card.appendChild(el('p', 'gmc-id-sub', m.playerVisible
+        ? '👁 Fiche visible des joueurs'
+        : '🙈 Fiche invisible des joueurs (ownership Foundry)'));
+    }
     panel.appendChild(card);
+
+    // Relations custom du nœud, libellées selon le SENS de lecture (aller/retour).
+    const rels = [];
+    state.board.edges.forEach((e) => {
+      if (e.from === id) rels.push(`→ ${esc(e.label || EDGE_TYPES[e.type]?.fwd || 'lié à')} <b>${esc(nodeMeta(e.to).name)}</b>`);
+      else if (e.to === id) rels.push(`← ${esc(e.label || EDGE_TYPES[e.type]?.back || 'lié à')} <b>${esc(nodeMeta(e.from).name)}</b>`);
+    });
+    if (rels.length) {
+      const box = el('div', 'gmc-rels');
+      box.innerHTML = '<p class="gmc-field-lbl">Relations custom</p>' + rels.map((r) => `<p class="gmc-rel">${r}</p>`).join('');
+      panel.appendChild(box);
+    }
 
     const actions = el('div', 'gmc-id-actions');
     if (!id.startsWith('seq:') && !m.ghost) {
       const open = el('a', 'gmc-btn', '↗ Ouvrir la fiche');
       open.href = `#/journal/${id}`;
       actions.appendChild(open);
+    }
+    if (m.type === 'acte') {
+      const sum = el('button', 'gmc-btn gold', '📜 Sommaire d’acte');
+      sum.type = 'button';
+      sum.title = 'Récap de début d’acte (crawl, situation, objectifs…) — rendu en tête de l’acte, visible joueurs';
+      sum.addEventListener('click', () => paintActEditor(id));
+      actions.appendChild(sum);
     }
     const pin = el('button', 'gmc-btn', p?.pinned ? '📌 Désépingler' : '📌 Épingler');
     pin.type = 'button';
@@ -440,6 +542,97 @@ export async function mountGmCampaign(main, cleanup = []) {
     rm.type = 'button';
     rm.addEventListener('click', () => removeNode(id));
     actions.appendChild(rm);
+    panel.appendChild(actions);
+  }
+
+  /* --------------------------------------------- 📜 Sommaire d'acte (lot 2) -- */
+  // Éditeur du bloc flags.holocron.actSummary : crawl, situation, objectifs,
+  // protagonistes/lieux (fiches de la carte), fronts — chaque champ masquable
+  // aux joueurs (🙈). Rendu joueur : encart en tête de la page de l'acte.
+  function paintActEditor(id) {
+    const m = nodeMeta(id);
+    const s = m.actSummary || {};
+    const hidden = new Set(s.hidden || []);
+    panel.innerHTML = '';
+    panel.appendChild(el('p', 'eyebrow', `📜 Sommaire — ${esc(m.name)}`));
+    panel.appendChild(el('p', 'gmc-hint', 'Affiché en tête de l’acte (joueurs compris). 🙈 = champ masqué aux joueurs.'));
+
+    const fields = {};
+    const hideBox = (f) => {
+      const lab = el('label', 'gmc-hide');
+      const cb = el('input');
+      cb.type = 'checkbox';
+      cb.checked = hidden.has(f);
+      cb.addEventListener('change', () => { cb.checked ? hidden.add(f) : hidden.delete(f); });
+      lab.append(cb, document.createTextNode(' 🙈'));
+      lab.title = 'Masquer ce champ aux joueurs';
+      return lab;
+    };
+    const textArea = (f, label, value, ph, rows = 3) => {
+      const head = el('div', 'gmc-field-head');
+      head.append(el('span', 'gmc-field-lbl', label), hideBox(f));
+      const ta = el('textarea', 'gmc-input');
+      ta.rows = rows;
+      ta.placeholder = ph;
+      ta.value = value || '';
+      fields[f] = ta;
+      panel.append(head, ta);
+    };
+    textArea('crawl', 'Texte d’ouverture (façon générique déroulant)', s.crawl, 'Il est une période de guerre civile…', 4);
+    textArea('situation', 'Situation', s.situation, 'Où en est-on au début de cet acte ?');
+    textArea('objectifs', 'Objectifs (un par ligne)', (s.objectifs || []).join('\n'), 'Livrer la cargaison\nRetrouver Maz…');
+    textArea('fronts', 'Fronts en mouvement (un par ligne)', (s.fronts || []).join('\n'), 'L’Empire resserre l’étau…');
+
+    // protagonistes / lieux : cases à cocher sur les fiches du catalogue
+    const pickList = (f, label, types, selected) => {
+      const head = el('div', 'gmc-field-head');
+      head.append(el('span', 'gmc-field-lbl', label), hideBox(f));
+      panel.appendChild(head);
+      const box = el('div', 'gmc-picks');
+      const sel = new Set(selected || []);
+      for (const c of state.catalog.nodes.filter((n) => types.includes(n.type))) {
+        const lab = el('label', 'gmc-pick');
+        const cb = el('input');
+        cb.type = 'checkbox';
+        cb.checked = sel.has(c.id);
+        cb.addEventListener('change', () => { cb.checked ? sel.add(c.id) : sel.delete(c.id); });
+        lab.append(cb, document.createTextNode(` ${NODE_TYPES[c.type].icon} ${c.name}`));
+        box.appendChild(lab);
+      }
+      if (!box.children.length) box.appendChild(el('p', 'muted', 'Aucune fiche de ce type.'));
+      panel.appendChild(box);
+      fields[f] = { get: () => [...sel] };
+    };
+    pickList('protagonistes', 'Protagonistes', ['npc', 'group'], s.protagonistes);
+    pickList('lieux', 'Lieux', ['location', 'shop'], s.lieux);
+
+    const actions = el('div', 'gmc-id-actions');
+    const save = el('button', 'gmc-btn gold', '💾 Enregistrer le sommaire');
+    save.type = 'button';
+    save.addEventListener('click', async () => {
+      save.disabled = true;
+      const lines = (v) => v.split('\n').map((x) => x.trim()).filter(Boolean);
+      const body = {
+        crawl: fields.crawl.value.trim(),
+        situation: fields.situation.value.trim(),
+        objectifs: lines(fields.objectifs.value),
+        fronts: lines(fields.fronts.value),
+        protagonistes: fields.protagonistes.get(),
+        lieux: fields.lieux.get(),
+        hidden: [...hidden],
+      };
+      try {
+        const out = await api(`/gm/act-summary/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(body) });
+        const cat = catById.get(id);
+        if (cat) cat.actSummary = out.actSummary;
+        save.textContent = '✓ Enregistré';
+      } catch (e) { save.textContent = `✗ ${e.message}`.slice(0, 40); }
+      setTimeout(() => { save.textContent = '💾 Enregistrer le sommaire'; save.disabled = false; }, 1500);
+    });
+    const back = el('button', 'gmc-btn', '← Retour à la fiche');
+    back.type = 'button';
+    back.addEventListener('click', () => paintSide());
+    actions.append(save, back);
     panel.appendChild(actions);
   }
 
