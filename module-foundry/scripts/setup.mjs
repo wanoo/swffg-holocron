@@ -61,6 +61,7 @@ function utilityJournals() {
     "🗒️ Notes MJ (Holocron)",
     "⚔️ Bibliothèque de rencontres",
     "🗂️ Dossiers MJ (Holocron)",
+    "🗺️ Carte de campagne (Holocron)",
     "dice_helper",
   ].filter(Boolean);
   const docs = names.map((n) => game.journal.getName(n)).filter(Boolean);
