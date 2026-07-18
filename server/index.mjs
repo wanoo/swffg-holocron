@@ -30,16 +30,18 @@ const PUBLIC_DIR = process.env.HOLOCRON_PUBLIC_DIR || join(__dirname, '..', 'pub
 setCorsOrigin(ENV.corsOrigin);
 configureAuth({ sessionSecret: ENV.sessionSecret, foundryBaseUrl: ENV.foundryBaseUrl });
 
-// --- connecteur Foundry (embarqué stdio par défaut, gateway HTTP en option) ---
-const childEntry = ['node', join(__dirname, '..', 'node_modules', 'foundry-mcp-server', 'build', 'server.js')];
+// --- connecteur Foundry : gateway Rust en sidecar (défaut) ou externe (URL) ---
+const sidecarBin = process.env.FOUNDRY_GATEWAY_BIN || join(__dirname, '..', 'vendor', 'foundry-mcp');
 const mode = configureMcp({
   foundryMcpUrl: ENV.foundryMcpUrl,
   credentialsJson: ENV.foundryCredentialsJson,
-  childEntry: existsSync(childEntry[1]) ? childEntry : null,
-  dataDir: ENV.dataDir,
+  sidecarBin: existsSync(sidecarBin) ? sidecarBin : null,
   logger: console,
 });
 console.log(`[holocron] connecteur Foundry : mode ${mode}`);
+if (mode === 'none' && ENV.foundryCredentialsJson) {
+  console.warn('[holocron] binaire gateway absent (vendor/foundry-mcp) — lancez scripts/fetch-gateway.mjs ou définissez FOUNDRY_MCP_URL / FOUNDRY_GATEWAY_BIN');
+}
 
 // --- store + services -----------------------------------------------------------
 const store = createStore({ dataDir: ENV.dataDir, logger: console });

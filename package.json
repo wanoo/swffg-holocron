@@ -11,9 +11,7 @@
   "scripts": {
     "start": "node server/index.mjs",
     "check": "find server public/js -name '*.mjs' -o -name '*.js' | xargs -n1 node --check",
-    "test": "node --test 'server/test/*.test.mjs'"
-  },
-  "optionalDependencies": {
-    "foundry-mcp-server": "github:wanoo/foundry-vtt-mcp#clever-basepath"
+    "test": "node --test 'server/test/*.test.mjs'",
+    "postinstall": "node scripts/fetch-gateway.mjs"
   }
 }
