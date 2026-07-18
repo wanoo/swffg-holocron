@@ -10,6 +10,13 @@ import { MOD, t } from "./util.mjs";
 const CC = "campaign-codex";
 const MEJ = "monks-enhanced-journal";
 const TYPE_MAP = { person: "npc", organization: "group", place: "location", shop: "shop", quest: "quest", poi: "location", loot: "shop" };
+// CC ne pose flags.core.sheetClass que sur SES créations : sans lui, la fiche
+// s'ouvre avec la sheet Foundry par défaut (qui ignore l'image CC).
+export const CC_SHEET = {
+  npc: "campaign-codex.NPCSheet", group: "campaign-codex.GroupSheet",
+  location: "campaign-codex.LocationSheet", region: "campaign-codex.RegionSheet",
+  shop: "campaign-codex.ShopSheet", quest: "campaign-codex.QuestSheet", tag: "campaign-codex.TagSheet",
+};
 const ROLE_STATUT = {
   ally: "allie", allie: "allie", "allié": "allie", ami: "allie", amie: "allie", friend: "allie",
   enemy: "ennemi", ennemi: "ennemi", ennemie: "ennemi", rival: "ennemi", hostile: "ennemi",
@@ -51,6 +58,9 @@ export async function convertMejToCC({ dryRun = false } = {}) {
     if (mf.placetype) attrs.region = attrs.region || String(mf.placetype);
     const statut = ROLE_STATUT[String(mf.role || "").toLowerCase()] || "";
     const mort = /mort|décéd|décès|deceased|dead/i.test(String(attrs.life || attrs.vie || ""));
+    // portrait : page image dédiée, sinon flag/img MEJ, sinon src de la page méta
+    const img = j.pages.find((p) => p.type === "image")?.src
+      || j.flags?.[MEJ]?.img || page?.flags?.[MEJ]?.img || page?.src || null;
     const cc = await JournalEntry.create({
       name: j.name,
       img: j.img,
@@ -61,10 +71,11 @@ export async function convertMejToCC({ dryRun = false } = {}) {
         name: p.name, type: "text", text: { content: p.text?.content || "", format: 1 },
       })),
       flags: {
+        core: { sheetClass: CC_SHEET[type] },
         [CC]: {
           type,
           data: { description: page?.text?.content || j.pages.find((p) => p.text?.content)?.text?.content || "" },
-          ...(j.flags?.[MEJ]?.img || page?.src ? { image: j.flags?.[MEJ]?.img || page?.src } : {}),
+          ...(img ? { image: img } : {}),
         },
         holocron: {
           legacyId: j.id, // les ancres web #/journal/<ancien id> restent valides
@@ -110,12 +121,18 @@ export async function repairCCFolders() {
     quest: findFolder(game.settings.get(MOD, "folderQuests")),
   };
   let moved = 0;
+  const sheetFixes = [];
   for (const j of game.journal) {
-    if (!j.flags?.[CC]?.type || !j.flags?.holocron?.legacyId) continue;
+    if (!j.flags?.[CC]?.type) continue;
+    // nos fiches converties : sheet CC posée si absente (sinon sheet Foundry par défaut)
+    if (j.flags?.holocron?.legacyId && !j.flags?.core?.sheetClass && CC_SHEET[j.flags[CC].type])
+      sheetFixes.push({ _id: j.id, "flags.core.sheetClass": CC_SHEET[j.flags[CC].type] });
+    if (!j.flags?.holocron?.legacyId) continue;
     if (!/^Campaign Codex - /.test(j.folder?.name || "")) continue;
     const dest = DEST[j.flags[CC].type];
     if (dest && j.folder?.id !== dest.id) { await j.update({ folder: dest.id }); moved++; }
   }
-  if (moved) console.log(`swffg-holocron | ${moved} fiche(s) CC rangée(s) dans les dossiers Holocron`);
+  for (let i = 0; i < sheetFixes.length; i += 200) await JournalEntry.updateDocuments(sheetFixes.slice(i, i + 200));
+  if (moved || sheetFixes.length) console.log(`swffg-holocron | ${moved} fiche(s) rangée(s), ${sheetFixes.length} sheet(s) CC posée(s)`);
   return moved;
 }

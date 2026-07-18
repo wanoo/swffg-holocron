@@ -2,7 +2,7 @@
   "id": "swffg-holocron",
   "title": "SWFFG Holocron — Poste de commande de campagne",
   "description": "Le poste de commande de votre campagne Star Wars FFG : vaisseau partagé du groupe (vivres, carburant, usure — voyages appliqués depuis l'Astronav), tableau de bord holographique (allégeance, équipage, alignement des PNJ, HoloNet, mondes d'intérêt) et boîte à outils MJ (test de Peur, points de Destin, dégâts de groupe, blessures critiques, fin de rencontre, initiative, générateur de boutiques). Your Star Wars FFG campaign command deck: shared party ship, holographic dashboard and GM toolbox.",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "authors": [
     {
       "name": "wanoo"
@@ -61,6 +61,13 @@
         "id": "asset-librarian",
         "type": "module",
         "reason": "Navigation et étiquetage des assets du monde et des compendiums (suite wgtnGM).",
+        "compatibility": {}
+      },
+      {
+        "id": "foundry-mcp-gateway-companion",
+        "type": "module",
+        "reason": "Pont client-side pour le serveur MCP (foundry-mcp-gateway) : exécution de macros, vrais jets FFG avec Dice So Nice, caméra/ping/sons, API Campaign Codex et télémétrie. Optionnel — le pilotage de l'Archive par une IA fonctionne sans, mais le compagnon débloque les actions navigateur.",
+        "manifest": "https://github.com/wanoo/foundry-mcp-gateway-companion/releases/latest/download/module.json",
         "compatibility": {}
       }
     ]

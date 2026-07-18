@@ -177,6 +177,9 @@ async function ensureShipWidget() {
   if (!j.flags?.["campaign-codex"]?.type) {
     await j.update({ "flags.campaign-codex": { type: "location", data: { description: `<p>${t("ship.pageName")}</p>`, tags: [] } } });
   }
+  if (!j.flags?.core?.sheetClass) {
+    await j.update({ "flags.core.sheetClass": "campaign-codex.LocationSheet" });
+  }
   const wid = stableId("swh-widget:ship-resources");
   if (!j.flags?.["campaign-codex"]?.data?.widgets?.shipresourcebar?.[wid]) {
     await j.update({ [`flags.campaign-codex.data.widgets.shipresourcebar.${wid}`]: { title: "" } });
