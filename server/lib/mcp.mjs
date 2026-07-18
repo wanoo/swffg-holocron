@@ -150,6 +150,22 @@ async function sidecarCall(name, args) {
   return httpCall(name, args);
 }
 
+// Le gateway se reconnecte tout seul à Foundry, mais un appel tombé pendant ce
+// trou remonte « Not connected to Foundry server » (erreur d'OUTIL, pas réseau :
+// aucun retry ne s'applique sinon). Typiquement le dernier job d'un long tick.
+async function callWithReconnectRetry(fn, name, args) {
+  for (let attempt = 0; ; attempt++) {
+    try { return await fn(name, args); }
+    catch (e) {
+      if (attempt < 4 && /not connected/i.test(e.message || '')) {
+        await new Promise((r) => setTimeout(r, 3000));
+        continue;
+      }
+      throw e;
+    }
+  }
+}
+
 /* ------------------------------------------------------------------ commun */
 function unpack(msg) {
   const result = msg?.result;
@@ -164,7 +180,8 @@ function unpack(msg) {
 // Appel d'outil, TOUJOURS via la file séquentielle (+ chien de garde sidecar).
 export function mcpCall(name, args = {}) {
   if (cfg.mode === 'none') return Promise.reject(new Error('connecteur Foundry non configuré'));
-  return mcpQueue(() => (cfg.mode === 'http' ? httpCall(name, args) : sidecarCall(name, args)))
+  const call = cfg.mode === 'http' ? httpCall : sidecarCall;
+  return mcpQueue(() => callWithReconnectRetry(call, name, args))
     .then((v) => { noteResult(true); return v; }, (e) => { noteResult(false); throw e; });
 }
 
