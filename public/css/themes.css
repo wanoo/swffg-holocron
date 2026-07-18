@@ -246,9 +246,9 @@
   --hero-overlay-start: color-mix(in srgb, var(--surface-default) 96%, transparent);
   --hero-overlay-end: color-mix(in srgb, var(--surface-default) 6%, transparent);
 
-  --radius-small: 3px;
-  --radius-medium: 6px;
-  --radius-large: 8px;
+  --radius-small: 5px;
+  --radius-medium: 9px;
+  --radius-large: 12px;
   --panel-cut-size: 0px;
   --font-display: 'Signika', system-ui, sans-serif;
 }
@@ -321,10 +321,10 @@
   --hero-overlay-start: color-mix(in srgb, var(--surface-default) 96%, transparent);
   --hero-overlay-end: color-mix(in srgb, var(--surface-default) 6%, transparent);
 
-  --radius-small: 4px;
-  --radius-medium: 8px;
-  --radius-large: 10px;
-  --panel-cut-size: 8px;
+  --radius-small: 6px;
+  --radius-medium: 10px;
+  --radius-large: 14px;
+  --panel-cut-size: 0px;
   --font-display: 'Signika', system-ui, sans-serif;
 }
 
@@ -434,18 +434,17 @@
   border-radius: 4px;
 }
 
-/* EotE : rivets de coin discrets sur la tôle des panneaux. */
-[data-theme='edge-of-the-empire'] :is(.dash-hero, .page-surface, .tile) { position: relative; }
+/* EotE : cadre à double filet cuivré (même traitement qu'AoR, palette Bordure —
+   les rivets de coin ont été retirés sur retour utilisateur). */
+[data-theme='edge-of-the-empire'] :is(.dash-hero, .page-surface, .tile) {
+  position: relative;
+  border-color: color-mix(in srgb, var(--accent-primary) 40%, var(--border-default));
+}
 [data-theme='edge-of-the-empire'] :is(.dash-hero, .page-surface, .tile)::after {
   content: '';
   position: absolute;
-  inset: 0;
+  inset: 3px;
   pointer-events: none;
-  border-radius: inherit;
-  --rvt: color-mix(in srgb, var(--accent-primary) 55%, #4a3a24);
-  background-image:
-    radial-gradient(circle at 8px 8px, var(--rvt) 2px, transparent 2.8px),
-    radial-gradient(circle at calc(100% - 8px) 8px, var(--rvt) 2px, transparent 2.8px),
-    radial-gradient(circle at 8px calc(100% - 8px), var(--rvt) 2px, transparent 2.8px),
-    radial-gradient(circle at calc(100% - 8px) calc(100% - 8px), var(--rvt) 2px, transparent 2.8px);
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 26%, transparent);
+  border-radius: calc(var(--radius-medium) - 3px);
 }
