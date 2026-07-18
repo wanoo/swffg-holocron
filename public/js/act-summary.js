@@ -4,8 +4,50 @@
 // le serveur a DÉJÀ retiré les champs masqués aux joueurs ; une session MJ
 // reçoit tout + la liste `hidden` (badge 🔒 sur les champs masqués).
 import { Data } from './data.js';
+import { apiBase, getGMKey } from './collab.js';
 
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// --- Progression du storyboard (MJ UNIQUEMENT) --------------------------------
+// Les beats vivent dans flags.holocron.storyboard et ne sortent QUE par la
+// route gm-gated /api/gm/board (catalogue des actes) : pour un joueur, ce
+// fetch n'est jamais tenté et rien n'est rendu. Cache court (30 s).
+let sbCache = null; // { t, byId: Map<journalFoundryId, storyboard> }
+async function gmStoryboards() {
+  if (!(Data.gm || getGMKey())) return null;
+  if (sbCache && Date.now() - sbCache.t < 30_000) return sbCache.byId;
+  try {
+    const res = await fetch(`${apiBase()}/gm/board`, {
+      credentials: 'same-origin',
+      headers: getGMKey() ? { 'x-gm-key': getGMKey() } : {},
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const byId = new Map();
+    for (const n of (data.catalog?.nodes || [])) {
+      if (n.type === 'acte' && n.storyboard?.beats?.length) byId.set(n.id, n.storyboard);
+    }
+    sbCache = { t: Date.now(), byId };
+    return byId;
+  } catch { return null; }
+}
+
+/** Pied de sommaire : progression du storyboard de l'acte (async, MJ only). */
+function appendStoryboardFooter(box, journal) {
+  if (!(Data.gm || getGMKey())) return;
+  gmStoryboards().then((byId) => {
+    const sb = byId?.get(journal.foundryId);
+    if (!sb || !box.isConnected) return;
+    const done = sb.beats.filter((b) => b.status === 'fait').length;
+    const cur = sb.beats.find((b) => b.status === 'encours');
+    const foot = document.createElement('p');
+    foot.className = 'acts-sb';
+    foot.innerHTML = `🎬 Storyboard : <b>${done}/${sb.beats.length}</b> beats joués`
+      + (cur ? ` · en cours : <b>${esc(cur.title || '(sans titre)')}</b>` : '')
+      + ` — <a href="#/mj/campagne">ouvrir</a> <span class="acts-lock" title="Visible du MJ seulement">🔒 MJ</span>`;
+    box.appendChild(foot);
+  });
+}
 
 const FIELD_LABELS = {
   situation: 'Situation',
@@ -52,5 +94,6 @@ export function actSummaryCard(journal) {
   }
   if (!s.crawl && !rows.length) return null;
   box.innerHTML = html;
+  appendStoryboardFooter(box, journal); // MJ only — async, no-op joueur
   return box;
 }

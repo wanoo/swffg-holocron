@@ -48,7 +48,7 @@ function statsFor(name) {
   };
 }
 
-export async function mountEncounters(container) {
+export async function mountEncounters(container, targetId) {
   container.innerHTML = '<div class="view-head"><h1>⚔️ Rencontres</h1><p class="muted">Prépare tes combats : bibliothèque partagée avec Foundry, tracker intégré, génération de scène.</p></div>';
   const wrap = el('div', 'enc-wrap');
   container.appendChild(wrap);
@@ -201,5 +201,10 @@ export async function mountEncounters(container) {
   container.appendChild(dl);
 
   await refresh();
+  // deep-link #/rencontres/<id> (depuis un beat ⚔️ du storyboard) : présélectionne l'entrée
+  if (targetId) {
+    const t = encounters.find((e) => e.id === targetId);
+    if (t) { current = JSON.parse(JSON.stringify(t)); paintList(); }
+  }
   paintEditor();
 }

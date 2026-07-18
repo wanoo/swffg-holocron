@@ -280,7 +280,8 @@ function route() {
   else if (a === 'timeline') { cleanupSpy(); cleanupSpy = () => {}; mountTimeline(content); }
   else if (a === 'sabacc') { cleanupSpy(); cleanupSpy = () => {}; mountSabacc(content); }
   else if (a === 'ateliers') { cleanupSpy(); cleanupSpy = () => {}; mountAteliers(content); }
-  else if (a === 'rencontres') { cleanupSpy(); cleanupSpy = () => {}; if (isGm) mountEncounters(content); else viewGmOnly(); }
+  // #/rencontres/<id> : deep-link vers une entrée de la bibliothèque (storyboard → « Ouvrir la rencontre »)
+  else if (a === 'rencontres') { cleanupSpy(); cleanupSpy = () => {}; if (isGm) mountEncounters(content, b); else viewGmOnly(); }
   else if (a === 'journal' && b) viewJournal(b, c);
   else if (a === 'pc' && b) viewSheet(Data.pcById.get(b), 'pc');
   else if (gmOnly && !isGm) viewGmOnly();
