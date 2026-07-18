@@ -33,7 +33,7 @@ Ce dépôt = l'app web **« Archive Holocron »** + le module Foundry dans **`mo
 (anciennement `foundry/`). Il vit désormais sous `star-wars JDR/modules/swffg-holocron/`.
 
 - **GitHub** : **wanoo/swffg-holocron** — branche locale `main-release` → remote `main`
-  (`git push origin main-release:main`). Connecteur MCP : **wanoo/foundry-vtt-mcp**.
+  (`git push origin main-release:main`). Connecteur MCP : **wanoo/foundry-mcp-gateway** (Rust, 126 outils ; l'ancien fork TS wanoo/foundry-vtt-mcp est archivé).
 - **Issues / PR** : `gh issue list -R wanoo/swffg-holocron` · `gh pr list -R wanoo/swffg-holocron`.
 - **Module Foundry (v2.x)** : packs LevelDB `node module-foundry/build_pack.mjs` ;
   zip `cd module-foundry && python build.py --zip` → `dist/swffg-holocron.zip` + `dist/module.json` ;

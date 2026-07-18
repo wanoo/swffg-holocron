@@ -39,7 +39,7 @@ campaign site, and writes back (GM bible editor, player notes, dice rolls, ship 
 ## Architecture (1 minute)
 
 ```
-Foundry (SSOT) ⇄ connector (foundry-mcp fork, stdio child or HTTP gateway)
+Foundry (SSOT) ⇄ foundry-mcp-gateway (Rust MCP server, HTTP)
                      ⇅ sequential queue
               SyncStore (mem + disk cache, targeted sync)
                      ⇅
@@ -50,9 +50,14 @@ Foundry (SSOT) ⇄ connector (foundry-mcp fork, stdio child or HTTP gateway)
 
 - Campaign specifics (categories, packs, NPC registry, planets…) live in a Foundry journal
   **« ⚙️ Holocron Config »** (`flags.holocron.config`) — `POST /api/gm/bootstrap` creates it.
-- The connector is [wanoo/foundry-vtt-mcp](https://github.com/wanoo/foundry-vtt-mcp)
-  (fork of [TheStranjer/foundry-vtt-mcp](https://github.com/TheStranjer/foundry-vtt-mcp))
-  with `keep_id`, pack reads, hosted deployment, heartbeat & reconnect patches.
+- The connector is **[wanoo/foundry-mcp-gateway](https://github.com/wanoo/foundry-mcp-gateway)**
+  — an independent Rust MCP server (**126 tools**: document reads/writes, GM session
+  tools, perception & interaction via its companion module, world administration…).
+  Its README carries the full catalog; its
+  [docs/integrators.md](https://github.com/wanoo/foundry-mcp-gateway/blob/main/docs/integrators.md)
+  documents the exact response shapes this app consumes. Point `FOUNDRY_MCP_URL` at it.
+  (The legacy embedded TS connector, [wanoo/foundry-vtt-mcp](https://github.com/wanoo/foundry-vtt-mcp),
+  still works via `FOUNDRY_CREDENTIALS_JSON` but is archived.)
 
 ## Quick start
 
