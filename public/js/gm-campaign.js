@@ -36,6 +36,19 @@ export const EDGE_TYPES = {
 };
 const edgeLabel = (e) => e.label || (EDGE_TYPES[e.type]?.fwd ?? '');
 
+// --- Storyboard d'acte : MOMENTS DE JEU typés (flags.holocron.storyboard) -----
+// Couleurs = tokens de statut des thèmes (--accent-primary / --status-*) —
+// posées en CSS via data-kind ; formes distinctes dessinées dans paintStoryboard.
+export const BEAT_KINDS = {
+  scene: { icon: '🎭', label: 'Scène', hint: 'theater of the mind' },
+  combat: { icon: '⚔️', label: 'Combat', hint: 'rencontre liée' },
+  note: { icon: '🗒️', label: 'Note MJ', hint: 'jamais montrée aux joueurs' },
+  handout: { icon: '🖼️', label: 'Handout', hint: 'séquence d’images à projeter' },
+};
+const BEAT_STATUS = ['todo', 'encours', 'fait'];
+const STATUS_META = { todo: { icon: '○', label: 'À jouer' }, encours: { icon: '▶', label: 'En cours' }, fait: { icon: '✓', label: 'Fait' } };
+const BEAT_W = 200, BEAT_H = 84, BEAT_GX = 82, SAT_W = 150, SAT_H = 34;
+
 async function api(path, opts = {}) {
   const res = await fetch(`${apiBase()}${path}`, {
     credentials: 'same-origin',
@@ -73,8 +86,9 @@ export async function mountGmCampaign(main, cleanup = []) {
     board: data.board || { nodes: {}, edges: [], hidden: [] },
     catalog: data.catalog || { nodes: [], edges: [] },
     sequences: data.sequences || [],
-    selected: null,        // { kind: 'node'|'edge', id | index }
+    selected: null,        // { kind: 'node'|'edge'|'beat'|'sat', id | index }
     linkFrom: null,        // id du nœud d'origine pendant un tracé de lien
+    sb: null,              // mode storyboard : { actId } (null = carte globale)
     view: { x: 20, y: 20, k: 1 },
     // lentilles d'affichage (non persistées) : types de nœuds, familles d'arêtes,
     // « MJ-only » (fiches invisibles des joueurs), « orphelins » (aucune arête).
@@ -114,6 +128,71 @@ export async function mountGmCampaign(main, cleanup = []) {
   }
   cleanup.push(() => { clearTimeout(saveTimer); if (saveState === 'dirty') doSave(); });
 
+  /* ------------------------------------------ storyboard : état + sauvegarde -- */
+  const sbAct = () => (state.sb ? catById.get(state.sb.actId) : null);
+  function sbData() {
+    const act = sbAct();
+    if (!act) return { beats: [] };
+    act.storyboard = act.storyboard || { beats: [] };
+    act.storyboard.beats = act.storyboard.beats || [];
+    return act.storyboard;
+  }
+  const sbTagKey = () => 'holocron-sb-tag:' + (state.sb?.actId || '');
+  const sbTagOn = () => localStorage.getItem(sbTagKey()) === '1';
+  let sbTagInfo = ''; // retour serveur du dernier taguage (« mj:acte-6 : 3 posés… »)
+  let sbSaveTimer = null;
+  let sbDirty = false;
+  function scheduleSbSave(now = false, tagParticipants) {
+    sbDirty = true;
+    paintSaveDot('dirty');
+    clearTimeout(sbSaveTimer);
+    sbSaveTimer = setTimeout(() => doSbSave(tagParticipants), now ? 0 : 900);
+  }
+  async function doSbSave(tagParticipants) {
+    const act = sbAct();
+    if (!act) return;
+    sbDirty = false;
+    paintSaveDot('saving');
+    const tag = tagParticipants !== undefined ? tagParticipants : (sbTagOn() ? true : undefined);
+    try {
+      // NE PAS remplacer act.storyboard par la réponse (références vives du panneau) —
+      // l'assainissement serveur s'applique au prochain chargement.
+      const out = await api(`/gm/storyboard/${encodeURIComponent(act.id)}`, {
+        method: 'PUT',
+        body: JSON.stringify({ ...sbData(), ...(tag !== undefined ? { tagParticipants: tag } : {}) }),
+      });
+      if (out.tags) {
+        sbTagInfo = `${out.tags.tag} : ${out.tags.added} posé(s), ${out.tags.removed} retiré(s)`;
+        if (state.sb && !state.selected) paintSide(); // rafraîchit l'info tag de l'aperçu
+      }
+      paintSaveDot('saved');
+    } catch (e) { paintSaveDot('error', e.message); }
+  }
+  cleanup.push(() => { clearTimeout(sbSaveTimer); if (sbDirty) doSbSave(); });
+
+  function enterStoryboard(actId) {
+    if (saveState === 'dirty') { clearTimeout(saveTimer); doSave(); } // flush board
+    state.sb = { actId, prevView: { ...state.view } };
+    state.selected = null;
+    state.view = { x: 40, y: 150, k: 1 };
+    applyView();
+    paintLegend();
+    paint();
+    paintSide();
+  }
+  function exitStoryboard() {
+    if (sbDirty) { clearTimeout(sbSaveTimer); doSbSave(); }
+    const prev = state.sb?.prevView;
+    state.sb = null;
+    state.selected = null;
+    if (prev) state.view = prev;
+    applyView();
+    paintLegend();
+    paintTabs();
+    paint();
+    paintSide();
+  }
+
   /* ---------------------------------------------------------------- layout -- */
   const wrap = el('div', 'gmc-wrap');
   const canvasBox = el('div', 'gmc-canvas');
@@ -126,6 +205,21 @@ export async function mountGmCampaign(main, cleanup = []) {
   const legend = el('div', 'gmc-legend');
   canvasBox.appendChild(legend);
   function paintLegend() {
+    // Mode storyboard : la barre devient l'en-tête de l'acte (retour, progression).
+    if (state.sb) {
+      const act = sbAct();
+      const beats = sbData().beats;
+      const done = beats.filter((b) => b.status === 'fait').length;
+      const pct = beats.length ? Math.round((done / beats.length) * 100) : 0;
+      legend.innerHTML = `<button type="button" class="gmc-lens" data-sb-back title="Revenir à la carte de campagne">← Carte</button>
+        <span class="gmc-sb-title">🎬 ${esc(act?.name || '(acte disparu)')}</span>
+        <span class="gmc-sb-progress" role="progressbar" aria-valuenow="${done}" aria-valuemax="${beats.length}"
+          title="Progression de l'acte : ${done}/${beats.length} beats joués"><i style="width:${pct}%"></i></span>
+        <span class="gmc-count">${done}/${beats.length}</span>
+        <span class="gmc-save" id="gmc-save" title="État de sauvegarde">●</span>`;
+      paintSaveDot(saveState);
+      return;
+    }
     const f = state.filters;
     legend.innerHTML = Object.entries(NODE_TYPES)
       .map(([k, t]) => `<button type="button" class="gmc-lens${f.types.has(k) ? '' : ' off'}" data-lens-type="${k}"
@@ -141,6 +235,8 @@ export async function mountGmCampaign(main, cleanup = []) {
   legend.addEventListener('click', (ev) => {
     const b = ev.target.closest('.gmc-lens');
     if (!b) return;
+    if (b.dataset.sbBack !== undefined) return exitStoryboard();
+    if (state.sb) return;
     const f = state.filters;
     if (b.dataset.lensType) {
       const k = b.dataset.lensType;
@@ -210,6 +306,7 @@ export async function mountGmCampaign(main, cleanup = []) {
   }
 
   function paint() {
+    if (state.sb) return paintStoryboard();
     const ids = visibleIds();
     // arêtes AUTO (liens CC) entre nœuds posés
     let eh = '';
@@ -252,6 +349,8 @@ export async function mountGmCampaign(main, cleanup = []) {
         <text x="36" y="${NODE_H / 2 - 3}" class="gmc-name">${esc(name)}</text>
         <text x="36" y="${NODE_H / 2 + 13}" class="gmc-type">${t.label}${m.statut ? ' · ' + esc(m.statut) : ''}${m.mort ? ' · ✝' : ''}${p.sound ? ' · 🎵' : ''}</text>
         ${gmOnly ? `<text x="${NODE_W - 14}" y="15" class="gmc-eye" aria-label="Invisible des joueurs">🙈</text>` : ''}
+        ${m.type === 'acte' && m.storyboard?.beats?.length ? `<g class="gmc-sb-badge"><title>Storyboard : ${m.storyboard.beats.length} beat(s)</title>
+          <circle cx="${NODE_W - 12}" cy="${NODE_H - 11}" r="9"/><text x="${NODE_W - 12}" y="${NODE_H - 7}">${m.storyboard.beats.length}</text></g>` : ''}
         <circle class="gmc-port" cx="${NODE_W}" cy="${NODE_H / 2}" r="7"><title>Tirer pour créer un lien</title></circle>
       </g>`;
     }
@@ -259,8 +358,21 @@ export async function mountGmCampaign(main, cleanup = []) {
   }
 
   /* ------------------------------------------------- interactions du canvas -- */
-  let drag = null; // { mode: 'pan'|'node'|'link', … }
+  let drag = null; // { mode: 'pan'|'node'|'link'|'beat', … }
   svg.addEventListener('pointerdown', (ev) => {
+    if (state.sb) {
+      // storyboard : drag d'un beat = RÉORDONNANCEMENT dans la chaîne (pas de
+      // position libre) ; le clic sur la pastille de statut ne déclenche rien ici.
+      const beatEl = !ev.target.closest('.gmc-beat-st') && ev.target.closest('.gmc-beat');
+      if (beatEl) {
+        const w = toWorld(ev);
+        drag = { mode: 'beat', id: beatEl.dataset.beat, startX: w.x, dx: 0, moved: false };
+      } else {
+        drag = { mode: 'pan', sx: ev.clientX, sy: ev.clientY, vx: state.view.x, vy: state.view.y };
+      }
+      svg.setPointerCapture(ev.pointerId);
+      return;
+    }
     const port = ev.target.closest('.gmc-port');
     const nodeEl = ev.target.closest('.gmc-node');
     if (port && nodeEl) {
@@ -289,6 +401,13 @@ export async function mountGmCampaign(main, cleanup = []) {
       p.y = Math.round(w.y - drag.dy);
       drag.moved = true;
       requestAnimationFrame(paint);
+    } else if (drag.mode === 'beat') {
+      const w = toWorld(ev);
+      drag.dx = w.x - drag.startX;
+      if (Math.abs(drag.dx) > 5) drag.moved = true;
+      const p = sbPos.get(drag.id);
+      const g = nodesG.querySelector(`.gmc-beat[data-beat="${CSS.escape(drag.id)}"]`);
+      if (p && g) g.setAttribute('transform', `translate(${p.x + drag.dx},${p.y - (drag.moved ? 8 : 0)})`);
     } else if (drag.mode === 'link') {
       const a = anchor(drag.from);
       const w = toWorld(ev);
@@ -297,6 +416,29 @@ export async function mountGmCampaign(main, cleanup = []) {
   });
   svg.addEventListener('pointerup', (ev) => {
     if (!drag) return;
+    if (drag.mode === 'beat') {
+      if (drag.moved) {
+        // réordonne par la position du CENTRE lâché dans la chaîne
+        const beats = sbData().beats;
+        const i = beats.findIndex((b) => b.id === drag.id);
+        const p = sbPos.get(drag.id);
+        if (i >= 0 && p) {
+          const center = p.x + drag.dx + BEAT_W / 2;
+          const [moved] = beats.splice(i, 1);
+          let to = beats.length;
+          for (let j = 0; j < beats.length; j++) {
+            const q = sbPos.get(beats[j].id);
+            if (q && center < q.x + BEAT_W / 2) { to = j; break; }
+          }
+          beats.splice(to, 0, moved);
+          scheduleSbSave();
+        }
+        paint();
+        paintSide();
+      }
+      drag = null;
+      return;
+    }
     if (drag.mode === 'link') {
       tempG.innerHTML = '';
       state.linkFrom = null;
@@ -328,6 +470,30 @@ export async function mountGmCampaign(main, cleanup = []) {
   }, { passive: false });
 
   svg.addEventListener('click', (ev) => {
+    if (state.sb) {
+      // pastille de statut : todo → encours → fait → todo, sans changer la sélection
+      const stEl = ev.target.closest('.gmc-beat-st');
+      if (stEl) {
+        const id = stEl.closest('.gmc-beat')?.dataset.beat;
+        const b = sbData().beats.find((x) => x.id === id);
+        if (b) {
+          b.status = BEAT_STATUS[(BEAT_STATUS.indexOf(b.status) + 1) % BEAT_STATUS.length];
+          scheduleSbSave();
+          paintLegend();
+          paint();
+          paintSide();
+        }
+        return;
+      }
+      const beatEl = ev.target.closest('.gmc-beat');
+      const satEl = ev.target.closest('.gmc-sat');
+      if (beatEl) state.selected = { kind: 'beat', id: beatEl.dataset.beat };
+      else if (satEl) state.selected = { kind: 'sat', id: satEl.dataset.sat };
+      else state.selected = null;
+      paint();
+      paintSide();
+      return;
+    }
     const nodeEl = ev.target.closest('.gmc-node');
     const edgeEl = ev.target.closest('.gmc-edge.custom');
     if (nodeEl) state.selected = { kind: 'node', id: nodeEl.dataset.id };
@@ -337,6 +503,11 @@ export async function mountGmCampaign(main, cleanup = []) {
     paintSide();
   });
   svg.addEventListener('dblclick', (ev) => {
+    if (state.sb) {
+      const satEl = ev.target.closest('.gmc-sat');
+      if (satEl) location.hash = `#/journal/${satEl.dataset.sat}`;
+      return;
+    }
     const nodeEl = ev.target.closest('.gmc-node');
     if (!nodeEl) return;
     const id = nodeEl.dataset.id;
@@ -366,6 +537,7 @@ export async function mountGmCampaign(main, cleanup = []) {
   paintTabs();
 
   function paintSide() {
+    if (state.sb) { tabs.innerHTML = ''; return paintSbSide(); } // storyboard : panneau dédié
     if (state.selected && activeTab !== 'selection') { activeTab = 'selection'; paintTabs(); }
     panel.innerHTML = '';
     if (activeTab === 'objets') return paintObjects();
@@ -624,26 +796,40 @@ export async function mountGmCampaign(main, cleanup = []) {
       actions.appendChild(proj);
     }
     if (m.type === 'acte') {
+      const nb = m.storyboard?.beats?.length || 0;
+      const sb = el('button', 'gmc-btn gold', `🎬 Storyboard${nb ? ` (${nb} beats)` : ''}`);
+      sb.type = 'button';
+      sb.title = 'Ouvrir le storyboard de l’acte : moments de jeu 🎭⚔️🗒️🖼️ enchaînés (MJ only)';
+      sb.addEventListener('click', () => enterStoryboard(id));
+      actions.appendChild(sb);
       const sum = el('button', 'gmc-btn gold', '📜 Sommaire d’acte');
       sum.type = 'button';
       sum.title = 'Récap de début d’acte (crawl, situation, objectifs…) — rendu en tête de l’acte, visible joueurs';
       sum.addEventListener('click', () => paintActEditor(id));
       actions.appendChild(sum);
     }
-    const pin = el('button', 'gmc-btn', p?.pinned ? '📌 Désépingler' : '📌 Épingler');
-    pin.type = 'button';
-    pin.title = 'Un nœud épinglé est mis en avant (bordure or)';
-    pin.addEventListener('click', () => {
-      if (p.pinned) delete p.pinned; else p.pinned = true;
-      scheduleSave();
-      paint();
-      paintSide();
-    });
-    actions.appendChild(pin);
-    const rm = el('button', 'gmc-btn danger', '✕ Retirer de la carte');
-    rm.type = 'button';
-    rm.addEventListener('click', () => removeNode(id));
-    actions.appendChild(rm);
+    if (p && !state.sb) { // nœud posé sur la carte globale (pas un satellite de storyboard)
+      const pin = el('button', 'gmc-btn', p.pinned ? '📌 Désépingler' : '📌 Épingler');
+      pin.type = 'button';
+      pin.title = 'Un nœud épinglé est mis en avant (bordure or)';
+      pin.addEventListener('click', () => {
+        if (p.pinned) delete p.pinned; else p.pinned = true;
+        scheduleSave();
+        paint();
+        paintSide();
+      });
+      actions.appendChild(pin);
+      const rm = el('button', 'gmc-btn danger', '✕ Retirer de la carte');
+      rm.type = 'button';
+      rm.addEventListener('click', () => removeNode(id));
+      actions.appendChild(rm);
+    }
+    if (state.sb) {
+      const back = el('button', 'gmc-btn', '← Storyboard');
+      back.type = 'button';
+      back.addEventListener('click', () => { state.selected = null; paint(); paintSide(); });
+      actions.appendChild(back);
+    }
     panel.appendChild(actions);
   }
 
@@ -896,6 +1082,413 @@ export async function mountGmCampaign(main, cleanup = []) {
     back.addEventListener('click', () => paintSide());
     actions.append(save, back);
     panel.appendChild(actions);
+  }
+
+  /* ------------------------------------------------ 🎬 Storyboard d'acte (A2) --
+   * L'acte est un STORYBOARD construit sur la carte : ses beats (moments de jeu
+   * typés) en chaîne horizontale « puis → », et autour, les ENTITÉS CC qu'ils
+   * référencent en petits nœuds satellites — leurs liens CC se dessinent entre
+   * elles (le moteur d'arêtes du catalogue, exploité à fond). */
+  const trunc = (s, n) => (String(s).length > n ? String(s).slice(0, n - 1) + '…' : String(s));
+  let sbPos = new Map();     // beatId -> {x, y} du layout courant (drag/réordonnancement)
+  let sbSatPos = new Map();  // entityId -> {x, y}
+  let sbProj = false;        // player de séquence ouvert DEPUIS un beat
+  let encLib = null;         // ⚔️ bibliothèque de rencontres (lazy)
+  async function loadEncLib() {
+    try { encLib = (await api('/gm/encounters')).encounters || []; }
+    catch { encLib = []; }
+  }
+
+  // chemin d'arête VERTICAL (beat → satellite) — pendant de edgePath (horizontal)
+  function edgePathV(a, b) {
+    const my = (a.y + b.y) / 2;
+    return `M ${a.x} ${a.y} C ${a.x} ${my}, ${b.x} ${my}, ${b.x} ${b.y}`;
+  }
+
+  function sbLayout(beats) {
+    sbPos = new Map();
+    beats.forEach((b, i) => sbPos.set(b.id, { x: i * (BEAT_W + BEAT_GX), y: 0 }));
+    // satellites : entités uniques, placées sous le barycentre de leurs beats,
+    // en rangées successives quand ça se chevauche.
+    const refs = new Map(); // entityId -> [centres x des beats référents]
+    beats.forEach((b, i) => (b.uuids || []).forEach((u) => {
+      const id = u.split('.').pop();
+      if (!refs.has(id)) refs.set(id, []);
+      refs.get(id).push(i * (BEAT_W + BEAT_GX) + BEAT_W / 2);
+    }));
+    const avg = (a) => a.reduce((t, v) => t + v, 0) / a.length;
+    sbSatPos = new Map();
+    const laneEnd = [];
+    const ids = [...refs.keys()].sort((a, b) => avg(refs.get(a)) - avg(refs.get(b)));
+    for (const id of ids) {
+      let x = avg(refs.get(id)) - SAT_W / 2;
+      let row = 0;
+      while (row < 6 && laneEnd[row] !== undefined && x < laneEnd[row] + 18) row++;
+      if (row >= 6) { row = 0; x = laneEnd[0] + 18; } // toutes les rangées pleines : à droite
+      laneEnd[row] = x + SAT_W;
+      sbSatPos.set(id, { x, y: BEAT_H + 96 + row * (SAT_H + 34) });
+    }
+    return refs;
+  }
+
+  function beatSvg(b, i) {
+    const k = BEAT_KINDS[b.kind] || BEAT_KINDS.scene;
+    const p = sbPos.get(b.id);
+    const sel = state.selected?.kind === 'beat' && state.selected.id === b.id;
+    const st = STATUS_META[b.status] || STATUS_META.todo;
+    const meta = [];
+    if (b.uuids?.length) meta.push(`👥 ${b.uuids.length}`);
+    if (b.encounterId) meta.push('⚔️ rencontre');
+    if (b.sequenceId) meta.push('🎞️ séquence');
+    if (b.sound) meta.push('🎵');
+    if (b.kind === 'note') meta.push('🔒 MJ');
+    const W = BEAT_W, H = BEAT_H;
+    // FORMES typées : 🎭 panneau arrondi · ⚔️ panneau anguleux (chanfreins) ·
+    // 🗒️ post-it penché à coin corné · 🖼️ cadre photo (double bordure).
+    const shape = {
+      scene: `<rect class="gmc-beat-bg" width="${W}" height="${H}" rx="18"/>`,
+      combat: `<polygon class="gmc-beat-bg" points="14,0 ${W - 14},0 ${W},14 ${W},${H - 14} ${W - 14},${H} 14,${H} 0,${H - 14} 0,14"/>`,
+      note: `<rect class="gmc-beat-bg" width="${W}" height="${H}" rx="2"/><path class="gmc-beat-fold" d="M ${W - 16} ${H} L ${W} ${H - 16} L ${W} ${H} Z"/>`,
+      handout: `<rect class="gmc-beat-bg" width="${W}" height="${H}" rx="4"/><rect class="gmc-beat-frame" x="6" y="6" width="${W - 12}" height="${H - 12}" rx="2"/>`,
+    }[b.kind] || `<rect class="gmc-beat-bg" width="${W}" height="${H}" rx="18"/>`;
+    const inner = `${shape}
+      <text x="12" y="19" class="gmc-beat-kind">${i + 1} · ${k.icon} ${k.label}</text>
+      <text x="12" y="44" class="gmc-beat-title">${esc(trunc(b.title || '(sans titre)', 26))}</text>
+      <text x="12" y="${H - 12}" class="gmc-beat-meta">${meta.join('  ')}</text>
+      <g class="gmc-beat-st st-${esc(b.status)}"><title>${st.label} — clic : changer le statut</title>
+        <circle cx="${W - 18}" cy="18" r="11"/><text x="${W - 18}" y="22.5">${st.icon}</text></g>`;
+    return `<g class="gmc-beat ${esc(b.kind)}${sel ? ' selected' : ''}${b.status === 'encours' ? ' current' : ''}${b.status === 'fait' ? ' done' : ''}"
+        data-beat="${esc(b.id)}" transform="translate(${p.x},${p.y})" tabindex="0" role="button" aria-label="${esc(b.title || k.label)}">
+      ${b.kind === 'note' ? `<g transform="rotate(-1.6 ${W / 2} ${H / 2})">${inner}</g>` : inner}
+    </g>`;
+  }
+
+  function paintStoryboard() {
+    const beats = sbData().beats;
+    sbLayout(beats);
+    let eh = '';
+    // la chaîne narrative « puis → »
+    for (let i = 0; i + 1 < beats.length; i++) {
+      const a = sbPos.get(beats[i].id), b = sbPos.get(beats[i + 1].id);
+      const y = BEAT_H / 2;
+      eh += `<g class="gmc-edge sb-chain"><path d="M ${a.x + BEAT_W + 4} ${y} L ${b.x - 6} ${y}" marker-end="url(#gmc-arrow-custom)"/>
+        <text x="${(a.x + BEAT_W + b.x) / 2}" y="${y - 8}" class="gmc-chain-lbl">puis</text></g>`;
+    }
+    // beat → entités référencées
+    for (const b of beats) {
+      const bp = sbPos.get(b.id);
+      for (const u of (b.uuids || [])) {
+        const sp = sbSatPos.get(u.split('.').pop());
+        if (sp) eh += `<g class="gmc-edge sb-ref"><path d="${edgePathV({ x: bp.x + BEAT_W / 2, y: BEAT_H }, { x: sp.x + SAT_W / 2, y: sp.y })}"/></g>`;
+      }
+    }
+    // liens CC ENTRE les entités présentes (moteur d'arêtes du catalogue)
+    for (const e of state.catalog.edges) {
+      const a = sbSatPos.get(e.from), b = sbSatPos.get(e.to);
+      if (!a || !b) continue;
+      eh += `<g class="gmc-edge auto"><path d="${edgePath({ x: a.x + SAT_W / 2, y: a.y + SAT_H / 2 }, { x: b.x + SAT_W / 2, y: b.y + SAT_H / 2 })}" marker-end="url(#gmc-arrow)"><title>${esc(e.rel)}</title></path></g>`;
+    }
+    edgesG.innerHTML = eh;
+    tempG.innerHTML = '';
+
+    let nh = '';
+    beats.forEach((b, i) => { nh += beatSvg(b, i); });
+    for (const [id, p] of sbSatPos) {
+      const m = nodeMeta(id);
+      const t = NODE_TYPES[m.type] || NODE_TYPES.quest;
+      const sel = state.selected?.kind === 'sat' && state.selected.id === id;
+      nh += `<g class="gmc-sat${sel ? ' selected' : ''}${m.ghost ? ' ghost' : ''}" data-sat="${esc(id)}" data-type="${esc(m.type)}"
+          transform="translate(${p.x},${p.y})" tabindex="0" role="button" aria-label="${esc(m.name)}">
+        <rect width="${SAT_W}" height="${SAT_H}" rx="8" style="--tc:${t.color}"/>
+        <text x="9" y="${SAT_H / 2 + 4}" class="gmc-ico-s">${t.icon}</text>
+        <text x="28" y="${SAT_H / 2 + 4}" class="gmc-sat-name">${esc(trunc(m.name, 16))}</text>
+      </g>`;
+    }
+    if (!beats.length) nh += '<text x="24" y="40" class="gmc-sb-empty">Storyboard vide — ajoute un premier moment de jeu (panneau de droite).</text>';
+    nodesG.innerHTML = nh;
+  }
+
+  /* ------------------------------------------- panneau latéral du storyboard -- */
+  function paintSbSide() {
+    panel.innerHTML = '';
+    if (sbProj) {
+      const s = state.sequences.find((x) => x.id === projState.seqId);
+      if (projState.mode === 'play' && s) return paintSeqPlayer(s);
+      sbProj = false; // le player a rendu la main (← Séquences)
+    }
+    if (state.selected?.kind === 'beat') return paintBeatEditor(state.selected.id);
+    if (state.selected?.kind === 'sat') return paintIdentity(state.selected.id);
+    return paintSbOverview();
+  }
+
+  function cycleStatus(b) {
+    b.status = BEAT_STATUS[(BEAT_STATUS.indexOf(b.status) + 1) % BEAT_STATUS.length];
+    scheduleSbSave();
+    paintLegend();
+    paint();
+    paintSide();
+  }
+
+  function addBeat(kind) {
+    const beats = sbData().beats;
+    const b = { id: `beat-${Math.random().toString(36).slice(2, 10)}`, kind, title: '', note: '', uuids: [], status: 'todo' };
+    beats.push(b);
+    state.selected = { kind: 'beat', id: b.id };
+    scheduleSbSave();
+    paintLegend();
+    paint();
+    paintSide();
+  }
+
+  function paintSbOverview() {
+    const act = sbAct();
+    const beats = sbData().beats;
+    panel.appendChild(el('p', 'eyebrow', `🎬 Storyboard — ${esc(act?.name || '')}`));
+    panel.appendChild(el('p', 'gmc-hint', 'L’acte, en moments de jeu enchaînés : 🎭 scène · ⚔️ combat · 🗒️ note MJ · 🖼️ handout. '
+      + 'Clic sur un beat : éditer · pastille ○▶✓ : statut · glisser : réordonner. MJ only — jamais montré aux joueurs.'));
+    const list = el('div', 'gmc-obj-list');
+    beats.forEach((b, i) => {
+      const k = BEAT_KINDS[b.kind] || BEAT_KINDS.scene;
+      const st = STATUS_META[b.status] || STATUS_META.todo;
+      const row = el('div', 'gmc-obj' + (b.status === 'encours' ? ' on-map' : ''));
+      const stBtn = el('button', `gmc-mini gmc-st st-${b.status}`, st.icon);
+      stBtn.type = 'button';
+      stBtn.title = `${st.label} — clic : changer le statut`;
+      stBtn.addEventListener('click', () => cycleStatus(b));
+      const name = el('button', 'gmc-obj-name gmc-obj-btn', `${i + 1} · ${k.icon} ${esc(b.title || '(sans titre)')}`);
+      name.type = 'button';
+      name.addEventListener('click', () => { state.selected = { kind: 'beat', id: b.id }; paint(); paintSide(); });
+      row.append(stBtn, name);
+      list.appendChild(row);
+    });
+    if (!beats.length) list.appendChild(el('p', 'muted', 'Aucun beat pour l’instant.'));
+    panel.appendChild(list);
+
+    panel.appendChild(el('p', 'gmc-field-lbl', '＋ Ajouter un moment de jeu'));
+    const addRow = el('div', 'gmc-kind-row');
+    for (const [kk, t] of Object.entries(BEAT_KINDS)) {
+      const btn = el('button', `gmc-btn gmc-kind ${kk}`, `${t.icon} ${t.label}`);
+      btn.type = 'button';
+      btn.title = t.hint;
+      btn.addEventListener('click', () => addBeat(kk));
+      addRow.appendChild(btn);
+    }
+    panel.appendChild(addRow);
+
+    // 🏷️ tags d'acte : au save, pose mj:acte-<n> sur les fiches CC référencées
+    // (idempotent — retire aussi celles qui ne jouent plus) ; décocher RETIRE tout.
+    const nAct = (/(\d+)/.exec(act?.name || '') || [])[1] || '…';
+    const tagBox = el('label', 'gmc-hide gmc-tagbox');
+    const cb = el('input');
+    cb.type = 'checkbox';
+    cb.checked = sbTagOn();
+    cb.addEventListener('change', () => {
+      localStorage.setItem(sbTagKey(), cb.checked ? '1' : '');
+      scheduleSbSave(true, cb.checked); // sync immédiate : pose tout / retire tout
+    });
+    tagBox.append(cb, document.createTextNode(` 🏷️ Taguer les participants (mj:acte-${nAct}) — Asset Librarian retrouve « tout ce qui joue dans l'acte »`));
+    panel.appendChild(tagBox);
+    if (sbTagInfo) panel.appendChild(el('p', 'gmc-hint', `🏷️ ${esc(sbTagInfo)}`));
+
+    const actions = el('div', 'gmc-id-actions');
+    const sum = el('button', 'gmc-btn', '📜 Sommaire d’acte');
+    sum.type = 'button';
+    sum.addEventListener('click', () => paintActEditor(state.sb.actId));
+    const back = el('button', 'gmc-btn', '← Retour à la carte');
+    back.type = 'button';
+    back.addEventListener('click', () => exitStoryboard());
+    actions.append(sum, back);
+    panel.appendChild(actions);
+  }
+
+  function paintBeatEditor(id) {
+    const beats = sbData().beats;
+    const i = beats.findIndex((b) => b.id === id);
+    if (i < 0) { state.selected = null; return paintSbOverview(); }
+    const b = beats[i];
+    const k = BEAT_KINDS[b.kind] || BEAT_KINDS.scene;
+    panel.appendChild(el('p', 'eyebrow', `${k.icon} Beat ${i + 1}/${beats.length} — ${k.label}`));
+
+    const kindSel = el('select', 'gmc-input');
+    kindSel.innerHTML = Object.entries(BEAT_KINDS)
+      .map(([kk, t]) => `<option value="${kk}"${b.kind === kk ? ' selected' : ''}>${t.icon} ${t.label} — ${t.hint}</option>`).join('');
+    kindSel.addEventListener('change', () => { b.kind = kindSel.value; scheduleSbSave(); paint(); paintSide(); });
+    panel.appendChild(kindSel);
+
+    const title = el('input', 'gmc-input');
+    title.placeholder = 'Titre du moment (ex. Embuscade au spatioport)';
+    title.value = b.title || '';
+    title.addEventListener('change', () => { b.title = title.value.trim().slice(0, 120); scheduleSbSave(); paint(); });
+    panel.appendChild(title);
+
+    const note = el('textarea', 'gmc-input');
+    note.rows = 4;
+    note.placeholder = 'Note MJ courte : intention, accroche, à ne pas oublier… (jamais montrée aux joueurs)';
+    note.value = b.note || '';
+    note.addEventListener('change', () => { b.note = note.value.slice(0, 2000); scheduleSbSave(); });
+    panel.appendChild(note);
+
+    // statut (runbook de séance) : todo / en cours / fait
+    const stRow = el('div', 'gmc-seq-nav');
+    for (const st of BEAT_STATUS) {
+      const m = STATUS_META[st];
+      const btn = el('button', 'gmc-btn' + (b.status === st ? ' gold' : ''), `${m.icon} ${m.label}`);
+      btn.type = 'button';
+      btn.addEventListener('click', () => { b.status = st; scheduleSbSave(); paintLegend(); paint(); paintSide(); });
+      stRow.appendChild(btn);
+    }
+    panel.appendChild(stRow);
+
+    // entités CC impliquées (satellites sur la carte)
+    panel.appendChild(el('p', 'gmc-field-lbl', '👥 Entités impliquées (fiches CC)'));
+    const chips = el('div', 'gmc-rels');
+    for (const u of (b.uuids || [])) {
+      const eid = u.split('.').pop();
+      const m = nodeMeta(eid);
+      const t = NODE_TYPES[m.type] || NODE_TYPES.quest;
+      const row = el('div', 'gmc-obj');
+      const open = el('a', 'gmc-obj-name', `${t.icon} ${esc(m.name)}`);
+      open.href = `#/journal/${eid}`;
+      open.title = 'Ouvrir la fiche';
+      const rm = el('button', 'gmc-mini', '✕');
+      rm.type = 'button';
+      rm.title = 'Détacher du beat';
+      rm.addEventListener('click', () => {
+        b.uuids = b.uuids.filter((x) => x !== u);
+        scheduleSbSave();
+        paint();
+        paintSide();
+      });
+      row.append(open, rm);
+      chips.appendChild(row);
+    }
+    if (!b.uuids?.length) chips.appendChild(el('p', 'muted', 'Aucune — attache PNJ, lieux, orgs, quêtes…'));
+    panel.appendChild(chips);
+    const search = el('input', 'gmc-input');
+    search.type = 'search';
+    search.placeholder = 'Attacher une entité (recherche dans le catalogue)…';
+    const results = el('div', 'gmc-obj-list');
+    const norm = (s) => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    search.addEventListener('input', () => {
+      const q = norm(search.value.trim());
+      results.innerHTML = '';
+      if (!q) return;
+      const attached = new Set((b.uuids || []).map((u) => u.split('.').pop()));
+      const hits = state.catalog.nodes
+        .filter((n) => n.type !== 'acte' && !attached.has(n.id) && norm(n.name).includes(q))
+        .slice(0, 8);
+      for (const n of hits) {
+        const t = NODE_TYPES[n.type] || NODE_TYPES.quest;
+        const btn = el('button', 'gmc-obj-name gmc-obj-btn', `＋ ${t.icon} ${esc(n.name)}`);
+        btn.type = 'button';
+        btn.addEventListener('click', () => {
+          b.uuids = [...(b.uuids || []), `JournalEntry.${n.id}`];
+          scheduleSbSave();
+          paint();
+          paintSide();
+        });
+        results.appendChild(btn);
+      }
+      if (!hits.length) results.appendChild(el('p', 'muted', 'Rien dans le catalogue.'));
+    });
+    panel.append(search, results);
+
+    // pièces jointes SELON le kind
+    if (b.kind === 'combat') {
+      panel.appendChild(el('p', 'gmc-field-lbl', '⚔️ Rencontre liée (bibliothèque)'));
+      if (encLib === null) {
+        panel.appendChild(el('p', 'muted', 'chargement de la bibliothèque…'));
+        loadEncLib().then(() => { if (state.sb && state.selected?.kind === 'beat') paintSide(); });
+      } else {
+        const encSel = el('select', 'gmc-input');
+        encSel.innerHTML = '<option value="">— aucune —</option>'
+          + encLib.map((e2) => `<option value="${esc(e2.id)}"${b.encounterId === e2.id ? ' selected' : ''}>${esc(e2.title)}</option>`).join('');
+        encSel.addEventListener('change', () => {
+          if (encSel.value) b.encounterId = encSel.value; else delete b.encounterId;
+          scheduleSbSave();
+          paint();
+          paintSide();
+        });
+        panel.appendChild(encSel);
+        if (b.encounterId) {
+          const open = el('a', 'gmc-btn gold', '⚔️ Ouvrir la rencontre (tracker)');
+          open.href = `#/rencontres/${encodeURIComponent(b.encounterId)}`;
+          panel.appendChild(open);
+        }
+      }
+    }
+    if (b.kind === 'scene' || b.kind === 'handout') {
+      panel.appendChild(el('p', 'gmc-field-lbl', '🎞️ Séquence d’images liée'));
+      const seqSel = el('select', 'gmc-input');
+      seqSel.innerHTML = '<option value="">— aucune —</option>'
+        + state.sequences.map((s) => `<option value="${esc(s.id)}"${b.sequenceId === s.id ? ' selected' : ''}>${esc(s.name)} (${s.items.length})</option>`).join('');
+      seqSel.addEventListener('change', () => {
+        if (seqSel.value) b.sequenceId = seqSel.value; else delete b.sequenceId;
+        scheduleSbSave();
+        paint();
+        paintSide();
+      });
+      panel.appendChild(seqSel);
+      if (b.sequenceId) {
+        const proj = el('button', 'gmc-btn gold', '📡 Projeter (séquence liée)');
+        proj.type = 'button';
+        proj.title = 'Ouvre le projecteur : chaque image est poussée aux joueurs dans Foundry';
+        proj.addEventListener('click', () => {
+          sbProj = true;
+          projState = { mode: 'play', seqId: b.sequenceId, idx: 0 };
+          paintSide();
+        });
+        panel.appendChild(proj);
+      }
+    }
+
+    // 🎵 ambiance du beat (tous kinds) : ▶/⏹ direct chez les joueurs
+    panel.appendChild(el('p', 'gmc-field-lbl', '🎵 Ambiance du beat'));
+    const sndRow = el('div', 'gmc-seq-nav');
+    const snd = el('input', 'gmc-input');
+    snd.placeholder = 'Playlist Foundry…';
+    snd.setAttribute('list', 'gmc-playlists');
+    snd.value = b.sound?.playlist || '';
+    snd.addEventListener('change', () => {
+      const v = snd.value.trim();
+      if (v) b.sound = { playlist: v.slice(0, 100) }; else delete b.sound;
+      scheduleSbSave();
+      paint();
+    });
+    const sndStatus = el('p', 'gmc-hint', '');
+    const play = el('button', 'gmc-btn gold', '▶'); play.type = 'button'; play.title = 'Jouer chez les joueurs';
+    play.addEventListener('click', () => { const v = snd.value.trim(); if (v) playSound(v, 'play', sndStatus); });
+    const stop = el('button', 'gmc-btn', '⏹'); stop.type = 'button'; stop.title = 'Arrêter';
+    stop.addEventListener('click', () => { const v = snd.value.trim(); if (v) playSound(v, 'stop', sndStatus); });
+    sndRow.append(snd, play, stop);
+    panel.append(sndRow, sndStatus);
+    let dl = document.getElementById('gmc-playlists');
+    if (!dl) { dl = el('datalist'); dl.id = 'gmc-playlists'; wrap.appendChild(dl); }
+    const fillDl = () => { dl.innerHTML = (playlists || []).map((x) => `<option value="${esc(x.name)}">`).join(''); };
+    if (playlists === null) loadPlaylists().then(fillDl); else fillDl();
+
+    // ordre & suppression
+    const ordRow = el('div', 'gmc-seq-nav');
+    const up = el('button', 'gmc-btn', '↑ Avancer'); up.type = 'button'; up.disabled = i === 0;
+    up.addEventListener('click', () => { beats.splice(i - 1, 0, beats.splice(i, 1)[0]); scheduleSbSave(); paint(); paintSide(); });
+    const down = el('button', 'gmc-btn', '↓ Reculer'); down.type = 'button'; down.disabled = i === beats.length - 1;
+    down.addEventListener('click', () => { beats.splice(i + 1, 0, beats.splice(i, 1)[0]); scheduleSbSave(); paint(); paintSide(); });
+    const del = el('button', 'gmc-btn danger', '🗑️'); del.type = 'button'; del.title = 'Supprimer ce beat';
+    del.addEventListener('click', () => {
+      beats.splice(i, 1);
+      state.selected = null;
+      scheduleSbSave();
+      paintLegend();
+      paint();
+      paintSide();
+    });
+    ordRow.append(up, down, del);
+    panel.appendChild(ordRow);
+
+    const back = el('button', 'gmc-btn', '← Storyboard');
+    back.type = 'button';
+    back.addEventListener('click', () => { state.selected = null; paint(); paintSide(); });
+    panel.appendChild(back);
   }
 
   paint();

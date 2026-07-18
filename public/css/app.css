@@ -1920,6 +1920,65 @@ textarea.gmc-input { resize: vertical; font-size: 0.85rem; line-height: 1.4; }
 .gmc-seq-nav { display: flex; gap: 0.4rem; }
 .gmc-seq-nav .gmc-btn { flex: 1; padding: 0.4rem 0.3rem; font-size: 0.78rem; }
 
+/* ---- 🎬 Storyboard d'acte (éditeur de campagne) ---------------------------
+   Beats = moments de jeu TYPÉS ; les couleurs de kind consomment les tokens
+   de statut des thèmes : 🎭 scène = accent, ⚔️ combat = danger, 🗒️ note =
+   warning (MJ only), 🖼️ handout = info. Formes distinctes dessinées en SVG. */
+.gmc-sb-badge circle { fill: color-mix(in srgb, var(--accent-primary) 24%, transparent); stroke: var(--accent-primary); stroke-width: 1; }
+.gmc-sb-badge text { fill: var(--accent-bright, var(--accent-primary)); font: 700 10px var(--font-body, sans-serif); text-anchor: middle; }
+.gmc-sb-title { font: 700 0.9rem var(--font-display); color: var(--fg); }
+.gmc-sb-progress { flex: 0 1 160px; min-width: 60px; height: 7px; border-radius: 4px; overflow: hidden;
+  background: color-mix(in srgb, var(--fg-dim) 25%, transparent); display: inline-block; }
+.gmc-sb-progress i { display: block; height: 100%; background: var(--status-success); transition: width 0.2s; }
+.gmc-beat { cursor: pointer; --bc: var(--accent-primary); }
+.gmc-beat.combat { --bc: var(--status-danger); }
+.gmc-beat.note { --bc: var(--status-warning); }
+.gmc-beat.handout { --bc: var(--status-info); }
+.gmc-beat .gmc-beat-bg { fill: color-mix(in srgb, var(--bc) 13%, var(--surface-raised, rgba(12,20,30,0.94)));
+  stroke: color-mix(in srgb, var(--bc) 65%, transparent); stroke-width: 1.6; }
+.gmc-beat:hover .gmc-beat-bg, .gmc-beat:focus-visible .gmc-beat-bg { stroke: var(--bc); }
+.gmc-beat.selected .gmc-beat-bg { stroke: var(--bc); stroke-width: 2.6; }
+.gmc-beat.current .gmc-beat-bg { stroke: var(--bc); stroke-width: 2.4;
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--bc) 70%, transparent)); }
+.gmc-beat.done { opacity: 0.55; }
+.gmc-beat-fold { fill: color-mix(in srgb, var(--bc) 45%, transparent); }
+.gmc-beat-frame { fill: none; stroke: color-mix(in srgb, var(--bc) 40%, transparent); stroke-width: 1; stroke-dasharray: 3 3; }
+.gmc-beat-kind { fill: var(--bc); font: 700 10px var(--font-body, sans-serif); letter-spacing: 0.04em; text-transform: uppercase; }
+.gmc-beat-title { fill: var(--text-primary, #eaf6ff); font: 600 12.5px var(--font-body, sans-serif); }
+.gmc-beat-meta { fill: var(--text-muted, #8b9bc0); font: 500 10px var(--font-body, sans-serif); }
+.gmc-beat-st { cursor: pointer; }
+.gmc-beat-st circle { fill: color-mix(in srgb, var(--fg-dim) 18%, transparent); stroke: var(--fg-dim); stroke-width: 1.2; }
+.gmc-beat-st text { fill: var(--fg-muted); font: 700 11px var(--font-body, sans-serif); text-anchor: middle; }
+.gmc-beat-st.st-encours circle { fill: color-mix(in srgb, var(--status-warning) 25%, transparent); stroke: var(--status-warning); }
+.gmc-beat-st.st-encours text { fill: var(--status-warning); }
+.gmc-beat-st.st-fait circle { fill: color-mix(in srgb, var(--status-success) 25%, transparent); stroke: var(--status-success); }
+.gmc-beat-st.st-fait text { fill: var(--status-success); }
+.gmc-edge.sb-chain path { stroke: color-mix(in srgb, var(--accent-primary) 70%, transparent); stroke-width: 2; }
+.gmc-chain-lbl { fill: var(--accent-primary); font: 700 10px var(--font-body, sans-serif); text-anchor: middle;
+  paint-order: stroke; stroke: var(--app-background, rgba(8,12,18,0.85)); stroke-width: 3; }
+.gmc-edge.sb-ref path { stroke: color-mix(in srgb, var(--fg-muted) 40%, transparent); stroke-width: 1.1; stroke-dasharray: 2 4; }
+.gmc-sat { cursor: pointer; }
+.gmc-sat rect { fill: color-mix(in srgb, var(--tc) 10%, var(--surface-raised, rgba(12,20,30,0.94)));
+  stroke: color-mix(in srgb, var(--tc) 50%, transparent); stroke-width: 1.2; }
+.gmc-sat:hover rect, .gmc-sat:focus-visible rect, .gmc-sat.selected rect { stroke: var(--tc); }
+.gmc-sat.ghost { opacity: 0.45; }
+.gmc-ico-s { font-size: 12px; }
+.gmc-sat-name { fill: var(--text-primary, #eaf6ff); font: 600 11px var(--font-body, sans-serif); }
+.gmc-sb-empty { fill: var(--fg-muted); font: 500 13px var(--font-body, sans-serif); }
+.gmc-kind-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
+.gmc-kind.scene { border-color: color-mix(in srgb, var(--accent-primary) 55%, transparent); }
+.gmc-kind.combat { border-color: color-mix(in srgb, var(--status-danger) 55%, transparent); }
+.gmc-kind.note { border-color: color-mix(in srgb, var(--status-warning) 55%, transparent); }
+.gmc-kind.handout { border-color: color-mix(in srgb, var(--status-info) 55%, transparent); }
+.gmc-obj-btn { border: 0; background: transparent; color: var(--fg); font: inherit; text-align: left; cursor: pointer; padding: 0.1rem 0; }
+.gmc-obj-btn:hover { color: var(--gold); }
+.gmc-st { min-width: 1.6rem; }
+.gmc-st.st-encours { border-color: var(--status-warning); color: var(--status-warning); }
+.gmc-st.st-fait { border-color: var(--status-success); color: var(--status-success); }
+.gmc-tagbox { display: block; font-size: 0.78rem; line-height: 1.35; border-top: 1px solid var(--line); padding-top: 0.5rem; }
+.acts-sb { margin: 0.6rem 0 0; padding-top: 0.45rem; border-top: 1px dashed var(--line); font-size: 0.82rem; color: var(--fg-muted); }
+.acts-sb b { color: var(--fg); }
+
 /* --- 📡 Montrer aux joueurs (bouton d'overlay image, profil MJ) --------------- */
 .show-players-btn {
   position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
