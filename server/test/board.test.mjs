@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  sanitizeBoard, sanitizeSequence, buildCatalog, EDGE_TYPES,
+  sanitizeBoard, sanitizeSequence, sanitizeHandout, HANDOUT_TYPES, buildCatalog, EDGE_TYPES,
   sanitizeStoryboard, actTagOps, actNumberOf, ACT_TAG_PREFIX,
 } from '../lib/board.mjs';
 import { sanitizeActSummary, actSummaryView } from '../lib/transform/journals.mjs';
@@ -82,6 +82,55 @@ test('sanitizeSequence : items bornés, src sans traversée, id généré', () =
   assert.equal(out.items[1].src, 'https://exemple.test/img.png');
 });
 
+/* ---------------------------------------------------------------- handouts -- */
+test('sanitizeHandout : type fermé, src bornée sans traversée, targets = ids Foundry dédupliqués', () => {
+  assert.deepEqual(HANDOUT_TYPES, ['image', 'audio', 'video', 'chat']);
+  const out = sanitizeHandout({
+    type: 'video', src: '  worlds/demo/briefing.mp4  ', title: 't'.repeat(200),
+    targets: ['ABCDEFGHIJKLMNOP', 'ABCDEFGHIJKLMNOP', 'pas-un-id', '<script>', 'QRSTUVWXYZABCDEF', 42],
+  });
+  assert.equal(out.type, 'video');
+  assert.equal(out.src, 'worlds/demo/briefing.mp4');
+  assert.equal(out.title.length, 120);
+  assert.deepEqual(out.targets, ['ABCDEFGHIJKLMNOP', 'QRSTUVWXYZABCDEF']);
+  assert.equal(sanitizeHandout({ type: 'image', src: '../../etc/passwd' }), null, 'traversée rejetée');
+  assert.equal(sanitizeHandout({ type: 'hack', src: 'x'.repeat(400) }).type, 'image', 'type inconnu → image');
+  assert.equal(sanitizeHandout({ type: 'image', src: 'x'.repeat(400) }).src.length, 300, 'src ≤ 300');
+  assert.equal(sanitizeHandout({ type: 'audio' }), null, 'média sans src → null');
+  assert.equal(sanitizeHandout('niet'), null);
+});
+
+test('sanitizeHandout : chat — texte requis ≤ 4000, HTML léger sans script/handlers, targets ≤ 30', () => {
+  const out = sanitizeHandout({
+    type: 'chat', title: 'Message de Maz',
+    text: '<p onclick="hack()">Bonjour</p><script>evil()</script><em>fin</em><a href="javascript:x()">l</a>' + 'x'.repeat(5000),
+    targets: Array.from({ length: 40 }, (_, i) => `USER${i}`.padEnd(16, '0').slice(0, 16)),
+  });
+  assert.equal(out.type, 'chat');
+  assert.equal(out.src, undefined);
+  assert.ok(out.text.includes('<p>Bonjour</p>') && out.text.includes('<em>fin</em>'), 'HTML léger conservé');
+  assert.ok(!/script|onclick|javascript:/i.test(out.text), 'script/handlers retirés');
+  assert.ok(out.text.length <= 4000);
+  assert.equal(out.targets.length, 30);
+  assert.equal(sanitizeHandout({ type: 'chat', text: '   ' }), null, 'chat sans texte → null');
+  assert.equal(sanitizeHandout({ type: 'chat', text: 'ok' }).targets, undefined, 'sans cible = toute la table');
+});
+
+test('sanitizeSequence : items multi-média — rétrocompat sans type = image, targets conservés', () => {
+  const out = sanitizeSequence({ id: 'seq-mixte', items: [
+    { src: 'worlds/demo/handout.webp', title: 'Legacy', note: 'sans type' },
+    { type: 'audio', src: 'worlds/demo/theme.mp3', targets: ['ABCDEFGHIJKLMNOP'] },
+    { type: 'chat', text: '<em>Un message urgent…</em>', title: 'HoloNet' },
+    { type: 'chat', text: '' }, // chat vide : retiré
+  ] });
+  assert.equal(out.items.length, 3);
+  assert.equal(out.items[0].type, 'image', 'item legacy sans type = image');
+  assert.equal(out.items[0].note, 'sans type', 'la note MJ reste portée par l’item');
+  assert.deepEqual(out.items[1].targets, ['ABCDEFGHIJKLMNOP']);
+  assert.equal(out.items[2].text, '<em>Un message urgent…</em>');
+  assert.equal(out.items[2].src, undefined);
+});
+
 /* --------------------------------------------------------------- storyboard -- */
 test('sanitizeStoryboard : kinds/status en table fermée, uuids normalisés dédupliqués', () => {
   const out = sanitizeStoryboard({ beats: [
@@ -120,6 +169,17 @@ test('sanitizeStoryboard : pièces jointes selon le kind (séquence ≠ note, so
   assert.deepEqual(out.beats[0].sound, { playlist: 'Cantina' });
   assert.equal(out.beats[1].sequenceId, undefined);
   assert.equal(out.beats[1].sound.playlist.length, 100);
+});
+
+test('sanitizeStoryboard : handout UNITAIRE inline réservé au kind handout, assaini', () => {
+  const out = sanitizeStoryboard({ beats: [
+    { id: 'b1', kind: 'handout', handout: { type: 'chat', text: 'Un datapad grésille…', targets: ['ABCDEFGHIJKLMNOP'] } },
+    { id: 'b2', kind: 'scene', handout: { type: 'image', src: 'worlds/demo/x.webp' } },
+    { id: 'b3', kind: 'handout', handout: { type: 'image', src: '' } }, // vide : retiré
+  ] });
+  assert.deepEqual(out.beats[0].handout, { type: 'chat', title: '', text: 'Un datapad grésille…', targets: ['ABCDEFGHIJKLMNOP'] });
+  assert.equal(out.beats[1].handout, undefined, 'inline réservé au kind handout');
+  assert.equal(out.beats[2].handout, undefined, 'handout vide retiré');
 });
 
 test('sanitizeStoryboard : entrée vide/malveillante → { beats: [] }', () => {

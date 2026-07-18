@@ -81,7 +81,7 @@ export function createStore({ dataDir, logger = console }) {
   async function syncUsers() {
     const users = await mcpCall('get_users', {});
     set('users', (Array.isArray(users) ? users : []).filter((u) => u && u._id)
-      .map((u) => ({ _id: u._id, name: u.name, role: u.role, character: u.character || null, color: u.color || null })));
+      .map((u) => ({ _id: u._id, name: u.name, role: u.role, character: u.character || null, color: u.color || null, active: !!u.active })));
   }
 
   async function syncFolders() {

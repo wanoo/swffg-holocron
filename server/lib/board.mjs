@@ -42,6 +42,7 @@ const clampPos = (v) => (Number.isFinite(+v) ? Math.max(-20000, Math.min(20000, 
  *     uuids: ["JournalEntry.<id>", …]  (entités CC impliquées : PNJ/lieux/orgs/quêtes),
  *     encounterId?  (entrée de flags.holocron.encounters — kind combat),
  *     sequenceId?   (entrée de flags.holocron.sequences — kind scene/handout),
+ *     handout?      (kind handout : handout UNITAIRE inline — voir sanitizeHandout),
  *     sound?: { playlist }, status: todo|encours|fait, x?, y? }.
  * MJ-ONLY STRICT : le storyboard ne sort QUE par la vue board (route gm-gated) —
  * jamais dans les vues publiques (buildJournalsView ne le lit pas). */
@@ -74,6 +75,11 @@ export function sanitizeStoryboard(raw) {
       // pièces jointes SELON le kind (le reste est ignoré à l'assainissement)
       if (kind === 'combat' && okId(b.encounterId)) out.encounterId = b.encounterId;
       if ((kind === 'scene' || kind === 'handout') && okId(b.sequenceId)) out.sequenceId = b.sequenceId;
+      if (kind === 'handout' && b.handout && typeof b.handout === 'object') {
+        // handout UNITAIRE inline (sans séquence) : {type, src|text, title, targets?}
+        const h = sanitizeHandout(b.handout);
+        if (h) out.handout = h;
+      }
       const pl = b.sound && typeof b.sound === 'object' ? String(b.sound.playlist || '').slice(0, 100) : '';
       if (pl) out.sound = { playlist: pl };
       if (b.x != null && Number.isFinite(+b.x)) out.x = clampPos(b.x);
@@ -149,23 +155,50 @@ export function sanitizeBoard(raw) {
   return { nodes, edges, hidden };
 }
 
-/** Assainit une séquence de handouts (préparation de séance). */
+/* ---------------------------------------------------------------- handouts --
+ * Un HANDOUT = { type: image|audio|video|chat, src|text, title, targets? } —
+ * envoyé aux joueurs SÉLECTIONNÉS (targets = ids Foundry) ou à toute la table
+ * (targets absent). Cœur commun du pont POST /api/gm/foundry/handout, des items
+ * de séquence et du handout unitaire d'un beat. */
+export const HANDOUT_TYPES = ['image', 'audio', 'video', 'chat'];
+const USER_ID = /^[A-Za-z0-9]{16}$/;
+
+/** Assainit un handout multi-média. Retourne null si rien d'exploitable
+ * (chat sans texte, média sans src). Ne jette jamais. */
+export function sanitizeHandout(raw) {
+  const h = raw && typeof raw === 'object' ? raw : {};
+  const type = HANDOUT_TYPES.includes(h.type) ? h.type : 'image';
+  const src = (() => {
+    const s = String(h.src || '').trim().slice(0, 300);
+    return s.includes('..') ? '' : s; // URL http(s) ou chemin Foundry, jamais de traversée
+  })();
+  // chat : HTML léger autorisé, mais jamais de script/iframe ni de handler inline
+  const text = String(h.text || '').slice(0, 4000)
+    .replace(/<\s*\/?\s*(script|iframe|object|embed|form)[^>]*>/gi, '')
+    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+    .replace(/javascript:/gi, '');
+  const targets = [...new Set((Array.isArray(h.targets) ? h.targets : [])
+    .map((t) => String(t)).filter((t) => USER_ID.test(t)))].slice(0, 30);
+  const out = { type, title: String(h.title || '').slice(0, 120) };
+  if (type === 'chat') { if (!text.trim()) return null; out.text = text; }
+  else { if (!src) return null; out.src = src; }
+  if (targets.length) out.targets = targets; // absent = toute la table
+  return out;
+}
+
+/** Assainit une séquence de handouts (préparation de séance). Rétrocompat :
+ * item sans `type` = image, sans `targets` = toute la table. */
 export function sanitizeSequence(raw) {
   const s = raw && typeof raw === 'object' ? raw : {};
-  const cleanSrc = (v) => {
-    const src = String(v || '').trim().slice(0, 500);
-    return src.includes('..') ? '' : src; // URL http(s) ou chemin Foundry, jamais de traversée
-  };
   return {
     id: okId(s.id) ? s.id : `seq-${Math.random().toString(36).slice(2, 10)}`,
     name: String(s.name || 'Séquence').slice(0, 80),
     items: (Array.isArray(s.items) ? s.items : []).slice(0, 40)
-      .map((it) => ({
-        src: cleanSrc(it?.src),
-        title: String(it?.title || '').slice(0, 120),
-        note: String(it?.note || '').slice(0, 500),
-      }))
-      .filter((it) => it.src),
+      .map((it) => {
+        const h = sanitizeHandout(it);
+        return h ? { ...h, note: String(it?.note || '').slice(0, 500) } : null;
+      })
+      .filter(Boolean),
     updatedAt: Date.now(),
   };
 }

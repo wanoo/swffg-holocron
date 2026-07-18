@@ -379,6 +379,14 @@ async function handleApi(req, res, urlPath) {
         return sendJSON(res, e.code || 500, { error: e.message, ...(e.current ? { current: e.current } : {}) });
       }
     }
+    // Vue MJ légère des joueurs (picker de destinataires des handouts) :
+    // id, name, actif, gm — jamais les rôles numériques ni les secrets.
+    if (parts[1] === 'players' && req.method === 'GET') {
+      const players = (store.get('users') || []).map((u) => ({
+        id: u._id, name: u.name, active: !!u.active, gm: (u.role || 0) >= 3,
+      }));
+      return sendJSON(res, 200, { players });
+    }
     // Éditeur de campagne (carte de campagne MJ) : board persisté + catalogue
     // dérivé + séquences de handouts — journal technique config.journals.board.
     if (parts[1] === 'board') {
@@ -486,7 +494,13 @@ async function handleApi(req, res, urlPath) {
         }
         if (action === 'handouts' && req.method === 'GET') return sendJSON(res, 200, { journals: await tools.listHandouts() });
         if (action === 'handout' && req.method === 'POST') {
-          const body = JSON.parse(await readBody(req));
+          const body = JSON.parse(await readBody(req, 20_000));
+          // handout multi-média ciblé {type, src|text, title, targets[]} (pont
+          // module holocron.handout) — sinon compat : partage d'un journal par id.
+          if (['chat', 'image', 'audio', 'video'].includes(body.type)) {
+            await tools.handoutBridge({ type: body.type, src: body.src, text: body.text, title: body.title, targets: body.targets });
+            return sendJSON(res, 200, { ok: true });
+          }
           await tools.showHandout(body.id, body.name);
           return sendJSON(res, 200, { ok: true });
         }
