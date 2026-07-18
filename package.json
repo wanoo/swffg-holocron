@@ -5,7 +5,9 @@
   "type": "module",
   "license": "MIT",
   "repository": "github:wanoo/swffg-holocron",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "node server/index.mjs",
     "check": "find server public/js -name '*.mjs' -o -name '*.js' | xargs -n1 node --check",
