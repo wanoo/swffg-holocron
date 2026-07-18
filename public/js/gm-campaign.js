@@ -348,7 +348,7 @@ export async function mountGmCampaign(main, cleanup = []) {
   const panel = el('div', 'gmc-panel');
   side.append(tabs, panel);
   let activeTab = 'objets';
-  const TABS = [['objets', '📚 Objets'], ['selection', '🔍 Sélection'], ['projeter', '🎞️ Projeter']];
+  const TABS = [['objets', '📚 Objets'], ['selection', '🔍 Sélection'], ['projeter', '🎞️ Projeter'], ['ambiance', '🎵 Ambiance']];
   function paintTabs() {
     tabs.innerHTML = '';
     for (const [id, label] of TABS) {
@@ -370,7 +370,63 @@ export async function mountGmCampaign(main, cleanup = []) {
     panel.innerHTML = '';
     if (activeTab === 'objets') return paintObjects();
     if (activeTab === 'projeter') return paintProjeter();
+    if (activeTab === 'ambiance') return paintAmbiance();
     return paintSelection();
+  }
+
+  /* -------------------------------------------------- 🎵 Ambiances (lot 4) -- */
+  // Liste des playlists Foundry (connecteur MCP get_playlists) ; lecture/arrêt
+  // via le PONT ChatMessage holocron.sound (module ≥ 2.2 : playAll/stopAll, le
+  // vrai moteur — fiable quel que soit le mode de la playlist). Repli : champ
+  // « nom de playlist » si la liste est indisponible.
+  let playlists = null; // null = pas encore chargées, [] = échec/aucune
+  async function loadPlaylists() {
+    try { playlists = (await api('/gm/foundry/playlists')).playlists || []; }
+    catch { playlists = []; }
+  }
+  async function playSound(playlist, action, statusEl) {
+    if (statusEl) statusEl.textContent = '…';
+    try {
+      await api('/gm/foundry/sound', { method: 'POST', body: JSON.stringify({ playlist, action }) });
+      if (statusEl) statusEl.textContent = action === 'stop' ? '⏹ Arrêt demandé' : `▶ Lecture demandée — ${playlist}`;
+    } catch (e) { if (statusEl) statusEl.textContent = `⚠️ ${e.message}`.slice(0, 60); }
+  }
+
+  function paintAmbiance() {
+    panel.appendChild(el('p', 'eyebrow', '🎵 Ambiances'));
+    panel.appendChild(el('p', 'gmc-hint', 'Joue/arrête les playlists Foundry chez les joueurs (client MJ Foundry ouvert requis).'));
+    const status = el('p', 'gmc-hint', '');
+    const list = el('div', 'gmc-obj-list', '<p class="muted">chargement…</p>');
+    panel.append(list, status);
+    const paintList = () => {
+      list.innerHTML = '';
+      if (!playlists?.length) {
+        // repli : nom de playlist en clair (la liste MCP est indisponible)
+        list.appendChild(el('p', 'muted', playlists === null ? 'chargement…' : 'Liste indisponible — entre le nom exact de la playlist.'));
+        const row = el('div', 'gmc-seq-nav');
+        const inp = el('input', 'gmc-input');
+        inp.placeholder = 'Nom de playlist Foundry';
+        const play = el('button', 'gmc-btn gold', '▶'); play.type = 'button';
+        play.addEventListener('click', () => inp.value.trim() && playSound(inp.value.trim(), 'play', status));
+        const stop = el('button', 'gmc-btn', '⏹'); stop.type = 'button';
+        stop.addEventListener('click', () => inp.value.trim() && playSound(inp.value.trim(), 'stop', status));
+        row.append(inp, play, stop);
+        list.appendChild(row);
+        return;
+      }
+      for (const p of playlists) {
+        const row = el('div', 'gmc-obj');
+        row.appendChild(el('span', 'gmc-obj-name', `${p.playing ? '🔊 ' : ''}${esc(p.name)}`));
+        const play = el('button', 'gmc-mini', '▶'); play.type = 'button'; play.title = 'Jouer (chez les joueurs)';
+        play.addEventListener('click', () => playSound(p.name, 'play', status));
+        const stop = el('button', 'gmc-mini', '⏹'); stop.type = 'button'; stop.title = 'Arrêter';
+        stop.addEventListener('click', () => playSound(p.name, 'stop', status));
+        row.append(play, stop);
+        list.appendChild(row);
+      }
+    };
+    if (playlists === null) loadPlaylists().then(() => { if (activeTab === 'ambiance') paintList(); });
+    paintList();
   }
 
   // « À trier » : place les nouveaux nœuds en cascade en haut-gauche de la vue.
@@ -519,6 +575,36 @@ export async function mountGmCampaign(main, cleanup = []) {
     if (rels.length) {
       const box = el('div', 'gmc-rels');
       box.innerHTML = '<p class="gmc-field-lbl">Relations custom</p>' + rels.map((r) => `<p class="gmc-rel">${r}</p>`).join('');
+      panel.appendChild(box);
+    }
+
+    // 🎵 ambiance associée au nœud (board.nodes[id].sound.playlist) : ▶ en un clic.
+    if (p) {
+      const box = el('div', 'gmc-rels');
+      box.appendChild(el('p', 'gmc-field-lbl', '🎵 Ambiance du nœud'));
+      const row = el('div', 'gmc-seq-nav');
+      const inp = el('input', 'gmc-input');
+      inp.placeholder = 'Playlist Foundry…';
+      inp.setAttribute('list', 'gmc-playlists');
+      inp.value = p.sound?.playlist || '';
+      inp.addEventListener('change', () => {
+        const v = inp.value.trim();
+        if (v) p.sound = { playlist: v }; else delete p.sound;
+        scheduleSave();
+        paint();
+      });
+      const play = el('button', 'gmc-btn gold', '▶'); play.type = 'button'; play.title = 'Jouer cette ambiance chez les joueurs';
+      const stop = el('button', 'gmc-btn', '⏹'); stop.type = 'button'; stop.title = 'Arrêter cette ambiance';
+      const status = el('p', 'gmc-hint', '');
+      play.addEventListener('click', () => { const v = inp.value.trim(); if (v) playSound(v, 'play', status); });
+      stop.addEventListener('click', () => { const v = inp.value.trim(); if (v) playSound(v, 'stop', status); });
+      row.append(inp, play, stop);
+      box.append(row, status);
+      // datalist des playlists connues (remplie à la volée)
+      let dl = document.getElementById('gmc-playlists');
+      if (!dl) { dl = el('datalist'); dl.id = 'gmc-playlists'; wrap.appendChild(dl); }
+      const fillDl = () => { dl.innerHTML = (playlists || []).map((x) => `<option value="${esc(x.name)}">`).join(''); };
+      if (playlists === null) loadPlaylists().then(fillDl); else fillDl();
       panel.appendChild(box);
     }
 

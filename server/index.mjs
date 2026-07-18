@@ -484,6 +484,12 @@ async function handleApi(req, res, urlPath) {
           return sendJSON(res, 200, { ok: true });
         }
         if (action === 'playlists' && req.method === 'GET') return sendJSON(res, 200, { playlists: await tools.listPlaylists() });
+        // 🎵 pont son par ChatMessage (module) : lecture/arrêt fiable via playAll/stopAll
+        if (action === 'sound' && req.method === 'POST') {
+          const body = JSON.parse(await readBody(req, 5000));
+          await tools.soundBridge({ playlist: body.playlist, sound: body.sound, action: body.action });
+          return sendJSON(res, 200, { ok: true });
+        }
         if (action === 'ambiance' && req.method === 'POST') {
           const body = JSON.parse(await readBody(req));
           await tools.setAmbiance(body.id, body.action, body.exclusive);

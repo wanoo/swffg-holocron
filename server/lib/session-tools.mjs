@@ -118,6 +118,23 @@ export async function showImage({ src, title = '' }) {
   }] });
 }
 
+// 🎵 Pont son (module ≥ 2.2) : message-requête flaggé holocron.sound — le module
+// Foundry (MJ actif) joue/arrête la playlist (ou la piste) avec playAll/stopAll,
+// le vrai moteur de lecture (modifier `playing` par MCP ne suffit pas selon le
+// mode de la playlist), puis supprime la requête. playlist = NOM ou id.
+export async function soundBridge({ playlist, sound = '', action = 'play' }) {
+  const p = String(playlist || '').trim().slice(0, 100);
+  if (!p) throw new Error('playlist requise');
+  const act = action === 'stop' ? 'stop' : 'play';
+  const author = await mcpAuthorId();
+  await mcpCall('create_document', { type: 'ChatMessage', data: [{
+    author,
+    whisper: [author],
+    content: `<p style="opacity:.55;font-size:.85em">🎵 ${act === 'stop' ? 'Stop' : 'Lecture'} — ${p.replace(/</g, '&lt;')}</p>`,
+    flags: { holocron: { sound: { action: act, playlist: p, ...(sound ? { sound: String(sound).trim().slice(0, 100) } : {}) } } },
+  }] });
+}
+
 export async function listPlaylists() {
   const list = await mcpCall('get_playlists', { requested_fields: ['_id', 'name', 'playing'] });
   return (Array.isArray(list) ? list : []).map((p) => ({ id: p._id, name: p.name, playing: !!p.playing }));

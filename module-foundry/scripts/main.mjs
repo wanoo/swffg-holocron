@@ -143,6 +143,26 @@ Hooks.on("createChatMessage", async (msg) => {
   finally { await msg.delete().catch(() => {}); }
 });
 
+/* Pont web → son : l'Archive Holocron poste un ChatMessage flaggé holocron.sound
+   { action: "play"|"stop", playlist, sound? } (POST /api/gm/foundry/sound). Le MJ
+   « actif » joue/arrête la playlist (ou la piste précise) avec le VRAI moteur
+   Foundry (playAll/stopAll — un modify_document `playing` ne déclenche pas la
+   lecture selon le mode de la playlist), puis supprime la requête. */
+Hooks.on("createChatMessage", async (msg) => {
+  const req = msg.flags?.holocron?.sound;
+  if (!req?.playlist || !isTripApplier()) return;
+  try {
+    const pl = game.playlists.getName(req.playlist) ?? game.playlists.get(req.playlist);
+    if (!pl) { console.warn(`swffg-holocron | playlist introuvable : ${req.playlist}`); return; }
+    if (req.action === "stop") await pl.stopAll();
+    else if (req.sound) {
+      const s = pl.sounds.getName(req.sound) ?? pl.sounds.get(req.sound);
+      if (s) await pl.playSound(s); else await pl.playAll();
+    } else await pl.playAll();
+  } catch (e) { console.warn("swffg-holocron | sound", e); }
+  finally { await msg.delete().catch(() => {}); }
+});
+
 /* Au chargement : widgets Campaign Codex + installation + POI « vous êtes ici ». */
 Hooks.once("ready", async () => {
   // Widgets CC embarqués (Resource Bar, Quest Graph, Ressources du vaisseau) —
