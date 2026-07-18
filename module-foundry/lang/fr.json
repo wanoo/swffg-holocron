@@ -48,6 +48,9 @@
       },
       "notesPageName": "📓 Notes d'équipage"
     },
+    "handout": {
+      "sentTo": "📜 Handout envoyé à {names}"
+    },
     "deck": {
       "title": "Holocron — Poste de commande",
       "allegiance": "Allégeance du groupe",
