@@ -8,19 +8,52 @@
       name="description"
       content="Archive hors-ligne des journaux, fiches et bestiaire d'une campagne Star Wars — Force et Destinée (FFG)."
     />
-    <meta name="theme-color" content="#0e1116" />
+    <meta name="theme-color" content="#01070d" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <script>
+      // Anti-flash : applique le thème ET l'emblème persistés AVANT le premier rendu.
+      // La config ui de MONDE (thème verrouillé, emblème MJ) n'est connue que du
+      // serveur : on lit son CACHE localStorage (posé par data.js) pour l'appliquer
+      // sans flash dès la 2e visite ; la 1re visite est corrigée à l'arrivée de la
+      // config (accepté). Le cas « MJ + thème verrouillé » est affiné par app.js.
+      (function () {
+        var t = null, e = null, ui = null;
+        try {
+          t = localStorage.getItem('holocron-theme');
+          e = localStorage.getItem('holocron-emblem');
+          var cfg = JSON.parse(localStorage.getItem('holocron-cache:/content/config') || 'null');
+          ui = (cfg && cfg.body && cfg.body.ui) || null;
+        } catch (err) { /* stockage indisponible */ }
+        var ok = ['force-jedi', 'force-sith', 'age-of-rebellion', 'edge-of-the-empire'];
+        if (ui && ok.indexOf(ui.theme) >= 0 && (ui.themeLocked || ok.indexOf(t) < 0)) t = ui.theme;
+        document.documentElement.setAttribute('data-theme', ok.indexOf(t) >= 0 ? t : 'force-jedi');
+        // Miroir de la liste de js/emblem.js (source du picker).
+        var eok = ['rebel-alliance', 'galactic-empire', 'jedi-order', 'jedi', 'new-jedi-order',
+          'sith', 'sith-empire', 'galactic-republic', 'old-republic', 'new-republic',
+          'galactic-senate', 'separatists', 'first-order', 'phoenix-squadron', 'mandalorian',
+          'nite-owls', 'black-sun', 'crimson-dawn', 'pyke-syndicate', 'hutt-clan', 'credits'];
+        if (ui && eok.indexOf(ui.emblem) >= 0) e = ui.emblem; // l'emblème de monde prime
+        document.documentElement.style.setProperty(
+          '--user-emblem',
+          "url('/img/emblems/" + (eok.indexOf(e) >= 0 ? e : 'rebel-alliance') + ".svg')"
+        );
+      })();
+    </script>
+    <link rel="stylesheet" href="css/themes.css" />
     <link rel="stylesheet" href="css/fonts.css" />
     <link rel="stylesheet" href="css/dice.css" />
     <link rel="stylesheet" href="css/journal.css" />
     <link rel="stylesheet" href="css/sheet.css" />
     <link rel="stylesheet" href="css/app.css" />
+    <link rel="stylesheet" href="css/home.css" />
   </head>
   <body>
     <a class="skip-link" href="#content">Aller au contenu</a>
 
+    <!-- Barre mobile : uniquement le burger (ouvre le tiroir) + la marque.
+         Sur desktop la topbar n'existe plus : tout vit dans la sidebar. -->
     <header class="topbar">
       <button class="icon-btn hamburger" id="btn-menu" aria-label="Ouvrir le menu" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -29,25 +62,24 @@
         <span class="brand-mark" aria-hidden="true">◈</span>
         <span class="brand-text">Archive Holocron</span>
       </a>
-      <div class="topbar-spacer"></div>
-      <button class="search-trigger" id="btn-search" aria-label="Rechercher (Ctrl+K)">
-        <span aria-hidden="true">⌕</span>
-        <span class="search-trigger-label">Rechercher</span>
-        <kbd>Ctrl K</kbd>
-      </button>
-      <button class="icon-btn" id="btn-generator" aria-label="Générateur de dés" title="Générateur de dés">
-        <span aria-hidden="true">🎲</span>
-      </button>
-      <button class="icon-btn" id="btn-gm" aria-label="Espace Maître du Jeu" title="Espace MJ (clé requise)">
-        <span aria-hidden="true">🔒</span>
-      </button>
-      <button class="icon-btn" id="btn-legend" aria-label="Légende des dés et symboles" title="Dés &amp; Symboles">
-        <span class="ffg-die dt-proficiency" aria-hidden="true">c</span>
-      </button>
     </header>
 
     <div class="layout">
       <aside class="sidebar" id="sidebar" aria-label="Navigation">
+        <!-- Emblème du site (choisi par l'utilisateur, masque SVG teinté par le thème) -->
+        <div class="sidebar-brand">
+          <button
+            class="sb-emblem-btn"
+            id="btn-emblem"
+            aria-label="Choisir l'emblème du site"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            title="Emblème"
+          >
+            <span class="sb-emblem" aria-hidden="true"></span>
+          </button>
+          <span class="sb-word">Archive<br />Holocron</span>
+        </div>
         <div class="sidebar-search">
           <input
             id="sidebar-search-box"
@@ -57,8 +89,39 @@
             aria-label="Ouvrir la recherche"
           />
         </div>
-        <div class="filters" id="filters" role="group" aria-label="Filtrer par catégorie"></div>
-        <nav class="tree" id="tree" aria-label="Sommaire"></nav>
+        <!-- Actions rapides (ex-topbar) : dés, thème, compte, MJ -->
+        <div class="sidebar-actions" id="sidebar-actions" role="group" aria-label="Actions rapides">
+          <button
+            class="icon-btn"
+            id="btn-dice"
+            aria-label="Dés : lancer et légende des symboles"
+            aria-haspopup="dialog"
+            title="Dés &amp; symboles"
+          >
+            <span class="ffg-die dt-proficiency" aria-hidden="true">c</span>
+          </button>
+          <button
+            class="icon-btn"
+            id="btn-theme"
+            aria-label="Choisir le thème d'interface"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            title="Thème"
+          >
+            <span class="theme-dot" aria-hidden="true"></span>
+          </button>
+          <button class="icon-btn" id="btn-gm" aria-label="Espace Maître du Jeu" title="Espace MJ (clé requise)">
+            <i class="ico" style="--ico: url('/img/icons/profile.svg')" aria-hidden="true"></i>
+          </button>
+        </div>
+        <!-- Deux zones : sélecteur de parties (haut) + chapitrage (bas, scroll indépendant) -->
+        <nav class="sidebar-parts" id="parts" aria-label="Sections de l'archive"></nav>
+        <nav class="sidebar-chapters" id="chapters" aria-label="Chapitres"></nav>
+        <!-- Retour au tableau de bord, façon mockups -->
+        <a class="holocron-btn" id="holocron-home" href="#/">
+          <span class="hb-ico" aria-hidden="true"></span>
+          <span>Holocron central</span>
+        </a>
       </aside>
 
       <main class="main" id="content" tabindex="-1"></main>
@@ -83,22 +146,11 @@
       </div>
     </div>
 
-    <!-- Modale légende -->
-    <div class="modal-backdrop on-dark" id="legend" hidden>
+    <!-- Modale dés : générateur + légende des symboles (fusionnés) -->
+    <div class="modal-backdrop on-dark" id="generator" hidden>
       <div class="modal" role="dialog" aria-modal="true" aria-label="Dés et symboles">
         <div class="modal-head">
           <h2>Dés &amp; Symboles</h2>
-          <button class="icon-btn" data-close aria-label="Fermer">✕</button>
-        </div>
-        <div class="modal-body" id="legend-body"></div>
-      </div>
-    </div>
-
-    <!-- Modale générateur de dés -->
-    <div class="modal-backdrop on-dark" id="generator" hidden>
-      <div class="modal" role="dialog" aria-modal="true" aria-label="Générateur de dés">
-        <div class="modal-head">
-          <h2>Générateur de dés</h2>
           <button class="icon-btn" data-close aria-label="Fermer">✕</button>
         </div>
         <div class="modal-body" id="generator-body"></div>

@@ -12,7 +12,8 @@ const SHIP_DEFAULTS = { name: 'Vaisseau du groupe', vivres: 60, vivresMax: 60, f
 // --- tableau de bord : les données Foundry (SSOT) réaffichées par l'Holocron -----
 // codex (allégeance/PJ/PNJ), HoloNet, vaisseau — via /api/(gm/)foundry/dash.
 // Repli hors-ligne : données statiques du site + localStorage.
-async function fetchDash() {
+// Exporté : le widget « Synthèse » du tableau de bord (#/) le réutilise.
+export async function fetchDash() {
   const gm = getGMKey() || Data.gm; // clé de secours OU session MJ Foundry
   try {
     if (gm) {

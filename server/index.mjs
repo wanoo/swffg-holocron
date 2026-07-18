@@ -18,6 +18,7 @@ import {
 import { setCorsOrigin, cors, sendJSON, sendVersioned, readBody, rateLimited, makeStatic, MIME } from './lib/http.mjs';
 import { createContentService } from './lib/content.mjs';
 import { createWriteService, createEncounterService } from './lib/write.mjs';
+import { createBoardService } from './lib/board.mjs';
 import { createShipService, createDashService } from './lib/ship.mjs';
 import { createAstroService } from './lib/astro.mjs';
 import * as tools from './lib/session-tools.mjs';
@@ -29,16 +30,18 @@ const PUBLIC_DIR = process.env.HOLOCRON_PUBLIC_DIR || join(__dirname, '..', 'pub
 setCorsOrigin(ENV.corsOrigin);
 configureAuth({ sessionSecret: ENV.sessionSecret, foundryBaseUrl: ENV.foundryBaseUrl });
 
-// --- connecteur Foundry (embarqué stdio par défaut, gateway HTTP en option) ---
-const childEntry = ['node', join(__dirname, '..', 'node_modules', 'foundry-mcp-server', 'build', 'server.js')];
+// --- connecteur Foundry : gateway Rust en sidecar (défaut) ou externe (URL) ---
+const sidecarBin = process.env.FOUNDRY_GATEWAY_BIN || join(__dirname, '..', 'vendor', 'foundry-mcp');
 const mode = configureMcp({
   foundryMcpUrl: ENV.foundryMcpUrl,
   credentialsJson: ENV.foundryCredentialsJson,
-  childEntry: existsSync(childEntry[1]) ? childEntry : null,
-  dataDir: ENV.dataDir,
+  sidecarBin: existsSync(sidecarBin) ? sidecarBin : null,
   logger: console,
 });
 console.log(`[holocron] connecteur Foundry : mode ${mode}`);
+if (mode === 'none' && ENV.foundryCredentialsJson) {
+  console.warn('[holocron] binaire gateway absent (vendor/foundry-mcp) — lancez scripts/fetch-gateway.mjs ou définissez FOUNDRY_MCP_URL / FOUNDRY_GATEWAY_BIN');
+}
 
 // --- store + services -----------------------------------------------------------
 const store = createStore({ dataDir: ENV.dataDir, logger: console });
@@ -46,6 +49,7 @@ const cc = () => campaignConfig(store);
 const content = createContentService({ store, config: cc });
 const writer = createWriteService({ store, config: cc, logger: console });
 const encounters = createEncounterService({ store, config: cc });
+const board = createBoardService({ store, config: cc });
 const dashPayload = createDashService({ journals: campaignConfig(store).journals });
 const shipSvc = () => createShipService({ journalName: cc().journals.ship });
 const astro = createAstroService({ publicDir: PUBLIC_DIR, config: cc, store });
@@ -168,9 +172,11 @@ async function handleApi(req, res, urlPath) {
     if (req.method !== 'GET') return sendJSON(res, 405, { error: 'GET uniquement' });
     if (kind === 'manifest') return sendVersioned(req, res, content.manifest(), v.manifest);
     if (kind === 'journals') return sendVersioned(req, res, content.journalsView(session), v.journals * 13 + (session ? 1 : 0) + (isGM(session) ? 7 : 0));
-    if (kind === 'pcs') return sendVersioned(req, res, content.pcsView(), v.pcs);
-    if (kind === 'vehicle') return sendVersioned(req, res, content.vehicleView(), v.vehicle);
+    if (kind === 'pcs') return sendVersioned(req, res, content.pcsView(session), v.pcs * 13 + (session ? 1 : 0) + (isGM(session) ? 7 : 0));
+    if (kind === 'vehicle') return sendVersioned(req, res, content.vehicleView(session), v.vehicle * 13 + (session ? 1 : 0) + (isGM(session) ? 7 : 0));
     if (kind === 'timeline') return sendVersioned(req, res, content.timelineView(session), v.timeline * 13 + (session ? 1 : 0) + (isGM(session) ? 7 : 0));
+    // quêtes joueur-safe ({ id, name, status } filtrés canSee — jamais le graphe)
+    if (kind === 'quests') return sendVersioned(req, res, content.questsPlayerView(session), v.quests * 13 + (session ? 1 : 0) + (isGM(session) ? 7 : 0));
     if (kind === 'dice-helper') return sendVersioned(req, res, content.diceHelper(), v.diceHelper);
     if (kind === 'config') return sendVersioned(req, res, publicConfig(cc(), ENV.foundryBaseUrl), store.version('config'));
     if (kind === 'npcs') {
@@ -340,6 +346,15 @@ async function handleApi(req, res, urlPath) {
       return sendJSON(res, 405, { error: 'méthode non supportée' });
     }
 
+    // Personnalisation de monde (thème/emblème/titre/dashboard/parties) :
+    // patch partiel fusionné dans flags.holocron.config.ui du journal ⚙️.
+    if (parts[1] === 'config' && parts[2] === 'ui') {
+      if (req.method !== 'PUT') return sendJSON(res, 405, { error: 'PUT uniquement' });
+      let body; try { body = JSON.parse(await readBody(req, 50_000)); } catch { return sendJSON(res, 400, { error: 'JSON invalide' }); }
+      try { return sendJSON(res, 200, await writer.uiSave(body)); }
+      catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
+    }
+
     if (parts[1] === 'quests' && req.method === 'GET') return sendJSON(res, 200, content.questsView());
     if (parts[1] === 'docs' && req.method === 'GET' && !id) return sendJSON(res, 200, { docs: writer.gmList() });
     if (parts[1] === 'dossiers' && req.method === 'GET') return sendJSON(res, 200, { dossiers: writer.dossiers() });
@@ -365,6 +380,56 @@ async function handleApi(req, res, urlPath) {
       } catch (e) {
         return sendJSON(res, e.code || 500, { error: e.message, ...(e.current ? { current: e.current } : {}) });
       }
+    }
+    // Vue MJ légère des joueurs (picker de destinataires des handouts) :
+    // id, name, actif, gm — jamais les rôles numériques ni les secrets.
+    if (parts[1] === 'players' && req.method === 'GET') {
+      const players = (store.get('users') || []).map((u) => ({
+        id: u._id, name: u.name, active: !!u.active, gm: (u.role || 0) >= 3,
+      }));
+      return sendJSON(res, 200, { players });
+    }
+    // Éditeur de campagne (carte de campagne MJ) : board persisté + catalogue
+    // dérivé + séquences de handouts — journal technique config.journals.board.
+    if (parts[1] === 'board') {
+      try {
+        if (req.method === 'GET') return sendJSON(res, 200, board.view());
+        if (req.method === 'PUT') {
+          const body = JSON.parse(await readBody(req, 300_000));
+          return sendJSON(res, 200, { ok: true, board: await board.saveBoard(body) });
+        }
+      } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
+      return sendJSON(res, 405, { error: 'méthode non supportée' });
+    }
+    if (parts[1] === 'sequences') {
+      try {
+        if (req.method === 'PUT') {
+          const body = JSON.parse(await readBody(req, 200_000));
+          return sendJSON(res, 200, { ok: true, sequence: await board.saveSequence(body) });
+        }
+        if (req.method === 'DELETE' && id) return sendJSON(res, 200, await board.removeSequence(id));
+      } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
+      return sendJSON(res, 405, { error: 'méthode non supportée' });
+    }
+    // Sommaire d'acte : bloc structuré flags.holocron.actSummary sur le journal d'acte.
+    if (parts[1] === 'act-summary' && id) {
+      if (req.method !== 'PUT') return sendJSON(res, 405, { error: 'PUT uniquement' });
+      try {
+        const body = JSON.parse(await readBody(req, 100_000));
+        return sendJSON(res, 200, { ok: true, actSummary: await board.saveActSummary(id, body) });
+      } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
+    }
+    // Storyboard d'acte (flags.holocron.storyboard sur le journal de l'acte) —
+    // MJ only strict : les beats ne sortent JAMAIS des vues publiques (la lecture
+    // passe par GET /api/gm/board, catalogue des actes). `tagParticipants` :
+    // true = pose/synchronise les tags « mj:acte-<n> » sur les fiches CC
+    // référencées, false = les retire toutes, absent = n'y touche pas.
+    if (parts[1] === 'storyboard' && id) {
+      if (req.method !== 'PUT') return sendJSON(res, 405, { error: 'PUT uniquement' });
+      try {
+        const body = JSON.parse(await readBody(req, 300_000));
+        return sendJSON(res, 200, { ok: true, ...(await board.saveStoryboard(id, body, { tagParticipants: body.tagParticipants })) });
+      } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
     }
     if (parts[1] === 'encounters') {
       try {
@@ -431,7 +496,13 @@ async function handleApi(req, res, urlPath) {
         }
         if (action === 'handouts' && req.method === 'GET') return sendJSON(res, 200, { journals: await tools.listHandouts() });
         if (action === 'handout' && req.method === 'POST') {
-          const body = JSON.parse(await readBody(req));
+          const body = JSON.parse(await readBody(req, 20_000));
+          // handout multi-média ciblé {type, src|text, title, targets[]} (pont
+          // module holocron.handout) — sinon compat : partage d'un journal par id.
+          if (['chat', 'image', 'audio', 'video'].includes(body.type)) {
+            await tools.handoutBridge({ type: body.type, src: body.src, text: body.text, title: body.title, targets: body.targets });
+            return sendJSON(res, 200, { ok: true });
+          }
           await tools.showHandout(body.id, body.name);
           return sendJSON(res, 200, { ok: true });
         }
@@ -441,6 +512,12 @@ async function handleApi(req, res, urlPath) {
           return sendJSON(res, 200, { ok: true });
         }
         if (action === 'playlists' && req.method === 'GET') return sendJSON(res, 200, { playlists: await tools.listPlaylists() });
+        // 🎵 pont son par ChatMessage (module) : lecture/arrêt fiable via playAll/stopAll
+        if (action === 'sound' && req.method === 'POST') {
+          const body = JSON.parse(await readBody(req, 5000));
+          await tools.soundBridge({ playlist: body.playlist, sound: body.sound, action: body.action });
+          return sendJSON(res, 200, { ok: true });
+        }
         if (action === 'ambiance' && req.method === 'POST') {
           const body = JSON.parse(await readBody(req));
           await tools.setAmbiance(body.id, body.action, body.exclusive);

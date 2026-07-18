@@ -1,34 +1,37 @@
-// mcp.mjs — connecteur Foundry à deux modes, avec file d'appels SÉQUENTIELLE.
+// mcp.mjs — connecteur Foundry (gateway Rust) à deux modes, file SÉQUENTIELLE.
 //
-//   Mode A (embarqué, défaut)  : spawn du serveur foundry-mcp-server en process
-//     enfant STDIO (JSON-RPC ligne à ligne) — un seul runtime, supervision +
-//     redémarrage automatique du child s'il meurt.
-//   Mode B (externe)           : FOUNDRY_MCP_URL vers un gateway MCP
-//     « streamable HTTP » (setup historique ; utile quand le gateway sert aussi
-//     d'autres clients, ex. sessions Claude).
+//   Mode sidecar (défaut)  : spawn du binaire foundry-mcp-gateway (Rust) en
+//     process enfant HTTP sur localhost — supervision : respawn s'il meurt,
+//     chien de garde si la session Foundry est morte (échecs consécutifs).
+//   Mode http (externe)    : FOUNDRY_MCP_URL vers un gateway déjà déployé
+//     (utile quand il sert aussi d'autres clients, ex. sessions Claude).
 //
-// Règle d'or : le client Foundry ne supporte PAS les appels concurrents →
+// Le binaire sidecar est téléchargé par scripts/fetch-gateway.mjs (postinstall)
+// dans vendor/, ou fourni via FOUNDRY_GATEWAY_BIN (dev : target/release local).
+// Règle d'or : le monde Foundry n'aime pas les appels concurrents →
 // mcpQueue() sérialise TOUT (sync d'arrière-plan comme routes MJ).
 import { spawn } from 'node:child_process';
 import { createInterface } from 'node:readline';
-import { writeFileSync, mkdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { randomBytes } from 'node:crypto';
 
-let cfg = { mode: 'none', url: '', childCmd: null, credsJson: '', credsPath: '', logger: console };
+let cfg = { mode: 'none', url: '', bin: null, credsJson: '', logger: console };
 
-export function configureMcp({ foundryMcpUrl, credentialsJson, childEntry, dataDir = './data', logger }) {
+export function configureMcp({ foundryMcpUrl, credentialsJson, sidecarBin, logger }) {
   cfg.logger = logger || console;
   if (foundryMcpUrl) {
     cfg.mode = 'http';
     cfg.url = foundryMcpUrl;
-  } else if (credentialsJson && childEntry) {
-    cfg.mode = 'stdio';
-    cfg.childCmd = childEntry;
-    cfg.credsJson = credentialsJson;
-    // le serveur MCP lit un FICHIER de credentials (env FOUNDRY_CREDENTIALS)
-    mkdirSync(dataDir, { recursive: true });
-    cfg.credsPath = join(dataDir, 'foundry_credentials.json');
-    writeFileSync(cfg.credsPath, credentialsJson, { mode: 0o600 });
+  } else if (credentialsJson && sidecarBin) {
+    cfg.mode = 'sidecar';
+    cfg.bin = sidecarBin;
+    // le gateway exige un _id par entrée — les envs historiques (ère TS) ne
+    // l'ont pas : on le complète pour rester zéro-config.
+    try {
+      const arr = JSON.parse(credentialsJson);
+      cfg.credsJson = Array.isArray(arr)
+        ? JSON.stringify(arr.map((c, i) => ({ _id: `world-${i}`, ...c })))
+        : credentialsJson;
+    } catch { cfg.credsJson = credentialsJson; }
   } else {
     cfg.mode = 'none';
   }
@@ -44,7 +47,7 @@ export function mcpQueue(fn) {
   return run;
 }
 
-/* ------------------------------------------------------------- mode B : HTTP */
+/* ------------------------------------------------------- client MCP « HTTP » */
 let httpSid = null;
 let rid = 1000;
 async function httpRpc(payload) {
@@ -75,84 +78,86 @@ async function httpCall(name, args) {
   }
 }
 
-/* ----------------------------------------------------------- mode A : stdio */
+/* ------------------------------------------------- sidecar : gateway local -- */
+const SIDECAR_PORT = Number(process.env.FOUNDRY_GATEWAY_PORT || 8788);
 let child = null;
-let childReady = null;
-const pending = new Map(); // id → {resolve, reject}
+let childReady = null;      // promesse résolue quand /health répond
+let respawnDelay = 5000;    // backoff (5 s → 60 s max)
 
-// Chien de garde : quand le monde Foundry redémarre, le child reste vivant
-// mais sa session WebSocket est morte — tous les appels échouent (« Response
-// does not contain … array ») sans que 'exit' ne se déclenche jamais. Au bout
-// de FAIL_LIMIT échecs consécutifs on tue le child : le handler 'exit' le
-// relance avec une session fraîche (plus besoin de redémarrer l'app).
+function startSidecar() {
+  const secret = randomBytes(24).toString('hex');
+  cfg.url = `http://127.0.0.1:${SIDECAR_PORT}/mcp-${secret}`;
+  httpSid = null;
+  cfg.logger.log(`[mcp] démarrage du gateway sidecar : ${cfg.bin} (port ${SIDECAR_PORT})`);
+  child = spawn(cfg.bin, [], {
+    stdio: ['ignore', 'pipe', 'pipe'],
+    env: {
+      ...process.env,
+      PORT: String(SIDECAR_PORT),
+      MCP_SECRET: secret,
+      FOUNDRY_CREDENTIALS_JSON: cfg.credsJson,
+    },
+  });
+  for (const stream of [child.stdout, child.stderr]) {
+    const rl = createInterface({ input: stream });
+    rl.on('line', (line) => {
+      if (!line.trim()) return;
+      cfg.logger.log(`[mcp·gw] ${line.length > 400 ? line.slice(0, 400) + '… (tronqué)' : line}`);
+    });
+  }
+  child.on('exit', (code, signal) => {
+    cfg.logger.error(`[mcp] gateway sidecar mort (code=${code} signal=${signal}) — redémarrage dans ${respawnDelay / 1000} s`);
+    child = null; childReady = null; httpSid = null;
+    setTimeout(() => { ensureSidecar().catch(() => {}); }, respawnDelay);
+    respawnDelay = Math.min(respawnDelay * 2, 60_000);
+  });
+  childReady = (async () => {
+    const health = `http://127.0.0.1:${SIDECAR_PORT}/health`;
+    for (let i = 0; i < 60; i++) {
+      try {
+        const r = await fetch(health, { signal: AbortSignal.timeout(2000) });
+        if (r.ok) { respawnDelay = 5000; failStreak = 0; return; }
+      } catch { /* pas encore prêt */ }
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    throw new Error('gateway sidecar : /health injoignable après 60 s');
+  })();
+  return childReady;
+}
+function ensureSidecar() {
+  if (child && childReady) return childReady;
+  return startSidecar();
+}
+
+// Chien de garde : le gateway gère sa propre reconnexion Foundry, mais s'il se
+// retrouve coincé (session zombie, monde redémarré au mauvais moment), on le
+// relance après FAIL_LIMIT échecs consécutifs — tout succès remet à zéro.
 const FAIL_LIMIT = 8;
 let failStreak = 0;
 function noteResult(ok) {
-  if (cfg.mode !== 'stdio') return;
+  if (cfg.mode !== 'sidecar') return;
   if (ok) { failStreak = 0; return; }
   failStreak += 1;
   if (failStreak >= FAIL_LIMIT && child) {
-    cfg.logger.error(`[mcp] ${failStreak} échecs consécutifs — session Foundry supposée morte, redémarrage du connecteur`);
+    cfg.logger.error(`[mcp] ${failStreak} échecs consécutifs — redémarrage du gateway sidecar`);
     failStreak = 0;
     try { child.kill(); } catch { /* déjà mort */ }
   }
 }
 
-function startChild() {
-  failStreak = 0;
-  cfg.logger.log(`[mcp] démarrage du connecteur embarqué : ${cfg.childCmd.join(' ')}`);
-  child = spawn(cfg.childCmd[0], cfg.childCmd.slice(1), {
-    stdio: ['pipe', 'pipe', 'pipe'],
-    env: { ...process.env, FOUNDRY_CREDENTIALS: cfg.credsPath },
-  });
-  // stderr du connecteur : il logge CHAQUE message WebSocket — sur un monde
-  // volumineux ce sont des dumps de plusieurs Mo par tick qui saturent le
-  // pipeline de logs (et la mémoire d'une petite instance). On filtre le
-  // bruit et on tronque le reste.
-  const rlErr = createInterface({ input: child.stderr });
-  rlErr.on('line', (line) => {
-    if (line.includes('WebSocket message') || line.includes('userActivity')) return;
-    cfg.logger.error(`[mcp·child] ${line.length > 500 ? line.slice(0, 500) + '… (tronqué)' : line}`);
-  });
-  const rl = createInterface({ input: child.stdout });
-  rl.on('line', (line) => {
-    let msg; try { msg = JSON.parse(line); } catch { return; }
-    const waiter = pending.get(msg.id);
-    if (waiter) { pending.delete(msg.id); waiter.resolve(msg); }
-  });
-  child.on('exit', (code, signal) => {
-    cfg.logger.error(`[mcp] connecteur mort (code=${code} signal=${signal}) — redémarrage dans 5 s`);
-    for (const [, w] of pending) w.reject(new Error('connecteur redémarré'));
-    pending.clear();
-    child = null; childReady = null;
-    setTimeout(() => { ensureChild().catch(() => {}); }, 5000);
-  });
-  childReady = (async () => {
-    await stdioSend({ jsonrpc: '2.0', id: 0, method: 'initialize', params: { protocolVersion: '2025-03-26', capabilities: {}, clientInfo: { name: 'swffg-holocron', version: '1' } } });
-    child.stdin.write(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' }) + '\n');
-  })();
-  return childReady;
+async function sidecarCall(name, args) {
+  await ensureSidecar();
+  return httpCall(name, args);
 }
-function ensureChild() {
-  if (child && childReady) return childReady;
-  return startChild();
-}
-function stdioSend(payload, timeoutMs = 120_000) {
-  return new Promise((resolve, reject) => {
-    const t = setTimeout(() => { pending.delete(payload.id); reject(new Error('timeout MCP stdio')); }, timeoutMs);
-    pending.set(payload.id, { resolve: (m) => { clearTimeout(t); resolve(m); }, reject: (e) => { clearTimeout(t); reject(e); } });
-    child.stdin.write(JSON.stringify(payload) + '\n');
-  });
-}
-async function stdioCall(name, args) {
-  await ensureChild();
-  // le client Foundry du child se connecte en asynchrone au démarrage : on
-  // laisse quelques secondes avant d'abandonner sur « Not connected ».
+
+// Le gateway se reconnecte tout seul à Foundry, mais un appel tombé pendant ce
+// trou remonte « Not connected to Foundry server » (erreur d'OUTIL, pas réseau :
+// aucun retry ne s'applique sinon). Typiquement le dernier job d'un long tick.
+async function callWithReconnectRetry(fn, name, args) {
   for (let attempt = 0; ; attempt++) {
-    const msg = await stdioSend({ jsonrpc: '2.0', id: ++rid, method: 'tools/call', params: { name, arguments: args } });
-    try { return unpack(msg); }
+    try { return await fn(name, args); }
     catch (e) {
-      if (attempt < 5 && /Not connected/i.test(e.message)) {
+      if (attempt < 4 && /not connected/i.test(e.message || '')) {
         await new Promise((r) => setTimeout(r, 3000));
         continue;
       }
@@ -172,10 +177,11 @@ function unpack(msg) {
   return parsed;
 }
 
-// Appel d'outil, TOUJOURS via la file séquentielle (+ chien de garde stdio).
+// Appel d'outil, TOUJOURS via la file séquentielle (+ chien de garde sidecar).
 export function mcpCall(name, args = {}) {
   if (cfg.mode === 'none') return Promise.reject(new Error('connecteur Foundry non configuré'));
-  return mcpQueue(() => (cfg.mode === 'http' ? httpCall(name, args) : stdioCall(name, args)))
+  const call = cfg.mode === 'http' ? httpCall : sidecarCall;
+  return mcpQueue(() => callWithReconnectRetry(call, name, args))
     .then((v) => { noteResult(true); return v; }, (e) => { noteResult(false); throw e; });
 }
 

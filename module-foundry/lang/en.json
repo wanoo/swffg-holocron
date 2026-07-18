@@ -48,6 +48,9 @@
       },
       "notesPageName": "📓 Crew notes"
     },
+    "handout": {
+      "sentTo": "📜 Handout sent to {names}"
+    },
     "deck": {
       "title": "Holocron",
       "allegiance": "Party allegiance",

@@ -116,6 +116,7 @@ export async function mountShipView(container, cleanupEditors = []) {
     <section class="chapter page-surface shipv-notes">
       <h3 class="sheet-section-title">📓 Notes d'équipage</h3>
       <div class="journal-content" id="shipv-notes"></div>
+      <div id="shipv-groupnotes"></div>
     </section>`;
 
   // Actions rapides (mêmes actions que le deck Foundry, loguées au chat).
@@ -148,6 +149,36 @@ export async function mountShipView(container, cleanupEditors = []) {
     }));
   } else {
     renderJournalHTML(notesEl, notes.html);
+  }
+
+  // Notes de GROUPE : journaux de notes tagués « équipage » / « groupe » /
+  // « vaisseau » (associés côté serveur — vehicle.groupNotes, filtré canSee).
+  // Même présentation que la page d'équipage : titre-lien vers la fiche +
+  // contenu monté dans l'éditeur partagé existant.
+  const gnEl = wrap.querySelector('#shipv-groupnotes');
+  for (const n of (vehicle?.groupNotes || [])) {
+    const j = Data.journalById.get(n.id) || (n.foundryId ? Data.journalById.get(n.foundryId) : null);
+    const block = document.createElement('div');
+    block.className = 'shipv-groupnote';
+    const h = document.createElement('h3');
+    h.className = 'sheet-section-title';
+    h.innerHTML = `<a href="#/journal/${esc(encodeURIComponent(n.id))}" title="Ouvrir le journal complet">📓 ${esc(n.name)}</a>`;
+    block.appendChild(h);
+    if (j && j.pages.length) {
+      for (const p of j.pages) {
+        const body = document.createElement('div');
+        body.className = 'journal-content';
+        // id « <journalId>:<pageId> » : forme canonique de /api/docs (write.mjs)
+        cleanupEditors.push(mountEditablePage(body, { id: `${j.foundryId || n.foundryId}:${p.id}`, name: p.name, html: p.html }));
+        block.appendChild(body);
+      }
+    } else {
+      const p = document.createElement('p');
+      p.className = 'muted';
+      p.textContent = 'Contenu non chargé — ouvre le journal.';
+      block.appendChild(p);
+    }
+    gnEl.appendChild(block);
   }
 
   container.innerHTML = '';

@@ -6,6 +6,7 @@ import { openCard } from './modal.js';
 import { foundryAsset, Data } from './data.js';
 import { getGMKey, gmGetBackrefs, gmGetDossiers } from './collab.js';
 import { addShowButton } from './show-image.js';
+import { mountEditablePage } from './editor.js';
 
 const normSkillKey = (en) => (en || '').replace(/[^A-Za-z]/g, '');
 
@@ -738,6 +739,50 @@ function xpBlock(entity) {
   return sec;
 }
 
+// --- Onglet « 📓 Notes » : journaux de notes du joueur rattachés à la fiche PJ ---
+// (associés côté serveur : tag au nom du PJ prioritaire, sinon ownership — voir
+// server/lib/transform/notes.mjs). Édition = éditeur partagé existant (/api/docs,
+// concurrence 409) monté inline, comme sur la vue #/journal des catégories editable.
+// Les éditeurs montés ici sont nettoyés par la fiche elle-même (au re-rendu et au
+// changement de route), sans toucher au cycle de vie du routeur.
+let notesCleanups = [];
+function disposeNotesEditors() {
+  for (const fn of notesCleanups) { try { fn(); } catch { /* déjà nettoyé */ } }
+  notesCleanups = [];
+}
+window.addEventListener('hashchange', disposeNotesEditors);
+
+function notesBlock(entity) {
+  const notes = entity.notes || [];
+  if (!notes.length) return null;
+  const wrap = el('div', 'sheet-notes');
+  for (const n of notes) {
+    // la vue journals porte déjà le contenu (catégorie notes visible via canSee)
+    const j = Data.journalById.get(n.id) || (n.foundryId ? Data.journalById.get(n.foundryId) : null);
+    const sec = el('section', 'sheet-section sheet-note');
+    const h = el('h3', 'sheet-section-title');
+    const link = el('a', 'sheet-note-link');
+    link.href = `#/journal/${encodeURIComponent(n.id)}`;
+    link.textContent = `📓 ${n.name}`;
+    link.title = 'Ouvrir le journal complet';
+    h.appendChild(link);
+    sec.appendChild(h);
+    if (j && j.pages.length) {
+      for (const p of j.pages) {
+        if (j.pages.length > 1) sec.appendChild(el('h4', 'skill-group-title', escape(p.name)));
+        const body = el('div', 'journal-content');
+        // id « <journalId>:<pageId> » : forme canonique de /api/docs (write.mjs)
+        notesCleanups.push(mountEditablePage(body, { id: `${j.foundryId || n.foundryId}:${p.id}`, name: p.name, html: p.html }));
+        sec.appendChild(body);
+      }
+    } else {
+      sec.appendChild(el('p', 'muted', 'Contenu non chargé — ouvre le journal.'));
+    }
+    wrap.appendChild(sec);
+  }
+  return wrap;
+}
+
 // Enveloppe une section : rend `node`, ou un état vide discret si absent.
 function orEmpty(title, node) {
   if (node) return node;
@@ -751,6 +796,7 @@ function orEmpty(title, node) {
 // onglets de fiche (Jeu / Spécialisations / Pouvoirs / Progression / Bio) pour tout
 // avoir sous la main en jeu sans naviguer de haut en bas.
 export function renderSheet(entity, kind) {
+  disposeNotesEditors(); // éditeurs de notes d'un précédent rendu de fiche
   const mine = Boolean(Data.me && kind === 'pc' && entity && entity.id && entity.id === Data.me.character);
   sheetRoll = {
     foundry: Boolean(Data.me && (mine || Data.gm)), // sa fiche, ou MJ (n'importe quelle fiche)
@@ -780,6 +826,7 @@ export function renderSheet(entity, kind) {
   const forceNode = forceTreesOnly(entity); if (forceNode) entries.push({ label: 'Pouvoirs de Force', node: wrapSection('Arbres de pouvoirs', forceNode) });
   const xp = xpBlock(entity); if (xp) entries.push({ label: '📈 Progression', node: xp });
   const bio = bioBlock(entity); if (bio) entries.push({ label: 'Bio', node: bio });
+  const notesN = notesBlock(entity); if (notesN) entries.push({ label: '📓 Notes', node: notesN });
 
   root.appendChild(sheetTabs(entries));
   appendGmSections(root, entity, kind); // Dossier MJ + « Mentionné dans » — gated, async

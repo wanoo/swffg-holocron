@@ -3,7 +3,7 @@
    (color-mix) et repasse à blanc à l'impression. */
 
 .reader {
-  --page-bg: #121826; /* dalle holocron, un cran au-dessus de --bg */
+  --page-bg: var(--surface-reading, #121826); /* dalle de lecture (token thème) */
   --page-fg: var(--fg);
   --page-muted: var(--fg-muted);
   --page-rule: var(--line);
@@ -18,7 +18,7 @@
   color: var(--page-fg);
   border-radius: 10px;
   border: 1px solid color-mix(in srgb, var(--gold-soft) 26%, var(--line));
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--gold) 14%, transparent) inset, 0 10px 40px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--shadow-panel);
   padding: clamp(1.25rem, 3vw, 2.75rem);
   max-width: 62rem;
   margin: 0 auto 2rem;
@@ -134,13 +134,13 @@
 }
 .journal-table thead th,
 .journal-table th[scope='col'] {
-  background: var(--sw-red); /* en-têtes rouge Empire, fidèles au style FFG */
-  color: #f4e6cf;
+  background: var(--table-head-bg); /* en-tête aux couleurs du thème (rouge FFG sur les sombres) */
+  color: var(--table-head-fg);
   font-weight: 700;
 }
-/* Les liens/styles inline hérités de Foundry restent lisibles sur l'en-tête rouge. */
+/* Les liens/styles inline hérités de Foundry restent lisibles sur l'en-tête. */
 .journal-table thead a,
-.journal-table thead [style*='color'] { color: #f4e6cf !important; }
+.journal-table thead [style*='color'] { color: var(--table-head-fg) !important; }
 .journal-table tbody tr:nth-child(even),
 .journal-table tr:nth-child(even) { background: color-mix(in srgb, var(--gold) 6%, transparent); }
 

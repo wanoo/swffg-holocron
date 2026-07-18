@@ -143,8 +143,87 @@ Hooks.on("createChatMessage", async (msg) => {
   finally { await msg.delete().catch(() => {}); }
 });
 
+/* Pont web → son : l'Archive Holocron poste un ChatMessage flaggé holocron.sound
+   { action: "play"|"stop", playlist, sound? } (POST /api/gm/foundry/sound). Le MJ
+   « actif » joue/arrête la playlist (ou la piste précise) avec le VRAI moteur
+   Foundry (playAll/stopAll — un modify_document `playing` ne déclenche pas la
+   lecture selon le mode de la playlist), puis supprime la requête. */
+Hooks.on("createChatMessage", async (msg) => {
+  const req = msg.flags?.holocron?.sound;
+  if (!req?.playlist || !isTripApplier()) return;
+  try {
+    const pl = game.playlists.getName(req.playlist) ?? game.playlists.get(req.playlist);
+    if (!pl) { console.warn(`swffg-holocron | playlist introuvable : ${req.playlist}`); return; }
+    if (req.action === "stop") await pl.stopAll();
+    else if (req.sound) {
+      const s = pl.sounds.getName(req.sound) ?? pl.sounds.get(req.sound);
+      if (s) await pl.playSound(s); else await pl.playAll();
+    } else await pl.playAll();
+  } catch (e) { console.warn("swffg-holocron | sound", e); }
+  finally { await msg.delete().catch(() => {}); }
+});
+
+/* Pont web → handouts audio/vidéo CIBLÉS : les images passent par l'outil natif
+   share_image du connecteur et le chat par un vrai ChatMessage (whisper) — le
+   module ne reste nécessaire QUE pour l'audio et la vidéo, sans outil natif.
+   L'Archive poste un ChatMessage-requête flaggé holocron.handout
+   { type: "audio"|"video", src, title, targets?: [userIds] } ; le MJ « actif »
+   le diffuse sur le socket du module aux clients visés (targets vide = tous),
+   se rend le handout localement s'il est visé, puis supprime la requête. */
+const HANDOUT_CHANNEL = `module.${MOD}`;
+const handoutForMe = (targets) => !targets?.length || targets.includes(game.user.id);
+
+/** Rendu LOCAL d'un handout audio/vidéo (chaque client visé, MJ compris). */
+async function renderHandout({ type, src, title }) {
+  if (typeof src !== "string" || !src) return;
+  const esc = foundry.utils?.escapeHTML ?? ((s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])));
+  const name = String(title || "Holocron").slice(0, 120);
+  try {
+    if (type === "video") {
+      const content = `<video src="${esc(src)}" controls autoplay style="max-width:100%;display:block;margin:auto"></video>`;
+      const D2 = foundry.applications?.api?.DialogV2; // v12/v13
+      if (D2) {
+        new D2({
+          window: { title: `🎬 ${name}` },
+          content,
+          position: { width: 640 },
+          buttons: [{ action: "close", label: t("common.close"), default: true }],
+        }).render(true);
+      } else {
+        new Dialog({ title: `🎬 ${name}`, content, buttons: { close: { label: t("common.close") } } }, { width: 640 }).render(true);
+      }
+    } else if (type === "audio") {
+      const AH = foundry.audio?.AudioHelper ?? globalThis.AudioHelper; // v13 namespacé / v12
+      await AH.play({ src, volume: 0.8, loop: false }, false); // LOCAL — jamais broadcast
+      ui.notifications.info(`🎵 ${name}`);
+    }
+  } catch (e) { console.warn("swffg-holocron | handout", e); }
+}
+
+Hooks.on("createChatMessage", async (msg) => {
+  const req = msg.flags?.holocron?.handout;
+  if (!req || !["audio", "video"].includes(req.type) || !isTripApplier()) return;
+  try {
+    const targets = (Array.isArray(req.targets) ? req.targets : []).filter((id) => game.users.get(id));
+    const payload = { action: "handout", type: req.type, src: String(req.src || ""), title: String(req.title || ""), targets };
+    game.socket.emit(HANDOUT_CHANNEL, payload);
+    // le socket ne revient jamais à l'émetteur : rendu local si le MJ est visé,
+    // sinon petite confirmation « envoyé à … ».
+    if (handoutForMe(targets)) await renderHandout(payload);
+    else ui.notifications.info(t("handout.sentTo", { names: targets.map((id) => game.users.get(id)?.name).filter(Boolean).join(", ") }));
+  } catch (e) { console.warn("swffg-holocron | handout", e); }
+  finally { await msg.delete().catch(() => {}); }
+});
+
 /* Au chargement : widgets Campaign Codex + installation + POI « vous êtes ici ». */
 Hooks.once("ready", async () => {
+  // Réception des handouts audio/vidéo ciblés (chaque client, MJ ou joueur) :
+  // on ne rend que si on est visé (targets vide = toute la table).
+  game.socket.on(HANDOUT_CHANNEL, (data) => {
+    if (data?.action !== "handout" || !["audio", "video"].includes(data.type)) return;
+    if (!handoutForMe(Array.isArray(data.targets) ? data.targets : [])) return;
+    renderHandout(data);
+  });
   // Widgets CC embarqués (Resource Bar, Quest Graph, Ressources du vaisseau) —
   // enregistrés AVANT l'installation (qui pose le widget vaisseau sur la fiche).
   try { registerHolocronWidgets(); } catch (e) { console.warn("swffg-holocron | widgets", e); }

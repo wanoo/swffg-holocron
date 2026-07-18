@@ -4,6 +4,7 @@
 // (comparé au CACHE, patché à chaque écriture — le client Foundry ne voit pas
 // ses propres writes, on ne re-lit jamais pour vérifier).
 import { mcpCall } from './mcp.mjs';
+import { mergeUiConfig } from './config.mjs';
 
 export function createWriteService({ store, config, logger = console }) {
   const idx = () => store.get('journalsIndex') || [];
@@ -201,6 +202,24 @@ export function createWriteService({ store, config, logger = console }) {
     return { ok: true };
   }
 
+  // --- Personnalisation de monde (flags.holocron.config.ui) -------------------
+  // PUT /api/gm/config/ui : patch PARTIEL fusionné/assaini (mergeUiConfig) puis
+  // écrit sous la seule clé `ui` du flag config (fusion Foundry par chemin —
+  // jamais un remplacement du reste de la config). Write-through sur la
+  // collection `config` du store, comme cfgSave (pas de re-lecture : le client
+  // Foundry ne voit pas ses propres writes).
+  async function uiSave(patch) {
+    const entry = idx().find((j) => j.name === (process.env.CONFIG_JOURNAL_NAME || '⚙️ Holocron Config'));
+    if (!entry) throw Object.assign(new Error('journal ⚙️ Holocron Config absent — POST /api/gm/bootstrap'), { code: 404 });
+    const ui = mergeUiConfig((store.get('config') || {}).ui, patch);
+    await mcpCall('modify_document', {
+      type: 'JournalEntry', _id: entry._id,
+      updates: [{ 'flags.holocron.config.ui': ui }],
+    });
+    store.patch('config', (cfg) => { cfg.ui = ui; });
+    return { ok: true, ui };
+  }
+
   // --- Dossiers MJ (fiche narrative par entité, affichée sur les fiches) ------
   // Journal dédié (config.journals.dossiers), flags.holocron.dossiers =
   // { entityId: { role, statut, veut, levier, indices, attitude, replique, advId } }.
@@ -238,7 +257,7 @@ export function createWriteService({ store, config, logger = console }) {
     return map;
   }
 
-  return { gmList, gmGet, gmSave, publicGet, publicSave, notesList, noteSave, noteDelete, cfgSave, dossiers, backrefs };
+  return { gmList, gmGet, gmSave, publicGet, publicSave, notesList, noteSave, noteDelete, cfgSave, uiSave, dossiers, backrefs };
 }
 
 /* ----------------------------------------------------------------------------

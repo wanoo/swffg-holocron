@@ -1,0 +1,450 @@
+/* themes.css — design system : tokens sémantiques (niveau 1), tokens de
+   composition (niveau 2) et 4 thèmes interchangeables via <html data-theme="…">.
+   Les composants ne consomment QUE ces tokens (ou les alias historiques
+   --bg/--panel/--gold/--holo… redéfinis dans app.css à partir d'eux).
+   Thème par défaut : force-jedi (valeurs posées dans :root). */
+
+:root {
+  /* ---- Niveau 1 — tokens sémantiques (valeurs force-jedi) ----
+     Couleurs relevées sur mockup-force-destiny-jedi.png : fonds quasi noirs
+     bleutés (#00080e…#08111b), or #d09753, bleu holo profond #1c88d0. */
+  --app-background: #030a12;
+  --surface-default: #081019;
+  --surface-raised: #0d1927;
+  --surface-reading: #0a1520;       /* dalle de lecture des journaux */
+  --border-default: #17293c;
+  --border-muted: #101f2e;
+  --border-active: #d9a54f;
+
+  --text-primary: #ecf3fa;
+  --text-secondary: #97abbc;
+  --text-muted: #64798c;
+  --text-on-accent: #201503;
+
+  --accent-primary: #d9a54f;        /* or holocron : titres, actifs, CTA */
+  --accent-muted: #9c7a3f;
+  --accent-bright: #eec06a;
+  --accent-secondary: #2f9fe6;      /* bleu holo : liens, info, focus */
+  --accent-secondary-muted: #1f6ea6;
+
+  --status-success: #58c99a;
+  --status-warning: #e0a23f;
+  --status-danger: #e05561;
+  --status-info: #4fc3ff;
+
+  /* Identité de la sidebar / topbar (peut diverger du contenu, cf. thèmes clairs) */
+  --sidebar-background: #01070d;
+  --sidebar-surface: #071019;
+  --sidebar-surface-raised: #0c1826;
+  --sidebar-border: #142638;
+  --sidebar-text: #e9f0f7;
+  --sidebar-text-secondary: #8ea3b5;
+  --sidebar-text-muted: #5d7284;
+  --sidebar-accent: #d9a54f;
+
+  /* Emblème du thème (masque SVG monochrome, teinté par --sidebar-accent) :
+     ordre ailé stylisé — dessin maison simplifié, pas un logo copié. */
+  --sidebar-emblem: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round'%3E%3Cpath d='M12 3v18'/%3E%3Cpath d='M10.6 5.2L12 3l1.4 2.2L12 9.5z' fill='%23000' stroke='none'/%3E%3Cpath d='M9.3 8.6C6.8 9.6 5 11.7 4.2 14.6'/%3E%3Cpath d='M14.7 8.6c2.5 1 4.3 3.1 5.1 6'/%3E%3Cpath d='M9.8 12.2c-1.7.9-2.9 2.4-3.5 4.6'/%3E%3Cpath d='M14.2 12.2c1.7.9 2.9 2.4 3.5 4.6'/%3E%3C/svg%3E");
+
+  --shadow-panel: 0 1px 0 color-mix(in srgb, var(--accent-primary) 12%, transparent) inset,
+                  0 10px 36px rgba(0, 0, 0, 0.4);
+  --shadow-floating: 0 20px 60px rgba(0, 0, 0, 0.6);
+  --glow-accent: 0 0 16px color-mix(in srgb, var(--accent-primary) 35%, transparent);
+
+  /* Tableaux (thead) et activation des talents : défauts pour thèmes SOMBRES —
+     les thèmes papier (AoR/EotE) surchargent avec des encres plus contrastées. */
+  --table-head-bg: #5a1614;            /* rouge FFG historique */
+  --table-head-fg: #f4e6cf;
+  --act-passive: #5b8fd6;              /* talents passifs (bleu) */
+  --act-active: #d67a5b;               /* talents actifs (rouge) */
+  --act-passive-ink: #7aa8e6;          /* texte associé */
+  --act-active-ink: #e69a7a;
+  --force-accent: #4fbf7a;             /* arbres de Force (vert) */
+
+  /* Matières : une seule texture légère par thème (jamais un mockup complet). */
+  --texture-page:
+    radial-gradient(1px 1px at 12% 24%, rgba(214, 232, 255, 0.5) 48%, transparent 52%),
+    radial-gradient(1px 1px at 38% 71%, rgba(214, 232, 255, 0.35) 48%, transparent 52%),
+    radial-gradient(1px 1px at 64% 12%, rgba(214, 232, 255, 0.42) 48%, transparent 52%),
+    radial-gradient(1px 1px at 87% 51%, rgba(214, 232, 255, 0.3) 48%, transparent 52%),
+    radial-gradient(1px 1px at 25% 92%, rgba(214, 232, 255, 0.28) 48%, transparent 52%);
+  --texture-size: 480px 480px;
+
+  /* Fond de page : PROCÉDURAL par gamme (dégradés CSS + tuiles/tracés SVG en
+     data-URI, rendus à taille native → nets à toute résolution, contrairement
+     aux anciens PNG 723 px upscalés). La config Foundry (dashboardBackground /
+     headerImage) reste prioritaire via applyDashboardArt(), qui repasse alors
+     en « cover » + voile. Les listes size/position/repeat sont alignées couche
+     à couche (le voile est géré à part dans app.css). */
+  /* force-jedi : champ d'étoiles (2 tuiles SVG désynchronisées) + nébuleuse
+     bleutée + carte d'astrogation ultra-discrète (cercles or / bleu holo). */
+  --bgart-stars-fine: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='460' height='460'%3E%3Cg fill='%23d8e9ff'%3E%3Ccircle cx='23' cy='44' r='.7' opacity='.5'/%3E%3Ccircle cx='91' cy='132' r='.6' opacity='.35'/%3E%3Ccircle cx='167' cy='61' r='.9' opacity='.6'/%3E%3Ccircle cx='240' cy='17' r='.6' opacity='.4'/%3E%3Ccircle cx='305' cy='88' r='.7' opacity='.5'/%3E%3Ccircle cx='388' cy='41' r='1.2' opacity='.75'/%3E%3Ccircle cx='441' cy='150' r='.6' opacity='.35'/%3E%3Ccircle cx='58' cy='231' r='.8' opacity='.55'/%3E%3Ccircle cx='139' cy='297' r='.6' opacity='.4'/%3E%3Ccircle cx='219' cy='214' r='1.1' opacity='.7'/%3E%3Ccircle cx='334' cy='266' r='.7' opacity='.45'/%3E%3Ccircle cx='415' cy='321' r='.9' opacity='.6'/%3E%3Ccircle cx='36' cy='376' r='.6' opacity='.4'/%3E%3Ccircle cx='172' cy='428' r='.8' opacity='.5'/%3E%3Ccircle cx='297' cy='394' r='.6' opacity='.35'/%3E%3Ccircle cx='430' cy='437' r='.7' opacity='.5'/%3E%3C/g%3E%3C/svg%3E");
+  --bgart-stars-large: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='700'%3E%3Cg fill='%23eaf3ff'%3E%3Ccircle cx='77' cy='103' r='1.4' opacity='.8'/%3E%3Ccircle cx='253' cy='47' r='1' opacity='.55'/%3E%3Ccircle cx='431' cy='139' r='1.6' opacity='.85'/%3E%3Ccircle cx='613' cy='71' r='1' opacity='.5'/%3E%3Ccircle cx='157' cy='309' r='1.1' opacity='.6'/%3E%3Ccircle cx='529' cy='343' r='1.3' opacity='.7'/%3E%3Ccircle cx='347' cy='471' r='1.7' opacity='.9'/%3E%3Ccircle cx='81' cy='557' r='1' opacity='.5'/%3E%3Ccircle cx='611' cy='593' r='1.2' opacity='.65'/%3E%3Ccircle cx='259' cy='647' r='1' opacity='.55'/%3E%3C/g%3E%3C/svg%3E");
+  --bgart-chart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='920' height='920' fill='none' stroke='%23d9a54f' stroke-width='1'%3E%3Cg opacity='.18'%3E%3Ccircle cx='460' cy='460' r='445' stroke-dasharray='2 9'/%3E%3Ccircle cx='460' cy='460' r='386'/%3E%3Ccircle cx='460' cy='460' r='318' stroke='%232f9fe6' stroke-dasharray='1 6'/%3E%3Ccircle cx='460' cy='460' r='232' opacity='.7'/%3E%3Ccircle cx='460' cy='460' r='120' stroke='%232f9fe6' stroke-dasharray='4 12'/%3E%3Cline x1='460' y1='8' x2='460' y2='84'/%3E%3Cline x1='60' y1='460' x2='150' y2='460'/%3E%3Cline x1='142' y1='142' x2='205' y2='205' opacity='.6'/%3E%3C/g%3E%3C/svg%3E");
+  --dashboard-background-image:
+    var(--bgart-stars-fine),
+    var(--bgart-stars-large),
+    var(--bgart-chart),
+    radial-gradient(1300px 720px at 82% -12%, #142c47 0%, rgba(20, 44, 71, 0) 62%),
+    radial-gradient(1000px 640px at 8% 108%, #0b1c30 0%, rgba(11, 28, 48, 0) 58%);
+  --dashboard-background-size: 460px 460px, 700px 700px, 920px 920px, auto, auto;
+  --dashboard-background-position: 0 0, 0 0, right -280px bottom -280px, center, center;
+  --dashboard-background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat;
+  --dashboard-overlay: rgba(3, 10, 18, 0);
+  --dashboard-header-image: url('../img/themes/force-destiny-jedi-ornament.png');
+  --hero-overlay-start: color-mix(in srgb, var(--surface-default) 97%, transparent);
+  --hero-overlay-end: color-mix(in srgb, var(--surface-default) 8%, transparent);
+
+  /* ---- Niveau 2 — tokens de composition ---- */
+  --sidebar-width: 300px;
+  --topbar-height: 56px;
+  --content-max-width: 1200px;
+  --section-gap: 1.6rem;
+  --card-padding: 1rem;
+  --radius-small: 6px;
+  --radius-medium: 10px;
+  --radius-large: 14px;
+  --panel-cut-size: 12px;           /* biseau « holocron » (0 = rectangle) */
+  --transition-fast: 150ms;
+  --transition-normal: 220ms;
+  --font-display: 'Orbitron', 'Signika', system-ui, sans-serif;
+}
+
+/* ============================ force-sith ============================ */
+[data-theme='force-sith'] {
+  /* Couleurs relevées sur mockup-force-destiny-sith.png : noirs chauds
+     (#050504…#100908), rouge vermillon #bc392d / #b03629, héro #a01c17. */
+  --app-background: #060404;
+  --surface-default: #0e0908;
+  --surface-raised: #150d0b;
+  --surface-reading: #100a09;
+  --border-default: #3a1512;
+  --border-muted: #260e0c;
+  --border-active: #d84433;
+
+  --text-primary: #f4eeee;
+  --text-secondary: #b79b9d;
+  --text-muted: #816e70;
+  --text-on-accent: #1c0304;
+
+  --accent-primary: #c93b2d;
+  --accent-muted: #7c241c;
+  --accent-bright: #e5543f;
+  --accent-secondary: #d97662;
+  --accent-secondary-muted: #a04a3a;
+
+  --status-success: #8fbd86;
+  --status-warning: #dd9a3c;
+  --status-danger: #ff2532;
+  --status-info: #d97662;
+
+  --sidebar-background: #040303;
+  --sidebar-surface: #0d0807;
+  --sidebar-surface-raised: #140c0a;
+  --sidebar-border: #2f1310;
+  --sidebar-text: #f2e9e9;
+  --sidebar-text-secondary: #ae9092;
+  --sidebar-text-muted: #766163;
+  --sidebar-accent: #d84433;
+
+  /* Rouage impérial stylisé (dessin maison simplifié). */
+  --sidebar-emblem: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='6.4'/%3E%3Ccircle cx='12' cy='12' r='2.1' fill='%23000' stroke='none'/%3E%3Cpath d='M12 2.4v3.2M12 18.4v3.2M2.4 12h3.2M18.4 12h3.2M5.2 5.2l2.3 2.3M16.5 16.5l2.3 2.3M18.8 5.2l-2.3 2.3M7.5 16.5l-2.3 2.3'/%3E%3C/svg%3E");
+
+  --glow-accent: 0 0 12px color-mix(in srgb, var(--accent-primary) 40%, transparent);
+  --texture-page:
+    radial-gradient(1px 1px at 18% 32%, rgba(255, 120, 120, 0.22) 48%, transparent 52%),
+    radial-gradient(1px 1px at 52% 78%, rgba(255, 120, 120, 0.15) 48%, transparent 52%),
+    radial-gradient(1px 1px at 79% 18%, rgba(255, 160, 160, 0.18) 48%, transparent 52%);
+  --texture-size: 520px 520px;
+  /* Fond procédural : braises/étoiles rougies éparses + nébuleuse sombre
+     chaude + réticule de visée vermillon en filigrane. */
+  --bgart-stars-fine: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='460' height='460'%3E%3Cg fill='%23ffb4a3'%3E%3Ccircle cx='31' cy='57' r='.7' opacity='.3'/%3E%3Ccircle cx='171' cy='24' r='.6' opacity='.22'/%3E%3Ccircle cx='287' cy='96' r='.9' opacity='.35'/%3E%3Ccircle cx='409' cy='49' r='.6' opacity='.24'/%3E%3Ccircle cx='97' cy='201' r='.8' opacity='.3'/%3E%3Ccircle cx='243' cy='262' r='1.1' opacity='.4'/%3E%3Ccircle cx='377' cy='219' r='.6' opacity='.22'/%3E%3Ccircle cx='53' cy='343' r='.7' opacity='.28'/%3E%3Ccircle cx='189' cy='411' r='.9' opacity='.34'/%3E%3Ccircle cx='331' cy='372' r='.6' opacity='.22'/%3E%3Ccircle cx='433' cy='428' r='.7' opacity='.3'/%3E%3C/g%3E%3C/svg%3E");
+  --bgart-stars-large: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='700'%3E%3Cg fill='%23ffc9ba'%3E%3Ccircle cx='113' cy='87' r='1.3' opacity='.4'/%3E%3Ccircle cx='417' cy='153' r='1' opacity='.3'/%3E%3Ccircle cx='607' cy='63' r='1.5' opacity='.45'/%3E%3Ccircle cx='217' cy='351' r='1.1' opacity='.32'/%3E%3Ccircle cx='541' cy='433' r='1.6' opacity='.5'/%3E%3Ccircle cx='89' cy='527' r='1' opacity='.28'/%3E%3Ccircle cx='363' cy='613' r='1.2' opacity='.36'/%3E%3Ccircle cx='629' cy='657' r='1' opacity='.3'/%3E%3C/g%3E%3C/svg%3E");
+  --bgart-chart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='920' height='920' fill='none' stroke='%23c93b2d' stroke-width='1'%3E%3Cg opacity='.14'%3E%3Ccircle cx='460' cy='460' r='445' stroke-dasharray='2 9'/%3E%3Ccircle cx='460' cy='460' r='372'/%3E%3Ccircle cx='460' cy='460' r='294' stroke-dasharray='1 6'/%3E%3Ccircle cx='460' cy='460' r='196' opacity='.7'/%3E%3Cline x1='460' y1='8' x2='460' y2='120'/%3E%3Cline x1='460' y1='800' x2='460' y2='912'/%3E%3Cline x1='8' y1='460' x2='120' y2='460'/%3E%3Cline x1='800' y1='460' x2='912' y2='460'/%3E%3C/g%3E%3C/svg%3E");
+  --dashboard-background-image:
+    var(--bgart-stars-fine),
+    var(--bgart-stars-large),
+    var(--bgart-chart),
+    radial-gradient(1200px 700px at 80% -12%, #260b09 0%, rgba(38, 11, 9, 0) 60%),
+    radial-gradient(900px 600px at 6% 110%, #170605 0%, rgba(23, 6, 5, 0) 58%);
+  --dashboard-background-size: 460px 460px, 700px 700px, 920px 920px, auto, auto;
+  --dashboard-background-position: 0 0, 0 0, right -300px bottom -300px, center, center;
+  --dashboard-background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat;
+  --dashboard-overlay: rgba(6, 4, 4, 0);
+  --dashboard-header-image: url('../img/themes/force-destiny-sith-ornament.png');
+  --hero-overlay-start: color-mix(in srgb, var(--surface-default) 97%, transparent);
+  --hero-overlay-end: color-mix(in srgb, var(--surface-default) 8%, transparent);
+}
+
+/* ========================= age-of-rebellion ========================= */
+/* Papier chaud + encre rouge brique : imprimé militaire, mat, sans glow.
+   Couleurs relevées sur mockup-age-of-rebellion.png : papier #c9b39b…#dbc9b6
+   (sidebar comprise — PAS de sidebar sombre ici), rouge #89291d / #741d11. */
+[data-theme='age-of-rebellion'] {
+  --app-background: #c9b39b;
+  --surface-default: #dcc9b4;
+  --surface-raised: #e4d3bf;
+  --surface-reading: #e6d6c1;
+  --border-default: #a98c6d;
+  --border-muted: #bba381;
+  --border-active: #8f2318;
+
+  --text-primary: #2e2119;
+  --text-secondary: #61503f;
+  --text-muted: #877158;
+  --text-on-accent: #f2e4d2;
+
+  --accent-primary: #8f2318;
+  --accent-muted: #a2543f;
+  --accent-bright: #a72c1c;
+  --accent-secondary: #741d11;
+  --accent-secondary-muted: #9c4636;
+
+  --status-success: #4c6b47;
+  --status-warning: #96660f;
+  --status-danger: #a4211f;
+  --status-info: #345c78;
+
+  /* Sidebar papier comme le mockup : mêmes matières que le contenu,
+     panneaux encadrés d'un filet rouge. */
+  --sidebar-background: #cdb7a0;
+  --sidebar-surface: #dbc9b6;
+  --sidebar-surface-raised: #e3d3bf;
+  --sidebar-border: #ab8a68;
+  --sidebar-text: #35251b;
+  --sidebar-text-secondary: #6b543f;
+  --sidebar-text-muted: #92795e;
+  --sidebar-accent: #8f2318;
+
+  /* Oiseau-étoile rebelle stylisé (dessin maison simplifié). */
+  --sidebar-emblem: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round'%3E%3Cpath d='M12 4.5c-1.2 3.2-4 5.2-7.3 5.4C6 15.6 8.6 19 12 20.5 15.4 19 18 15.6 19.3 9.9 16 9.7 13.2 7.7 12 4.5z'/%3E%3Cpath d='M12 4.5V20.5' stroke-width='1.2'/%3E%3C/svg%3E");
+
+  --shadow-panel: 0 1px 2px rgba(43, 33, 28, 0.16);
+  --shadow-floating: 0 14px 40px rgba(43, 33, 28, 0.3);
+  --glow-accent: none;
+
+  /* Sur papier : en-têtes = encre brique du thème, activation en encres foncées. */
+  --table-head-bg: #8f2318;
+  --table-head-fg: #f0e4d0;
+  --act-passive: #2f5c9c;
+  --act-active: #a03a1e;
+  --act-passive-ink: #2f5c9c;
+  --act-active-ink: #a03a1e;
+  --force-accent: #3d6f4a;
+  /* grain papier discret (bruit SVG inline, une seule texture) */
+  --texture-page: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  --texture-size: 140px 140px;
+  /* Fond : illustration parchemin fournie par l'utilisateur (X-wings à l'encre
+     sépia/rouge + plans techniques en marge, 1672×941 JPEG). L'art embarque
+     déjà grain et vignette — une seule couche, en couverture. */
+  --dashboard-background-image: url('../img/themes/age-of-rebellion-background.jpg');
+  --dashboard-background-size: cover;
+  --dashboard-background-position: center top;
+  --dashboard-background-repeat: no-repeat;
+  --dashboard-overlay: rgba(201, 179, 155, 0);
+  --dashboard-header-image: url('../img/themes/age-of-rebellion-ornament.png');
+  --hero-overlay-start: color-mix(in srgb, var(--surface-default) 96%, transparent);
+  --hero-overlay-end: color-mix(in srgb, var(--surface-default) 6%, transparent);
+
+  --radius-small: 5px;
+  --radius-medium: 9px;
+  --radius-large: 12px;
+  --panel-cut-size: 0px;
+  --font-display: 'Signika', system-ui, sans-serif;
+}
+
+/* ======================== edge-of-the-empire ======================== */
+/* Datapad beige + châssis métal noir/cuivre : industriel, mat, ambre. */
+/* Couleurs relevées sur mockup-edge-of-the-empire.png : châssis métal noir
+   #15130e…#201c15, parchemin cuivré #b79e82, ambre #cd7429 / #98541d. */
+[data-theme='edge-of-the-empire'] {
+  --app-background: #b19877;
+  --surface-default: #cbb392;
+  --surface-raised: #d6c1a1;
+  --surface-reading: #d2bc9b;
+  --border-default: #8a6d4c;
+  --border-muted: #a1855f;
+  --border-active: #c56d24;
+
+  --text-primary: #241a10;
+  --text-secondary: #5f4c38;
+  --text-muted: #7d684f;
+  --text-on-accent: #f8efe2;
+
+  --accent-primary: #a1511a;
+  --accent-muted: #a97b4e;
+  --accent-bright: #c56d24;
+  --accent-secondary: #7a3416;
+  --accent-secondary-muted: #a3653d;
+
+  --status-success: #5c7040;
+  --status-warning: #96660f;
+  --status-danger: #a63824;
+  --status-info: #3f637d;
+
+  --sidebar-background: #14110c;
+  --sidebar-surface: #1f1a13;
+  --sidebar-surface-raised: #2a2318;
+  --sidebar-border: #3c3020;
+  --sidebar-text: #ead9c0;
+  --sidebar-text-secondary: #a89478;
+  --sidebar-text-muted: #7d6d57;
+  --sidebar-accent: #cd7429;
+
+  /* Rose des vents de la Bordure (dessin maison simplifié). */
+  --sidebar-emblem: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='8.2'/%3E%3Cpath d='M12 4.6l1.6 5.8 5.8 1.6-5.8 1.6L12 19.4l-1.6-5.8L4.6 12l5.8-1.6z' fill='%23000' stroke='none'/%3E%3Cpath d='M6.9 6.9l2.3 2.3M17.1 6.9l-2.3 2.3M6.9 17.1l2.3-2.3M17.1 17.1l-2.3-2.3' stroke-width='1.1'/%3E%3C/svg%3E");
+
+  --shadow-panel: 0 1px 2px rgba(40, 32, 25, 0.2);
+  --shadow-floating: 0 14px 40px rgba(40, 32, 25, 0.35);
+  --glow-accent: none;
+
+  /* Sur parchemin : en-têtes = brun cuivré du thème, activation en encres foncées. */
+  --table-head-bg: #7a3416;
+  --table-head-fg: #f8efe2;
+  --act-passive: #2d567f;
+  --act-active: #96411d;
+  --act-passive-ink: #2d567f;
+  --act-active-ink: #96411d;
+  --force-accent: #4c6b39;
+  --texture-page: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  --texture-size: 140px 140px;
+  /* Fond : illustration parchemin fournie par l'utilisateur (cargo léger et
+     cité de la Bordure à l'encre sépia, cadre métal riveté intégré à l'art,
+     1672×941 JPEG). L'art embarque déjà grain, cadre et vignette — une seule
+     couche, en couverture. */
+  --dashboard-background-image: url('../img/themes/edge-of-the-empire-background.jpg');
+  --dashboard-background-size: cover;
+  --dashboard-background-position: center top;
+  --dashboard-background-repeat: no-repeat;
+  --dashboard-overlay: rgba(177, 152, 119, 0);
+  --dashboard-header-image: url('../img/themes/edge-of-the-empire-ornament.png');
+  --hero-overlay-start: color-mix(in srgb, var(--surface-default) 96%, transparent);
+  --hero-overlay-end: color-mix(in srgb, var(--surface-default) 6%, transparent);
+
+  --radius-small: 6px;
+  --radius-medium: 10px;
+  --radius-large: 14px;
+  --panel-cut-size: 0px;
+  --font-display: 'Signika', system-ui, sans-serif;
+}
+
+/* ---- Zone latérale & topbar : re-scope des alias historiques ----
+   La sidebar garde sa propre identité (rouge rebelle / métal noir sur les
+   thèmes clairs) : on redirige les alias vers les tokens --sidebar-* pour que
+   tous les composants existants (arbo, chips, inputs) suivent sans réécriture. */
+.topbar,
+.sidebar,
+.gm-nav {
+  --bg: var(--sidebar-background);
+  --bg-2: var(--sidebar-background);
+  --bg-3: var(--sidebar-surface-raised);
+  --panel: var(--sidebar-surface);
+  --panel-2: var(--sidebar-surface-raised);
+  --line: var(--sidebar-border);
+  --line-soft: var(--sidebar-border);
+  --fg: var(--sidebar-text);
+  --fg-muted: var(--sidebar-text-secondary);
+  --fg-dim: var(--sidebar-text-muted);
+  --gold: var(--sidebar-accent);
+  --gold-soft: color-mix(in srgb, var(--sidebar-accent) 72%, var(--sidebar-background));
+  --gold-bright: var(--sidebar-accent);
+  /* anneau de focus lisible sur le fond sombre de la sidebar (thèmes clairs) */
+  --holo: var(--sidebar-accent);
+  color: var(--fg);
+}
+
+/* ---- Menu du sélecteur de thème (topbar) ---- */
+.theme-menu {
+  position: fixed;
+  z-index: 90;
+  min-width: 270px;
+  padding: 0.35rem;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-floating);
+}
+.theme-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 0;
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.theme-menu-item:hover,
+.theme-menu-item:focus-visible {
+  background: color-mix(in srgb, var(--accent-primary) 12%, transparent);
+}
+.theme-menu-txt { flex: 1; min-width: 0; }
+.theme-menu-txt b { display: block; font-size: 0.86rem; font-weight: 600; }
+.theme-menu-txt small { color: var(--text-secondary); font-size: 0.74rem; }
+.theme-menu-check { visibility: hidden; color: var(--accent-primary); font-weight: 700; }
+.theme-menu-item[aria-checked='true'] .theme-menu-check { visibility: visible; }
+.theme-menu-item[aria-checked='true'] { box-shadow: inset 2px 0 0 var(--accent-primary); }
+
+/* ---- Pastilles d'aperçu des thèmes (sélecteur) ---- */
+.theme-dot {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1px solid rgba(127, 127, 127, 0.55);
+  background: linear-gradient(135deg, var(--td-a, var(--app-background)) 50%, var(--td-b, var(--accent-primary)) 50%);
+}
+.theme-dot[data-theme-dot='force-jedi'] { --td-a: #071527; --td-b: #d9a54f; }
+.theme-dot[data-theme-dot='force-sith'] { --td-a: #0c0505; --td-b: #c93b2d; }
+.theme-dot[data-theme-dot='age-of-rebellion'] { --td-a: #dcc9b4; --td-b: #8f2318; }
+.theme-dot[data-theme-dot='edge-of-the-empire'] { --td-a: #cbb392; --td-b: #cd7429; }
+
+/* ================= Ornements de panneaux par gamme =================
+   Structure décorative des mockups : chanfreins holocron (Force), cadres
+   imprimés à double filet (AoR), tôle rivetée discrète (EotE). Appliqués aux
+   grands panneaux uniquement — le contenu reste plus léger que les mockups. */
+
+/* Force (Jedi/Sith) : coins chanfreinés sur les panneaux majeurs. */
+[data-theme='force-jedi'] :is(.dash-hero, .page-surface, .tile),
+[data-theme='force-sith'] :is(.dash-hero, .page-surface, .tile) {
+  border-radius: 0;
+  clip-path: polygon(
+    var(--panel-cut-size) 0, calc(100% - var(--panel-cut-size)) 0, 100% var(--panel-cut-size),
+    100% calc(100% - var(--panel-cut-size)), calc(100% - var(--panel-cut-size)) 100%,
+    var(--panel-cut-size) 100%, 0 calc(100% - var(--panel-cut-size)), 0 var(--panel-cut-size)
+  );
+}
+
+/* AoR : cadre imprimé — bordure rouge + filet intérieur, comme les panneaux
+   du mockup papier. */
+[data-theme='age-of-rebellion'] :is(.dash-hero, .page-surface, .tile) {
+  position: relative;
+  border-color: color-mix(in srgb, var(--accent-primary) 45%, var(--border-default));
+}
+[data-theme='age-of-rebellion'] :is(.dash-hero, .page-surface, .tile)::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  pointer-events: none;
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 28%, transparent);
+  border-radius: 4px;
+}
+
+/* EotE : cadre à double filet cuivré (même traitement qu'AoR, palette Bordure —
+   les rivets de coin ont été retirés sur retour utilisateur). */
+[data-theme='edge-of-the-empire'] :is(.dash-hero, .page-surface, .tile) {
+  position: relative;
+  border-color: color-mix(in srgb, var(--accent-primary) 40%, var(--border-default));
+}
+[data-theme='edge-of-the-empire'] :is(.dash-hero, .page-surface, .tile)::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  pointer-events: none;
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 26%, transparent);
+  border-radius: calc(var(--radius-medium) - 3px);
+}

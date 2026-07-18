@@ -1,0 +1,538 @@
+/* home.css — tableau de bord d'accueil en widgets. Ne consomme QUE les tokens
+   sémantiques de themes.css : identique dans les 4 thèmes, seule la peau change.
+   Parti pris « charge visuelle réduite » : pas de bordure forte ni de glow
+   généralisé — l'espacement et la typo hiérarchisent, l'accent reste rare. */
+
+.dash {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-gap);
+}
+
+/* --- Héro : identité + image d'en-tête configurable (voile par thème) --- */
+.dash-hero {
+  display: flex;
+  gap: 1.6rem;
+  align-items: stretch;
+  justify-content: space-between;
+  padding: clamp(1.2rem, 3.5vw, 2.2rem);
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 20%, var(--border-muted));
+  border-radius: var(--radius-large);
+  background-color: var(--surface-default);
+  /* Voile plein sur la moitié gauche (le texte n'est jamais posé sur l'image),
+     fondu vers la droite pour révéler l'ornement de l'image d'en-tête. */
+  background-image:
+    linear-gradient(to right, var(--hero-overlay-start) 0%, var(--hero-overlay-start) 55%, var(--hero-overlay-end) 82%),
+    var(--dashboard-header-image);
+  /* Par défaut : ornement de gamme calé à droite (hauteur pleine). Une image
+     d'en-tête configurée (Foundry) repasse en cover via applyDashboardArt(). */
+  background-size: 100% 100%, var(--hero-image-size, auto 100%);
+  background-position: center, var(--hero-image-position, right center);
+  background-repeat: no-repeat;
+  box-shadow: var(--shadow-panel);
+}
+.dash-hero .eyebrow {
+  margin: 0;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.dash-hero h1 {
+  margin: 0.3rem 0 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-size: clamp(1.5rem, 3.4vw, 2.2rem);
+}
+.dash-hero .sep-aurebesh { margin: 0.7rem 0; max-width: 280px; color: var(--accent-muted); }
+.dash-hero .crawl { color: var(--text-secondary); max-width: 62ch; line-height: 1.6; }
+.dash-hero .crawl p { margin: 0 0 0.6em; }
+.dash-hero .crawl :is(h1, h2, h3) { font-family: var(--font-ui); font-size: 1.1rem; margin: 0 0 0.4em; color: var(--text-primary); }
+.dash-hero-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex: 0 0 auto;
+}
+
+/* L'ornement décoratif (cube holocron, X-wing, cargo…) est désormais porté
+   par l'image d'en-tête du thème (voile fondu à droite) — plus de cube CSS.
+   On réserve simplement l'espace à droite pour laisser l'ornement respirer. */
+.dash-holocron { width: 150px; min-height: 74px; }
+
+.dash-customize {
+  border: 1px solid var(--border-default);
+  background: color-mix(in srgb, var(--surface-raised) 80%, transparent);
+  color: var(--text-secondary);
+  border-radius: 999px;
+  padding: 0.38rem 0.9rem;
+  font: 600 0.82rem var(--font-ui);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.dash-customize:hover,
+.dash-customize[aria-pressed='true'] {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+/* --- Panneau du mode personnalisation (MJ — réglages de MONDE) --- */
+.dash-editbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px dashed var(--accent-muted);
+  border-radius: var(--radius-medium);
+  background: color-mix(in srgb, var(--accent-primary) 6%, var(--surface-default));
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+.dash-edit-head {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+.dash-edit-head > span:first-child { flex: 1; min-width: 14rem; }
+.cfg-status { color: var(--accent-primary); font-size: 0.8rem; min-width: 8rem; text-align: right; }
+
+/* Champs de config de monde (titre, journal de reprise, thème, images) */
+.cfg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.6rem 0.9rem;
+}
+.cfg-field { display: flex; flex-direction: column; gap: 0.25rem; }
+.cfg-field > span {
+  font-family: var(--font-display);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.cfg-field input,
+.cfg-field select {
+  height: 34px;
+  padding: 0 0.6rem;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-small);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+}
+.cfg-field input:focus-visible,
+.cfg-field select:focus-visible { outline: 2px solid var(--accent-secondary); outline-offset: 1px; }
+.cfg-wide { grid-column: 1 / -1; }
+.cfg-check {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.cfg-check input { accent-color: var(--accent-primary); }
+.cfg-parts {
+  margin: 0.2rem 0 0;
+  padding: 0.6rem 0.8rem 0.7rem;
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-small);
+}
+.cfg-parts legend {
+  padding: 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.cfg-parts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.3rem 0.9rem;
+}
+.cfg-hint { margin: 0.5rem 0 0; font-size: 0.76rem; color: var(--text-muted); }
+
+/* --- Enveloppe commune des widgets --- */
+.dash-widgets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-gap);
+}
+.w-head {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 0 0 0.7rem;
+}
+.w-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.88rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+}
+/* filet latéral qui prolonge le titre (façon mockups, teinté accent) */
+.w-head::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent-primary) 40%, var(--border-muted)), transparent);
+}
+.w-empty,
+.w-loading {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border: 1px dashed var(--border-muted);
+  border-radius: var(--radius-medium);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* Mode édition : contours et contrôles visibles, rien en mode normal. */
+.dash.editing .widget {
+  outline: 1px dashed var(--accent-muted);
+  outline-offset: 8px;
+  border-radius: var(--radius-small);
+}
+.dash.editing .widget.is-off { opacity: 0.55; }
+.w-ctrl { display: flex; gap: 0.3rem; margin-left: auto; }
+.w-btn {
+  border: 1px solid var(--border-default);
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  border-radius: var(--radius-small);
+  min-width: 1.9rem;
+  height: 1.9rem;
+  padding: 0 0.55rem;
+  font: 600 0.8rem var(--font-ui);
+  cursor: pointer;
+}
+.w-btn:hover:not(:disabled) { border-color: var(--accent-primary); color: var(--accent-primary); }
+.w-btn:disabled { opacity: 0.4; cursor: default; }
+.w-btn.w-done {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-accent);
+}
+.w-btn.w-done:hover { color: var(--text-on-accent); filter: brightness(1.08); }
+
+/* --- Options PAR widget (panneau ⚙ inline, mode Personnaliser) --- */
+.w-opts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0 0 0.8rem;
+  padding: 0.7rem 0.9rem 0.8rem;
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-small);
+  background: var(--surface-default);
+}
+.w-opts-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.w-opts .cfg-hint { margin: 0; }
+.w-opts-num { max-width: 16rem; }
+.w-opts-num input { width: 6rem; }
+.w-opts-search {
+  height: 32px;
+  padding: 0 0.6rem;
+  max-width: 20rem;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-small);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+}
+.w-opts-search:focus-visible { outline: 2px solid var(--accent-secondary); outline-offset: 1px; }
+.w-opts-scroll { max-height: 13rem; overflow: auto; padding-right: 0.3rem; }
+
+/* --- Quêtes : liste compacte à pastilles de statut --- */
+.qw-list {
+  list-style: none;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.qw-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-small);
+  background: var(--surface-default);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+a.qw-item:hover,
+a.qw-item:focus-visible { border-color: var(--border-active); }
+.qw-dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--qc, var(--accent-primary));
+  box-shadow: 0 0 6px color-mix(in srgb, var(--qc, var(--accent-primary)) 55%, transparent);
+}
+.qw-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qw-st {
+  margin-left: auto;
+  flex: none;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* --- Synthèse : tuiles allégeance / position / ressources --- */
+.stat-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.9rem;
+}
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: var(--card-padding);
+  background: var(--surface-default);
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-medium);
+}
+.tile-k {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.tile-v { font-size: 1.08rem; line-height: 1.3; }
+.tile-sub { color: var(--text-secondary); font-size: 0.8rem; }
+.tile-link {
+  margin-top: auto;
+  align-self: flex-start;
+  color: var(--accent-secondary);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.tile-link:hover { text-decoration: underline; }
+.tile-alleg { display: flex; align-items: center; gap: 0.7rem; font-size: 1.05rem; }
+.tile-emblem {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 55%, transparent);
+  border-radius: 50%;
+  color: var(--accent-primary);
+  font-size: 1.25rem;
+  box-shadow: var(--glow-accent);
+}
+.tile-emblem .ico { width: 22px; height: 22px; }
+.tile-k .ico { width: 0.95em; height: 0.95em; }
+
+/* Jauges de ressources (couleurs fonctionnelles, lisibles dans les 4 thèmes) */
+.meter { margin: 0.15rem 0; }
+.meter-h {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  margin-bottom: 0.22rem;
+}
+.meter-h b { font-variant-numeric: tabular-nums; }
+.meter-track {
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-primary) 9%, transparent);
+  border: 1px solid var(--border-muted);
+  overflow: hidden;
+}
+.meter-fill { height: 100%; border-radius: 999px; transition: width var(--transition-normal) ease; }
+.meter-fill.ok { background: var(--status-success); }
+.meter-fill.warn { background: var(--status-warning); }
+.meter-fill.crit { background: var(--status-danger); }
+
+/* --- « Où en est-on ? » : journal de reprise en lecture compacte --- */
+.resume-doc {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  background: var(--surface-reading, var(--surface-default));
+  border: 1px solid var(--border-muted);
+  border-left: 3px solid var(--accent-primary);
+  border-radius: var(--radius-medium);
+  box-shadow: var(--shadow-panel);
+}
+.resume-doc-head .eyebrow {
+  margin: 0;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+.resume-doc-title {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.15rem;
+  letter-spacing: 0.03em;
+}
+.resume-doc-body {
+  position: relative;
+  max-height: 24rem;
+  overflow: hidden;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+/* fondu de bas de colonne : la lecture complète se fait sur la fiche */
+.resume-doc-body::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 4.5rem;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--surface-reading, var(--surface-default)));
+}
+.resume-doc-body .journal-content > :first-child { margin-top: 0; }
+.resume-doc-foot { display: flex; justify-content: flex-end; }
+
+/* --- Cartes génériques (journaux, outils, bestiaire) --- */
+.dash-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.9rem;
+}
+.dash-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: var(--card-padding);
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-medium);
+  background: var(--surface-default);
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+.dash-card:hover,
+.dash-card:focus-visible {
+  border-color: var(--border-active);
+  transform: translateY(-2px);
+}
+.dc-count { color: var(--accent-primary); font-size: 1.5rem; font-weight: 700; line-height: 1.1; }
+.dc-ico { font-size: 1.5rem; line-height: 1.1; }
+.dc-title { font-weight: 700; }
+.dc-sub { color: var(--text-secondary); font-size: 0.82rem; }
+
+/* Cartes catégories de journaux : icône du pack dans une pastille teintée
+   (même langage que la sidebar), nom en avant, compte + kind en second plan. */
+.cat-card { flex-direction: row; align-items: center; gap: 0.75rem; }
+.cat-card .dc-emb {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  margin: 7px; /* réserve des coins du losange (rotation 45°) */
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 45%, transparent);
+  border-radius: var(--radius-small);
+  background: color-mix(in srgb, var(--accent-primary) 9%, transparent);
+  color: var(--accent-primary);
+  transform: rotate(45deg); /* écrin losange, façon sidebar */
+}
+.cat-card .dc-emb .ico { width: 20px; height: 20px; transform: rotate(-45deg); }
+.cat-card:hover .dc-emb { border-color: var(--accent-primary); box-shadow: var(--glow-accent); }
+.cat-card .dc-body { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.cat-card .dc-title { line-height: 1.25; }
+
+/* --- Personnages joueurs (portraits) --- */
+.pc-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 0.9rem;
+}
+.pc-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-medium);
+  background: var(--surface-default);
+  color: var(--text-primary);
+  text-decoration: none;
+  overflow: hidden;
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+.pc-card:hover,
+.pc-card:focus-visible {
+  border-color: var(--border-active);
+  transform: translateY(-2px);
+}
+.pc-portrait {
+  display: block;
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  object-position: center 18%; /* cadre le visage plutôt que le buste */
+  background: var(--surface-raised);
+}
+.pc-fallback {
+  display: grid;
+  place-items: center;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--accent-primary) 8%, var(--surface-raised));
+}
+.pc-info { display: flex; flex-direction: column; gap: 0.1rem; padding: 0.6rem 0.75rem 0.75rem; }
+.pc-info small { color: var(--text-secondary); font-size: 0.78rem; }
+
+/* Option ⚙ « compact » du widget PJ : cartes resserrées, sans sous-titre */
+.pc-cards.compact { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.7rem; }
+.pc-cards.compact .pc-portrait { height: 100px; }
+.pc-cards.compact .pc-fallback { font-size: 1.7rem; }
+.pc-cards.compact .pc-info small { display: none; }
+
+/* PNJ clés : mêmes cartes que les PJ + pastille de statut sous le nom */
+.knpc-card .statut-pill.compact { margin: 0.25rem 0 0; align-self: flex-start; }
+
+/* --- Responsive --- */
+@media (max-width: 760px) {
+  .dash-hero { flex-direction: column; }
+  .dash-hero-side { flex-direction: row-reverse; align-items: center; justify-content: space-between; width: 100%; }
+  .dash-holocron { width: 52px; height: 52px; margin: 0 0.6rem 0 0; }
+  .dash-holocron i { inset: 11px; }
+  .pc-cards { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .pc-portrait { height: 120px; }
+}

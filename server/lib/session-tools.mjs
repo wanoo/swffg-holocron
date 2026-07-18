@@ -2,6 +2,7 @@
 // chat (pool starwarsffg), handouts, ambiances sonores, combat. Porté de
 // l'Archive Holocron. Toutes les fonctions parlent au monde via mcpCall.
 import { mcpCall, mcpAuthorId } from './mcp.mjs';
+import { sanitizeHandout } from './board.mjs';
 
 const GLYPH = { ability: '[ab]', proficiency: '[pr]', difficulty: '[di]', challenge: '[ch]', boost: '[bo]', setback: '[se]', force: '[fo]' };
 const RESULT = { success: '[su]', failure: '[fa]', advantage: '[ad]', threat: '[th]', triumph: '[tr]', despair: '[de]', light: '[li]', dark: '[da]' };
@@ -99,22 +100,117 @@ export async function showHandout(id, name) {
   }] });
 }
 
-// « 📡 Montrer une image » aux joueurs : message-requête flaggé (même pont que les
-// jets) — le module Foundry (MJ actif) ouvre un ImagePopout PARTAGÉ à tous les
-// clients puis supprime la requête. src = URL http(s) OU chemin Foundry (worlds/…).
-// Jamais d'URL /api/… de l'Holocron : les clients Foundry ne la connaissent pas,
-// et une clé MJ en query fuiterait dans le chat.
-export async function showImage({ src, title = '' }) {
+// « 📡 Montrer une image » aux joueurs : d'abord l'outil NATIF `share_image` du
+// connecteur (ImagePopout ciblable, exécuté par la session bot — aucun client MJ
+// requis) ; en REPLI (connecteur pas encore à jour) le pont historique par
+// ChatMessage flaggé holocron.showImage, traité par le module (MJ actif).
+// src = URL http(s) OU chemin Foundry (worlds/…). Jamais d'URL /api/… de
+// l'Holocron : les clients Foundry ne la connaissent pas, et une clé MJ en
+// query fuiterait dans le chat.
+export async function showImage({ src, title = '', users = null }) {
   const s = String(src || '').trim().slice(0, 600);
   const ok = /^https?:\/\/\S+$/i.test(s)
     || (!s.includes('..') && /^(worlds|icons|modules|systems|assets)\//.test(s) && /\.(png|jpe?g|webp|gif|svg|avif)(\?.*)?$/i.test(s));
   if (!ok) throw new Error("src d'image invalide (URL http(s) ou chemin Foundry worlds/…)");
+  const t = String(title || '').slice(0, 120);
+  try {
+    await mcpCall('share_image', { image: s, title: t || 'Holocron', ...(users?.length ? { users } : {}) });
+    return;
+  } catch (e) {
+    // ciblé : le pont legacy ne sait pas viser des joueurs → erreur claire
+    if (users?.length) throw new Error(`share_image indisponible (connecteur à mettre à jour ?) : ${String(e.message || e).slice(0, 120)}`);
+  }
   const author = await mcpAuthorId();
   await mcpCall('create_document', { type: 'ChatMessage', data: [{
     author,
     whisper: [author],
     content: '<p style="opacity:.55;font-size:.85em">📡 Image → joueurs</p>',
-    flags: { holocron: { showImage: { src: s, title: String(title || '').slice(0, 120) } } },
+    flags: { holocron: { showImage: { src: s, title: t } } },
+  }] });
+}
+
+// 📜 Handout multi-média CIBLÉ { type: chat|image|audio|video, src|text, title,
+// targets? } — targets = ids users Foundry ; absent/vide = toute la table.
+// Tuyauterie par type (voir planHandout) :
+//   · image → outil NATIF share_image du connecteur (ciblage users natif) ;
+//   · chat  → create_document ChatMessage (whisper = targets) — direct ;
+//   · audio/vidéo → PAS d'outil natif : pont module (ChatMessage-requête flaggé
+//     holocron.handout, le MJ actif diffuse sur le socket module aux visés).
+const HANDOUT_EXT = {
+  image: /\.(png|jpe?g|webp|gif|svg|avif)(\?.*)?$/i,
+  audio: /\.(mp3|ogg|wav|m4a|flac|webm)(\?.*)?$/i,
+  video: /\.(mp4|webm|m4v|ogv)(\?.*)?$/i,
+};
+const escBasic = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/** Assainit ET valide un handout entrant (route POST /api/gm/foundry/handout).
+ * Jette une erreur claire si le payload est inexploitable. */
+export function checkHandout(raw) {
+  const h = sanitizeHandout(raw);
+  if (!h) throw new Error('handout invalide (type fermé chat/image/audio/video, texte ou src requis)');
+  if (h.type !== 'chat') {
+    // même règle que showImage : URL http(s) OU chemin Foundry avec la bonne
+    // extension pour le type — jamais d'URL /api/… de l'Holocron.
+    const ok = /^https?:\/\/\S+$/i.test(h.src)
+      || (/^(worlds|icons|modules|systems|assets)\//.test(h.src) && HANDOUT_EXT[h.type].test(h.src));
+    if (!ok) throw new Error(`src ${h.type} invalide (URL http(s) ou chemin Foundry worlds/… avec extension ${h.type})`);
+  }
+  return h;
+}
+
+/** Plan d'exécution PUR d'un handout assaini (testable, partagé avec le stub). */
+export function planHandout(h) {
+  if (h.type === 'image') {
+    return { kind: 'share_image', args: { image: h.src, title: h.title || 'Holocron', ...(h.targets ? { users: h.targets } : {}) } };
+  }
+  if (h.type === 'chat') {
+    const head = h.title ? `<p style="opacity:.7;font-size:.85em;margin:0 0 .3em">📜 ${escBasic(h.title)}</p>` : '';
+    return { kind: 'chat-message', message: {
+      speaker: { alias: 'Holocron' },
+      content: head + h.text,
+      ...(h.targets ? { whisper: h.targets } : {}),
+    } };
+  }
+  return { kind: 'module-bridge', flag: h }; // audio / video
+}
+
+export async function handoutBridge(raw) {
+  const h = checkHandout(raw);
+  const plan = planHandout(h);
+  if (plan.kind === 'share_image') {
+    // natif + repli pont module (toute la table) géré par showImage
+    await showImage({ src: h.src, title: h.title, users: h.targets || null });
+  } else if (plan.kind === 'chat-message') {
+    await mcpCall('create_document', { type: 'ChatMessage', data: [{
+      author: await mcpAuthorId(), ...plan.message,
+    }] });
+  } else {
+    const author = await mcpAuthorId();
+    const dest = h.targets ? `${h.targets.length} joueur(s)` : 'la table';
+    await mcpCall('create_document', { type: 'ChatMessage', data: [{
+      author,
+      whisper: [author],
+      content: `<p style="opacity:.55;font-size:.85em">📜 Handout ${h.type} → ${dest}</p>`,
+      flags: { holocron: { handout: plan.flag } },
+    }] });
+  }
+  return h;
+}
+
+// 🎵 Pont son (module ≥ 2.2) : message-requête flaggé holocron.sound — le module
+// Foundry (MJ actif) joue/arrête la playlist (ou la piste) avec playAll/stopAll,
+// le vrai moteur de lecture (modifier `playing` par MCP ne suffit pas selon le
+// mode de la playlist), puis supprime la requête. playlist = NOM ou id.
+export async function soundBridge({ playlist, sound = '', action = 'play' }) {
+  const p = String(playlist || '').trim().slice(0, 100);
+  if (!p) throw new Error('playlist requise');
+  const act = action === 'stop' ? 'stop' : 'play';
+  const author = await mcpAuthorId();
+  await mcpCall('create_document', { type: 'ChatMessage', data: [{
+    author,
+    whisper: [author],
+    content: `<p style="opacity:.55;font-size:.85em">🎵 ${act === 'stop' ? 'Stop' : 'Lecture'} — ${p.replace(/</g, '&lt;')}</p>`,
+    flags: { holocron: { sound: { action: act, playlist: p, ...(sound ? { sound: String(sound).trim().slice(0, 100) } : {}) } } },
   }] });
 }
 

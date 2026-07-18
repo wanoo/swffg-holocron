@@ -1,13 +1,16 @@
 // app.js — bootstrap, routeur (hash), rendu des vues, modales, responsive.
 import { loadData, Data, compendiumEntry, ensureNpcs, ensureAdversaries, ensureCompendium, foundryAsset } from './data.js';
 import { mountLoginButton } from './login.js';
+import { mountThemeSwitcher, applyWorldTheme } from './theme.js';
+import { mountEmblemPicker, syncEmblem } from './emblem.js';
+import { uiConfig, isGMActive, worldTitle } from './ui-config.js';
+import { homeView, applyDashboardArt } from './home.js';
 import { mountSidebar, setActiveTreeLink } from './tree.js';
 import { initSearch, openPalette } from './search.js';
 import { buildTOC, setupScrollSpy } from './toc.js';
 import { renderJournalHTML, renderRichHTML } from './render-journal.js';
 import { renderSheet, openImageFull } from './sheet.js';
 import { renderBestiary, renderNpcList } from './bestiary.js';
-import { legendHTML } from './render-dice.js';
 import { initGenerator, openGenerator } from './dice-roller.js';
 import { mountAstronav } from './astronav.js';
 import { mountSpendHelp } from './spendhelp.js';
@@ -21,6 +24,7 @@ import { mountEditablePage } from './editor.js';
 import { mountGM } from './gm.js';
 import { statutPill } from './statut.js';
 import { getGMKey, gmGetDossiers } from './collab.js';
+import { actSummaryCard } from './act-summary.js';
 
 // Catégories dont les pages sont éditables/collaboratives.
 // Catégories éditables : déclarées dans la config de campagne (⚙️ Holocron Config)
@@ -36,98 +40,21 @@ function esc(s = '') {
 
 // --- Vues -----------------------------------------------------------------
 
+// Accueil : tableau de bord en widgets (voir home.js).
 function viewHome() {
-  const m = Data.meta;
-  const wrap = document.createElement('div');
-  const hero = document.createElement('section');
-  hero.className = 'home-hero holo-frame';
-  hero.innerHTML = `
-    <p class="eyebrow">${esc(m.system)}</p>
-    <h1>${esc(m.title)} — Archive Holocron</h1>
-    <div class="sep-aurebesh" aria-hidden="true"></div>
-    <div class="crawl">${m.description || ''}</div>`;
-  wrap.appendChild(hero);
+  mount(homeView());
+  document.title = worldTitle() + ' — Holocron';
+}
 
-  // Bannière de reprise : « où en est-on » (dernier acte joué) + accès direct aux fiches PJ.
-  const recaps = Data.journals
-    .filter((j) => /^recap-acte-\d+$/.test(j.id))
-    .sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
-  const lastRecap = recaps[recaps.length - 1];
-  if (lastRecap || Data.pcs.length) {
-    const resume = document.createElement('section');
-    resume.className = 'home-resume';
-    let html = '';
-    if (lastRecap) {
-      html +=
-        `<div class="hr-where"><p class="eyebrow">Où en est-on ?</p>` +
-        `<h2>${esc(lastRecap.name)}</h2>` +
-        `<a class="hr-cta" href="#/journal/${lastRecap.id}">Lire le dernier résumé →</a></div>`;
-    }
-    if (Data.pcs.length) {
-      const links = Data.pcs
-        .map((p) => `<a class="hr-pc" href="#/pc/${p.id}">${esc(p.name)}</a>`)
-        .join('');
-      html += `<div class="hr-mine"><p class="eyebrow">Ma fiche de personnage</p><div class="hr-pcs">${links}</div></div>`;
-    }
-    resume.innerHTML = html;
-    wrap.appendChild(resume);
-  }
-
-  // Cartes catégories.
-  wrap.insertAdjacentHTML('beforeend', '<h2 class="section-title">Journaux</h2>');
-  const grid = document.createElement('div');
-  grid.className = 'home-grid';
-  for (const cat of Data.categories) {
-    const n = Data.journals.filter((j) => j.categoryId === cat.id).length;
-    if (!n) continue;
-    const first = Data.journals.find((j) => j.categoryId === cat.id);
-    const a = document.createElement('a');
-    a.className = 'home-card';
-    a.href = `#/journal/${first.id}`;
-    a.innerHTML = `<div class="hc-count">${n}</div><div class="hc-title">${esc(cat.label)}</div>`;
-    grid.appendChild(a);
-  }
-  wrap.appendChild(grid);
-
-  // Personnages joueurs.
-  if (Data.pcs.length) {
-    wrap.insertAdjacentHTML('beforeend', '<h2 class="section-title">Personnages joueurs</h2>');
-    const pg = document.createElement('div');
-    pg.className = 'home-players';
-    for (const p of Data.pcs) {
-      const a = document.createElement('a');
-      a.className = 'home-card';
-      a.href = `#/pc/${p.id}`;
-      a.innerHTML = `<div class="hc-title">${esc(p.name)}</div><div class="hc-sub">${esc([p.species, p.career].filter(Boolean).join(' · ') || 'Fiche')}</div>`;
-      pg.appendChild(a);
-    }
-    wrap.appendChild(pg);
-  }
-
-  // Outils joueurs.
-  wrap.insertAdjacentHTML('beforeend', '<h2 class="section-title">Outils</h2>');
-  const tg = document.createElement('div');
-  tg.className = 'home-grid';
-  tg.innerHTML = `<a class="home-card" href="#/vaisseau"><div class="hc-count">🚀</div><div class="hc-title">Vaisseau</div><div class="hc-sub">État, position, fiche technique & notes</div></a>`
-    + `<a class="home-card" href="#/astronav"><div class="hc-count">🪐</div><div class="hc-title">Astronav</div><div class="hc-sub">Calculateur d'astrogation · 6 750 systèmes</div></a>`
-    + `<a class="home-card" href="#/sabacc"><div class="hc-count">🎴</div><div class="hc-title">Sabacc</div><div class="hc-sub">Règles — Spike de Corellia & Kessel</div></a>`
-    + `<a class="home-card" href="#/ateliers"><div class="hc-count">⚒️</div><div class="hc-title">Ateliers</div><div class="hc-sub">Fabrication — sabre laser, mods, potions</div></a>`
-    + `<a class="home-card" href="#/timeline"><div class="hc-count">📅</div><div class="hc-title">Chronologie</div><div class="hc-sub">Frise galactique — canon & campagne (BBY/ABY)</div></a>`;
-  wrap.appendChild(tg);
-
-  // Bestiaire / PNJ — RÉSERVÉ AU MJ (stats/spoilers). Masqué côté joueur.
-  if (getGMKey() || Data.gm) {
-    wrap.insertAdjacentHTML('beforeend', '<h2 class="section-title">Bestiaire (MJ)</h2>');
-    const bg = document.createElement('div');
-    bg.className = 'home-grid';
-    bg.innerHTML =
-      `<a class="home-card" href="#/npc"><div class="hc-count">${Data.worldNpcs.length}</div><div class="hc-title">PNJ du monde</div></a>` +
-      `<a class="home-card" href="#/bestiaire"><div class="hc-count">${Data.adversaries.length}</div><div class="hc-title">Adversaires</div></a>`;
-    wrap.appendChild(bg);
-  }
-
-  mount(wrap);
-  document.title = 'Archive Holocron — Star Wars FFG';
+// Applique la personnalisation de monde (config ui) : thème (défaut/verrou),
+// titre affiché (sidebar + barre mobile) — rappelée quand le MJ enregistre.
+function applyUiConfig() {
+  applyWorldTheme(uiConfig(), isGMActive());
+  syncEmblem();
+  const t = worldTitle();
+  const sw = document.querySelector('.sb-word'); if (sw) sw.textContent = t;
+  const bt = document.querySelector('.brand-text'); if (bt) bt.textContent = t;
+  applyDashboardArt();
 }
 
 function pageHead(page, journalName) {
@@ -202,6 +129,10 @@ function viewJournal(jid, pid) {
   main.appendChild(header);
   const mejBox = mejCard(journal);
   if (mejBox) main.appendChild(mejBox);
+  // Sommaire d'acte (récap de début d'acte — visible joueurs, champs masqués
+  // déjà retirés côté serveur ; le MJ voit tout avec badge 🔒).
+  const actsBox = actSummaryCard(journal);
+  if (actsBox) main.appendChild(actsBox);
 
   const editable = editableCategoryIds().has(journal.categoryId);
   const pagesWrap = document.createElement('div');
@@ -334,7 +265,7 @@ function route() {
     content.innerHTML = '';
     mountGM(content, b, cleanupEditors);
     content.focus({ preventScroll: true });
-    setActiveTreeLink('#/mj');
+    setActiveTreeLink(hash); // partie « Espace MJ » + chapitre deep-linké
     closeDrawer();
     return;
   }
@@ -349,7 +280,8 @@ function route() {
   else if (a === 'timeline') { cleanupSpy(); cleanupSpy = () => {}; mountTimeline(content); }
   else if (a === 'sabacc') { cleanupSpy(); cleanupSpy = () => {}; mountSabacc(content); }
   else if (a === 'ateliers') { cleanupSpy(); cleanupSpy = () => {}; mountAteliers(content); }
-  else if (a === 'rencontres') { cleanupSpy(); cleanupSpy = () => {}; if (isGm) mountEncounters(content); else viewGmOnly(); }
+  // #/rencontres/<id> : deep-link vers une entrée de la bibliothèque (storyboard → « Ouvrir la rencontre »)
+  else if (a === 'rencontres') { cleanupSpy(); cleanupSpy = () => {}; if (isGm) mountEncounters(content, b); else viewGmOnly(); }
   else if (a === 'journal' && b) viewJournal(b, c);
   else if (a === 'pc' && b) viewSheet(Data.pcById.get(b), 'pc');
   else if (gmOnly && !isGm) viewGmOnly();
@@ -365,12 +297,6 @@ function route() {
 
 // --- Modales --------------------------------------------------------------
 
-function openModal(id) {
-  document.getElementById(id).hidden = false;
-}
-function closeModal(id) {
-  document.getElementById(id).hidden = true;
-}
 function openCompendiumCard(ref) {
   const entry = compendiumEntry(ref);
   if (!entry) return;
@@ -398,15 +324,20 @@ function closeDrawer() {
 // --- Init -----------------------------------------------------------------
 
 async function init() {
+  // Sélecteurs de thème et d'emblème : indépendants des données (restent
+  // utilisables en cas d'erreur de chargement).
+  mountThemeSwitcher(document.getElementById('btn-theme'));
+  mountEmblemPicker(document.getElementById('btn-emblem'));
   try {
     await loadData();
   ensureCompendium();
-  if (Data.authEnabled) mountLoginButton(document.querySelector('.topbar'));
-  document.addEventListener('holocron:session', () => { mountSidebar(); });
-  if (Data.meta?.title) {
-    document.title = Data.meta.title + ' — Holocron';
-    const bt = document.querySelector('.brand-text'); if (bt) bt.textContent = Data.meta.title;
-  }
+  if (Data.authEnabled) mountLoginButton(document.getElementById('sidebar-actions'));
+  document.addEventListener('holocron:session', () => { mountSidebar(); applyUiConfig(); });
+  // Personnalisation de monde enregistrée par le MJ : sidebar (parties, titre),
+  // thème, décor — resynchronisés à chaud.
+  document.addEventListener('holocron:ui', () => { mountSidebar(); applyUiConfig(); });
+  document.title = worldTitle() + ' — Holocron';
+  applyUiConfig();
   } catch (err) {
     content.innerHTML = `<div class="view-head"><h1>Erreur de chargement</h1><p class="muted">${esc(err.message)}<br>Servez le site via <code>npx serve public</code> (le protocole file:// bloque le chargement des données).</p></div>`;
     return;
@@ -415,14 +346,11 @@ async function init() {
   mountSidebar();
   initSearch();
   initGenerator();
-  document.getElementById('legend-body').innerHTML = legendHTML();
 
-  // Boutons.
-  document.getElementById('btn-search').addEventListener('click', openPalette);
+  // Boutons (rangée d'actions de la sidebar).
   document.getElementById('sidebar-search-box').addEventListener('focus', openPalette);
   document.getElementById('sidebar-search-box').addEventListener('click', openPalette);
-  document.getElementById('btn-legend').addEventListener('click', () => openModal('legend'));
-  document.getElementById('btn-generator').addEventListener('click', () => openGenerator());
+  document.getElementById('btn-dice').addEventListener('click', () => openGenerator());
   document.getElementById('btn-gm').addEventListener('click', () => { location.hash = '#/mj'; });
   document.getElementById('btn-menu').addEventListener('click', () =>
     document.body.classList.contains('drawer-open') ? closeDrawer() : openDrawer()
