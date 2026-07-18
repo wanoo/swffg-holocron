@@ -14,6 +14,7 @@ import { openLoginModal } from './login.js';
 import { openScreen } from './gm-screen.js';
 import { renderGmHome } from './gm-home.js';
 import { mountGmQuests } from './gm-quests.js';
+import { mountGmCampaign } from './gm-campaign.js';
 import { addShowButton } from './show-image.js';
 import { initSession, isSessionOn, toggleSession, teardownSession, refreshSessionBar, injectPins } from './gm-session.js';
 
@@ -336,6 +337,10 @@ async function renderDocs(container, list, scrollTo, cleanup) {
   questsLink.href = '#/mj/quetes';
   questsLink.addEventListener('click', (e) => { e.preventDefault(); selectChap('quetes'); });
   nav.appendChild(questsLink);
+  const campaignLink = el('a', 'gm-chap-link gm-home-link', '🗺️ Campagne');
+  campaignLink.href = '#/mj/campagne';
+  campaignLink.addEventListener('click', (e) => { e.preventDefault(); selectChap('campagne'); });
+  nav.appendChild(campaignLink);
 
   // Champ de filtre.
   const filter = el('input', 'gm-filter');
@@ -414,17 +419,20 @@ async function renderDocs(container, list, scrollTo, cleanup) {
   // Sélectionne (et rend si besoin) UN chapitre — ou le poste de pilotage —
   // puis scrolle vers son heading.
   function selectChap(chapId, headingId) {
-    if (chapId === 'quetes') { // 🎯 graphe des quêtes Campaign Codex
-      if (currentChap !== 'quetes') {
+    // Vues-outils du cockpit (🎯 quêtes, 🗺️ éditeur de campagne) : même mécanique.
+    const TOOL_VIEWS = { quetes: { mount: mountGmQuests, link: questsLink }, campagne: { mount: mountGmCampaign, link: campaignLink } };
+    if (TOOL_VIEWS[chapId]) {
+      if (currentChap !== chapId) {
         disposeChap();
-        currentChap = 'quetes';
-        mountGmQuests(main, chapCleanup);
+        currentChap = chapId;
+        TOOL_VIEWS[chapId].mount(main, chapCleanup);
         for (const r of present) rubBlocks.get(r.key).details.open = false;
-        try { history.replaceState(null, '', '#/mj/quetes'); } catch { /* sandbox */ }
+        try { history.replaceState(null, '', `#/mj/${chapId}`); } catch { /* sandbox */ }
       }
       for (const [, a] of chapLinks) a.classList.remove('active');
       homeLink.classList.remove('active');
-      questsLink.classList.add('active');
+      questsLink.classList.toggle('active', chapId === 'quetes');
+      campaignLink.classList.toggle('active', chapId === 'campagne');
       activeChapter = null;
       refreshSessionBar();
       window.scrollTo(0, 0);
@@ -439,6 +447,8 @@ async function renderDocs(container, list, scrollTo, cleanup) {
         try { history.replaceState(null, '', '#/mj'); } catch { /* sandbox */ }
       }
       for (const [, a] of chapLinks) a.classList.remove('active');
+      questsLink.classList.remove('active');
+      campaignLink.classList.remove('active');
       homeLink.classList.add('active');
       activeChapter = null;
       refreshSessionBar(); // retire les chips du chapitre quitté
@@ -446,6 +456,8 @@ async function renderDocs(container, list, scrollTo, cleanup) {
       return;
     }
     homeLink.classList.remove('active');
+    questsLink.classList.remove('active');
+    campaignLink.classList.remove('active');
     const chap = all.find((c) => c.id === chapId) || all[0];
     if (!chap) return;
     if (chap.id !== currentChap) {

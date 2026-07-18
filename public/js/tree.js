@@ -31,6 +31,7 @@ const KIND_ICON = {
 const ROUTE_ICON = {
   '#/mj': packIcon('dashboard'),
   '#/mj/quetes': packIcon('campaign'),
+  '#/mj/campagne': packIcon('position'),
   '#/navicomputer': packIcon('position'),
   '#/vaisseau': packIcon('ship'),
   '#/astronav': packIcon('astronav'),
@@ -145,6 +146,7 @@ function buildParts() {
     const gmChapters = [
       { href: '#/mj', label: 'Poste de pilotage', icon: ROUTE_ICON['#/mj'] },
       { href: '#/mj/quetes', label: 'Quêtes', icon: ROUTE_ICON['#/mj/quetes'] },
+      { href: '#/mj/campagne', label: 'Campagne (éditeur)', icon: ROUTE_ICON['#/mj/campagne'] },
       ...(gmDocs || []).map((d) => ({ href: `#/mj/${d.id}`, label: d.name, icon: packIcon('journal') })),
     ];
     list.push({
