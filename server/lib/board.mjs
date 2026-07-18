@@ -7,6 +7,9 @@
 //   · flags.holocron.sequences = [{ id, name, items: [{src, title, note}] }]
 // Le CATALOGUE des objets de campagne (actes, quêtes, PNJ, orgs, lieux, boutiques
 // Campaign Codex) et leurs LIENS AUTO sont DÉRIVÉS du SyncStore — jamais stockés.
+// Chaque ACTE porte en plus un STORYBOARD (flags.holocron.storyboard sur SON
+// journal — voir sanitizeStoryboard) : moments de jeu typés 🎭⚔️🗒️🖼️ enchaînés,
+// MJ only, servi UNIQUEMENT par la vue board (route gm-gated).
 import { mcpCall } from './mcp.mjs';
 import { ccView, resolveFolder, sanitizeActSummary } from './transform/journals.mjs';
 
@@ -30,6 +33,93 @@ export const EDGE_TYPES = {
 const NODE_ID = /^[A-Za-z0-9:_-]{1,40}$/;
 const okId = (s) => typeof s === 'string' && NODE_ID.test(s);
 const clampPos = (v) => (Number.isFinite(+v) ? Math.max(-20000, Math.min(20000, Math.round(+v))) : 0);
+
+/* ------------------------------------------------------------- storyboard --
+ * Chaque ACTE porte un STORYBOARD : `flags.holocron.storyboard` SUR le journal
+ * de l'acte = { beats: [beat] } — l'ORDRE du tableau est l'ordre narratif.
+ * Un beat = un MOMENT DE JEU typé :
+ *   { id, kind: scene|combat|note|handout, title, note (texte MJ court),
+ *     uuids: ["JournalEntry.<id>", …]  (entités CC impliquées : PNJ/lieux/orgs/quêtes),
+ *     encounterId?  (entrée de flags.holocron.encounters — kind combat),
+ *     sequenceId?   (entrée de flags.holocron.sequences — kind scene/handout),
+ *     sound?: { playlist }, status: todo|encours|fait, x?, y? }.
+ * MJ-ONLY STRICT : le storyboard ne sort QUE par la vue board (route gm-gated) —
+ * jamais dans les vues publiques (buildJournalsView ne le lit pas). */
+export const BEAT_KINDS = ['scene', 'combat', 'note', 'handout'];
+export const BEAT_STATUS = ['todo', 'encours', 'fait'];
+const beatUuid = (v) => {
+  const s = String(v || '');
+  const m = /JournalEntry\.([A-Za-z0-9]{16})/.exec(s);
+  return m ? `JournalEntry.${m[1]}` : (/^[A-Za-z0-9]{16}$/.test(s) ? `JournalEntry.${s}` : null);
+};
+
+/** Assainit un storyboard complet (PUT client → flag). Ne jette jamais. */
+export function sanitizeStoryboard(raw) {
+  const s = raw && typeof raw === 'object' ? raw : {};
+  const seen = new Set();
+  const beats = (Array.isArray(s.beats) ? s.beats : []).slice(0, 60)
+    .map((b) => {
+      if (!b || typeof b !== 'object') return null;
+      const id = okId(b.id) ? b.id : `beat-${Math.random().toString(36).slice(2, 10)}`;
+      if (seen.has(id)) return null; // ids dupliqués : premier gagnant
+      seen.add(id);
+      const kind = BEAT_KINDS.includes(b.kind) ? b.kind : 'scene';
+      const out = {
+        id, kind,
+        title: String(b.title || '').trim().slice(0, 120),
+        note: String(b.note || '').slice(0, 2000),
+        uuids: [...new Set((Array.isArray(b.uuids) ? b.uuids : []).slice(0, 16).map(beatUuid).filter(Boolean))],
+        status: BEAT_STATUS.includes(b.status) ? b.status : 'todo',
+      };
+      // pièces jointes SELON le kind (le reste est ignoré à l'assainissement)
+      if (kind === 'combat' && okId(b.encounterId)) out.encounterId = b.encounterId;
+      if ((kind === 'scene' || kind === 'handout') && okId(b.sequenceId)) out.sequenceId = b.sequenceId;
+      const pl = b.sound && typeof b.sound === 'object' ? String(b.sound.playlist || '').slice(0, 100) : '';
+      if (pl) out.sound = { playlist: pl };
+      if (b.x != null && Number.isFinite(+b.x)) out.x = clampPos(b.x);
+      if (b.y != null && Number.isFinite(+b.y)) out.y = clampPos(b.y);
+      return out;
+    })
+    .filter(Boolean);
+  return { beats };
+}
+
+/* Tags d'acte « mj:acte-<n> » : le storyboard POSE (option « taguer les
+ * participants ») ce tag dans `flags.campaign-codex.data.tags` des fiches CC
+ * référencées par ses beats — indexé par Asset Librarian (« tout ce qui joue
+ * dans l'acte 6 »). Idempotent : pose sur les référencées, retire sur celles
+ * qui le portent sans plus être référencées ; uuids = [] retire partout. */
+export const ACT_TAG_PREFIX = 'mj:acte-';
+
+/** Numéro d'acte : premier nombre du NOM du journal, sinon rang (1-based) dans
+ * les actes triés par sort Foundry. */
+export function actNumberOf(entry, storyEntries) {
+  const m = /(\d+)/.exec(String(entry?.name || ''));
+  if (m) return +m[1];
+  const i = (storyEntries || []).findIndex((j) => j._id === entry?._id);
+  return i >= 0 ? i + 1 : 1;
+}
+
+const normTags = (raw) => (Array.isArray(raw) ? raw : String(raw || '').split(','))
+  .map((t) => String(t).trim()).filter(Boolean);
+
+/** Diff PUR des poses/retraits de tag (testable) : fiches CC uniquement.
+ * Retourne { add: [{id, tags}], remove: [{id, tags}] } — tags = liste FINALE. */
+export function actTagOps({ tag, uuids, journalsIndex, getJournal }) {
+  const referenced = new Set((uuids || []).map((u) => String(u).split('.').pop()));
+  const add = [];
+  const remove = [];
+  for (const e of (journalsIndex || [])) {
+    if (!e?._id || !e.flags?.['campaign-codex']?.type) continue;
+    if (e.flags?.['swffg-astronavigation']) continue; // atlas : jamais tagué
+    const doc = getJournal?.(e._id) || e;
+    const tags = normTags(doc.flags?.['campaign-codex']?.data?.tags ?? e.flags?.['campaign-codex']?.data?.tags);
+    const has = tags.some((t) => t.toLowerCase() === tag.toLowerCase());
+    if (referenced.has(e._id) && !has) add.push({ id: e._id, tags: [...tags, tag] });
+    else if (!referenced.has(e._id) && has) remove.push({ id: e._id, tags: tags.filter((t) => t.toLowerCase() !== tag.toLowerCase()) });
+  }
+  return { add, remove };
+}
 
 /** Assainit un board complet (PUT client → flag). Ne jette jamais. */
 export function sanitizeBoard(raw) {
@@ -110,6 +200,8 @@ export function buildCatalog({ config, folders, journalsIndex, getJournal }) {
     if (doc.flags?.['swffg-astronavigation']) continue;
     const fh = entry.flags?.holocron || {};
     const img = (doc.pages || []).find((p) => p.src)?.src || null;
+    // storyboard (MJ only — cette vue n'est servie que par la route gm-gated)
+    const sb = type === 'acte' ? sanitizeStoryboard(fh.storyboard) : null;
     nodes.push({
       id: entry._id,
       name: entry.name,
@@ -120,6 +212,7 @@ export function buildCatalog({ config, folders, journalsIndex, getJournal }) {
       ...(fh.mort ? { mort: true } : {}),
       ...(img ? { img } : {}),
       ...(type === 'acte' ? { sort: entry.sort || 0, actSummary: sanitizeActSummary(fh.actSummary) } : {}),
+      ...(sb?.beats.length ? { storyboard: sb } : {}),
     });
     known.add(entry._id);
     if (type === 'quest') {
@@ -252,5 +345,50 @@ export function createBoardService({ store, config }) {
     return clean;
   }
 
-  return { view, saveBoard, saveSequence, removeSequence, saveActSummary };
+  /** Storyboard d'acte : flags.holocron.storyboard SUR le journal de l'acte —
+   * même écriture en deux temps que le board (le merge Foundry par chemin ne
+   * retire jamais une clé ; on supprime le flag puis on le repose entier).
+   * `tagParticipants` (true/false/absent) : synchronise / retire / ne touche pas
+   * les tags « mj:acte-<n> » des fiches CC référencées (voir actTagOps). */
+  async function saveStoryboard(journalId, raw, { tagParticipants } = {}) {
+    const entry = idx().find((j) => j._id === journalId);
+    if (!entry) throw Object.assign(new Error('journal inexistant'), { code: 404 });
+    const clean = sanitizeStoryboard(raw);
+    await mcpCall('modify_document', { type: 'JournalEntry', _id: journalId,
+      updates: [{ 'flags.holocron.-=storyboard': null }] });
+    await mcpCall('modify_document', { type: 'JournalEntry', _id: journalId,
+      updates: [{ 'flags.holocron.storyboard': clean }] });
+    patchEntryFlags(journalId, (h) => { h.storyboard = clean; });
+
+    let tags = null;
+    if (tagParticipants === true || tagParticipants === false) {
+      const storyFolderIds = new Set((config().categories || [])
+        .filter((c) => c && c.kind === 'story' && c.folder)
+        .map((c) => resolveFolder(store.get('folders'), c.folder)?._id)
+        .filter(Boolean));
+      const story = idx().filter((j) => storyFolderIds.has(j.folder)).sort((a, b) => (a.sort || 0) - (b.sort || 0));
+      const tag = ACT_TAG_PREFIX + actNumberOf(entry, story);
+      const uuids = tagParticipants ? clean.beats.flatMap((b) => b.uuids) : [];
+      const ops = actTagOps({ tag, uuids, journalsIndex: idx(), getJournal: (id) => store.get(`journal:${id}`) });
+      for (const op of [...ops.add, ...ops.remove]) {
+        await mcpCall('modify_document', { type: 'JournalEntry', _id: op.id,
+          updates: [{ 'flags.campaign-codex.data.tags': op.tags }] });
+        // write-through des caches (le client Foundry ne voit pas ses propres writes)
+        const setTags = (flags) => {
+          flags['campaign-codex'] = flags['campaign-codex'] || {};
+          flags['campaign-codex'].data = flags['campaign-codex'].data || {};
+          flags['campaign-codex'].data.tags = op.tags;
+        };
+        store.patch('journalsIndex', (items) => {
+          const j = items.find((x) => x._id === op.id);
+          if (j) { j.flags = j.flags || {}; setTags(j.flags); }
+        });
+        store.patch(`journal:${op.id}`, (doc) => { doc.flags = doc.flags || {}; setTags(doc.flags); });
+      }
+      tags = { tag, added: ops.add.length, removed: ops.remove.length };
+    }
+    return { storyboard: clean, ...(tags ? { tags } : {}) };
+  }
+
+  return { view, saveBoard, saveSequence, removeSequence, saveActSummary, saveStoryboard };
 }

@@ -409,6 +409,18 @@ async function handleApi(req, res, urlPath) {
         return sendJSON(res, 200, { ok: true, actSummary: await board.saveActSummary(id, body) });
       } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
     }
+    // Storyboard d'acte (flags.holocron.storyboard sur le journal de l'acte) —
+    // MJ only strict : les beats ne sortent JAMAIS des vues publiques (la lecture
+    // passe par GET /api/gm/board, catalogue des actes). `tagParticipants` :
+    // true = pose/synchronise les tags « mj:acte-<n> » sur les fiches CC
+    // référencées, false = les retire toutes, absent = n'y touche pas.
+    if (parts[1] === 'storyboard' && id) {
+      if (req.method !== 'PUT') return sendJSON(res, 405, { error: 'PUT uniquement' });
+      try {
+        const body = JSON.parse(await readBody(req, 300_000));
+        return sendJSON(res, 200, { ok: true, ...(await board.saveStoryboard(id, body, { tagParticipants: body.tagParticipants })) });
+      } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
+    }
     if (parts[1] === 'encounters') {
       try {
         if (req.method === 'GET') return sendJSON(res, 200, { encounters: await encounters.list() });

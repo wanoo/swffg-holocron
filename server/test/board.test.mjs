@@ -4,7 +4,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { sanitizeBoard, sanitizeSequence, buildCatalog, EDGE_TYPES } from '../lib/board.mjs';
+import {
+  sanitizeBoard, sanitizeSequence, buildCatalog, EDGE_TYPES,
+  sanitizeStoryboard, actTagOps, actNumberOf, ACT_TAG_PREFIX,
+} from '../lib/board.mjs';
 import { sanitizeActSummary, actSummaryView } from '../lib/transform/journals.mjs';
 
 /* ------------------------------------------------------------------- board -- */
@@ -77,6 +80,97 @@ test('sanitizeSequence : items bornés, src sans traversée, id généré', () =
   assert.equal(out.items.length, 2);
   assert.equal(out.items[0].src, 'worlds/star-wars/assets/handout1.webp');
   assert.equal(out.items[1].src, 'https://exemple.test/img.png');
+});
+
+/* --------------------------------------------------------------- storyboard -- */
+test('sanitizeStoryboard : kinds/status en table fermée, uuids normalisés dédupliqués', () => {
+  const out = sanitizeStoryboard({ beats: [
+    {
+      id: 'beat-abc', kind: 'combat', title: ' L’abordage ' + 'x'.repeat(200), note: 'n'.repeat(3000),
+      uuids: ['JournalEntry.ABCDEFGHIJKLMNOP::page', 'QRSTUVWXYZABCDEF', 'ABCDEFGHIJKLMNOP', 'pas-un-id', 42],
+      encounterId: 'enc-12345678', sequenceId: 'seq-x', status: 'encours', x: 120.6, y: -99999,
+    },
+    { kind: 'inconnu', status: 'hack', title: 'défauts' },
+    { id: 'beat-abc', kind: 'note', title: 'id dupliqué → retiré' },
+    'pas un objet',
+  ] });
+  assert.equal(out.beats.length, 2);
+  const [b1, b2] = out.beats;
+  assert.equal(b1.title.length, 120);
+  assert.equal(b1.note.length, 2000);
+  assert.deepEqual(b1.uuids, ['JournalEntry.ABCDEFGHIJKLMNOP', 'JournalEntry.QRSTUVWXYZABCDEF']);
+  assert.equal(b1.encounterId, 'enc-12345678'); // kind combat : rencontre gardée
+  assert.equal(b1.sequenceId, undefined); // … mais pas de séquence sur un combat
+  assert.equal(b1.status, 'encours');
+  assert.equal(b1.x, 121);
+  assert.equal(b1.y, -20000); // clamp
+  assert.equal(b2.kind, 'scene'); // kind inconnu → scène
+  assert.equal(b2.status, 'todo');
+  assert.match(b2.id, /^beat-/);
+  assert.equal(b2.x, undefined, 'position absente non inventée');
+});
+
+test('sanitizeStoryboard : pièces jointes selon le kind (séquence ≠ note, son partout)', () => {
+  const out = sanitizeStoryboard({ beats: [
+    { id: 'b1', kind: 'handout', sequenceId: 'seq-abc', encounterId: 'enc-abc', sound: { playlist: 'Cantina' } },
+    { id: 'b2', kind: 'note', sequenceId: 'seq-abc', sound: { playlist: 'x'.repeat(300) } },
+  ] });
+  assert.equal(out.beats[0].sequenceId, 'seq-abc');
+  assert.equal(out.beats[0].encounterId, undefined, 'rencontre réservée au kind combat');
+  assert.deepEqual(out.beats[0].sound, { playlist: 'Cantina' });
+  assert.equal(out.beats[1].sequenceId, undefined);
+  assert.equal(out.beats[1].sound.playlist.length, 100);
+});
+
+test('sanitizeStoryboard : entrée vide/malveillante → { beats: [] }', () => {
+  assert.deepEqual(sanitizeStoryboard(null), { beats: [] });
+  assert.deepEqual(sanitizeStoryboard({ beats: 'niet' }), { beats: [] });
+});
+
+test('actNumberOf : numéro du nom d’acte, sinon rang dans les actes triés', () => {
+  const story = [{ _id: 'A', name: 'Prologue' }, { _id: 'B', name: 'Acte 6 — Chute' }, { _id: 'C', name: 'Finale' }];
+  assert.equal(actNumberOf(story[1], story), 6);
+  assert.equal(actNumberOf(story[0], story), 1);
+  assert.equal(actNumberOf(story[2], story), 3);
+  assert.equal(ACT_TAG_PREFIX + actNumberOf(story[1], story), 'mj:acte-6');
+});
+
+test('actTagOps : idempotent — pose sur les référencées, retire ailleurs, CC only', () => {
+  const cc = (id, name, tags, extra = {}) =>
+    ({ _id: id, name, flags: { 'campaign-codex': { type: 'npc', data: { tags } }, ...extra } });
+  const journalsIndex = [
+    cc('NPC1000000000001', 'Maz', ['Favori']),                       // référencée, pas de tag → pose
+    cc('NPC2000000000002', 'Krayt', ['mj:acte-6', 'Favori']),        // référencée, déjà taguée → rien
+    cc('NPC3000000000003', 'Oublié', ['mj:acte-6']),                 // plus référencée → retrait
+    cc('ATL4000000000004', 'Planète', [], { 'swffg-astronavigation': { uid: 'x' } }), // atlas : jamais
+    { _id: 'ACTE000000000005', name: 'Acte 6', flags: { holocron: {} } }, // pas une fiche CC
+  ];
+  const uuids = ['JournalEntry.NPC1000000000001', 'JournalEntry.NPC2000000000002'];
+  const ops = actTagOps({ tag: 'mj:acte-6', uuids, journalsIndex, getJournal: () => null });
+  assert.deepEqual(ops.add, [{ id: 'NPC1000000000001', tags: ['Favori', 'mj:acte-6'] }]);
+  assert.deepEqual(ops.remove, [{ id: 'NPC3000000000003', tags: [] }]);
+  // retrait complet (« retirable ») : uuids vides → toutes les porteuses perdent le tag
+  const off = actTagOps({ tag: 'mj:acte-6', uuids: [], journalsIndex, getJournal: () => null });
+  assert.deepEqual(off.add, []);
+  assert.deepEqual(off.remove.map((o) => o.id), ['NPC2000000000002', 'NPC3000000000003']);
+  assert.deepEqual(off.remove[0].tags, ['Favori'], 'les autres tags survivent');
+});
+
+test('buildCatalog : le storyboard d’un acte sort dans le catalogue (assaini)', () => {
+  const F = { actes: 'FACT000000000001' };
+  const folders = [{ _id: F.actes, name: '🎬 Actes', type: 'JournalEntry' }];
+  const config = { categories: [{ folder: '🎬 Actes', kind: 'story' }], journals: {} };
+  const journalsIndex = [
+    { _id: 'ACTE000000000001', name: 'Acte 1', folder: F.actes, sort: 1, ownership: { default: 2 },
+      flags: { holocron: { storyboard: { beats: [{ id: 'b1', kind: 'scene', title: 'Ouverture', status: 'fait' }, 'niet'] } } } },
+    { _id: 'ACTE000000000002', name: 'Acte 2', folder: F.actes, sort: 2, ownership: { default: 2 }, flags: {} },
+  ];
+  const cat = buildCatalog({ config, folders, journalsIndex, getJournal: () => null });
+  const a1 = cat.nodes.find((n) => n.id === 'ACTE000000000001');
+  assert.equal(a1.storyboard.beats.length, 1);
+  assert.equal(a1.storyboard.beats[0].status, 'fait');
+  const a2 = cat.nodes.find((n) => n.id === 'ACTE000000000002');
+  assert.equal(a2.storyboard, undefined, 'pas de storyboard vide dans le catalogue');
 });
 
 /* ---------------------------------------------------------- sommaire d'acte -- */
