@@ -45,6 +45,42 @@ export async function postRoll({ player, description, pool = {}, result = null, 
 // réémet un message de résultat estampillé flags.holocron.resultFor=token, que
 // readRollResult() récupère par polling. Message chuchoté à l'auteur → pas de
 // bruit dans le chat public (la macro le supprime après évaluation).
+// Résultats mémorisés des jets évalués par le connecteur (token → résultat) :
+// le front continue de sonder /roll-result, mais la réponse est déjà là.
+const rollResults = new Map();   // token → { result, at }
+const ROLL_KEEP = 200;
+
+/** Normalise le retour d'un outil de jet en symboles NETS {success, failure, …}.
+ * Deux formats connus : client_roll_pool_native (clés singulières, déjà nettes)
+ * et roll_ffg_pool (bloc `detail` au pluriel + netSuccesses/netAdvantages). */
+export function readSymbols(payload) {
+  const src = (payload && typeof payload === 'object')
+    ? (payload.detail || payload.result || payload.symbols || payload) : null;
+  if (!src || typeof src !== 'object') return null;
+  const num = (...keys) => {
+    for (const k of keys) { const v = Number(src[k]); if (Number.isFinite(v) && src[k] !== undefined) return v; }
+    return 0;
+  };
+  const netSuccess = src.netSuccesses !== undefined
+    ? Number(src.netSuccesses)
+    : num('success') - num('failure');
+  const netAdv = src.netAdvantages !== undefined
+    ? Number(src.netAdvantages)
+    : num('advantage') - num('threat');
+  const out = {
+    success: Math.max(netSuccess, 0),
+    failure: Math.max(-netSuccess, 0),
+    advantage: Math.max(netAdv, 0),
+    threat: Math.max(-netAdv, 0),
+    triumph: num('triumph', 'triumphs'),
+    despair: num('despair', 'despairs'),
+    light: num('light'),
+    dark: num('dark'),
+  };
+  for (const k of Object.keys(out)) if (!out[k]) delete out[k];
+  return Object.keys(out).length ? out : { success: 0 };
+}
+
 export async function requestRoll({ token, player, characterId, description, pool = {}, skillName = '' }) {
   const cleanPool = {};
   for (const k of Object.keys(GLYPH)) {
@@ -53,9 +89,30 @@ export async function requestRoll({ token, player, characterId, description, poo
   }
   const who = String(player || 'Joueur').slice(0, 40);
   const desc = String(description || 'Jet').slice(0, 200);
+  const actor = ID_RE.test(String(characterId || '')) ? String(characterId) : undefined;
+  const label = `${who} — ${desc}`;
+
+  // 1. moteur FFG natif du client (carte de chat officielle + dés 3D Dice So
+  //    Nice sur la table) — nécessite le module compagnon côté Foundry.
+  try {
+    const r = await mcpCall('client_roll_pool_native', { pool: cleanPool, description: label, ...(actor ? { actor } : {}) });
+    rememberRoll(token, readSymbols(r));
+    return String(token);
+  } catch (e) { lastRollFallback = String(e.message || e).slice(0, 120); }
+
+  // 2. évaluation SERVEUR par le connecteur (faces officielles, posté au chat) :
+  //    autonome, aucun navigateur MJ requis.
+  try {
+    const r = await mcpCall('roll_ffg_pool', { description: label, post: true, ...cleanPool });
+    rememberRoll(token, readSymbols(r));
+    return String(token);
+  } catch (e) { lastRollFallback = String(e.message || e).slice(0, 120); }
+
+  // 3. repli historique : message porteur du pool, évalué par la macro
+  //    « Pont de jets Holocron » ouverte sur un navigateur MJ.
   const author = await mcpAuthorId();
   const speaker = { alias: who };
-  if (ID_RE.test(String(characterId || ''))) speaker.actor = characterId;
+  if (actor) speaker.actor = actor;
   const poolTxt = Object.entries(cleanPool).map(([k, v]) => GLYPH[k].repeat(v)).join('') || '—';
   await mcpCall('create_document', { type: 'ChatMessage', data: [{
     author,
@@ -74,8 +131,19 @@ export async function requestRoll({ token, player, characterId, description, poo
   return String(token);
 }
 
-// Récupère le résultat d'une demande de jet (posté par la macro Foundry).
+let lastRollFallback = '';
+export const rollBridgeNote = () => lastRollFallback;
+
+function rememberRoll(token, result) {
+  rollResults.set(String(token), { result, at: Date.now() });
+  if (rollResults.size > ROLL_KEEP) rollResults.delete(rollResults.keys().next().value);
+}
+
+// Résultat d'une demande de jet : immédiat quand le connecteur a évalué le
+// pool (moteur natif ou serveur), sinon posté par la macro-pont historique.
 export async function readRollResult(token) {
+  const done = rollResults.get(String(token));
+  if (done) return { ready: true, result: done.result, at: done.at };
   const msgs = await mcpCall('get_messages', { requested_fields: ['flags'] });
   const hit = (Array.isArray(msgs) ? msgs : []).find((m) => m?.flags?.holocron?.resultFor === String(token));
   if (!hit) return { ready: false };
