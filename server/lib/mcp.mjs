@@ -24,7 +24,14 @@ export function configureMcp({ foundryMcpUrl, credentialsJson, sidecarBin, logge
   } else if (credentialsJson && sidecarBin) {
     cfg.mode = 'sidecar';
     cfg.bin = sidecarBin;
-    cfg.credsJson = credentialsJson;
+    // le gateway exige un _id par entrée — les envs historiques (ère TS) ne
+    // l'ont pas : on le complète pour rester zéro-config.
+    try {
+      const arr = JSON.parse(credentialsJson);
+      cfg.credsJson = Array.isArray(arr)
+        ? JSON.stringify(arr.map((c, i) => ({ _id: `world-${i}`, ...c })))
+        : credentialsJson;
+    } catch { cfg.credsJson = credentialsJson; }
   } else {
     cfg.mode = 'none';
   }
