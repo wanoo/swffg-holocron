@@ -43,11 +43,24 @@ export const BEAT_KINDS = {
   scene: { icon: '🎭', label: 'Scène', hint: 'theater of the mind' },
   combat: { icon: '⚔️', label: 'Combat', hint: 'rencontre liée' },
   note: { icon: '🗒️', label: 'Note MJ', hint: 'jamais montrée aux joueurs' },
-  handout: { icon: '🖼️', label: 'Handout', hint: 'séquence d’images à projeter' },
+  handout: { icon: '🖼️', label: 'Handout', hint: 'image, vidéo, audio ou chat à envoyer' },
 };
 const BEAT_STATUS = ['todo', 'encours', 'fait'];
 const STATUS_META = { todo: { icon: '○', label: 'À jouer' }, encours: { icon: '▶', label: 'En cours' }, fait: { icon: '✓', label: 'Fait' } };
 const BEAT_W = 200, BEAT_H = 84, BEAT_GX = 82, SAT_W = 150, SAT_H = 34;
+
+// --- Handouts multi-média : types d'items de séquence & handouts unitaires ----
+// Miroir serveur (HANDOUT_TYPES de board.mjs) : envoyés via POST
+// /api/gm/foundry/handout aux joueurs SÉLECTIONNÉS (targets) ou à toute la table.
+export const ITEM_TYPES = {
+  image: { icon: '🖼️', label: 'Image' },
+  video: { icon: '🎬', label: 'Vidéo' },
+  audio: { icon: '🎵', label: 'Audio' },
+  chat: { icon: '💬', label: 'Événement chat' },
+};
+const detectType = (src) => (/\.(mp3|ogg|wav|m4a|flac)(\?.*)?$/i.test(src) ? 'audio'
+  : /\.(mp4|webm|m4v|ogv)(\?.*)?$/i.test(src) ? 'video' : 'image');
+const itemType = (it) => (ITEM_TYPES[it?.type] ? it.type : 'image'); // rétrocompat : sans type = image
 
 async function api(path, opts = {}) {
   const res = await fetch(`${apiBase()}${path}`, {
@@ -101,7 +114,7 @@ export async function mountGmCampaign(main, cleanup = []) {
   function nodeMeta(id) {
     if (id.startsWith('seq:')) {
       const s = seqById().get(id);
-      return s ? { id, name: s.name, type: 'seq', img: s.items[0]?.src || null }
+      return s ? { id, name: s.name, type: 'seq', img: s.items.find((it) => it.src)?.src || null }
         : { id, name: '(séquence supprimée)', type: 'seq', ghost: true };
     }
     return catById.get(id) || { id, name: '(objet disparu)', type: 'quest', ghost: true };
@@ -834,16 +847,55 @@ export async function mountGmCampaign(main, cleanup = []) {
   }
 
   /* --------------------------------------- 🎞️ Handouts & séquences (lot 3) -- */
-  // Une séquence = liste ORDONNÉE de handouts {src, title, note} préparée avant
-  // séance (flags.holocron.sequences). En séance : Précédent/Suivant POUSSENT
-  // l'image à tous les joueurs via le pont show-image existant (module Foundry).
+  // Une séquence = liste ORDONNÉE de handouts multi-média {type, src|text,
+  // title, note, targets?} préparée avant séance (flags.holocron.sequences).
+  // En séance : Précédent/Suivant POUSSENT l'item via POST /api/gm/foundry/handout
+  // aux joueurs sélectionnés (targets) — aucun sélectionné = toute la table.
   let projState = { mode: 'list', seqId: null, idx: 0 };
+
+  // Joueurs Foundry pour le picker de destinataires (vue MJ légère /gm/players).
+  let players = null; // null = pas encore chargés, [] = échec/aucun
+  async function loadPlayers() {
+    try { players = ((await api('/gm/players')).players || []).filter((p) => !p.gm); }
+    catch { players = []; }
+  }
+  const targetsBadge = (item) => {
+    if (!item.targets?.length) return '→ Tous';
+    return '→ ' + item.targets.map((id) => (players || []).find((p) => p.id === id)?.name || '?').join(', ');
+  };
+  // Chips cochables des destinataires — mute `item.targets` (vide = supprimé = tous).
+  function targetsPicker(item, onChange) {
+    const box = el('div', 'gmc-picks gmc-targets');
+    const paintChips = () => {
+      box.innerHTML = '';
+      for (const p of players || []) {
+        const lab = el('label', 'gmc-pick');
+        const cb = el('input');
+        cb.type = 'checkbox';
+        cb.checked = (item.targets || []).includes(p.id);
+        cb.addEventListener('change', () => {
+          const sel = new Set(item.targets || []);
+          cb.checked ? sel.add(p.id) : sel.delete(p.id);
+          if (sel.size) item.targets = [...sel]; else delete item.targets;
+          onChange?.();
+        });
+        lab.append(cb, document.createTextNode(` ${p.name}${p.active ? ' 🟢' : ''}`));
+        box.appendChild(lab);
+      }
+      if (!(players || []).length) box.appendChild(el('p', 'muted', 'Aucun joueur listé — tout part à toute la table.'));
+    };
+    if (players === null) loadPlayers().then(paintChips); else paintChips();
+    return box;
+  }
 
   async function pushHandout(item, statusEl) {
     statusEl.textContent = '📡 Envoi…';
+    const type = itemType(item);
+    const body = { type, title: item.title || '', ...(item.targets?.length ? { targets: item.targets } : {}) };
+    if (type === 'chat') body.text = item.text || ''; else body.src = toFoundrySrc(item.src);
     try {
-      await api('/gm/foundry/show-image', { method: 'POST', body: JSON.stringify({ src: toFoundrySrc(item.src), title: item.title }) });
-      statusEl.textContent = '✅ Projeté chez les joueurs';
+      await api('/gm/foundry/handout', { method: 'POST', body: JSON.stringify(body) });
+      statusEl.textContent = `✅ Envoyé ${targetsBadge(item)}`;
     } catch (e) { statusEl.textContent = `⚠️ ${e.message}`.slice(0, 60); }
   }
 
@@ -853,10 +905,11 @@ export async function mountGmCampaign(main, cleanup = []) {
     if (projState.mode === 'play' && s) return paintSeqPlayer(s);
     // --- liste des séquences -----------------------------------------------
     panel.appendChild(el('p', 'eyebrow', '🎞️ Séquences de handouts'));
-    panel.appendChild(el('p', 'gmc-hint', 'Prépare des suites d’images (handouts) et projette-les aux joueurs dans Foundry, dans l’ordre.'));
+    panel.appendChild(el('p', 'gmc-hint', 'Prépare des suites de handouts (🖼️ images, 🎬 vidéos, 🎵 audios, 💬 événements chat) et envoie-les dans l’ordre — à toute la table ou aux joueurs choisis.'));
     for (const seq of state.sequences) {
       const row = el('div', 'gmc-obj');
-      row.appendChild(el('span', 'gmc-obj-name', `${esc(seq.name)} <span class="gmc-count">${seq.items.length} image(s)</span>`));
+      const icons = seq.items.map((it) => ITEM_TYPES[itemType(it)].icon).join('');
+      row.appendChild(el('span', 'gmc-obj-name', `${esc(seq.name)} <span class="gmc-count">${seq.items.length} élément(s) ${icons}</span>`));
       const play = el('button', 'gmc-mini', '▶');
       play.type = 'button'; play.title = 'Projeter';
       play.addEventListener('click', () => { projState = { mode: 'play', seqId: seq.id, idx: 0 }; paintSide(); });
@@ -899,20 +952,42 @@ export async function mountGmCampaign(main, cleanup = []) {
         del.addEventListener('click', () => { seq.items.splice(i, 1); paintItems(); });
         head.append(up, down, del);
         box.appendChild(head);
-        const src = el('input', 'gmc-input'); src.value = it.src; src.placeholder = 'worlds/…/handout.webp ou https://…';
-        src.addEventListener('change', () => { it.src = src.value.trim(); });
-        const title = el('input', 'gmc-input'); title.value = it.title; title.placeholder = 'Titre (montré aux joueurs)';
+        // type du handout : 🖼️/🎬/🎵/💬 — auto-détecté sur la src (.mp3 → audio…)
+        const typeSel = el('select', 'gmc-input');
+        typeSel.innerHTML = Object.entries(ITEM_TYPES)
+          .map(([k, tt]) => `<option value="${k}"${itemType(it) === k ? ' selected' : ''}>${tt.icon} ${tt.label}</option>`).join('');
+        typeSel.addEventListener('change', () => { it.type = typeSel.value; paintItems(); });
+        box.appendChild(typeSel);
+        if (itemType(it) === 'chat') {
+          const text = el('textarea', 'gmc-input');
+          text.rows = 3;
+          text.value = it.text || '';
+          text.placeholder = 'Texte envoyé dans le tchat Foundry (HTML léger autorisé)';
+          text.addEventListener('change', () => { it.text = text.value; });
+          box.appendChild(text);
+        } else {
+          const src = el('input', 'gmc-input'); src.value = it.src || ''; src.placeholder = 'worlds/… (.webp, .mp3, .mp4) ou https://…';
+          src.addEventListener('change', () => {
+            it.src = src.value.trim();
+            const auto = detectType(it.src);
+            if (auto !== itemType(it)) { it.type = auto; paintItems(); } // .mp3 → audio, .mp4 → vidéo
+          });
+          box.appendChild(src);
+        }
+        const title = el('input', 'gmc-input'); title.value = it.title || ''; title.placeholder = 'Titre (montré aux joueurs)';
         title.addEventListener('change', () => { it.title = title.value; });
-        const note = el('input', 'gmc-input'); note.value = it.note; note.placeholder = 'Note MJ (jamais montrée)';
+        const note = el('input', 'gmc-input'); note.value = it.note || ''; note.placeholder = 'Note MJ (jamais montrée)';
         note.addEventListener('change', () => { it.note = note.value; });
-        box.append(src, title, note);
+        box.append(title, note);
+        box.appendChild(el('p', 'gmc-field-lbl', '📫 Destinataires (aucun coché = toute la table)'));
+        box.appendChild(targetsPicker(it));
         list.appendChild(box);
       });
     };
     paintItems();
-    const addItem = el('button', 'gmc-btn', '＋ handout (image)');
+    const addItem = el('button', 'gmc-btn', '＋ handout (image, vidéo, audio ou chat)');
     addItem.type = 'button';
-    addItem.addEventListener('click', () => { seq.items.push({ src: '', title: '', note: '' }); paintItems(); });
+    addItem.addEventListener('click', () => { seq.items.push({ type: 'image', src: '', title: '', note: '' }); paintItems(); });
     panel.appendChild(addItem);
 
     const actions = el('div', 'gmc-id-actions');
@@ -952,18 +1027,46 @@ export async function mountGmCampaign(main, cleanup = []) {
     panel.appendChild(actions);
   }
 
-  function paintSeqPlayer(seq) {
-    if (!seq.items.length) { projState = { mode: 'edit', seqId: seq.id, idx: 0 }; return paintSeqEditor(seq); }
-    projState.idx = Math.max(0, Math.min(projState.idx, seq.items.length - 1));
-    const it = seq.items[projState.idx];
-    panel.appendChild(el('p', 'eyebrow', `🎞️ ${esc(seq.name)}`));
-    const pos = el('p', 'gmc-seq-pos', `${projState.idx + 1}/${seq.items.length}${it.title ? ' — ' + esc(it.title) : ''}`);
-    panel.appendChild(pos);
+  // Aperçu MJ d'un handout selon son type (image/vidéo/audio/texte de chat).
+  function handoutPreview(it) {
+    const type = itemType(it);
+    if (type === 'chat') return el('div', 'gmc-handout-chat', it.text || '<p class="muted">(texte vide)</p>'); // assaini serveur au save
+    if (type === 'video') {
+      const v = el('video', 'gmc-id-img');
+      v.controls = true;
+      v.src = gmAssetUrl(it.src);
+      return v;
+    }
+    if (type === 'audio') {
+      const box = el('div');
+      box.appendChild(el('p', 'gmc-hint', `🎵 ${esc(it.title || it.src || '')}`));
+      const a = el('audio');
+      a.controls = true;
+      a.src = gmAssetUrl(it.src);
+      a.style.width = '100%';
+      box.appendChild(a);
+      return box;
+    }
     const img = el('img', 'gmc-id-img');
     img.alt = it.title || '';
     img.src = gmAssetUrl(it.src);
     img.addEventListener('error', () => { img.replaceWith(el('p', 'muted', '(aperçu indisponible)')); }, { once: true });
-    panel.appendChild(img);
+    return img;
+  }
+
+  function paintSeqPlayer(seq) {
+    if (!seq.items.length) { projState = { mode: 'edit', seqId: seq.id, idx: 0 }; return paintSeqEditor(seq); }
+    projState.idx = Math.max(0, Math.min(projState.idx, seq.items.length - 1));
+    const it = seq.items[projState.idx];
+    const type = itemType(it);
+    panel.appendChild(el('p', 'eyebrow', `🎞️ ${esc(seq.name)}`));
+    const pos = el('p', 'gmc-seq-pos', `${projState.idx + 1}/${seq.items.length} · ${ITEM_TYPES[type].icon}${it.title ? ' — ' + esc(it.title) : ''}`);
+    panel.appendChild(pos);
+    panel.appendChild(handoutPreview(it));
+    // pastille destinataires : « → Tous » ou « → Kara, Tom » (noms via /gm/players)
+    const dest = el('p', 'gmc-hint gmc-targets-badge', esc(targetsBadge(it)));
+    panel.appendChild(dest);
+    if (players === null) loadPlayers().then(() => { dest.textContent = targetsBadge(it); });
     if (it.note) panel.appendChild(el('p', 'gmc-hint', `📝 ${esc(it.note)}`));
     const status = el('p', 'gmc-hint', '');
     const nav = el('div', 'gmc-seq-nav');
@@ -974,7 +1077,7 @@ export async function mountGmCampaign(main, cleanup = []) {
       b.addEventListener('click', () => { projState.idx += delta; paintSide(); pushCurrent(); });
       return b;
     };
-    const show = el('button', 'gmc-btn gold', '📡 Projeter cette image');
+    const show = el('button', 'gmc-btn gold', `📡 Envoyer (${ITEM_TYPES[type].label})`);
     show.type = 'button';
     show.addEventListener('click', () => pushHandout(it, status));
     // Précédent/Suivant : navigue ET pousse aux joueurs (préparation → projection)
@@ -1140,6 +1243,7 @@ export async function mountGmCampaign(main, cleanup = []) {
     if (b.uuids?.length) meta.push(`👥 ${b.uuids.length}`);
     if (b.encounterId) meta.push('⚔️ rencontre');
     if (b.sequenceId) meta.push('🎞️ séquence');
+    if (b.handout) meta.push(`📜 ${ITEM_TYPES[itemType(b.handout)].icon}`);
     if (b.sound) meta.push('🎵');
     if (b.kind === 'note') meta.push('🔒 MJ');
     const W = BEAT_W, H = BEAT_H;
@@ -1432,7 +1536,7 @@ export async function mountGmCampaign(main, cleanup = []) {
       if (b.sequenceId) {
         const proj = el('button', 'gmc-btn gold', '📡 Projeter (séquence liée)');
         proj.type = 'button';
-        proj.title = 'Ouvre le projecteur : chaque image est poussée aux joueurs dans Foundry';
+        proj.title = 'Ouvre le projecteur : chaque handout est poussé aux joueurs dans Foundry';
         proj.addEventListener('click', () => {
           sbProj = true;
           projState = { mode: 'play', seqId: b.sequenceId, idx: 0 };
@@ -1440,6 +1544,56 @@ export async function mountGmCampaign(main, cleanup = []) {
         });
         panel.appendChild(proj);
       }
+    }
+    // 📜 handout UNITAIRE du beat (kind handout, sans passer par une séquence) :
+    // {type, src|text, title, targets} envoyé direct par le bouton 📡.
+    if (b.kind === 'handout') {
+      panel.appendChild(el('p', 'gmc-field-lbl', '📜 Handout unitaire (sans séquence)'));
+      const h = b.handout || (b.handout = { type: 'image', src: '', text: '', title: '' });
+      const box = el('div', 'gmc-seq-item');
+      const paintH = () => {
+        box.innerHTML = '';
+        const typeSel = el('select', 'gmc-input');
+        typeSel.innerHTML = Object.entries(ITEM_TYPES)
+          .map(([kk, tt]) => `<option value="${kk}"${itemType(h) === kk ? ' selected' : ''}>${tt.icon} ${tt.label}</option>`).join('');
+        typeSel.addEventListener('change', () => { h.type = typeSel.value; scheduleSbSave(); paint(); paintH(); });
+        box.appendChild(typeSel);
+        if (itemType(h) === 'chat') {
+          const text = el('textarea', 'gmc-input');
+          text.rows = 3;
+          text.value = h.text || '';
+          text.placeholder = 'Texte envoyé dans le tchat Foundry (HTML léger autorisé)';
+          text.addEventListener('change', () => { h.text = text.value; scheduleSbSave(); });
+          box.appendChild(text);
+        } else {
+          const src = el('input', 'gmc-input');
+          src.value = h.src || '';
+          src.placeholder = 'worlds/… (.webp, .mp3, .mp4) ou https://…';
+          src.addEventListener('change', () => {
+            h.src = src.value.trim();
+            const auto = detectType(h.src);
+            if (auto !== itemType(h)) { h.type = auto; paintH(); } // .mp3 → audio, .mp4 → vidéo
+            scheduleSbSave();
+            paint();
+          });
+          box.appendChild(src);
+        }
+        const ht = el('input', 'gmc-input');
+        ht.value = h.title || '';
+        ht.placeholder = 'Titre (montré aux joueurs)';
+        ht.addEventListener('change', () => { h.title = ht.value; scheduleSbSave(); });
+        box.appendChild(ht);
+        box.appendChild(el('p', 'gmc-field-lbl', '📫 Destinataires (aucun coché = toute la table)'));
+        box.appendChild(targetsPicker(h, () => scheduleSbSave()));
+        const hStatus = el('p', 'gmc-hint', '');
+        const send = el('button', 'gmc-btn gold', '📡 Envoyer ce handout');
+        send.type = 'button';
+        send.title = 'Envoie directement ce handout aux joueurs visés (ou à toute la table)';
+        send.addEventListener('click', () => pushHandout(h, hStatus));
+        box.append(send, hStatus);
+      };
+      paintH();
+      panel.appendChild(box);
     }
 
     // 🎵 ambiance du beat (tous kinds) : ▶/⏹ direct chez les joueurs
