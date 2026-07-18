@@ -5,6 +5,7 @@
 // unlocks/dépendances de quêtes) + LIENS CUSTOM tracés à la souris.
 // Persistance : flags.holocron.board du journal technique (GET/PUT /api/gm/board).
 import { apiBase, getGMKey } from './collab.js';
+import { toFoundrySrc } from './show-image.js';
 
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
@@ -347,13 +348,18 @@ export async function mountGmCampaign(main, cleanup = []) {
   const panel = el('div', 'gmc-panel');
   side.append(tabs, panel);
   let activeTab = 'objets';
-  const TABS = [['objets', '📚 Objets'], ['selection', '🔍 Sélection']];
+  const TABS = [['objets', '📚 Objets'], ['selection', '🔍 Sélection'], ['projeter', '🎞️ Projeter']];
   function paintTabs() {
     tabs.innerHTML = '';
     for (const [id, label] of TABS) {
       const b = el('button', 'gmc-tab' + (activeTab === id ? ' active' : ''), label);
       b.type = 'button';
-      b.addEventListener('click', () => { activeTab = id; paintTabs(); paintSide(); });
+      b.addEventListener('click', () => {
+        activeTab = id;
+        if (id !== 'selection' && state.selected) { state.selected = null; paint(); } // sinon paintSide re-bascule
+        paintTabs();
+        paintSide();
+      });
       tabs.appendChild(b);
     }
   }
@@ -363,6 +369,7 @@ export async function mountGmCampaign(main, cleanup = []) {
     if (state.selected && activeTab !== 'selection') { activeTab = 'selection'; paintTabs(); }
     panel.innerHTML = '';
     if (activeTab === 'objets') return paintObjects();
+    if (activeTab === 'projeter') return paintProjeter();
     return paintSelection();
   }
 
@@ -521,6 +528,15 @@ export async function mountGmCampaign(main, cleanup = []) {
       open.href = `#/journal/${id}`;
       actions.appendChild(open);
     }
+    if (id.startsWith('seq:') && !m.ghost) {
+      const proj = el('button', 'gmc-btn gold', '🎞️ Projeter la séquence');
+      proj.type = 'button';
+      proj.addEventListener('click', () => {
+        const s = seqById().get(id);
+        if (s) { projState = { mode: 'play', seqId: s.id, idx: 0 }; state.selected = null; activeTab = 'projeter'; paintTabs(); paint(); paintSide(); }
+      });
+      actions.appendChild(proj);
+    }
     if (m.type === 'acte') {
       const sum = el('button', 'gmc-btn gold', '📜 Sommaire d’acte');
       sum.type = 'button';
@@ -543,6 +559,166 @@ export async function mountGmCampaign(main, cleanup = []) {
     rm.addEventListener('click', () => removeNode(id));
     actions.appendChild(rm);
     panel.appendChild(actions);
+  }
+
+  /* --------------------------------------- 🎞️ Handouts & séquences (lot 3) -- */
+  // Une séquence = liste ORDONNÉE de handouts {src, title, note} préparée avant
+  // séance (flags.holocron.sequences). En séance : Précédent/Suivant POUSSENT
+  // l'image à tous les joueurs via le pont show-image existant (module Foundry).
+  let projState = { mode: 'list', seqId: null, idx: 0 };
+
+  async function pushHandout(item, statusEl) {
+    statusEl.textContent = '📡 Envoi…';
+    try {
+      await api('/gm/foundry/show-image', { method: 'POST', body: JSON.stringify({ src: toFoundrySrc(item.src), title: item.title }) });
+      statusEl.textContent = '✅ Projeté chez les joueurs';
+    } catch (e) { statusEl.textContent = `⚠️ ${e.message}`.slice(0, 60); }
+  }
+
+  function paintProjeter() {
+    const s = projState.seqId ? state.sequences.find((x) => x.id === projState.seqId) : null;
+    if (projState.mode === 'edit') return paintSeqEditor(s);
+    if (projState.mode === 'play' && s) return paintSeqPlayer(s);
+    // --- liste des séquences -----------------------------------------------
+    panel.appendChild(el('p', 'eyebrow', '🎞️ Séquences de handouts'));
+    panel.appendChild(el('p', 'gmc-hint', 'Prépare des suites d’images (handouts) et projette-les aux joueurs dans Foundry, dans l’ordre.'));
+    for (const seq of state.sequences) {
+      const row = el('div', 'gmc-obj');
+      row.appendChild(el('span', 'gmc-obj-name', `${esc(seq.name)} <span class="gmc-count">${seq.items.length} image(s)</span>`));
+      const play = el('button', 'gmc-mini', '▶');
+      play.type = 'button'; play.title = 'Projeter';
+      play.addEventListener('click', () => { projState = { mode: 'play', seqId: seq.id, idx: 0 }; paintSide(); });
+      const edit = el('button', 'gmc-mini', '✎');
+      edit.type = 'button'; edit.title = 'Éditer';
+      edit.addEventListener('click', () => { projState = { mode: 'edit', seqId: seq.id, idx: 0 }; paintSide(); });
+      row.append(play, edit);
+      panel.appendChild(row);
+    }
+    if (!state.sequences.length) panel.appendChild(el('p', 'muted', 'Aucune séquence.'));
+    const add = el('button', 'gmc-btn gold', '＋ Nouvelle séquence');
+    add.type = 'button';
+    add.addEventListener('click', () => { projState = { mode: 'edit', seqId: null, idx: 0 }; paintSide(); });
+    panel.appendChild(add);
+  }
+
+  function paintSeqEditor(existing) {
+    const seq = existing
+      ? JSON.parse(JSON.stringify(existing))
+      : { id: `seq-${Math.random().toString(36).slice(2, 10)}`, name: 'Nouvelle séquence', items: [] };
+    panel.appendChild(el('p', 'eyebrow', '✎ Séquence'));
+    const name = el('input', 'gmc-input');
+    name.value = seq.name;
+    name.placeholder = 'Nom (ex. Séance 12 — l’abordage)';
+    name.addEventListener('change', () => { seq.name = name.value; });
+    panel.appendChild(name);
+    const list = el('div', 'gmc-seq-items');
+    panel.appendChild(list);
+    const paintItems = () => {
+      list.innerHTML = '';
+      seq.items.forEach((it, i) => {
+        const box = el('div', 'gmc-seq-item');
+        const head = el('div', 'gmc-seq-head');
+        head.appendChild(el('span', 'gmc-count', `${i + 1}.`));
+        const up = el('button', 'gmc-mini', '↑'); up.type = 'button'; up.title = 'Monter';
+        up.addEventListener('click', () => { if (i > 0) { seq.items.splice(i - 1, 0, seq.items.splice(i, 1)[0]); paintItems(); } });
+        const down = el('button', 'gmc-mini', '↓'); down.type = 'button'; down.title = 'Descendre';
+        down.addEventListener('click', () => { if (i < seq.items.length - 1) { seq.items.splice(i + 1, 0, seq.items.splice(i, 1)[0]); paintItems(); } });
+        const del = el('button', 'gmc-mini', '✕'); del.type = 'button'; del.title = 'Retirer';
+        del.addEventListener('click', () => { seq.items.splice(i, 1); paintItems(); });
+        head.append(up, down, del);
+        box.appendChild(head);
+        const src = el('input', 'gmc-input'); src.value = it.src; src.placeholder = 'worlds/…/handout.webp ou https://…';
+        src.addEventListener('change', () => { it.src = src.value.trim(); });
+        const title = el('input', 'gmc-input'); title.value = it.title; title.placeholder = 'Titre (montré aux joueurs)';
+        title.addEventListener('change', () => { it.title = title.value; });
+        const note = el('input', 'gmc-input'); note.value = it.note; note.placeholder = 'Note MJ (jamais montrée)';
+        note.addEventListener('change', () => { it.note = note.value; });
+        box.append(src, title, note);
+        list.appendChild(box);
+      });
+    };
+    paintItems();
+    const addItem = el('button', 'gmc-btn', '＋ handout (image)');
+    addItem.type = 'button';
+    addItem.addEventListener('click', () => { seq.items.push({ src: '', title: '', note: '' }); paintItems(); });
+    panel.appendChild(addItem);
+
+    const actions = el('div', 'gmc-id-actions');
+    const save = el('button', 'gmc-btn gold', '💾 Enregistrer la séquence');
+    save.type = 'button';
+    save.addEventListener('click', async () => {
+      save.disabled = true;
+      try {
+        const out = await api('/gm/sequences', { method: 'PUT', body: JSON.stringify(seq) });
+        const i = state.sequences.findIndex((x) => x.id === out.sequence.id);
+        if (i >= 0) state.sequences[i] = out.sequence; else state.sequences.push(out.sequence);
+        projState = { mode: 'list', seqId: null, idx: 0 };
+        paintSide();
+      } catch (e) { save.textContent = `✗ ${e.message}`.slice(0, 40); save.disabled = false; }
+    });
+    actions.appendChild(save);
+    if (existing) {
+      const del = el('button', 'gmc-btn danger', '🗑️ Supprimer la séquence');
+      del.type = 'button';
+      del.addEventListener('click', async () => {
+        try {
+          await api(`/gm/sequences/${encodeURIComponent(seq.id)}`, { method: 'DELETE' });
+          state.sequences = state.sequences.filter((x) => x.id !== seq.id);
+          delete state.board.nodes['seq:' + seq.id];
+          scheduleSave();
+          projState = { mode: 'list', seqId: null, idx: 0 };
+          paint();
+          paintSide();
+        } catch (e) { del.textContent = `✗ ${e.message}`.slice(0, 40); }
+      });
+      actions.appendChild(del);
+    }
+    const back = el('button', 'gmc-btn', '← Séquences');
+    back.type = 'button';
+    back.addEventListener('click', () => { projState = { mode: 'list', seqId: null, idx: 0 }; paintSide(); });
+    actions.appendChild(back);
+    panel.appendChild(actions);
+  }
+
+  function paintSeqPlayer(seq) {
+    if (!seq.items.length) { projState = { mode: 'edit', seqId: seq.id, idx: 0 }; return paintSeqEditor(seq); }
+    projState.idx = Math.max(0, Math.min(projState.idx, seq.items.length - 1));
+    const it = seq.items[projState.idx];
+    panel.appendChild(el('p', 'eyebrow', `🎞️ ${esc(seq.name)}`));
+    const pos = el('p', 'gmc-seq-pos', `${projState.idx + 1}/${seq.items.length}${it.title ? ' — ' + esc(it.title) : ''}`);
+    panel.appendChild(pos);
+    const img = el('img', 'gmc-id-img');
+    img.alt = it.title || '';
+    img.src = gmAssetUrl(it.src);
+    img.addEventListener('error', () => { img.replaceWith(el('p', 'muted', '(aperçu indisponible)')); }, { once: true });
+    panel.appendChild(img);
+    if (it.note) panel.appendChild(el('p', 'gmc-hint', `📝 ${esc(it.note)}`));
+    const status = el('p', 'gmc-hint', '');
+    const nav = el('div', 'gmc-seq-nav');
+    const mk = (label, delta) => {
+      const b = el('button', 'gmc-btn', label);
+      b.type = 'button';
+      b.disabled = (projState.idx + delta < 0) || (projState.idx + delta >= seq.items.length);
+      b.addEventListener('click', () => { projState.idx += delta; paintSide(); pushCurrent(); });
+      return b;
+    };
+    const show = el('button', 'gmc-btn gold', '📡 Projeter cette image');
+    show.type = 'button';
+    show.addEventListener('click', () => pushHandout(it, status));
+    // Précédent/Suivant : navigue ET pousse aux joueurs (préparation → projection)
+    let pushCurrent = () => {
+      const cur = seq.items[projState.idx];
+      const st = panel.querySelector('.gmc-seq-status');
+      if (cur && st) pushHandout(cur, st);
+    };
+    nav.append(mk('← Précédent', -1), show, mk('Suivant →', +1));
+    panel.appendChild(nav);
+    status.classList.add('gmc-seq-status');
+    panel.appendChild(status);
+    const back = el('button', 'gmc-btn', '← Séquences');
+    back.type = 'button';
+    back.addEventListener('click', () => { projState = { mode: 'list', seqId: null, idx: 0 }; paintSide(); });
+    panel.appendChild(back);
   }
 
   /* --------------------------------------------- 📜 Sommaire d'acte (lot 2) -- */

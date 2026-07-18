@@ -1912,6 +1912,13 @@ textarea.gmc-input { resize: vertical; font-size: 0.85rem; line-height: 1.4; }
 .gmc-picks { display: flex; flex-direction: column; gap: 0.15rem; max-height: 9rem; overflow: auto;
   border: 1px solid var(--line); border-radius: 8px; padding: 0.4rem 0.55rem; }
 .gmc-pick { font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; }
+.gmc-seq-items { display: flex; flex-direction: column; gap: 0.5rem; }
+.gmc-seq-item { border: 1px solid var(--line); border-radius: 8px; padding: 0.45rem; display: flex; flex-direction: column; gap: 0.3rem; }
+.gmc-seq-head { display: flex; align-items: center; gap: 0.3rem; justify-content: flex-end; }
+.gmc-seq-head .gmc-count { margin-right: auto; }
+.gmc-seq-pos { margin: 0; font: 700 0.9rem var(--font-display); color: var(--gold); }
+.gmc-seq-nav { display: flex; gap: 0.4rem; }
+.gmc-seq-nav .gmc-btn { flex: 1; padding: 0.4rem 0.3rem; font-size: 0.78rem; }
 
 /* --- 📡 Montrer aux joueurs (bouton d'overlay image, profil MJ) --------------- */
 .show-players-btn {
