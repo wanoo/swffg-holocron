@@ -7,7 +7,7 @@ import { canSee, isGM } from './auth.mjs';
 
 // Version de SCHÉMA : à incrémenter dès que la FORME des vues change (transform), pour
 // invalider les ETag/caches clients même si les données Foundry n'ont pas bougé.
-const SCHEMA_VERSION = 11;
+const SCHEMA_VERSION = 12; // 12 : sommaires d'acte (actSummary) dans la vue journaux
 
 export function createContentService({ store, config }) {
   const actorFolderId = (name) => {

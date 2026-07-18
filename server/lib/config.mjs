@@ -142,6 +142,7 @@ export const CAMPAIGN_DEFAULTS = {
     holonet: '📡 HoloNet — Actualités',
     gmNotes: '🗒️ Notes MJ (Holocron)', encounters: '⚔️ Bibliothèque de rencontres',
     dossiers: '🗂️ Dossiers MJ (Holocron)',
+    board: '🗺️ Carte de campagne (Holocron)', // éditeur de campagne : flags.holocron.board + sequences
     shipNotes: '', // page « notes du vaisseau » : "<journalId>:<pageId>" (vue #/vaisseau)
   },
   registry: [],

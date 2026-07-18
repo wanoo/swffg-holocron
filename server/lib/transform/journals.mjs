@@ -202,6 +202,54 @@ export function sheetView(doc, gm) {
   return ccView(doc) || mejView(doc, gm);
 }
 
+// --- Sommaire d'acte (flags.holocron.actSummary) ------------------------------
+// Bloc structuré posé par l'éditeur de campagne sur le journal d'acte :
+// { crawl, situation, objectifs: [], protagonistes: [ids], lieux: [ids],
+//   fronts: [], hidden: [champs masqués aux joueurs] }.
+export const ACT_SUMMARY_FIELDS = ['crawl', 'situation', 'objectifs', 'protagonistes', 'lieux', 'fronts'];
+const asStr = (v, max) => String(v == null ? '' : v).slice(0, max).trim();
+const asStrList = (v, max, n) => (Array.isArray(v) ? v : [])
+  .map((x) => (typeof x === 'string' ? asStr(x, max) : '')).filter(Boolean).slice(0, n);
+const asIdList = (v, n) => (Array.isArray(v) ? v : [])
+  .map((x) => {
+    const s = String(x || '');
+    const m = /JournalEntry\.([A-Za-z0-9]{16})/.exec(s);
+    return m ? m[1] : (/^[A-Za-z0-9]{16}$/.test(s) ? s : null);
+  })
+  .filter(Boolean).slice(0, n);
+
+/** Assainit un sommaire d'acte ; null si le bloc est vide/inexistant. */
+export function sanitizeActSummary(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const out = {
+    crawl: asStr(raw.crawl, 4000),
+    situation: asStr(raw.situation, 4000),
+    objectifs: asStrList(raw.objectifs, 240, 20),
+    protagonistes: asIdList(raw.protagonistes, 30),
+    lieux: asIdList(raw.lieux, 30),
+    fronts: asStrList(raw.fronts, 240, 12),
+    hidden: (Array.isArray(raw.hidden) ? raw.hidden : [])
+      .filter((f) => ACT_SUMMARY_FIELDS.includes(f)).slice(0, ACT_SUMMARY_FIELDS.length),
+  };
+  const hasContent = out.crawl || out.situation
+    || out.objectifs.length || out.protagonistes.length || out.lieux.length || out.fronts.length;
+  return hasContent ? out : null;
+}
+
+/** Vue du sommaire pour une session : MJ = tout (hidden compris, pour l'éditeur) ;
+ * joueur = champs masqués retirés — null si plus rien à montrer. */
+export function actSummaryView(raw, gm) {
+  const clean = sanitizeActSummary(raw);
+  if (!clean) return null;
+  if (gm) return clean;
+  const out = {};
+  for (const f of ACT_SUMMARY_FIELDS) {
+    if (clean.hidden.includes(f)) continue;
+    if (Array.isArray(clean[f]) ? clean[f].length : clean[f]) out[f] = clean[f];
+  }
+  return Object.keys(out).length ? out : null;
+}
+
 // journalsIndex + journaux complets (store) + pack règles → vue front.
 // `visibleFilter(doc)` applique l'ownership de la session (auth.canSee).
 export function buildJournalsView({ config, folders, journalsIndex, getJournal, rulesPack, visibleFilter, gm = false }) {
@@ -237,6 +285,8 @@ export function buildJournalsView({ config, folders, journalsIndex, getJournal, 
     const statut = MEJ_ROLE_STATUT[String(mej?.role || '').toLowerCase()] || fh.statut || '';
     const mort = /mort|décéd|décès|deceased|dead/i.test(String(mej?.attributes?.life || mej?.attributes?.vie || '')) || Boolean(fh.mort);
     const isRules = rulesCatIds.has(entry.folder);
+    // Sommaire d'acte (récap de début d'acte, visible joueurs — champs masquables)
+    const actSummary = actSummaryView(fh.actSummary, gm);
     journals.push({
       id: fh.legacyId || doc._id,
       foundryId: doc._id,
@@ -246,6 +296,7 @@ export function buildJournalsView({ config, folders, journalsIndex, getJournal, 
       ...(statut ? { statut } : {}),
       ...(mort ? { mort: true } : {}),
       ...(mej ? { mej } : {}),
+      ...(actSummary ? { actSummary } : {}),
       pages: (doc.pages || []).filter((p) => (p.type === 'text' || p.text) && !isRawHelperPage(p)).map(pageView),
     });
   }

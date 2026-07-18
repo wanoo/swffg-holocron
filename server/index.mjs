@@ -18,6 +18,7 @@ import {
 import { setCorsOrigin, cors, sendJSON, sendVersioned, readBody, rateLimited, makeStatic, MIME } from './lib/http.mjs';
 import { createContentService } from './lib/content.mjs';
 import { createWriteService, createEncounterService } from './lib/write.mjs';
+import { createBoardService } from './lib/board.mjs';
 import { createShipService, createDashService } from './lib/ship.mjs';
 import { createAstroService } from './lib/astro.mjs';
 import * as tools from './lib/session-tools.mjs';
@@ -46,6 +47,7 @@ const cc = () => campaignConfig(store);
 const content = createContentService({ store, config: cc });
 const writer = createWriteService({ store, config: cc, logger: console });
 const encounters = createEncounterService({ store, config: cc });
+const board = createBoardService({ store, config: cc });
 const dashPayload = createDashService({ journals: campaignConfig(store).journals });
 const shipSvc = () => createShipService({ journalName: cc().journals.ship });
 const astro = createAstroService({ publicDir: PUBLIC_DIR, config: cc, store });
@@ -376,6 +378,36 @@ async function handleApi(req, res, urlPath) {
       } catch (e) {
         return sendJSON(res, e.code || 500, { error: e.message, ...(e.current ? { current: e.current } : {}) });
       }
+    }
+    // Éditeur de campagne (carte de campagne MJ) : board persisté + catalogue
+    // dérivé + séquences de handouts — journal technique config.journals.board.
+    if (parts[1] === 'board') {
+      try {
+        if (req.method === 'GET') return sendJSON(res, 200, board.view());
+        if (req.method === 'PUT') {
+          const body = JSON.parse(await readBody(req, 300_000));
+          return sendJSON(res, 200, { ok: true, board: await board.saveBoard(body) });
+        }
+      } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
+      return sendJSON(res, 405, { error: 'méthode non supportée' });
+    }
+    if (parts[1] === 'sequences') {
+      try {
+        if (req.method === 'PUT') {
+          const body = JSON.parse(await readBody(req, 200_000));
+          return sendJSON(res, 200, { ok: true, sequence: await board.saveSequence(body) });
+        }
+        if (req.method === 'DELETE' && id) return sendJSON(res, 200, await board.removeSequence(id));
+      } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
+      return sendJSON(res, 405, { error: 'méthode non supportée' });
+    }
+    // Sommaire d'acte : bloc structuré flags.holocron.actSummary sur le journal d'acte.
+    if (parts[1] === 'act-summary' && id) {
+      if (req.method !== 'PUT') return sendJSON(res, 405, { error: 'PUT uniquement' });
+      try {
+        const body = JSON.parse(await readBody(req, 100_000));
+        return sendJSON(res, 200, { ok: true, actSummary: await board.saveActSummary(id, body) });
+      } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
     }
     if (parts[1] === 'encounters') {
       try {

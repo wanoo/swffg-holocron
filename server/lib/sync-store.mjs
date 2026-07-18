@@ -176,6 +176,7 @@ export function createStore({ dataDir, logger = console }) {
       const UTIL_NAMES = new Set([
         '🚀 Vaisseau du groupe', '🖥️ Codex du groupe', '📡 HoloNet — Actualités',
         '🗒️ Notes MJ (Holocron)', '⚔️ Bibliothèque de rencontres', '🗂️ Dossiers MJ (Holocron)',
+        '🗺️ Carte de campagne (Holocron)',
         process.env.CONFIG_JOURNAL_NAME || '⚙️ Holocron Config',
         ...Object.values(cfgJ).filter((v) => typeof v === 'string' && v && !v.includes(':')),
       ]);
