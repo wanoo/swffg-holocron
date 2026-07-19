@@ -6,8 +6,10 @@
 // Persistance : flags.holocron.board du journal technique (GET/PUT /api/gm/board).
 import { apiBase, getGMKey } from './collab.js';
 import { toFoundrySrc } from './show-image.js';
-import { loadCfg, saveCfg } from './gm-config.js';
-import { SESSION_DEFAULTS } from './gm-session.js';
+import {
+  sessionCfg, loadSessionCfg, patchSessionCfg, pinBeat, invalidateBoard, renderPlayReport,
+} from './gm-session.js';
+import { normalizePinned, describeTrigger, WEATHER_UI } from './session-model.js';
 
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
@@ -182,6 +184,7 @@ export async function mountGmCampaign(main, cleanup = []) {
         if (state.sb && !state.selected) paintSide(); // rafraîchit l'info tag de l'aperçu
       }
       paintSaveDot('saved');
+      invalidateBoard(); // le bandeau de séance relit le storyboard (beat épinglé)
     } catch (e) { paintSaveDot('error', e.message); }
   }
   cleanup.push(() => { clearTimeout(sbSaveTimer); if (sbDirty) doSbSave(); });
@@ -193,27 +196,20 @@ export async function mountGmCampaign(main, cleanup = []) {
   // à la clôture. Stockage : flags.holocron.sessions du journal technique.
   // L'id de la séance courante vit dans la config MJ PARTAGÉE `gm:cfg:session`
   // (champ `currentId`) : la trace suit le MJ d'un appareil à l'autre.
-  const SESS_CFG_DEFAULTS = { ...SESSION_DEFAULTS, currentId: '' };
-  let sessCfg = { ...SESS_CFG_DEFAULTS };
-  let sessCfgAt = null;
-  async function loadSessCfg() {
-    const { cfg, updatedAt } = await loadCfg('session', SESS_CFG_DEFAULTS);
-    sessCfg = cfg;
-    sessCfgAt = updatedAt;
-  }
-  async function setCurrentSession(id) {
-    sessCfg.currentId = id || '';
-    const res = await saveCfg('session', sessCfg, sessCfgAt);
-    // conflit (bandeau de séance édité ailleurs) : on refusionne SANS perdre
-    // le champ qu'on vient de poser — le reste du bandeau reste celui du serveur.
-    if (res.conflict) sessCfg = { ...SESS_CFG_DEFAULTS, ...(res.current || {}), currentId: id || '' };
-    sessCfgAt = res.updatedAt;
-  }
+  // La config `gm:cfg:session` appartient à gm-session.js (source unique des
+  // défauts + écriture coordonnée) : ici on ne fait que lire et patcher.
+  const loadSessCfg = () => loadSessionCfg();
+  const setCurrentSession = (id) => patchSessionCfg({ currentId: id || '' });
   const sessionById = (id) => state.sessions.find((s) => s.id === id) || null;
   // séance COURANTE = celle pointée par la config, tant qu'elle n'est pas close.
   const openSession = () => {
-    const s = sessionById(sessCfg.currentId);
+    const s = sessionById(sessionCfg().currentId);
     return s && !s.endedAt ? s : null;
+  };
+  // beat épinglé par le bandeau de séance (étape 2) — pastille 📌 dans la vue
+  const pinnedBeat = () => {
+    const p = normalizePinned(sessionCfg().pinned);
+    return p && p.kind === 'beat' ? p : null;
   };
 
   /** Inscrit une entrée dans la séance ouverte. FIRE-AND-FORGET : jamais attendu,
@@ -223,9 +219,11 @@ export async function mountGmCampaign(main, cleanup = []) {
   function trace(kind, entry) {
     const s = openSession();
     if (!s) return; // aucune séance ouverte : on ne trace rien (et on ne gêne rien)
+    // enveloppe EXPLICITE { kind, entry } : l'entrée `played` porte son propre
+    // champ `kind` (celui du BEAT) et écrasait le type d'événement à plat.
     api(`/gm/sessions/${encodeURIComponent(s.id)}/event`, {
       method: 'POST',
-      body: JSON.stringify({ kind, at: Date.now(), ...entry }),
+      body: JSON.stringify({ kind, entry: { at: Date.now(), ...entry } }),
     }).then((out) => {
       if (!out?.session) return;
       const i = state.sessions.findIndex((x) => x.id === out.session.id);
@@ -1485,7 +1483,10 @@ export async function mountGmCampaign(main, cleanup = []) {
     if (b.sequenceId) meta.push('🎞️ séquence');
     if (b.handout) meta.push(`📜 ${ITEM_TYPES[itemType(b.handout)].icon}`);
     if (b.sound) meta.push('🎵');
+    if (b.trigger && Object.keys(b.trigger).length) meta.push('⚡'); // ▶ jouable
     if (b.kind === 'note') meta.push('🔒 MJ');
+    const pin = pinnedBeat();
+    if (pin && pin.actId === state.sb?.actId && pin.beatId === b.id) meta.push('📌');
     const W = BEAT_W, H = BEAT_H;
     // FORMES typées : 🎭 panneau arrondi · ⚔️ panneau anguleux (chanfreins) ·
     // 🗒️ post-it penché à coin corné · 🖼️ cadre photo (double bordure).
@@ -1672,6 +1673,150 @@ export async function mountGmCampaign(main, cleanup = []) {
     panel.appendChild(actions);
   }
 
+  /* ------------------------------------ ▶ Jouer ce beat (déclencheurs, A3) --
+   * Chaque beat DÉCLARE ce qu'il déclenche (`trigger`). Le bouton n'exécute que
+   * ça, côté serveur (POST /gm/beat/play : le beat est RELU depuis Foundry).
+   * DIDACTIQUE : on affiche avant ce qui partira, et après ce qui a marché. */
+  const triggerOf = (b) => (b.trigger || (b.trigger = {}));
+
+  /** Bloc « ▶ jouera : … » + alertes + bouton + rapport d'exécution. */
+  function playBlock(b) {
+    const box = el('div', 'gmc-play');
+    const status = el('p', 'gmc-hint gmc-play-report', '');
+    const paintDesc = () => {
+      const d = describeTrigger(b, {
+        encounters: encLib, sequences: state.sequences,
+        playlists, playerCount: (players || []).length,
+      });
+      const head = el('div', 'gmc-play-desc');
+      head.innerHTML = d.empty
+        ? '<p class="muted">Ce beat ne déclenche rien pour l’instant. Renseigne « ⚡ Ce que ce beat déclenche » ci-dessous : ▶ n’enverra QUE ça.</p>'
+        : `<p class="gmc-field-lbl">▶ jouera :</p>${d.lines.map((l) => `<p class="gmc-play-line">${esc(l)}</p>`).join('')}`;
+      for (const w of d.warnings) head.insertAdjacentHTML('beforeend', `<p class="gmc-play-warn">⚠️ ${esc(w)}</p>`);
+      return head;
+    };
+    let desc = paintDesc();
+    box.appendChild(desc);
+    const go = el('button', 'gmc-btn gold', '▶ Jouer ce beat');
+    go.type = 'button';
+    go.title = 'Exécute dans Foundry exactement ce qui est listé ci-dessus — rien d’autre';
+    go.addEventListener('click', async () => {
+      go.disabled = true;
+      status.textContent = '▶ Envoi à Foundry…';
+      try {
+        const out = await api('/gm/beat/play', { method: 'POST', body: JSON.stringify({ actId: state.sb.actId, beatId: b.id }) });
+        status.innerHTML = renderPlayReport(out);
+        if (!out.empty && b.status === 'todo') setBeatStatus(b, 'encours');
+      } catch (e) { status.innerHTML = `⚠️ ${esc(e.message)}`; }
+      go.disabled = false;
+    });
+    box.append(go, status);
+    // les listes (rencontres/playlists/joueurs) arrivent en tâche de fond :
+    // on redessine la description dès qu'elles sont là, sans rien perdre.
+    const refresh = () => { const next = paintDesc(); desc.replaceWith(next); desc = next; };
+    if (encLib === null) loadEncLib().then(refresh);
+    if (playlists === null) loadPlaylists().then(refresh);
+    if (players === null) loadPlayers().then(refresh);
+    box.dataset.beat = b.id;
+    box._refresh = refresh;
+    return box;
+  }
+
+  /** Éditeur du bloc `trigger` — un réglage = une ligne, jamais de magie. */
+  function triggerEditor(b, onChange) {
+    const t = triggerOf(b);
+    const wrapT = el('div', 'gmc-trigger');
+    wrapT.appendChild(el('p', 'gmc-field-lbl', '⚡ Ce que ce beat déclenche'));
+    wrapT.appendChild(el('p', 'gmc-hint',
+      'Tout est facultatif : ▶ n’exécutera QUE les cases remplies, dans cet ordre — '
+      + 'scène → combat → ambiance → météo → handout/séquence → caméra.'));
+    const touched = () => { scheduleSbSave(); onChange?.(); };
+
+    // scène + amener les joueurs
+    const scene = el('input', 'gmc-input');
+    scene.placeholder = '🎬 Scène Foundry à activer (nom exact ou id)';
+    scene.value = t.scene || '';
+    scene.addEventListener('change', () => { const v = scene.value.trim(); if (v) t.scene = v.slice(0, 120); else delete t.scene; touched(); });
+    wrapT.appendChild(scene);
+    const pull = el('label', 'gmc-hide');
+    const pullCb = el('input');
+    pullCb.type = 'checkbox';
+    pullCb.checked = t.pullUsers === true;
+    pullCb.addEventListener('change', () => { if (pullCb.checked) t.pullUsers = true; else delete t.pullUsers; touched(); });
+    pull.append(pullCb, document.createTextNode(' 👥 amener les joueurs sur cette scène (pull_users)'));
+    wrapT.appendChild(pull);
+
+    // rencontre liée (beats ⚔️ surtout, mais jamais interdit ailleurs)
+    if (encLib === null) loadEncLib().then(() => { if (state.sb && state.selected?.kind === 'beat') paintSide(); });
+    const encSel = el('select', 'gmc-input');
+    encSel.innerHTML = '<option value="">⚔️ — aucune rencontre montée —</option>'
+      + (encLib || []).map((e2) => `<option value="${esc(e2.id)}"${t.encounterId === e2.id ? ' selected' : ''}>⚔️ ${esc(e2.title)}</option>`).join('');
+    encSel.title = 'Monte la scène + les tokens + le combat à partir de la bibliothèque de rencontres';
+    encSel.addEventListener('change', () => { if (encSel.value) t.encounterId = encSel.value; else delete t.encounterId; touched(); });
+    wrapT.appendChild(encSel);
+
+    // playlist
+    const pl = el('input', 'gmc-input');
+    pl.placeholder = '🎵 Playlist à lancer';
+    pl.setAttribute('list', 'gmc-playlists');
+    pl.value = t.playlist || '';
+    pl.addEventListener('change', () => { const v = pl.value.trim(); if (v) t.playlist = v.slice(0, 100); else delete t.playlist; touched(); });
+    wrapT.appendChild(pl);
+
+    // météo (table fermée, « couper » exclusif)
+    wrapT.appendChild(el('p', 'gmc-hint', '🌦️ Météo (module compagnon + navigateur MJ requis)'));
+    const wBox = el('div', 'gmc-picks');
+    const paintW = () => {
+      wBox.innerHTML = '';
+      const cur = new Set(t.weather || []);
+      for (const [key, label] of WEATHER_UI) {
+        const lab = el('label', 'gmc-pick');
+        const cb = el('input');
+        cb.type = 'checkbox';
+        cb.checked = cur.has(key);
+        cb.addEventListener('change', () => {
+          const set = new Set(t.weather || []);
+          if (cb.checked) { if (key === 'clear') set.clear(); else set.delete('clear'); set.add(key); }
+          else set.delete(key);
+          if (set.size) t.weather = [...set].slice(0, 4); else delete t.weather;
+          paintW();
+          touched();
+        });
+        lab.append(cb, document.createTextNode(` ${label}`));
+        wBox.appendChild(lab);
+      }
+    };
+    paintW();
+    wrapT.appendChild(wBox);
+
+    // séquence liée (projection)
+    const seqSel = el('select', 'gmc-input');
+    seqSel.innerHTML = '<option value="">🎞️ — aucune séquence projetée —</option>'
+      + state.sequences.map((s) => `<option value="${esc(s.id)}"${t.sequenceId === s.id ? ' selected' : ''}>🎞️ ${esc(s.name)} (${s.items.length})</option>`).join('');
+    seqSel.addEventListener('change', () => { if (seqSel.value) t.sequenceId = seqSel.value; else delete t.sequenceId; touched(); });
+    wrapT.appendChild(seqSel);
+
+    // caméra
+    const panRow = el('div', 'gmc-seq-nav');
+    const mkNum = (key, ph) => {
+      const inp = el('input', 'gmc-input');
+      inp.type = 'number';
+      inp.placeholder = ph;
+      inp.value = t.pan?.[key] ?? '';
+      inp.addEventListener('change', () => {
+        const x = Number(panRow.children[0].value), y = Number(panRow.children[1].value), s = Number(panRow.children[2].value);
+        if (Number.isFinite(x) && panRow.children[0].value !== '' || Number.isFinite(y) && panRow.children[1].value !== '') {
+          t.pan = { x: x || 0, y: y || 0, ...(s > 0 ? { scale: s } : {}) };
+        } else delete t.pan;
+        touched();
+      });
+      return inp;
+    };
+    panRow.append(mkNum('x', '🎥 x'), mkNum('y', 'y'), mkNum('scale', 'zoom'));
+    wrapT.appendChild(panRow);
+    return wrapT;
+  }
+
   function paintBeatEditor(id) {
     const beats = sbData().beats;
     const i = beats.findIndex((b) => b.id === id);
@@ -1679,6 +1824,24 @@ export async function mountGmCampaign(main, cleanup = []) {
     const b = beats[i];
     const k = BEAT_KINDS[b.kind] || BEAT_KINDS.scene;
     panel.appendChild(el('p', 'eyebrow', `${k.icon} Beat ${i + 1}/${beats.length} — ${k.label}`));
+
+    // ▶ JOUER CE BEAT + ce qu'il déclenchera, EN CLAIR (didactique : aucun
+    // effet surprise, on annonce avant d'agir et on rend compte après).
+    const playBox = playBlock(b);
+    panel.appendChild(playBox);
+
+    // 📌 épingler ce beat : le bandeau de séance suit alors la chaîne d'ici
+    const pin = pinnedBeat();
+    const isPinned = pin && pin.actId === state.sb.actId && pin.beatId === b.id;
+    const pinBtn = el('button', 'gmc-btn' + (isPinned ? ' gold' : ''), isPinned ? '📌 Beat de la séance' : '📌 Épingler pour la séance');
+    pinBtn.type = 'button';
+    pinBtn.disabled = Boolean(isPinned);
+    pinBtn.title = 'Le bandeau de séance suivra ce beat : chaîne ◀▶, statut, minuteur, « ne pas oublier »';
+    pinBtn.addEventListener('click', async () => {
+      await pinBeat(state.sb.actId, b.id, b.title || '');
+      paintSide();
+    });
+    panel.appendChild(pinBtn);
 
     const kindSel = el('select', 'gmc-input');
     kindSel.innerHTML = Object.entries(BEAT_KINDS)
@@ -1903,6 +2066,10 @@ export async function mountGmCampaign(main, cleanup = []) {
     if (!dl) { dl = el('datalist'); dl.id = 'gmc-playlists'; wrap.appendChild(dl); }
     const fillDl = () => { dl.innerHTML = (playlists || []).map((x) => `<option value="${esc(x.name)}">`).join(''); };
     if (playlists === null) loadPlaylists().then(fillDl); else fillDl();
+
+    // ⚡ déclencheurs du beat — l'annonce en tête (playBox) se réécrit à chaque
+    // réglage : le MJ voit immédiatement ce que ▶ fera.
+    panel.appendChild(triggerEditor(b, () => { playBox._refresh(); paint(); }));
 
     // ordre & suppression
     const ordRow = el('div', 'gmc-seq-nav');

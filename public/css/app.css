@@ -1176,6 +1176,47 @@ body.gm-reading .gm-doc .journal-content { line-height: 1.65; }
   border-radius: 7px; min-width: 1.9rem; height: 1.7rem; padding: 0 0.4rem; font-size: 0.78rem; font-weight: 700;
 }
 .gm-session-tool:hover { border-color: var(--gold); }
+/* Bandeau branché sur le STORYBOARD : chaîne ◀▶, statut, progression, ▶ Jouer */
+.gm-session-nav {
+  cursor: pointer; border: 1px solid var(--line); background: var(--panel); color: var(--fg-muted);
+  border-radius: 7px; width: 1.7rem; height: 1.7rem; font-size: 0.72rem; font-weight: 700;
+}
+.gm-session-nav:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+.gm-session-nav:disabled { opacity: 0.3; cursor: default; }
+.gm-session-st {
+  cursor: pointer; border: 1px solid var(--line); background: var(--panel); color: var(--fg);
+  border-radius: 999px; width: 1.7rem; height: 1.7rem; font-size: 0.82rem; font-weight: 700;
+}
+.gm-session-st.st-encours { border-color: var(--gold); color: var(--gold); }
+.gm-session-st.st-fait { border-color: var(--status-ok, #7bd88f); color: var(--status-ok, #7bd88f); }
+.gm-session-prog { color: var(--fg-dim); font-size: 0.74rem; white-space: nowrap; }
+.gm-session-play {
+  cursor: pointer; border: 1px solid var(--gold); background: var(--gold); color: var(--on-gold);
+  border-radius: 999px; padding: 0.2rem 0.7rem; font-size: 0.76rem; font-weight: 700; white-space: nowrap;
+}
+.gm-session-play.empty { background: transparent; color: var(--fg-dim); border-color: var(--line); }
+.gm-session-status { font-size: 0.74rem; color: var(--fg-muted); max-width: 32vw; }
+/* Rythme : ALERTE DOUCE — une teinte, jamais une modale */
+.gm-session-pace {
+  font-size: 0.74rem; color: var(--fg-dim); border: 1px solid var(--line);
+  border-radius: 999px; padding: 0.14rem 0.55rem; white-space: nowrap;
+}
+.gm-session-pace.tone-warn { color: var(--gold); border-color: var(--gold-soft); }
+.gm-session-pace.tone-over { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); }
+/* Panneaux dépliants (checklist, « ne pas oublier ») */
+.gm-session-panel {
+  flex-basis: 100%; padding: 0.5rem 0.2rem 0.3rem; border-top: 1px dashed var(--line);
+  display: flex; flex-direction: column; gap: 0.3rem;
+  max-height: 55vh; overflow-y: auto;
+}
+.gm-session-forget-h { margin: 0.5rem 0 0.1rem; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold); }
+.gm-session-forget-row { font-size: 0.8rem; line-height: 1.45; padding: 0.3rem 0.5rem; border-left: 2px solid var(--gold-soft); }
+.gm-session-forget-row .k { color: var(--fg-dim); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.gm-session-forget-line { font-size: 0.8rem; margin: 0.1rem 0; }
+.gm-session-forget-line.current { color: var(--fg); }
+.gm-session-seen { font-size: 0.7rem; color: var(--fg-dim); }
+.gm-play-step.ko { color: var(--danger); }
+.gm-play-step.ok { color: var(--fg-muted); }
 /* Checklist dépliée */
 .gm-session-ck {
   flex-basis: 100%; padding: 0.5rem 0.2rem 0.3rem; border-top: 1px dashed var(--line);
@@ -1914,6 +1955,19 @@ body.gm-session .gm-doc h2, body.gm-session .gm-doc h3, body.gm-session .gm-doc 
 .gmc-hint { color: var(--fg-dim); font-size: 0.75rem; margin: 0; }
 .gmc-field-head { display: flex; align-items: center; justify-content: space-between; margin-top: 0.2rem; }
 .gmc-field-lbl { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--fg-muted); font-weight: 700; }
+/* ▶ Jouer ce beat : ce qui partira, annoncé AVANT ; ce qui a marché, APRÈS */
+.gmc-play {
+  border: 1px solid var(--gold-soft); border-radius: 9px; padding: 0.55rem 0.65rem;
+  margin-bottom: 0.6rem; display: flex; flex-direction: column; gap: 0.4rem;
+  background: color-mix(in srgb, var(--gold) 5%, transparent);
+}
+.gmc-play-line { font-size: 0.8rem; margin: 0.05rem 0; color: var(--fg); }
+.gmc-play-warn { font-size: 0.78rem; margin: 0.15rem 0; color: var(--danger); }
+.gmc-play-report { line-height: 1.5; }
+.gmc-trigger {
+  border-top: 1px dashed var(--line); margin-top: 0.7rem; padding-top: 0.5rem;
+  display: flex; flex-direction: column; gap: 0.4rem;
+}
 .gmc-hide { font-size: 0.75rem; color: var(--fg-dim); cursor: pointer; white-space: nowrap; }
 textarea.gmc-input { resize: vertical; font-size: 0.85rem; line-height: 1.4; }
 .gmc-picks { display: flex; flex-direction: column; gap: 0.15rem; max-height: 9rem; overflow: auto;

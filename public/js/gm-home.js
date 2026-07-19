@@ -6,9 +6,14 @@ import { loadCfg, saveCfg } from './gm-config.js';
 import { openNotes } from './notes.js';
 import { openScreen } from './gm-screen.js';
 import { foundryCard } from './gm-foundry.js';
+// La séance a UN SEUL propriétaire (gm-session.js) : ses défauts et son écriture
+// coordonnée viennent d'ici — ce widget prépare, le bandeau pilote, la clé
+// `gm:cfg:session` n'est plus écrite par deux modules qui s'ignorent.
+import { sessionCfg, loadSessionCfg, patchSessionCfg, onSessionCfg } from './gm-session.js';
+import { SESSION_DEFAULTS, normalizePinned } from './session-model.js';
 
 const FRONTS_DEFAULTS = { v: 1, fronts: [] };
-export const SESSION_DEFAULTS = { v: 1, title: '', date: '', pinned: null, checklist: [], noteRef: '' };
+export { SESSION_DEFAULTS };
 
 const STATUTS = [
   { key: 'ok', label: 'Stable', icon: '🟢' },
@@ -72,12 +77,12 @@ function sessionCard(ctx, homeCleanup) {
   const body = el('div', 'gmh-body', '<p class="gmh-p muted">Chargement…</p>');
   card.appendChild(body);
 
-  let updatedAt = null;
-  let cfg = { ...SESSION_DEFAULTS };
+  const cfg = () => sessionCfg();
 
   const render = () => {
+    const c = cfg();
     body.innerHTML = '';
-    if (!cfg.title && !cfg.pinned) {
+    if (!c.title && !c.pinned) {
       body.appendChild(el('p', 'gmh-p muted', 'Aucune séance préparée.'));
       const btn = el('button', 'gmh-cta ghost', 'Préparer une séance');
       btn.type = 'button';
@@ -85,54 +90,73 @@ function sessionCard(ctx, homeCleanup) {
       body.appendChild(btn);
       return;
     }
-    body.appendChild(el('p', 'gmh-p', `<strong>${esc(cfg.title || 'Séance')}</strong>${cfg.date ? ` · <span class="gmh-sub">${esc(cfg.date)}</span>` : ''}`));
-    if (cfg.pinned) {
-      const go = el('button', 'gmh-cta', `→ ${esc(cfg.pinned.label || 'Scène en cours')}`);
+    body.appendChild(el('p', 'gmh-p', `<strong>${esc(c.title || 'Séance')}</strong>${c.date ? ` · <span class="gmh-sub">${esc(c.date)}</span>` : ''}`));
+    // L'épinglage a DEUX formes : un beat du storyboard (depuis l'étape 2) ou,
+    // en compat ascendante, un chapitre de bible + heading.
+    const p = normalizePinned(c.pinned);
+    if (p?.kind === 'beat') {
+      const go = el('button', 'gmh-cta', `🎬 ${esc(p.label || 'Beat en cours')}`);
       go.type = 'button';
-      go.addEventListener('click', () => ctx.selectChap(cfg.pinned.chap, cfg.pinned.heading || undefined));
+      go.title = 'Ouvrir le storyboard de l’acte';
+      go.addEventListener('click', () => ctx.selectChap('campagne'));
+      body.appendChild(go);
+    } else if (p?.kind === 'chap') {
+      const go = el('button', 'gmh-cta', `→ ${esc(p.label || 'Scène en cours')}`);
+      go.type = 'button';
+      go.addEventListener('click', () => ctx.selectChap(p.chap, p.heading || undefined));
       body.appendChild(go);
     } else {
-      body.appendChild(el('p', 'gmh-p muted gmh-sub', 'Aucune scène épinglée — utilise 📌 dans un chapitre (mode séance).'));
+      body.appendChild(el('p', 'gmh-p muted gmh-sub', 'Rien d’épinglé — 📌 sur un beat du storyboard (🗺️ Campagne) ou dans un chapitre.'));
     }
-    if (cfg.checklist?.length) {
-      const done = cfg.checklist.filter((c) => c.done).length;
-      body.appendChild(el('p', 'gmh-p gmh-sub', `☑ Checklist : ${done}/${cfg.checklist.length}`));
+    if (c.checklist?.length) {
+      const done = c.checklist.filter((x) => x.done).length;
+      body.appendChild(el('p', 'gmh-p gmh-sub', `☑ Checklist : ${done}/${c.checklist.length}`));
     }
     const edit = el('button', 'gmh-mini', '✎ Modifier');
     edit.type = 'button';
     edit.addEventListener('click', () => editForm());
     body.appendChild(edit);
   };
+  homeCleanup.push(onSessionCfg(render)); // le bandeau écrit, ce widget suit
 
   const editForm = () => {
     body.innerHTML = '';
     const form = el('form', 'gmh-form');
     const title = el('input', 'gmh-input');
     title.placeholder = 'Titre (ex. Séance 12 — Phoenix Rise)';
-    title.value = cfg.title || '';
+    title.value = cfg().title || '';
     const date = el('input', 'gmh-input');
     date.type = 'date';
-    date.value = cfg.date || '';
+    date.value = cfg().date || '';
+    const pace = el('input', 'gmh-input');
+    pace.type = 'number';
+    pace.min = '0';
+    pace.max = '180';
+    pace.title = 'Alerte douce quand un beat dure plus longtemps (0 = pas d’alerte)';
+    pace.placeholder = 'Seuil de rythme (min)';
+    pace.value = String(cfg().paceMin ?? 25);
     const save = el('button', 'gmh-cta', 'Enregistrer');
     save.type = 'submit';
     const cancel = el('button', 'gmh-mini', 'Annuler');
     cancel.type = 'button';
     cancel.addEventListener('click', render);
-    form.append(title, date, save, cancel);
+    form.append(title, date, pace, save, cancel);
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      cfg.title = title.value.trim();
-      cfg.date = date.value;
-      const res = await saveCfg('session', cfg, updatedAt);
-      if (res.conflict) { cfg = { ...SESSION_DEFAULTS, ...(res.current || {}) }; }
-      updatedAt = res.updatedAt;
+      // écriture COORDONNÉE : on n'envoie qu'un patch, gm-session.js fusionne et
+      // gère le conflit — le bandeau ne perd plus l'épinglage posé en parallèle.
+      await patchSessionCfg({
+        title: title.value.trim(),
+        date: date.value,
+        paceMin: Math.max(0, Math.min(180, +pace.value || 0)),
+      });
       render();
     });
     body.appendChild(form);
     title.focus();
   };
 
-  loadCfg('session', SESSION_DEFAULTS).then(({ cfg: c, updatedAt: u }) => { cfg = c; updatedAt = u; render(); });
+  loadSessionCfg().then(render).catch(render);
   return card;
 }
 
