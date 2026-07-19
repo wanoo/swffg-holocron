@@ -1023,6 +1023,33 @@ body.gm-reading .gm-doc .journal-content { line-height: 1.65; }
 .gm-dossier .gm-dossier-stats:hover { background: var(--gold); color: var(--on-gold); }
 @media (max-width: 480px) { .gm-dossier .gm-dossier-dl { grid-template-columns: 1fr; gap: 0.1rem; } .gm-dossier dd { margin-bottom: 0.4rem; } }
 
+/* Édition du dossier (panneau MJ) : le même gabarit, en écriture. */
+.gm-dossier .gm-dossier-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.gm-dossier .gm-dossier-edit {
+  cursor: pointer; background: transparent; color: var(--fg-muted);
+  border: 1px solid var(--line); border-radius: 999px; padding: 0.14rem 0.65rem; font-size: 0.76rem; font-weight: 600;
+}
+.gm-dossier .gm-dossier-edit:hover { border-color: var(--gold); color: var(--gold); }
+.gm-dossier .gm-dossier-empty { font-size: 0.88rem; line-height: 1.5; margin: 0.5rem 0 0; }
+.gm-dossier .gm-dossier-form { display: grid; gap: 0.55rem; margin-top: 0.6rem; }
+.gm-dossier .gm-dossier-field { display: grid; gap: 0.18rem; }
+.gm-dossier .gm-dossier-lbl { font-weight: 700; color: var(--gold); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.gm-dossier .gm-dossier-field input,
+.gm-dossier .gm-dossier-field textarea {
+  width: 100%; background: rgba(255, 255, 255, 0.03); color: var(--fg);
+  border: 1px solid var(--line); border-radius: 7px; padding: 0.35rem 0.5rem;
+  font: inherit; font-size: 0.9rem; resize: vertical;
+}
+.gm-dossier .gm-dossier-field input:focus,
+.gm-dossier .gm-dossier-field textarea:focus { outline: none; border-color: var(--gold); }
+.gm-dossier .gm-dossier-actions { display: flex; align-items: center; gap: 0.7rem; }
+.gm-dossier .gm-dossier-save {
+  cursor: pointer; background: var(--gold); color: var(--on-gold); border: 0;
+  border-radius: 999px; padding: 0.3rem 0.95rem; font-size: 0.84rem; font-weight: 700;
+}
+.gm-dossier .gm-dossier-save[disabled] { opacity: 0.55; cursor: progress; }
+.gm-dossier .gm-dossier-msg { font-size: 0.8rem; }
+
 /* ---- Back-links « Mentionné dans (MJ) » sur les fiches d'entité ---- */
 .sheet-backrefs .backref-list { list-style: none; margin: 0.5rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.45rem; }
 .sheet-backrefs .backref-link {
@@ -1802,6 +1829,16 @@ body.gm-session .gm-doc h2, body.gm-session .gm-doc h3, body.gm-session .gm-doc 
 .enc-item { text-align: left; border: 1px solid var(--line, #2a3242); background: var(--panel, #10151f); color: var(--fg); border-radius: 9px; padding: 0.5rem 0.7rem; cursor: pointer; display: flex; flex-direction: column; gap: 0.15rem; }
 .enc-item small { color: var(--fg-dim); }
 .enc-item.active { border-color: var(--gold, #d9b45b); }
+/* Import des combats de la bible : aperçu à cocher (rien n'est écrit avant). */
+.enc-import { border-style: solid; border-color: var(--line, #2a3242); color: var(--fg-muted); font-size: 0.86rem; }
+.enc-import:hover { border-color: var(--gold, #d9b45b); color: var(--gold, #d9b45b); }
+.enc-scan { display: grid; gap: 0.4rem; margin: 0.7rem 0; }
+.enc-scan-row { display: flex; align-items: flex-start; gap: 0.6rem; cursor: pointer; border: 1px solid var(--line, #2a3242); border-radius: 9px; padding: 0.5rem 0.7rem; }
+.enc-scan-row:hover { border-color: var(--gold, #d9b45b); }
+.enc-scan-row input { margin-top: 0.2rem; }
+.enc-scan-info { display: flex; flex-direction: column; gap: 0.1rem; }
+.enc-scan-info small { color: var(--fg-dim); }
+.enc-scan-known { opacity: 0.62; }
 .enc-fields { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 0.7rem; }
 .enc-fields input, .enc-group input { background: var(--bg, #0a0e15); color: var(--fg); border: 1px solid var(--line); border-radius: 7px; padding: 0.4rem 0.55rem; font: 500 0.85rem/1 var(--font-ui); }
 .enc-title { font-size: 1.05rem !important; font-weight: 700; }

@@ -71,6 +71,13 @@ export function parseCombatBlock(text) {
     const w = /W\s*(\d+)/i.exec(thr);
     const s = /S\s*(\d+)/i.exec(thr);
     const n = /(\d+)/.exec(count);
+    // « W7/grp » : seuil de blessures PARTAGÉ par le groupe de sbires. La
+    // bibliothèque n'a pas ce champ — on le dit dans la note clé plutôt que de
+    // le perdre en silence (au table, c'est la différence entre 4 sbires et 1).
+    const perGroup = /grp|grpe|groupe/i.test(thr);
+    const noteKey = perGroup && !/gr(?:oup)?e?\b/i.test(key)
+      ? [key, 'seuil par groupe'].filter(Boolean).join(' · ')
+      : key;
     group.rows.push({
       name: name.slice(0, 80),
       // la bibliothèque stocke un NOMBRE (1..12) là où le bloc texte tolère « ×3 »
@@ -79,7 +86,7 @@ export function parseCombatBlock(text) {
       s: s ? +s[1] : 0,
       soak: soak.slice(0, 40),
       attack: attack.slice(0, 120),
-      key: key.slice(0, 120),
+      key: noteKey.slice(0, 120),
     });
   }
   meta.groups = meta.groups.filter((g) => g.rows.length);

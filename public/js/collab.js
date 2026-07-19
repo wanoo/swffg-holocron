@@ -103,6 +103,17 @@ export async function gmGetDossiers() {
   if (!res.ok) return {};
   return (await res.json()).dossiers || {};
 }
+// Écrit LE dossier d'une entité — patch PARTIEL : ce que le MJ a rempli dans
+// Foundry (ou via un assistant MCP) et qui n'est pas dans ce formulaire survit.
+export async function gmSaveDossier(entityId, patch) {
+  const res = await fetch(`${API}/gm/dossiers/${encodeURIComponent(entityId)}`, {
+    method: 'PUT',
+    headers: gmHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(patch),
+  });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `Dossier → ${res.status}`);
+  return (await res.json()).dossier || {};
+}
 
 // --- Notes MJ (privées, gated) -------------------------------------------
 export async function gmNotesList() {

@@ -401,11 +401,18 @@ export async function ensureRegistry() {
   if (!game.user.isGM) return { added: 0, enriched: 0 };
   const j = configJournal();
   if (!j) return { added: 0, enriched: 0 };
-  const existing = j.flags?.holocron?.config?.registry || [];
+  const cfg = j.flags?.holocron?.config || {};
+  const existing = cfg.registry || [];
   const pcs = pcActors().map((a) => ({ _id: a.id, name: a.name }));
-  const npcs = game.journal
+  // deux sources de PNJ (cf. gm-prep.mjs) : les ACTEURS du dossier PNJ du monde
+  // (ce que le linkifieur sait résoudre) ET les fiches Campaign Codex `npc`
+  // (ce que porte la couche narrative : dossiers MJ, backrefs de fiche).
+  const npcFolder = findFolder("Actor", cfg.npcsWorldFolder || game.settings.get(MOD, "folderNpcs"));
+  const npcActors = npcFolder ? game.actors.filter((a) => a.folder?.id === npcFolder.id).map((a) => ({ _id: a.id, name: a.name })) : [];
+  const ccNpcs = game.journal
     .filter((x) => x.flags?.["campaign-codex"]?.type === "npc" && !x.flags?.["swffg-astronavigation"])
     .map((x) => ({ _id: x.flags?.holocron?.legacyId || x.id, name: x.name }));
+  const npcs = [...npcActors, ...ccNpcs];
   const out = buildRegistry({ pcs, npcs, existing });
   if (!out.added && !out.enriched) return out;
   // deux temps : le merge Foundry par chemin ne retire jamais d'entrée d'une liste

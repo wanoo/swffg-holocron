@@ -96,23 +96,41 @@ export function createPrepService({ store, config, writer, encounters, gmSheets 
   }
 
   /* --------------------------------------------- 3. registre des personnages */
-  /** Aperçu ou écriture du registre régénéré (fusion non destructive). */
+  /**
+   * Aperçu ou écriture du registre régénéré (fusion non destructive).
+   *
+   * DEUX SOURCES pour les PNJ, parce que l'app les sert par deux chemins :
+   *   · les ACTEURS du dossier PNJ du monde (`/api/content/npcs`) — ce sont eux
+   *     que `linkifyPnj` sait résoudre pour rendre une mention cliquable ;
+   *   · les FICHES Campaign Codex `npc` — ce sont elles que porte la couche
+   *     narrative (dossiers MJ, backrefs affichées sur la fiche).
+   * Les deux cohabitent sans se gêner : une entrée dont la cible n'existe pas
+   * dans l'index du front est simplement ignorée par le linkifieur.
+   */
   async function rebuildRegistry({ dryRun = false } = {}) {
     const cc = config();
     const actors = store.get('actors') || [];
-    const pcFolderName = cc.pcFolder;
     const folders = store.get('folders') || [];
-    const pcFolderId = folders.find((f) => f.type === 'Actor' && f.name === pcFolderName)?._id;
+    const folderId = (name) => folders.find((f) => f.type === 'Actor' && f.name === name)?._id;
+    const pcFolderId = folderId(cc.pcFolder);
+    const npcFolderId = folderId(cc.npcsWorldFolder);
+    const light = (a) => ({ _id: a._id, name: a.name });
+
     const pcs = actors
       .filter((a) => (pcFolderId ? a.folder === pcFolderId : a.type === 'character') && a.type !== 'vehicle')
-      .map((a) => ({ _id: a._id, name: a.name }));
-    const npcs = idx()
+      .map(light);
+    const npcActors = npcFolderId ? actors.filter((a) => a.folder === npcFolderId).map(light) : [];
+    const ccNpcs = idx()
       .filter((j) => ccType(j) === 'npc' && !j.flags?.['swffg-astronavigation'])
       .map((j) => ({ _id: j.flags?.holocron?.legacyId || j._id, name: j.name }));
+    const npcs = [...npcActors, ...ccNpcs];
 
     const out = buildRegistry({ pcs, npcs, existing: cc.registry });
     if (!dryRun) await writer.registrySave(out.registry);
-    return { ...out, pcs: pcs.length, npcs: npcs.length, dryRun: Boolean(dryRun) };
+    return {
+      ...out, dryRun: Boolean(dryRun),
+      sources: { pcs: pcs.length, npcActors: npcActors.length, ccNpcs: ccNpcs.length },
+    };
   }
 
   return { actCheck, scanEncounters, importEncounters, rebuildRegistry };

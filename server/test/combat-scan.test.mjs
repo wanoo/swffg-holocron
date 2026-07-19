@@ -116,3 +116,15 @@ test('scanChapters : la sortie a la FORME attendue par la bibliothèque', () => 
     }
   }
 });
+
+test('« W7/grp » : le seuil partagé est dit dans la note clé, jamais perdu', () => {
+  const spec = parseCombatBlock('Belonuk | ×4 | W7/grp | 4 | Croc | meute');
+  assert.equal(spec.groups[0].rows[0].w, 7);
+  assert.equal(spec.groups[0].rows[0].key, 'meute · seuil par groupe');
+  // le bloc qui le dit déjà n'est pas paraphrasé
+  assert.equal(parseCombatBlock('Belonuk | ×4 | W7/grp | 4 | Croc | sbires en groupe')
+    .groups[0].rows[0].key, 'sbires en groupe');
+  // seuil individuel : rien n'est ajouté
+  assert.equal(parseCombatBlock('Chef | ×1 | W18 S15 | 4 | Lame | némésis')
+    .groups[0].rows[0].key, 'némésis');
+});
