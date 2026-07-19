@@ -306,6 +306,11 @@
       "folderQuests": {
         "name": "Dossier — Quêtes",
         "hint": "Fiches Campaign Codex « quête » (graphe des quêtes du cockpit MJ web). Garder ce nom pour la synchronisation. Nom ou uuid « Folder.<id> » ; créé s'il n'existe pas (appliqué à l'installation)."
+      },
+      "ccNativeMenu": {
+        "name": "Notes & PJ → Campaign Codex",
+        "label": "Convertir notes et PJ",
+        "hint": "Promeut les notes des joueurs en fiches Campaign Codex (type « tag », relabellées « Note de joueur ») et crée pour chaque PJ une fiche CC miroir liée à son acteur. Idempotent et non destructif : les tags existants sont fusionnés, rien n'est supprimé ni déplacé."
       }
     },
     "setup": {
@@ -313,7 +318,9 @@
       "dupRemoved": "Doublon « {name} » quasi vide supprimé (la vraie configuration est conservée).",
       "cfgRenamed": "Journal de configuration renommé en « {name} » (nom attendu par l'app web).",
       "ccConverted": "{n} fiche(s) MEJ convertie(s) en fiches Campaign Codex (originaux archivés dans 🗄️ Archive MEJ).",
-      "ccMissing": "Campaign Codex est inactif : la conversion des fiches MEJ n'a pas pu s'exécuter. Activez le module puis relancez « Installer / réinstaller »."
+      "ccMissing": "Campaign Codex est inactif : la conversion des fiches MEJ n'a pas pu s'exécuter. Activez le module puis relancez « Installer / réinstaller ».",
+      "notesConverted": "{n} note(s) de joueur promue(s) en fiches Campaign Codex.",
+      "pcsMirrored": "{n} fiche(s) Campaign Codex de PJ créée(s), {links} lien(s) vers leurs notes."
     }
   }
 }

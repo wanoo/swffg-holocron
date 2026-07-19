@@ -2,6 +2,7 @@
 import { MOD, t, applyTrip, shipJournal, readShip, setShipWorld, astronavApi, favoriteWorlds } from "./util.mjs";
 import { installHolocron, pushSettingsToConfig } from "./setup.mjs";
 import { convertMejToCC } from "./convert-mej.mjs";
+import { convertCcNative, convertNotesToCC, mirrorPcsToCC } from "./convert-cc-native.mjs";
 import { registerHolocronWidgets } from "./widgets/register.mjs";
 import { HolocronApp } from "./deck.mjs";
 import { openToolbox, TOOLS } from "./gm-tools.mjs";
@@ -13,6 +14,11 @@ class InstallMenu extends foundry.applications.api.ApplicationV2 {
 /** Menu de réglage : convertit les fiches MEJ du monde en fiches Campaign Codex. */
 class ConvertMenu extends foundry.applications.api.ApplicationV2 {
   async render() { await convertMejToCC(); return this; }
+}
+/** Menu de réglage : promeut les notes des joueurs en fiches Campaign Codex et
+ * crée les fiches CC miroir des PJ. Idempotent — relançable à volonté. */
+class CcNativeMenu extends foundry.applications.api.ApplicationV2 {
+  async render() { await convertCcNative(); return this; }
 }
 
 /** Dernier coût d'astrogation calculé par l'astronav (hook swffgAstronav.cost). */
@@ -72,6 +78,10 @@ Hooks.once("init", () => {
     name: "SWH.settings.convertMenu.name", label: "SWH.settings.convertMenu.label",
     hint: "SWH.settings.convertMenu.hint", icon: "fa-solid fa-arrows-rotate", type: ConvertMenu, restricted: true,
   });
+  game.settings.registerMenu(MOD, "ccNativeMenu", {
+    name: "SWH.settings.ccNativeMenu.name", label: "SWH.settings.ccNativeMenu.label",
+    hint: "SWH.settings.ccNativeMenu.hint", icon: "fa-solid fa-id-card", type: CcNativeMenu, restricted: true,
+  });
 
   game.modules.get(MOD).api = {
     open: () => new HolocronApp().render(true),
@@ -84,6 +94,9 @@ Hooks.once("init", () => {
     importAtlas: () => astronavApi()?.importToWorld?.({ confirm: true }),
     install: installHolocron,
     convertMej: convertMejToCC,
+    convertCcNative,          // notes joueurs → fiches CC + fiches CC miroir des PJ
+    convertNotes: convertNotesToCC,
+    mirrorPcs: mirrorPcsToCC,
     lastCost: () => LAST_COST,
     HolocronApp,
   };

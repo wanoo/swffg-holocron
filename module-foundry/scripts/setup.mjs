@@ -6,6 +6,7 @@
  *  Ne recrée jamais l'existant (repérage par nom) — relançable sans risque. */
 import { MOD, t, boundJournal, shipJournal, codexJournal, migratePartyResources } from "./util.mjs";
 import { convertMejToCC } from "./convert-mej.mjs";
+import { convertCcNative } from "./convert-cc-native.mjs";
 
 // Dossiers clés de la campagne — chaque réglage accepte un NOM ou un uuid
 // « Folder.<id> » ; le nom par défaut sert à la création si rien n'existe.
@@ -420,6 +421,8 @@ export async function installHolocron({ silent = false } = {}) {
   await importTables();
   // master switch : les fiches MEJ du monde deviennent des fiches Campaign Codex
   try { await convertMejToCC(); } catch (e) { console.warn("swffg-holocron | conversion MEJ→CC", e); }
+  // « 100 % CC » : notes des joueurs promues en fiches CC + fiches miroir des PJ
+  try { await convertCcNative(); } catch (e) { console.warn("swffg-holocron | conversion CC native", e); }
 
   // 6. rangement des journaux techniques préexistants (no-op sur un monde neuf)
   let moved = 0;

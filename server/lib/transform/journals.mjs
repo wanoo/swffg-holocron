@@ -156,7 +156,12 @@ const CC_LINK_FIELDS = {
   linkedLocations: 'Lieu', linkedLocation: 'Lieu', parentRegion: 'Région',
   linkedShops: 'Boutique', linkedQuests: 'Quête', linkedStandardJournals: 'Journal',
 };
-const CC_SKIP_ATTRS = new Set(['description', 'notes', 'markup', 'enrichedDescription', 'inventory', 'inventoryCash', 'widgets', 'sheetTypeLabelOverride']);
+// Champs INTERNES de `data` : jamais affichés en « carte d'identité ». `linkedActor`
+// est un uuid d'Actor (pas un lien de fiche à fiche : ccRef ne saurait pas le
+// résoudre) et `tagMode`/`isLoot` sont des drapeaux de rendu de la sheet CC —
+// les laisser passer afficherait « linkedActor: Actor.xxx » sur les fiches PJ et
+// sur les notes promues.
+const CC_SKIP_ATTRS = new Set(['description', 'notes', 'markup', 'enrichedDescription', 'inventory', 'inventoryCash', 'widgets', 'sheetTypeLabelOverride', 'linkedActor', 'tagMode', 'isLoot']);
 // lien CC → id de JournalEntry (uuid "JournalEntry.<id>", id nu, ou objet {uuid})
 const ccRef = (v) => {
   const s = typeof v === 'string' ? v : String(v?.uuid || v?.id || '');

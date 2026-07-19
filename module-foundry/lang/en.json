@@ -306,6 +306,11 @@
       "folderQuests": {
         "name": "Folder — Quests",
         "hint": "Campaign Codex “quest” sheets (web GM cockpit quest graph). Keep this name for sync. Name or “Folder.<id>” uuid; created if missing (applied at install)."
+      },
+      "ccNativeMenu": {
+        "name": "Notes & PCs → Campaign Codex",
+        "label": "Convert notes and PCs",
+        "hint": "Promotes player notes to Campaign Codex sheets (type \"tag\", relabelled \"Player note\") and creates a mirror CC sheet linked to each PC's actor. Idempotent and non-destructive: existing tags are merged, nothing is deleted or moved."
       }
     },
     "setup": {
@@ -313,7 +318,9 @@
       "dupRemoved": "Removed near-empty duplicate “{name}” (the real configuration is kept).",
       "cfgRenamed": "Configuration journal renamed to “{name}” (name expected by the web app).",
       "ccConverted": "{n} MEJ sheet(s) converted to Campaign Codex (originals archived in 🗄️ Archive MEJ).",
-      "ccMissing": "Campaign Codex is inactive: MEJ sheet conversion could not run. Enable the module then rerun “Install / reinstall”."
+      "ccMissing": "Campaign Codex is inactive: MEJ sheet conversion could not run. Enable the module then rerun “Install / reinstall”.",
+      "notesConverted": "{n} player note(s) promoted to Campaign Codex sheets.",
+      "pcsMirrored": "{n} PC Campaign Codex sheet(s) created, {links} link(s) to their notes."
     }
   }
 }
