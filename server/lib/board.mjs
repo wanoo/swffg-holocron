@@ -51,6 +51,49 @@ const clampPos = (v) => (Number.isFinite(+v) ? Math.max(-20000, Math.min(20000, 
  * jamais dans les vues publiques (buildJournalsView ne le lit pas). */
 export const BEAT_KINDS = ['scene', 'combat', 'note', 'handout'];
 export const BEAT_STATUS = ['todo', 'encours', 'fait'];
+
+/* ---------------------------------------------------------------- trigger --
+ * CHAQUE BEAT DÉCLARE CE QU'IL DÉCLENCHE (décision produit) : « ▶ Jouer ce
+ * beat » n'exécute QUE ce bloc, rien de plus, rien d'implicite.
+ *   trigger: { scene: "<nom ou _id>", pullUsers: bool,
+ *              playlist: "…", weather: ["fog"|…|"clear"],
+ *              sequenceId: "…", handout: {…}, encounterId: "…",
+ *              pan: { x, y, scale } }
+ * Toutes les clés sont FACULTATIVES ; un trigger vide n'est pas stocké. Les
+ * effets météo sont une TABLE FERMÉE (le connecteur refuserait un id inconnu).
+ * Ne jette JAMAIS : borne, normalise, laisse tomber l'illisible. */
+export const WEATHER_EFFECTS = ['clear', 'rain', 'rainStorm', 'snow', 'blizzard',
+  'fog', 'leaves', 'embers', 'birds', 'bubbles', 'stars', 'clouds'];
+const WEATHER_BY_LOWER = new Map(WEATHER_EFFECTS.map((w) => [w.toLowerCase(), w]));
+
+export function sanitizeTrigger(raw) {
+  const t = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  const out = {};
+  // scène : NOM ou _id Foundry — le connecteur accepte les deux (activate_scene)
+  const scene = String(t.scene || '').trim().slice(0, 120);
+  if (scene) out.scene = scene;
+  if (t.pullUsers === true) out.pullUsers = true;
+  const playlist = String(t.playlist || '').trim().slice(0, 100);
+  if (playlist) out.playlist = playlist;
+  const weather = [...new Set((Array.isArray(t.weather) ? t.weather : [])
+    .map((w) => WEATHER_BY_LOWER.get(String(w).trim().toLowerCase()))
+    .filter(Boolean))].slice(0, 4);
+  // « clear » est exclusif : couper la météo ou en poser, jamais les deux
+  if (weather.includes('clear')) out.weather = ['clear'];
+  else if (weather.length) out.weather = weather;
+  if (okId(t.sequenceId)) out.sequenceId = t.sequenceId;
+  if (okId(t.encounterId)) out.encounterId = t.encounterId;
+  if (t.handout && typeof t.handout === 'object') {
+    const h = sanitizeHandout(t.handout);
+    if (h) out.handout = h;
+  }
+  if (t.pan && typeof t.pan === 'object' && (Number.isFinite(+t.pan.x) || Number.isFinite(+t.pan.y))) {
+    const scale = Number.isFinite(+t.pan.scale) ? Math.max(0.1, Math.min(4, +t.pan.scale)) : 0;
+    out.pan = { x: clampPos(t.pan.x), y: clampPos(t.pan.y), ...(scale ? { scale } : {}) };
+  }
+  return Object.keys(out).length ? out : null;
+}
+
 const beatUuid = (v) => {
   const s = String(v || '');
   const m = /JournalEntry\.([A-Za-z0-9]{16})/.exec(s);
@@ -85,6 +128,10 @@ export function sanitizeStoryboard(raw) {
       }
       const pl = b.sound && typeof b.sound === 'object' ? String(b.sound.playlist || '').slice(0, 100) : '';
       if (pl) out.sound = { playlist: pl };
+      // déclencheur « ▶ Jouer ce beat » — TOUS les kinds (une note MJ peut très
+      // bien ne poser qu'une ambiance) ; absent quand rien n'est déclaré.
+      const trig = sanitizeTrigger(b.trigger);
+      if (trig) out.trigger = trig;
       if (b.x != null && Number.isFinite(+b.x)) out.x = clampPos(b.x);
       if (b.y != null && Number.isFinite(+b.y)) out.y = clampPos(b.y);
       return out;
@@ -100,6 +147,7 @@ export function sanitizeStoryboard(raw) {
  *       played:  [{ actId, beatId, title, kind, at }],   // beats passés à « fait »
  *       reveals: [{ uuid, label, at, note }],            // ce qui a été révélé
  *       shown:   [{ type, title, targets, at }],         // handouts projetés
+ *       acted:   [{ action, label, beatId, ok, at }],    // ▶ Jouer ce beat
  *       present: [userId],                               // qui était là
  *       recap:   { gm, players } }] }                    // debrief MJ + version publiable
  * Une séance TRAVERSE les actes (played porte son actId) : la trace est indexée
@@ -166,6 +214,23 @@ function sanitizeShown(raw) {
   };
 }
 
+/** Une action de pilotage RÉELLEMENT exécutée par « ▶ Jouer ce beat » (scène
+ * activée, playlist lancée, combat monté, caméra recadrée…). Complète played /
+ * shown / reveals : c'est le « qu'est-ce que la machine a fait » du journal.
+ * null si l'action n'est pas d'un type connu. */
+export const BEAT_ACTIONS = ['scene', 'combat-scene', 'combat', 'playlist', 'weather', 'handout', 'sequence', 'pan'];
+function sanitizeActed(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  if (!BEAT_ACTIONS.includes(raw.action)) return null;
+  return {
+    action: raw.action,
+    label: line(raw.label, 160),
+    ...(okId(raw.beatId) ? { beatId: raw.beatId } : {}),
+    ok: raw.ok !== false,
+    at: atOrNow(raw.at),
+  };
+}
+
 /** Assainit UNE séance. Ne jette jamais : borne, normalise, jette l'illisible. */
 export function sanitizeSession(raw) {
   const s = raw && typeof raw === 'object' ? raw : {};
@@ -181,6 +246,7 @@ export function sanitizeSession(raw) {
     played: list(s.played).map(sanitizePlayed).filter(Boolean),
     reveals: list(s.reveals).map(sanitizeReveal).filter(Boolean),
     shown: list(s.shown).map(sanitizeShown).filter(Boolean),
+    acted: list(s.acted).map(sanitizeActed).filter(Boolean),
     present: [...new Set(list(s.present).map(String).filter((u) => USER_ID.test(u)))].slice(0, 30),
     recap: { gm: txt(recap.gm, 8000), players: txt(recap.players, 8000) },
   };
@@ -203,15 +269,22 @@ export function sanitizeSessions(raw) {
 }
 
 /** Type d'entrée → liste de la séance (patron du POST .../event). */
-export const SESSION_EVENTS = { played: 'played', reveal: 'reveals', shown: 'shown' };
-const EVENT_SANITIZERS = { played: sanitizePlayed, reveal: sanitizeReveal, shown: sanitizeShown };
+export const SESSION_EVENTS = { played: 'played', reveal: 'reveals', shown: 'shown', acted: 'acted' };
+const EVENT_SANITIZERS = { played: sanitizePlayed, reveal: sanitizeReveal, shown: sanitizeShown, acted: sanitizeActed };
 
 /** Ajout PUR d'une entrée à une séance (testable, sans I/O) :
  * retourne la NOUVELLE liste de séances, ou null si séance/kind inconnus ou
- * entrée inexploitable. La liste visée est bornée (les plus anciennes tombent). */
-export function appendEvent(sessions, sessionId, { kind, ...entry }) {
+ * entrée inexploitable. La liste visée est bornée (les plus anciennes tombent).
+ * DEUX formes acceptées :
+ *   · { kind, entry: {…} }  — enveloppe EXPLICITE, à préférer : l'entrée
+ *     `played` porte elle-même un champ `kind` (celui du BEAT) qui écrasait
+ *     silencieusement le type d'événement dans la forme plate ;
+ *   · { kind, …champs }     — forme plate historique, toujours lue. */
+export function appendEvent(sessions, sessionId, patch) {
+  const p = patch && typeof patch === 'object' ? patch : {};
+  const { kind, entry, ...flat } = p;
   const key = SESSION_EVENTS[kind];
-  const clean = EVENT_SANITIZERS[kind]?.(entry);
+  const clean = EVENT_SANITIZERS[kind]?.(entry && typeof entry === 'object' ? entry : flat);
   if (!key || !clean) return null;
   const all = sanitizeSessions(sessions);
   const i = all.findIndex((s) => s.id === sessionId);
@@ -476,6 +549,12 @@ export function createBoardService({ store, config }) {
     return clean;
   }
 
+  /** Séquences de handouts seules (sans reconstruire le catalogue complet) —
+   * « ▶ Jouer ce beat » n'a besoin que de ça pour résoudre `trigger.sequenceId`. */
+  function sequences() {
+    return (findEntry()?.flags?.holocron?.sequences || []).map(sanitizeSequence);
+  }
+
   /* ------------------------------------------------------------- séances --- */
   /** La trace, telle qu'elle est stockée (assainie à la lecture). */
   function sessions() {
@@ -591,6 +670,6 @@ export function createBoardService({ store, config }) {
     return { storyboard: clean, ...(tags ? { tags } : {}) };
   }
 
-  return { view, saveBoard, saveSequence, removeSequence, saveActSummary, saveStoryboard,
+  return { view, saveBoard, sequences, saveSequence, removeSequence, saveActSummary, saveStoryboard,
     sessions, saveSessions, appendToSession };
 }

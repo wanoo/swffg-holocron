@@ -55,6 +55,32 @@ const shipSvc = () => createShipService({ journalName: cc().journals.ship });
 const astro = createAstroService({ publicDir: PUBLIC_DIR, config: cc, store });
 const serveStatic = makeStatic(PUBLIC_DIR);
 
+// --- 📓 trace côté serveur (« ▶ Jouer ce beat ») ------------------------------------
+// La séance OUVERTE vit dans la config MJ partagée `gm:cfg:session.currentId`
+// (journal ⚙️, flags.holocron.config.cfg.session) — la même que le bandeau et
+// le storyboard. Le serveur la relit pour inscrire ce QU'IL a exécuté.
+function currentSessionId() {
+  const raw = cc().cfg?.session;
+  if (!raw) return '';
+  try {
+    const v = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return String(v?.currentId || '');
+  } catch { return ''; }
+}
+// Écritures SÉRIALISÉES : appendToSession fait un lire-modifier-écrire, deux
+// appels en parallèle perdraient une entrée. Fire-and-forget : la trace ne
+// bloque jamais le pilotage et un échec n'est qu'un log.
+let traceChain = Promise.resolve();
+function beatTracer() {
+  const sid = currentSessionId();
+  if (!sid) return null; // aucune séance ouverte : on ne trace rien, on ne gêne rien
+  return (kind, entry) => {
+    traceChain = traceChain
+      .then(() => board.appendToSession(sid, { kind, entry: { at: Date.now(), ...entry } }))
+      .catch((e) => console.warn('[holocron] trace beat :', e.message));
+  };
+}
+
 // --- auth helpers ------------------------------------------------------------------
 const gmOK = (req, session) => isGM(session) || (ENV.gmKey && (req.headers['x-gm-key'] || '') === ENV.gmKey);
 const playerOK = (req, session) => Boolean(session) || (ENV.playerKey && (req.headers['x-player-key'] || '') === ENV.playerKey);
@@ -423,6 +449,27 @@ async function handleApi(req, res, urlPath) {
         }
       } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
       return sendJSON(res, 405, { error: 'méthode non supportée' });
+    }
+    // ▶ JOUER CE BEAT : exécute les déclencheurs DÉCLARÉS par un beat (scène,
+    // combat, ambiance, météo, handout/séquence, caméra). Le client n'envoie
+    // que { actId, beatId } — le serveur RELIT le beat depuis Foundry, donc
+    // aucune action arbitraire ne peut être injectée depuis le navigateur.
+    // Tolérant aux pannes : réponse = rapport par action (ok / erreur).
+    if (parts[1] === 'beat' && parts[2] === 'play' && req.method === 'POST') {
+      if (mode === 'none') return sendJSON(res, 503, { error: 'connecteur Foundry non configuré' });
+      try {
+        const body = JSON.parse(await readBody(req, 10_000));
+        const out = await tools.playBeat(
+          { actId: String(body.actId || ''), beatId: String(body.beatId || '') },
+          {
+            store,
+            config: cc,
+            encounters: await encounters.list().catch(() => []),
+            sequences: board.sequences(),
+            trace: beatTracer(),
+          });
+        return sendJSON(res, 200, out);
+      } catch (e) { return sendJSON(res, e.code || 502, { error: String(e.message || e).slice(0, 300) }); }
     }
     if (parts[1] === 'sequences') {
       try {

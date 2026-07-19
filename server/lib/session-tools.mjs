@@ -2,7 +2,7 @@
 // chat (pool starwarsffg), handouts, ambiances sonores, combat. Porté de
 // l'Archive Holocron. Toutes les fonctions parlent au monde via mcpCall.
 import { mcpCall, mcpAuthorId } from './mcp.mjs';
-import { sanitizeHandout } from './board.mjs';
+import { sanitizeHandout, sanitizeStoryboard } from './board.mjs';
 
 const GLYPH = { ability: '[ab]', proficiency: '[pr]', difficulty: '[di]', challenge: '[ch]', boost: '[bo]', setback: '[se]', force: '[fo]' };
 const RESULT = { success: '[su]', failure: '[fa]', advantage: '[ad]', threat: '[th]', triumph: '[tr]', despair: '[de]', light: '[li]', dark: '[da]' };
@@ -424,4 +424,203 @@ export async function createCombatScene({ title, map, combatants }, { store, con
   } catch { /* best-effort */ }
 
   return { ok: true, sceneId: scene._id, sceneName, tokens: tokens.length, missing, bgSet: Boolean(bg), map: bg || null };
+}
+
+/* ============================================================================
+ * ▶ JOUER CE BEAT — orchestrateur des déclencheurs (étape 3)
+ * ---------------------------------------------------------------------------
+ * Chaque beat DÉCLARE ce qu'il déclenche (flags.holocron.storyboard[].trigger,
+ * assaini par sanitizeTrigger). `playBeat` exécute EXACTEMENT ce qui est
+ * déclaré — rien d'implicite, rien de caché — dans un ordre sensé :
+ *     scène → tokens/combat → ambiance → météo → handout/séquence → caméra
+ * TOLÉRANT AUX PANNES : une action ratée n'annule pas les suivantes (le MJ est
+ * en pleine partie, on ne le laisse jamais devant un écran vide) ; on renvoie
+ * un rapport ligne à ligne « ce qui a marché / ce qui a échoué ».
+ * Le beat est RELU DEPUIS FOUNDRY par l'appelant : le client n'envoie que
+ * { actId, beatId } et ne peut donc pas faire exécuter d'action arbitraire.
+ * ========================================================================= */
+
+/** Beat d'un acte, relu depuis le store (jamais depuis le client). */
+export function findBeat({ store }, actId, beatId) {
+  const entry = (store.get('journalsIndex') || []).find((j) => j._id === actId);
+  if (!entry) return null;
+  const doc = store.get(`journal:${actId}`) || entry;
+  const sb = sanitizeStoryboard(doc.flags?.holocron?.storyboard ?? entry.flags?.holocron?.storyboard);
+  return sb.beats.find((b) => b.id === beatId) || null;
+}
+
+/** Combattants d'une rencontre de la bibliothèque → [{ name, count }] (≤ 20). */
+export function encounterCombatants(enc) {
+  const rows = (enc?.groups || []).flatMap((g) => (g?.rows || []));
+  return rows
+    .map((r) => ({ name: String(r?.name || '').slice(0, 80), count: Math.max(1, Math.min(12, +r?.count || 1)) }))
+    .filter((c) => c.name)
+    .slice(0, 20);
+}
+
+/** PLAN D'EXÉCUTION PUR (testable, sans I/O) d'un beat assaini.
+ * `ctx` = { encounter?, sequence? } — les objets déjà résolus par l'appelant.
+ * Renvoie la liste ORDONNÉE des actions ; liste vide = le beat ne déclare rien. */
+export function planBeat(beat, ctx = {}) {
+  const t = beat && typeof beat === 'object' && beat.trigger && typeof beat.trigger === 'object' ? beat.trigger : null;
+  if (!t) return [];
+  const steps = [];
+  const { encounter, sequence } = ctx;
+
+  // 1. la scène. Une rencontre liée MONTE LA SIENNE (scène + tokens) et gagne
+  //    donc sur `trigger.scene` — l'éditeur le dit en clair (describeTrigger).
+  if (t.encounterId) {
+    const combatants = encounterCombatants(encounter);
+    if (encounter && combatants.length) {
+      steps.push({ action: 'combat-scene', label: `Monter la scène de rencontre « ${encounter.title || t.encounterId} »`,
+        encounter: { title: encounter.title || 'Rencontre', map: encounter.map || '', combatants } });
+      steps.push({ action: 'scene', label: 'Activer la scène de rencontre', fromCombatScene: true, pullUsers: t.pullUsers === true });
+      steps.push({ action: 'combat', label: `Ouvrir le combat (${combatants.length} groupe(s))` });
+    } else {
+      steps.push({ action: 'combat-scene', label: `Rencontre « ${t.encounterId} » introuvable ou vide`, missing: true });
+    }
+  } else if (t.scene) {
+    steps.push({ action: 'scene', label: `Activer la scène « ${t.scene} »${t.pullUsers ? ' (joueurs amenés)' : ''}`,
+      scene: t.scene, pullUsers: t.pullUsers === true });
+  }
+
+  // 2. ambiance
+  if (t.playlist) steps.push({ action: 'playlist', label: `Jouer la playlist « ${t.playlist} »`, playlist: t.playlist });
+
+  // 3. météo (client_weather : module compagnon + navigateur MJ requis)
+  if (Array.isArray(t.weather) && t.weather.length) {
+    const clear = t.weather.includes('clear');
+    steps.push({ action: 'weather', label: clear ? 'Couper les effets météo' : `Météo : ${t.weather.join(', ')}`,
+      ...(clear ? { clear: true } : { effects: t.weather }) });
+  }
+
+  // 4. handout unitaire, puis premier élément de la séquence liée (le MJ
+  //    enchaîne ensuite au projecteur, Précédent/Suivant).
+  if (t.handout) {
+    const n = (t.handout.targets || []).length;
+    steps.push({ action: 'handout', label: `Handout « ${t.handout.title || t.handout.src || 'sans titre'} » → ${n ? `${n} joueur(s)` : 'toute la table'}`,
+      handout: t.handout });
+  }
+  if (t.sequenceId) {
+    const item = sequence?.items?.[0] || null;
+    if (item) {
+      steps.push({ action: 'sequence', label: `Séquence « ${sequence.name} » — élément 1/${sequence.items.length}`,
+        sequenceId: t.sequenceId, item });
+    } else {
+      steps.push({ action: 'sequence', label: `Séquence « ${t.sequenceId} » introuvable ou vide`, missing: true });
+    }
+  }
+
+  // 5. caméra
+  if (t.pan) steps.push({ action: 'pan', label: 'Recadrer la caméra des joueurs', pan: t.pan });
+
+  return steps;
+}
+
+/** Exécute UNE action du plan. Jette en cas d'échec — playBeat encaisse. */
+async function runStep(step, deps) {
+  if (step.missing) throw new Error('référence introuvable (rencontre ou séquence)');
+  switch (step.action) {
+    case 'combat-scene': {
+      const out = await createCombatScene(step.encounter, deps);
+      deps.state.sceneId = out.sceneId;
+      deps.state.sceneName = out.sceneName;
+      deps.state.combatants = step.encounter.combatants;
+      return { tokens: out.tokens, ...(out.missing?.length ? { missing: out.missing } : {}) };
+    }
+    case 'scene': {
+      const args = step.fromCombatScene
+        ? (deps.state.sceneId ? { _id: deps.state.sceneId } : null)
+        : (/^[A-Za-z0-9]{16}$/.test(step.scene) ? { _id: step.scene } : { name: step.scene });
+      if (!args) throw new Error('aucune scène à activer (la génération a échoué)');
+      await mcpCall('activate_scene', { ...args, ...(step.pullUsers ? { pull_users: true } : {}) });
+      return { scene: args._id || args.name };
+    }
+    case 'combat': {
+      // la scène active porte les tokens fraîchement posés : on crée le combat,
+      // on y verse tous les combattants de la scène, puis on lance.
+      await mcpCall('manage_combat', { action: 'create', ...(deps.state.sceneId ? { scene_id: deps.state.sceneId } : {}) });
+      try { await mcpCall('manage_combat', { action: 'add_combatants' }); } catch { /* déjà peuplé par la création */ }
+      try { await mcpCall('manage_combat', { action: 'start' }); } catch { /* le MJ lancera l'initiative */ }
+      return { combat: true };
+    }
+    case 'playlist': {
+      // outil natif d'abord ; repli sur le PONT ChatMessage (module ≥ 2.2), le
+      // seul chemin fiable quand le connecteur ne pilote pas le vrai lecteur.
+      try {
+        await mcpCall('control_playlist', { playlist: step.playlist, action: 'play' });
+        return { via: 'control_playlist' };
+      } catch (e) {
+        await soundBridge({ playlist: step.playlist, action: 'play' });
+        return { via: 'pont module', note: String(e.message || e).slice(0, 80) };
+      }
+    }
+    case 'weather':
+      await mcpCall('client_weather', step.clear ? { clear: true } : { effects: step.effects });
+      return { weather: step.clear ? 'clear' : step.effects.join(',') };
+    case 'handout':
+      await handoutBridge(step.handout);
+      return { handout: step.handout.title || step.handout.type };
+    case 'sequence':
+      await handoutBridge(step.item);
+      return { item: step.item.title || step.item.src || step.item.type };
+    case 'pan':
+      await mcpCall('client_pan_camera', { x: step.pan.x, y: step.pan.y, ...(step.pan.scale ? { scale: step.pan.scale } : {}) });
+      return { pan: true };
+    default:
+      throw new Error(`action inconnue : ${step.action}`);
+  }
+}
+
+/** Joue un beat : relit le beat depuis Foundry, bâtit le plan, l'exécute pas à
+ * pas SANS jamais s'arrêter au premier échec, trace ce qui a marché et renvoie
+ * un rapport lisible. `trace(kind, entry)` est facultatif (fire-and-forget). */
+export async function playBeat({ actId, beatId }, { store, config, encounters = [], sequences = [], trace = null }) {
+  const beat = findBeat({ store }, actId, beatId);
+  if (!beat) throw Object.assign(new Error('beat introuvable dans le storyboard de cet acte'), { code: 404 });
+
+  const steps = planBeat(beat, {
+    encounter: beat.trigger?.encounterId ? encounters.find((e) => e?.id === beat.trigger.encounterId) : null,
+    sequence: beat.trigger?.sequenceId ? sequences.find((s) => s?.id === beat.trigger.sequenceId) : null,
+  });
+  if (!steps.length) {
+    return { ok: true, beat: { id: beat.id, title: beat.title, kind: beat.kind }, empty: true, steps: [],
+      message: 'Ce beat ne déclare aucun déclencheur — rien n’a été envoyé à Foundry.' };
+  }
+
+  const deps = { store, config, state: {} };
+  const report = [];
+  for (const step of steps) {
+    try {
+      const detail = await runStep(step, deps);
+      report.push({ action: step.action, label: step.label, ok: true, ...(detail || {}) });
+    } catch (e) {
+      // TOLÉRANCE AUX PANNES : on note et on continue — le reste de la mise en
+      // scène doit partir même si le module compagnon n'est pas là (client_*).
+      report.push({ action: step.action, label: step.label, ok: false, error: String(e.message || e).slice(0, 200) });
+    }
+  }
+
+  // 📓 la trace : une entrée `acted` par action, et un `shown` pour ce qui a
+  // RÉELLEMENT été projeté (cohérent avec le reste de la trace).
+  if (typeof trace === 'function') {
+    for (const r of report) {
+      trace('acted', { action: r.action, label: r.label, beatId: beat.id, ok: r.ok });
+      if (r.ok && (r.action === 'handout' || r.action === 'sequence')) {
+        const h = steps.find((s) => s.action === r.action);
+        const src = h?.handout || h?.item || {};
+        trace('shown', { type: src.type || 'image', title: src.title || '', ...(src.targets?.length ? { targets: src.targets } : {}) });
+      }
+    }
+  }
+
+  const okN = report.filter((r) => r.ok).length;
+  return {
+    ok: okN > 0,
+    beat: { id: beat.id, title: beat.title, kind: beat.kind },
+    steps: report,
+    message: okN === report.length
+      ? `✅ ${okN} action(s) exécutée(s).`
+      : `⚠️ ${okN}/${report.length} action(s) exécutée(s) — voir le détail.`,
+  };
 }

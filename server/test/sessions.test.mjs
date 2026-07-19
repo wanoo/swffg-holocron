@@ -128,7 +128,13 @@ test('appendEvent : ajoute UNE entrée dans la bonne liste sans toucher au reste
 
   const shown = appendEvent(rev, 'sess-b', { kind: 'shown', type: 'image', title: 'Contrat' });
   assert.equal(shown[1].shown[0].title, 'Contrat');
-  assert.deepEqual(Object.keys(SESSION_EVENTS).sort(), ['played', 'reveal', 'shown']);
+  // ENVELOPPE EXPLICITE : indispensable pour `played`, dont l'entrée porte son
+  // propre `kind` (celui du BEAT) — à plat il écrasait le type d'événement.
+  const env = appendEvent(base, 'sess-a', { kind: 'played', entry: { beatId: 'beat-9', title: 'Duel', kind: 'combat' } });
+  assert.equal(env[0].played[0].kind, 'combat', 'le kind du beat est préservé');
+  assert.equal(env[0].played[0].title, 'Duel');
+  assert.equal(appendEvent(base, 'sess-a', { kind: 'played', beatId: 'b', kind2: 'combat' })[0].played.length, 1, 'forme plate encore lue');
+  assert.deepEqual(Object.keys(SESSION_EVENTS).sort(), ['acted', 'played', 'reveal', 'shown']);
 });
 
 test('appendEvent : séance inconnue, kind inconnu ou entrée vide → null (rien n’est écrit)', () => {
