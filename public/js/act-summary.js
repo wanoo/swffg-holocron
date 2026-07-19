@@ -32,7 +32,37 @@ async function gmStoryboards() {
   } catch { return null; }
 }
 
-/** Pied de sommaire : progression du storyboard de l'acte (async, MJ only). */
+// --- 📓 La trace : dernière séance jouée (MJ UNIQUEMENT, route gm-gated) ------
+// flags.holocron.sessions du journal technique, servi par GET /api/gm/sessions
+// (route DÉDIÉE : ce pied n'a que faire du catalogue complet). Cache court.
+let sessCache = null; // { t, sessions }
+async function gmSessions() {
+  if (!(Data.gm || getGMKey())) return null;
+  if (sessCache && Date.now() - sessCache.t < 30_000) return sessCache.sessions;
+  try {
+    const res = await fetch(`${apiBase()}/gm/sessions`, {
+      credentials: 'same-origin',
+      headers: getGMKey() ? { 'x-gm-key': getGMKey() } : {},
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    sessCache = { t: Date.now(), sessions: data.sessions || [] };
+    return sessCache.sessions;
+  } catch { return null; }
+}
+
+/** Dernière séance close (ou en cours si aucune n'est close). */
+export function lastSession(sessions) {
+  const all = [...(sessions || [])].sort((a, b) => (b.startedAt || 0) - (a.startedAt || 0));
+  return all.find((s) => s.endedAt) || all[0] || null;
+}
+
+const sessionDay = (s) => {
+  const ms = s.startedAt || Date.parse(s.date || '') || 0;
+  return ms ? new Date(ms).toLocaleDateString('fr-FR') : (s.date || '');
+};
+
+/** Pied de sommaire : progression du storyboard + dernière séance (async, MJ only). */
 function appendStoryboardFooter(box, journal) {
   if (!(Data.gm || getGMKey())) return;
   gmStoryboards().then((byId) => {
@@ -46,6 +76,17 @@ function appendStoryboardFooter(box, journal) {
       + (cur ? ` · en cours : <b>${esc(cur.title || '(sans titre)')}</b>` : '')
       + ` — <a href="#/mj/campagne">ouvrir</a> <span class="acts-lock" title="Visible du MJ seulement">🔒 MJ</span>`;
     box.appendChild(foot);
+    // 📓 la trace : « où on s'est arrêtés » — la dernière séance, toutes séances
+    // confondues (une séance traverse plusieurs actes, elle n'est pas par acte).
+    gmSessions().then((sessions) => {
+      const s = lastSession(sessions);
+      if (!s || !foot.isConnected) return;
+      const line = document.createElement('span');
+      line.className = 'acts-sb-sess';
+      line.innerHTML = ` · 📓 dernière séance : <b>${esc(sessionDay(s))}</b> — ${s.played.length} beat(s) joué(s)`
+        + (s.endedAt ? '' : ' <i>(en cours)</i>');
+      foot.appendChild(line);
+    });
   });
 }
 

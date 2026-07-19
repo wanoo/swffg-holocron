@@ -6,6 +6,8 @@
 // Persistance : flags.holocron.board du journal technique (GET/PUT /api/gm/board).
 import { apiBase, getGMKey } from './collab.js';
 import { toFoundrySrc } from './show-image.js';
+import { loadCfg, saveCfg } from './gm-config.js';
+import { SESSION_DEFAULTS } from './gm-session.js';
 
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
@@ -99,6 +101,7 @@ export async function mountGmCampaign(main, cleanup = []) {
     board: data.board || { nodes: {}, edges: [], hidden: [] },
     catalog: data.catalog || { nodes: [], edges: [] },
     sequences: data.sequences || [],
+    sessions: data.sessions || [],  // 📓 la trace (séances jouées) — MJ only
     selected: null,        // { kind: 'node'|'edge'|'beat'|'sat', id | index }
     linkFrom: null,        // id du nœud d'origine pendant un tracé de lien
     sb: null,              // mode storyboard : { actId } (null = carte globale)
@@ -182,6 +185,62 @@ export async function mountGmCampaign(main, cleanup = []) {
     } catch (e) { paintSaveDot('error', e.message); }
   }
   cleanup.push(() => { clearTimeout(sbSaveTimer); if (sbDirty) doSbSave(); });
+
+  /* ------------------------------------------------ 📓 la trace (séances) --- */
+  // Une séance OUVERTE enregistre AUTOMATIQUEMENT ce qui se joue : beat passé à
+  // « fait » (played), handout réellement projeté (shown), entité marquée
+  // révélée (reveals). Le MJ ne saisit RIEN pendant la partie — juste le récap
+  // à la clôture. Stockage : flags.holocron.sessions du journal technique.
+  // L'id de la séance courante vit dans la config MJ PARTAGÉE `gm:cfg:session`
+  // (champ `currentId`) : la trace suit le MJ d'un appareil à l'autre.
+  const SESS_CFG_DEFAULTS = { ...SESSION_DEFAULTS, currentId: '' };
+  let sessCfg = { ...SESS_CFG_DEFAULTS };
+  let sessCfgAt = null;
+  async function loadSessCfg() {
+    const { cfg, updatedAt } = await loadCfg('session', SESS_CFG_DEFAULTS);
+    sessCfg = cfg;
+    sessCfgAt = updatedAt;
+  }
+  async function setCurrentSession(id) {
+    sessCfg.currentId = id || '';
+    const res = await saveCfg('session', sessCfg, sessCfgAt);
+    // conflit (bandeau de séance édité ailleurs) : on refusionne SANS perdre
+    // le champ qu'on vient de poser — le reste du bandeau reste celui du serveur.
+    if (res.conflict) sessCfg = { ...SESS_CFG_DEFAULTS, ...(res.current || {}), currentId: id || '' };
+    sessCfgAt = res.updatedAt;
+  }
+  const sessionById = (id) => state.sessions.find((s) => s.id === id) || null;
+  // séance COURANTE = celle pointée par la config, tant qu'elle n'est pas close.
+  const openSession = () => {
+    const s = sessionById(sessCfg.currentId);
+    return s && !s.endedAt ? s : null;
+  };
+
+  /** Inscrit une entrée dans la séance ouverte. FIRE-AND-FORGET : jamais attendu,
+   * jamais bloquant — si la trace échoue, le pilotage de la séance continue et
+   * seul un log discret le signale. Ajout ATOMIQUE côté serveur (deux onglets
+   * MJ ouverts ne s'écrasent pas : le client n'envoie que l'entrée). */
+  function trace(kind, entry) {
+    const s = openSession();
+    if (!s) return; // aucune séance ouverte : on ne trace rien (et on ne gêne rien)
+    api(`/gm/sessions/${encodeURIComponent(s.id)}/event`, {
+      method: 'POST',
+      body: JSON.stringify({ kind, at: Date.now(), ...entry }),
+    }).then((out) => {
+      if (!out?.session) return;
+      const i = state.sessions.findIndex((x) => x.id === out.session.id);
+      if (i >= 0) state.sessions[i] = out.session;
+      if (activeTab === 'seance' && !state.sb) paintSide(); // compteurs vivants
+    }).catch((e) => console.warn('[holocron] trace non enregistrée :', e.message));
+  }
+
+  // Sauvegarde de la collection (remplacement complet) — réservée aux gestes
+  // LENTS du panneau (démarrer, clôturer, rédiger le récap), jamais au pilotage.
+  async function saveSessions() {
+    const out = await api('/gm/sessions', { method: 'PUT', body: JSON.stringify({ sessions: state.sessions }) });
+    if (out?.sessions) state.sessions = out.sessions;
+    return state.sessions;
+  }
 
   function enterStoryboard(actId) {
     if (saveState === 'dirty') { clearTimeout(saveTimer); doSave(); } // flush board
@@ -489,13 +548,7 @@ export async function mountGmCampaign(main, cleanup = []) {
       if (stEl) {
         const id = stEl.closest('.gmc-beat')?.dataset.beat;
         const b = sbData().beats.find((x) => x.id === id);
-        if (b) {
-          b.status = BEAT_STATUS[(BEAT_STATUS.indexOf(b.status) + 1) % BEAT_STATUS.length];
-          scheduleSbSave();
-          paintLegend();
-          paint();
-          paintSide();
-        }
+        if (b) cycleStatus(b); // trace comprise (passage à « fait »)
         return;
       }
       const beatEl = ev.target.closest('.gmc-beat');
@@ -532,7 +585,8 @@ export async function mountGmCampaign(main, cleanup = []) {
   const panel = el('div', 'gmc-panel');
   side.append(tabs, panel);
   let activeTab = 'objets';
-  const TABS = [['objets', '📚 Objets'], ['selection', '🔍 Sélection'], ['projeter', '🎞️ Projeter'], ['ambiance', '🎵 Ambiance']];
+  const TABS = [['objets', '📚 Objets'], ['selection', '🔍 Sélection'], ['projeter', '🎞️ Projeter'],
+    ['ambiance', '🎵 Ambiance'], ['seance', '📓 Séance']];
   function paintTabs() {
     tabs.innerHTML = '';
     for (const [id, label] of TABS) {
@@ -556,6 +610,7 @@ export async function mountGmCampaign(main, cleanup = []) {
     if (activeTab === 'objets') return paintObjects();
     if (activeTab === 'projeter') return paintProjeter();
     if (activeTab === 'ambiance') return paintAmbiance();
+    if (activeTab === 'seance') return paintSession();
     return paintSelection();
   }
 
@@ -896,6 +951,8 @@ export async function mountGmCampaign(main, cleanup = []) {
     try {
       await api('/gm/foundry/handout', { method: 'POST', body: JSON.stringify(body) });
       statusEl.textContent = `✅ Envoyé ${targetsBadge(item)}`;
+      // 📓 trace : ce handout a RÉELLEMENT été projeté (jamais les préparés).
+      trace('shown', { type, title: item.title || '', ...(item.targets?.length ? { targets: item.targets } : {}) });
     } catch (e) { statusEl.textContent = `⚠️ ${e.message}`.slice(0, 60); }
   }
 
@@ -1094,6 +1151,189 @@ export async function mountGmCampaign(main, cleanup = []) {
     back.type = 'button';
     back.addEventListener('click', () => { projState = { mode: 'list', seqId: null, idx: 0 }; paintSide(); });
     panel.appendChild(back);
+  }
+
+  /* -------------------------------------------------- 📓 Séance (la trace) -- */
+  // Cycle de vie de la séance : ▶ démarrer → (la trace se remplit TOUTE SEULE
+  // pendant la partie) → ■ terminer, ce qui pré-remplit le récap MJ à partir de
+  // ce qui a été joué/révélé/montré. Le MJ ne saisit que deux phrases.
+  const two = (n) => String(n).padStart(2, '0');
+  const fmtTime = (ms) => { const d = new Date(ms); return `${two(d.getHours())}:${two(d.getMinutes())}`; };
+  const fmtDay = (s) => {
+    const ms = s.startedAt || Date.parse(s.date || '') || 0;
+    return ms ? new Date(ms).toLocaleDateString('fr-FR') : (s.date || '—');
+  };
+  const fmtDur = (ms) => {
+    if (!(ms > 0)) return '';
+    const m = Math.round(ms / 60000);
+    return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${two(m % 60)}`;
+  };
+  const actName = (id) => catById.get(id)?.name || '';
+
+  /** Récap MJ pré-rempli : du TEXTE lisible (jamais du JSON) que le MJ complète. */
+  function recapDraft(s) {
+    const lines = [`Séance ${s.no}${s.title && s.title !== `Séance ${s.no}` ? ` — ${s.title}` : ''} · ${fmtDay(s)}`];
+    const dur = fmtDur((s.endedAt || Date.now()) - (s.startedAt || 0));
+    if (dur) lines.push(`Durée : ${dur}`);
+    lines.push('');
+    lines.push(`Joué (${s.played.length}) :`);
+    for (const p of s.played) {
+      const k = BEAT_KINDS[p.kind] || BEAT_KINDS.scene;
+      const a = actName(p.actId);
+      lines.push(`- ${k.icon} ${p.title || '(sans titre)'}${a ? ` — ${a}` : ''} (${fmtTime(p.at)})`);
+    }
+    if (!s.played.length) lines.push('- (aucun beat marqué « fait »)');
+    if (s.reveals.length) {
+      lines.push('', `Révélé aux joueurs (${s.reveals.length}) :`);
+      for (const r of s.reveals) lines.push(`- 👁 ${r.label || r.uuid} (${fmtTime(r.at)})${r.note ? ` — ${r.note}` : ''}`);
+    }
+    if (s.shown.length) {
+      lines.push('', `Montré (${s.shown.length}) :`);
+      for (const h of s.shown) {
+        const t = ITEM_TYPES[h.type] || ITEM_TYPES.image;
+        lines.push(`- ${t.icon} ${h.title || '(sans titre)'} → ${h.targets?.length ? `${h.targets.length} joueur(s)` : 'toute la table'} (${fmtTime(h.at)})`);
+      }
+    }
+    lines.push('', 'À retenir pour la prochaine fois : ');
+    return lines.join('\n');
+  }
+
+  async function startSession(statusEl) {
+    const no = state.sessions.reduce((m, s) => Math.max(m, +s.no || 0), 0) + 1;
+    const s = {
+      id: `sess-${Math.random().toString(36).slice(2, 10)}`,
+      no,
+      title: `Séance ${no}`,
+      date: new Date().toISOString().slice(0, 10),
+      startedAt: Date.now(),
+      endedAt: 0,
+      played: [], reveals: [], shown: [], present: [],
+      recap: { gm: '', players: '' },
+    };
+    state.sessions.push(s);
+    if (statusEl) statusEl.textContent = '…';
+    try {
+      await saveSessions();
+      await setCurrentSession(s.id);
+    } catch (e) { if (statusEl) statusEl.textContent = `⚠️ ${e.message}`.slice(0, 80); return; }
+    paintSide();
+  }
+
+  async function endSession(s, statusEl) {
+    s.endedAt = Date.now();
+    if (!String(s.recap?.gm || '').trim()) {
+      s.recap = { ...(s.recap || {}), gm: recapDraft(s) }; // pré-rempli, le MJ complète
+    }
+    if (statusEl) statusEl.textContent = '…';
+    try {
+      await saveSessions();
+      await setCurrentSession('');
+    } catch (e) { if (statusEl) statusEl.textContent = `⚠️ ${e.message}`.slice(0, 80); return; }
+    paintSide();
+  }
+
+  // Sauvegarde douce des champs éditables d'une séance (titre, date, récaps).
+  let sessSaveTimer = null;
+  function scheduleSessionsSave(statusEl) {
+    clearTimeout(sessSaveTimer);
+    if (statusEl) statusEl.textContent = '…';
+    sessSaveTimer = setTimeout(async () => {
+      try { await saveSessions(); if (statusEl) statusEl.textContent = '✅ Enregistré'; }
+      catch (e) { if (statusEl) statusEl.textContent = `⚠️ ${e.message}`.slice(0, 80); }
+    }, 700);
+  }
+  cleanup.push(() => clearTimeout(sessSaveTimer));
+
+  function paintSession() {
+    panel.appendChild(el('p', 'eyebrow', '📓 Séance'));
+    const status = el('p', 'gmc-hint', '');
+    const cur = openSession();
+
+    if (!cur) {
+      panel.appendChild(el('p', 'gmc-hint',
+        'Aucune séance ouverte. <b>Démarre une séance</b> pour que l’Archive garde trace de ce qui se joue : '
+        + 'chaque beat passé à ✓ <i>fait</i>, chaque handout projeté et chaque 👁 révélation s’inscrivent tout seuls — '
+        + 'tu n’as rien à saisir pendant la partie.'));
+      const go = el('button', 'gmc-btn gold', '▶ Démarrer la séance');
+      go.type = 'button';
+      go.addEventListener('click', () => startSession(status));
+      panel.append(go, status);
+    } else {
+      const dur = fmtDur(Date.now() - (cur.startedAt || 0));
+      panel.appendChild(el('p', 'gmc-hint',
+        `🔴 <b>Séance ${cur.no}</b> en cours depuis ${fmtTime(cur.startedAt)}${dur ? ` (${dur})` : ''} — tout ce que tu joues s’inscrit ici.`));
+
+      const title = el('input', 'gmc-input');
+      title.value = cur.title || '';
+      title.placeholder = 'Titre de la séance (ex. L’abordage du Vanguard)';
+      title.addEventListener('change', () => { cur.title = title.value.slice(0, 120); scheduleSessionsSave(status); });
+      const date = el('input', 'gmc-input');
+      date.type = 'date';
+      date.value = cur.date || '';
+      date.addEventListener('change', () => { cur.date = date.value; scheduleSessionsSave(status); });
+      panel.append(title, date);
+
+      panel.appendChild(el('p', 'gmc-field-lbl', 'Ce qui est déjà tracé'));
+      const counts = el('div', 'gmc-obj-list');
+      counts.appendChild(el('p', 'gmc-hint',
+        `🎬 <b>${cur.played.length}</b> beat(s) joué(s) · 👁 <b>${cur.reveals.length}</b> révélation(s) · 📡 <b>${cur.shown.length}</b> projection(s)`));
+      for (const p of cur.played.slice(-6).reverse()) {
+        const k = BEAT_KINDS[p.kind] || BEAT_KINDS.scene;
+        const a = actName(p.actId);
+        counts.appendChild(el('p', 'gmc-hint', `${k.icon} ${esc(p.title || '(sans titre)')}${a ? ` <span class="gmc-count">${esc(a)}</span>` : ''} <span class="gmc-count">${fmtTime(p.at)}</span>`));
+      }
+      for (const r of cur.reveals.slice(-4).reverse()) {
+        counts.appendChild(el('p', 'gmc-hint', `👁 ${esc(r.label || r.uuid)} <span class="gmc-count">${fmtTime(r.at)}</span>`));
+      }
+      for (const h of cur.shown.slice(-4).reverse()) {
+        const t = ITEM_TYPES[h.type] || ITEM_TYPES.image;
+        counts.appendChild(el('p', 'gmc-hint', `${t.icon} ${esc(h.title || '(sans titre)')} <span class="gmc-count">${h.targets?.length ? `${h.targets.length} joueur(s)` : 'toute la table'}</span>`));
+      }
+      if (!cur.played.length && !cur.reveals.length && !cur.shown.length) {
+        counts.appendChild(el('p', 'muted', 'Rien encore — ouvre le storyboard d’un acte et passe un beat à ✓ fait.'));
+      }
+      panel.appendChild(counts);
+
+      const stop = el('button', 'gmc-btn gold', '■ Terminer la séance');
+      stop.type = 'button';
+      stop.title = 'Fige l’heure de fin et pré-remplit le récap MJ à partir de ce qui a été joué';
+      stop.addEventListener('click', () => endSession(cur, status));
+      panel.append(stop, status);
+    }
+
+    // --- séances closes : récap MJ + version publiable ------------------------
+    const past = state.sessions.filter((s) => s.endedAt && s.id !== cur?.id).sort((a, b) => b.startedAt - a.startedAt);
+    panel.appendChild(el('p', 'gmc-field-lbl', '📚 Séances passées'));
+    if (!past.length) {
+      panel.appendChild(el('p', 'muted', 'Aucune séance archivée pour l’instant — la première clôture en créera une.'));
+      return;
+    }
+    for (const s of past.slice(0, 20)) {
+      const box = el('details', 'gmc-obj-group');
+      const sum = el('summary', '', `Séance ${s.no} · ${esc(fmtDay(s))} <span class="gmc-count">${s.played.length} beat(s)${fmtDur(s.endedAt - s.startedAt) ? ' · ' + fmtDur(s.endedAt - s.startedAt) : ''}</span>`);
+      box.appendChild(sum);
+      const gm = el('textarea', 'gmc-input');
+      gm.rows = 6;
+      gm.value = s.recap?.gm || '';
+      gm.placeholder = 'Récap MJ (pré-rempli à la clôture) — ce que tu veux retenir.';
+      gm.addEventListener('change', () => { s.recap = { ...(s.recap || {}), gm: gm.value.slice(0, 8000) }; scheduleSessionsSave(status); });
+      const pl = el('textarea', 'gmc-input');
+      pl.rows = 4;
+      pl.value = s.recap?.players || '';
+      pl.placeholder = 'Version publiable pour les joueurs (affichée dans « Où en est-on ? »).';
+      pl.addEventListener('change', () => { s.recap = { ...(s.recap || {}), players: pl.value.slice(0, 8000) }; scheduleSessionsSave(status); });
+      const copy = el('button', 'gmc-btn', '⤵ Repartir du récap MJ');
+      copy.type = 'button';
+      copy.title = 'Copie le récap MJ dans la version joueurs (à élaguer des secrets)';
+      copy.addEventListener('click', () => {
+        pl.value = gm.value;
+        s.recap = { ...(s.recap || {}), players: pl.value.slice(0, 8000) };
+        scheduleSessionsSave(status);
+      });
+      box.append(el('p', 'gmc-field-lbl', '🔒 Récap MJ'), gm, el('p', 'gmc-field-lbl', '👥 Récap joueurs'), pl, copy);
+      panel.appendChild(box);
+    }
+    panel.appendChild(status);
   }
 
   /* --------------------------------------------- 📜 Sommaire d'acte (lot 2) -- */
@@ -1325,12 +1565,22 @@ export async function mountGmCampaign(main, cleanup = []) {
     return paintSbOverview();
   }
 
-  function cycleStatus(b) {
-    b.status = BEAT_STATUS[(BEAT_STATUS.indexOf(b.status) + 1) % BEAT_STATUS.length];
+  /** Change le statut d'un beat — POINT D'ACCROCHE UNIQUE de la trace : passer à
+   * « fait » inscrit le beat dans la séance ouverte (horodaté, avec son acte). */
+  function setBeatStatus(b, status) {
+    const before = b.status;
+    b.status = status;
+    if (status === 'fait' && before !== 'fait') {
+      trace('played', { actId: state.sb?.actId || '', beatId: b.id, title: b.title || '', kind: b.kind });
+    }
     scheduleSbSave();
     paintLegend();
     paint();
     paintSide();
+  }
+
+  function cycleStatus(b) {
+    setBeatStatus(b, BEAT_STATUS[(BEAT_STATUS.indexOf(b.status) + 1) % BEAT_STATUS.length]);
   }
 
   function addBeat(kind) {
@@ -1350,6 +1600,23 @@ export async function mountGmCampaign(main, cleanup = []) {
     panel.appendChild(el('p', 'eyebrow', `🎬 Storyboard — ${esc(act?.name || '')}`));
     panel.appendChild(el('p', 'gmc-hint', 'L’acte, en moments de jeu enchaînés : 🎭 scène · ⚔️ combat · 🗒️ note MJ · 🖼️ handout. '
       + 'Clic sur un beat : éditer · pastille ○▶✓ : statut · glisser : réordonner. MJ only — jamais montré aux joueurs.'));
+    // 📓 état de la trace : le storyboard est le poste de pilotage, on démarre
+    // la séance d'ici (le panneau à onglets n'existe pas en mode storyboard).
+    const cur = openSession();
+    if (cur) {
+      const n = cur.played.length + cur.reveals.length + cur.shown.length;
+      panel.appendChild(el('p', 'gmc-hint', `🔴 <b>Séance ${cur.no}</b> ouverte — <b>${n}</b> événement(s) tracé(s). `
+        + 'Passer un beat à ✓ <i>fait</i> l’inscrit automatiquement.'));
+    } else {
+      const line = el('p', 'gmc-hint', 'Aucune séance ouverte — rien de ce que tu joues ne sera gardé en mémoire. ');
+      const go = el('button', 'gmc-mini', '▶');
+      go.type = 'button';
+      go.title = 'Démarrer la séance : l’Archive garde trace de ce qui se joue';
+      go.addEventListener('click', () => startSession().then(() => paintSide()));
+      line.appendChild(go);
+      panel.appendChild(line);
+    }
+
     const list = el('div', 'gmc-obj-list');
     beats.forEach((b, i) => {
       const k = BEAT_KINDS[b.kind] || BEAT_KINDS.scene;
@@ -1438,7 +1705,7 @@ export async function mountGmCampaign(main, cleanup = []) {
       const m = STATUS_META[st];
       const btn = el('button', 'gmc-btn' + (b.status === st ? ' gold' : ''), `${m.icon} ${m.label}`);
       btn.type = 'button';
-      btn.addEventListener('click', () => { b.status = st; scheduleSbSave(); paintLegend(); paint(); paintSide(); });
+      btn.addEventListener('click', () => setBeatStatus(b, st));
       stRow.appendChild(btn);
     }
     panel.appendChild(stRow);
@@ -1454,6 +1721,22 @@ export async function mountGmCampaign(main, cleanup = []) {
       const open = el('a', 'gmc-obj-name', `${t.icon} ${esc(m.name)}`);
       open.href = `#/journal/${eid}`;
       open.title = 'Ouvrir la fiche';
+      // 👁 mémoire des révélations : « les joueurs ont appris ça, à telle heure ».
+      // Une entrée `reveals` dans la séance ouverte — la matière du « ne pas oublier ».
+      const sess = openSession();
+      const seen = (sess?.reveals || []).some((r) => String(r.uuid).endsWith(eid));
+      const rev = el('button', 'gmc-mini' + (seen ? ' on' : ''), '👁');
+      rev.type = 'button';
+      rev.disabled = !sess || seen;
+      rev.title = !sess ? 'Démarre une séance (onglet 📓 Séance) pour garder trace des révélations'
+        : seen ? 'Déjà marqué révélé dans cette séance'
+          : 'Marquer révélé — les joueurs viennent de l’apprendre';
+      rev.addEventListener('click', () => {
+        trace('reveal', { uuid: u, label: m.name });
+        rev.classList.add('on');
+        rev.disabled = true;
+        rev.title = 'Marqué révélé';
+      });
       const rm = el('button', 'gmc-mini', '✕');
       rm.type = 'button';
       rm.title = 'Détacher du beat';
@@ -1463,7 +1746,7 @@ export async function mountGmCampaign(main, cleanup = []) {
         paint();
         paintSide();
       });
-      row.append(open, rm);
+      row.append(open, rev, rm);
       chips.appendChild(row);
     }
     if (!b.uuids?.length) chips.appendChild(el('p', 'muted', 'Aucune — attache PNJ, lieux, orgs, quêtes…'));
@@ -1647,5 +1930,8 @@ export async function mountGmCampaign(main, cleanup = []) {
 
   paint();
   paintSide();
+  // séance courante (gm:cfg:session.currentId) : chargée en tâche de fond —
+  // la carte s'affiche tout de suite, la trace se branche dès qu'on la connaît.
+  loadSessCfg().then(() => { if (openSession()) paintSide(); }).catch(() => {});
   window.scrollTo(0, 0);
 }

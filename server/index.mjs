@@ -401,6 +401,29 @@ async function handleApi(req, res, urlPath) {
       } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
       return sendJSON(res, 405, { error: 'méthode non supportée' });
     }
+    // 📓 LA TRACE : séances jouées (flags.holocron.sessions du journal technique).
+    // Route DÉDIÉE et non un simple morceau de /gm/board : le pied de sommaire
+    // d'acte et le widget « Où en est-on ? » n'ont besoin QUE de la trace, pas
+    // du catalogue complet (board.view() l'expose aussi pour l'éditeur, qui le
+    // charge de toute façon en un seul appel).
+    //   GET                      → { sessions: [...] }
+    //   PUT                      → remplacement complet assaini
+    //   POST /<id>/event         → AJOUT ATOMIQUE d'une entrée (alimentation
+    //                              automatique pendant la séance : played/reveal/shown)
+    if (parts[1] === 'sessions') {
+      try {
+        if (req.method === 'GET' && !id) return sendJSON(res, 200, { sessions: board.sessions() });
+        if (req.method === 'PUT' && !id) {
+          const body = JSON.parse(await readBody(req, 300_000));
+          return sendJSON(res, 200, { ok: true, sessions: await board.saveSessions(body.sessions ?? body) });
+        }
+        if (req.method === 'POST' && id && parts[3] === 'event') {
+          const body = JSON.parse(await readBody(req, 20_000));
+          return sendJSON(res, 200, { ok: true, session: await board.appendToSession(id, body) });
+        }
+      } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
+      return sendJSON(res, 405, { error: 'méthode non supportée' });
+    }
     if (parts[1] === 'sequences') {
       try {
         if (req.method === 'PUT') {
