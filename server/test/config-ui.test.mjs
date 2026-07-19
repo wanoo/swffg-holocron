@@ -102,3 +102,31 @@ test('latestByName : liste vide ou trous → null / éléments nuls ignorés', (
   assert.equal(latestByName(null), null);
   assert.equal(latestByName([null, { name: 'Acte 3' }, undefined]).name, 'Acte 3');
 });
+
+// --- étanchéité : le registre des personnages ne sort qu'au MJ ----------------
+// `config.registry` est régénéré automatiquement à partir des acteurs PJ et des
+// fiches Campaign Codex `npc` : servi publiquement, il livrerait le NOM et l'ID
+// de tous les PNJ de la campagne à n'importe quel visiteur anonyme. Il n'est lu
+// que par des vues MJ (mentions cliquables des chapitres, écran de MJ).
+test('publicConfig : registry vide pour un joueur, complet pour le MJ', () => {
+  const registry = [{ kind: 'npc', id: 'np00000000000001', forms: ['Moff Kalast', 'Kalast'] }];
+  const cc = campaignConfig(fakeStore({ registry }));
+  assert.deepEqual(publicConfig(cc).registry, []);            // anonyme / joueur
+  assert.deepEqual(publicConfig(cc, '', false).registry, []);
+  assert.deepEqual(publicConfig(cc, '', true).registry, registry); // MJ
+});
+
+test('publicConfig : aucune donnée MJ ne fuit (bible, cfg de séance, journaux techniques)', () => {
+  const cc = campaignConfig(fakeStore({
+    gmBibleFolder: '📕 Bible MJ',
+    cfg: { session: { pinned: 'secret' }, fronts: [{ label: 'L’étau impérial' }] },
+    registry: [{ kind: 'npc', id: 'np00000000000001', forms: ['Moff Kalast'] }],
+  }));
+  const pub = publicConfig(cc, '', false);
+  assert.deepEqual(Object.keys(pub).sort(),
+    ['advLinks', 'campaignPlanets', 'editableKinds', 'foundryBaseUrl', 'meta', 'registry', 'ui']);
+  const dump = JSON.stringify(pub);
+  for (const spoiler of ['Bible MJ', 'étau impérial', 'Moff Kalast', 'pinned']) {
+    assert.equal(dump.includes(spoiler), false, `« ${spoiler} » ne doit pas sortir dans /api/content/config`);
+  }
+});

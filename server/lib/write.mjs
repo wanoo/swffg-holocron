@@ -7,6 +7,26 @@ import { mcpCall } from './mcp.mjs';
 import { mergeUiConfig } from './config.mjs';
 import { resolveCategories } from './transform/categories.mjs';
 
+/* --- Dossiers MJ : gabarit narratif d'une entité -----------------------------
+ * Champs du dossier et leur borne. Miroir de l'affichage de fiche
+ * (public/js/sheet.js, section « 🔒 Dossier MJ ») ET du panneau d'édition MJ. */
+export const DOSSIER_FIELDS = {
+  name: 120, role: 120, statut: 40, veut: 500, levier: 500,
+  indices: 1000, attitude: 300, replique: 300, advId: 40,
+};
+
+/** Assainit un patch de dossier — PATCH PARTIEL : seules les clés PRÉSENTES sont
+ * touchées, un champ envoyé vide est retiré, les clés inconnues sont ignorées. */
+export function sanitizeDossier(patch, base = {}) {
+  const out = { ...(base && typeof base === 'object' ? base : {}) };
+  for (const [key, max] of Object.entries(DOSSIER_FIELDS)) {
+    if (!patch || typeof patch !== 'object' || !(key in patch)) continue;
+    const v = String(patch[key] ?? '').replace(/\r\n?/g, '\n').trim().slice(0, max);
+    if (v) out[key] = v; else delete out[key];
+  }
+  return out;
+}
+
 export function createWriteService({ store, config, logger = console }) {
   const idx = () => store.get('journalsIndex') || [];
   const findByChapter = (chapId) => idx().find((j) => j.flags?.holocron?.gmChapter === chapId);
@@ -241,6 +261,94 @@ export function createWriteService({ store, config, logger = console }) {
     return entry?.flags?.holocron?.dossiers || {};
   }
 
+  /** Le journal porteur, créé au premier ÉCRIT (jamais sur une lecture). */
+  async function dossiersJournal() {
+    const name = config().journals.dossiers;
+    let entry = idx().find((j) => j.name === name);
+    if (!entry) {
+      const sysF = (store.get('folders') || []).find((f) => f.type === 'JournalEntry' && f.name === '🛠️ Holocron — Système');
+      await mcpCall('create_document', { type: 'JournalEntry', data: [{
+        name, ownership: { default: 0 }, ...(sysF ? { folder: sysF._id } : {}),
+        flags: { holocron: { dossiers: {} } },
+        pages: [{ name: 'Dossiers MJ', type: 'text', text: {
+          content: '<p>Dossiers MJ narratifs du Holocron (flags.holocron.dossiers).</p>', format: 1 } }],
+      }] });
+      await store.sync.journalsIndex();
+      entry = idx().find((j) => j.name === name);
+      if (!entry) throw new Error('journal des dossiers MJ introuvable après création');
+    }
+    return entry;
+  }
+
+  /**
+   * Écrit LE dossier d'une entité (patch PARTIEL fusionné). L'app n'envoie que
+   * les champs de son formulaire : rien de ce que le MJ (ou un assistant MCP) a
+   * écrit ailleurs dans le flag n'est touché — la fusion Foundry se fait par
+   * chemin `flags.holocron.dossiers.<entityId>`.
+   */
+  async function dossierSave(entityId, patch) {
+    const id = String(entityId || '').trim().slice(0, 40);
+    if (!id || !/^[A-Za-z0-9._-]+$/.test(id)) throw Object.assign(new Error('entité invalide'), { code: 400 });
+    const entry = await dossiersJournal();
+    const all = entry.flags?.holocron?.dossiers || {};
+    const clean = sanitizeDossier(patch, all[id] || {});
+    await mcpCall('modify_document', { type: 'JournalEntry', _id: entry._id,
+      updates: [{ [`flags.holocron.dossiers.${id}`]: clean }] });
+    const next = { ...all, [id]: clean };
+    store.patch('journalsIndex', (items) => {
+      const j = items.find((x) => x._id === entry._id);
+      if (j) { j.flags = j.flags || {}; j.flags.holocron = { ...(j.flags.holocron || {}), dossiers: next }; }
+    });
+    store.patch(`journal:${entry._id}`, (doc) => {
+      doc.flags = doc.flags || {}; doc.flags.holocron = { ...(doc.flags.holocron || {}), dossiers: next };
+    });
+    return { ok: true, id, dossier: clean };
+  }
+
+  /**
+   * AMORCE : pré-remplit `role`/`statut` des fiches Campaign Codex qui portent
+   * déjà `flags.holocron.statut` (posé par la conversion MEJ→CC). Strictement
+   * ADDITIF — une entité déjà dossierée n'est pas retouchée, un champ déjà
+   * rempli n'est jamais écrasé. `dryRun` rend l'aperçu sans rien écrire.
+   */
+  async function dossiersSeed({ dryRun = false } = {}) {
+    const STATUT_ROLE = { allie: 'Allié', ennemi: 'Ennemi', mentor: 'Mentor', contact: 'Contact', neutre: 'Neutre' };
+    const cur = dossiers();
+    const seeded = [];
+    for (const e of idx()) {
+      if (e.flags?.['swffg-astronavigation']) continue;
+      if (String(e.flags?.['campaign-codex']?.type || '') !== 'npc') continue;
+      const statut = String(e.flags?.holocron?.statut || '');
+      if (!statut) continue;
+      const id = e.flags?.holocron?.legacyId || e._id;
+      const base = cur[id] || {};
+      if (base.role && base.statut) continue; // déjà renseigné à la main : on passe
+      seeded.push({ id, name: e.name, statut, role: base.role || STATUT_ROLE[statut] || '' });
+    }
+    if (dryRun) return { seeded, written: 0, dryRun: true };
+    let written = 0;
+    for (const s of seeded) {
+      await dossierSave(s.id, { name: s.name, statut: s.statut, ...(s.role ? { role: s.role } : {}) });
+      written++;
+    }
+    return { seeded, written, dryRun: false };
+  }
+
+  /** Registre des personnages (`config.registry`) — voir transform/registry.mjs. */
+  async function registrySave(registry) {
+    const entry = idx().find((j) => j.name === (process.env.CONFIG_JOURNAL_NAME || '⚙️ Holocron Config'));
+    if (!entry) throw Object.assign(new Error('journal ⚙️ Holocron Config absent — POST /api/gm/bootstrap'), { code: 404 });
+    const clean = Array.isArray(registry) ? registry : [];
+    // écriture en DEUX TEMPS comme le board : le merge Foundry par chemin ne
+    // retirerait jamais une entrée supprimée d'une liste remplacée en place.
+    await mcpCall('modify_document', { type: 'JournalEntry', _id: entry._id,
+      updates: [{ 'flags.holocron.config.-=registry': null }] });
+    await mcpCall('modify_document', { type: 'JournalEntry', _id: entry._id,
+      updates: [{ 'flags.holocron.config.registry': clean }] });
+    store.patch('config', (cfg) => { cfg.registry = clean; });
+    return { ok: true, count: clean.length };
+  }
+
   // --- Backrefs « Mentionné dans (MJ) » : index inverse CALCULÉ (SSOT Foundry).
   // Pour chaque entité du registre (config.registry), la liste des chapitres
   // bible dont le texte mentionne une de ses formes. Cache par révision.
@@ -268,7 +376,8 @@ export function createWriteService({ store, config, logger = console }) {
     return map;
   }
 
-  return { gmList, gmGet, gmSave, publicGet, publicSave, notesList, noteSave, noteDelete, cfgSave, uiSave, dossiers, backrefs };
+  return { gmList, gmGet, gmSave, publicGet, publicSave, notesList, noteSave, noteDelete,
+    cfgSave, uiSave, dossiers, dossierSave, dossiersSeed, registrySave, backrefs };
 }
 
 /* ----------------------------------------------------------------------------

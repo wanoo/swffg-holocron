@@ -6,7 +6,8 @@
  *  Ne recrée jamais l'existant (repérage par nom) — relançable sans risque. */
 import { MOD, t, boundJournal, shipJournal, codexJournal, migratePartyResources } from "./util.mjs";
 import { convertMejToCC } from "./convert-mej.mjs";
-import { convertCcNative } from "./convert-cc-native.mjs";
+import { convertCcNative, pcActors } from "./convert-cc-native.mjs";
+import { buildRegistry } from "./registry-build.mjs";
 
 // Dossiers clés de la campagne — chaque réglage accepte un NOM ou un uuid
 // « Folder.<id> » ; le nom par défaut sert à la création si rien n'existe.
@@ -386,6 +387,34 @@ export async function ensureShipNotesPage() {
   return page ? `${j.id}:${page.id}` : "";
 }
 
+/**
+ * REGISTRE DES PERSONNAGES (`config.registry`) — généré à partir de ce que le
+ * monde sait déjà : acteurs du dossier PJ + fiches Campaign Codex `npc`. Sans
+ * lui, les mentions cliquables des chapitres de bible et les backrefs
+ * « Mentionné dans » restent muettes (deux fonctionnalités codées mais vides).
+ *
+ * NON DESTRUCTIF et idempotent : les entrées écrites à la main sont conservées,
+ * leurs formes seulement complétées ; relancer l'installation n'écrit rien de
+ * plus. La même moulinette est exposée côté app (POST /api/gm/registry).
+ */
+export async function ensureRegistry() {
+  if (!game.user.isGM) return { added: 0, enriched: 0 };
+  const j = configJournal();
+  if (!j) return { added: 0, enriched: 0 };
+  const existing = j.flags?.holocron?.config?.registry || [];
+  const pcs = pcActors().map((a) => ({ _id: a.id, name: a.name }));
+  const npcs = game.journal
+    .filter((x) => x.flags?.["campaign-codex"]?.type === "npc" && !x.flags?.["swffg-astronavigation"])
+    .map((x) => ({ _id: x.flags?.holocron?.legacyId || x.id, name: x.name }));
+  const out = buildRegistry({ pcs, npcs, existing });
+  if (!out.added && !out.enriched) return out;
+  // deux temps : le merge Foundry par chemin ne retire jamais d'entrée d'une liste
+  await j.update({ "flags.holocron.config.-=registry": null });
+  await j.update({ "flags.holocron.config.registry": out.registry });
+  console.log(`swffg-holocron | registre : ${out.added} entrée(s) ajoutée(s), ${out.enriched} complétée(s)`);
+  return out;
+}
+
 export async function installHolocron({ silent = false } = {}) {
   if (!game.user.isGM) return false;
   // 1. répertoires clés (pilotés par les réglages folder*, créés s'ils manquent)
@@ -423,6 +452,8 @@ export async function installHolocron({ silent = false } = {}) {
   try { await convertMejToCC(); } catch (e) { console.warn("swffg-holocron | conversion MEJ→CC", e); }
   // « 100 % CC » : notes des joueurs promues en fiches CC + fiches miroir des PJ
   try { await convertCcNative(); } catch (e) { console.warn("swffg-holocron | conversion CC native", e); }
+  // registre des personnages : APRÈS les conversions (les fiches CC npc existent)
+  try { await ensureRegistry(); } catch (e) { console.warn("swffg-holocron | registre des personnages", e); }
 
   // 6. rangement des journaux techniques préexistants (no-op sur un monde neuf)
   let moved = 0;
