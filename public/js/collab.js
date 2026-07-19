@@ -64,7 +64,10 @@ export function setGMKey(k) { gmKey = k || ''; sessionStorage.setItem('holocron-
 export function getGMKey() { return gmKey; }
 export function clearGMKey() { gmKey = ''; sessionStorage.removeItem('holocron-gm-key'); syncGMCookie(); }
 
-function gmHeaders(extra) { return { ...(gmKey ? { 'x-gm-key': gmKey } : {}), ...(extra || {}) }; }
+// En-têtes des appels MJ : la session Foundry (cookie) suffit normalement ; la
+// clé de secours s'ajoute quand elle est saisie. Exportée pour les vues MJ qui
+// ont leur propre client (rencontres, fiches MJ…).
+export function gmHeaders(extra) { return { ...(gmKey ? { 'x-gm-key': gmKey } : {}), ...(extra || {}) }; }
 
 // Liste des chapitres MJ. Renvoie null si la clé est refusée (401).
 export async function gmList() {

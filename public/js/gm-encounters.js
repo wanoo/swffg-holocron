@@ -4,13 +4,14 @@
 // sur place (tracker) ou dans Foundry (🎬 scène + tokens).
 import { Data, ensureAdversaries } from './data.js';
 import { renderCombat } from './combat-tracker.js';
+import { gmHeaders } from './collab.js';
 
 const API = (window.HOLOCRON && window.HOLOCRON.api) || '/api';
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
 
 async function api(path, opts = {}) {
-  const res = await fetch(API + path, { credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, ...opts });
+  const res = await fetch(API + path, { credentials: 'same-origin', headers: gmHeaders({ 'Content-Type': 'application/json' }), ...opts });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
   return body;
