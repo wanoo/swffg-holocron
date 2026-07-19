@@ -5,6 +5,7 @@
 // ses propres writes, on ne re-lit jamais pour vérifier).
 import { mcpCall } from './mcp.mjs';
 import { mergeUiConfig } from './config.mjs';
+import { resolveCategories } from './transform/categories.mjs';
 
 export function createWriteService({ store, config, logger = console }) {
   const idx = () => store.get('journalsIndex') || [];
@@ -16,7 +17,17 @@ export function createWriteService({ store, config, logger = console }) {
       type: 'JournalEntryPage', _id: pageId, parent_uuid: `JournalEntry.${jid}`,
       updates: [{ 'text.content': html }],
     });
-    await mcpCall('modify_document', { type: 'JournalEntry', _id: jid, updates: [{ 'flags.holocron.rev': rev }] });
+    // Le contenu fait foi dans la PAGE (c'est elle que l'app édite et affiche).
+    // Si le journal est une fiche Campaign Codex, on recopie ce contenu dans
+    // `data.description` : c'est ce que la sheet CC affiche dans Foundry, donc le
+    // MJ voit la note à jour dans sa fiche au lieu d'un panneau vide. Miroir à
+    // sens unique — jamais l'inverse, la page reste la source.
+    const updates = [{ 'flags.holocron.rev': rev }];
+    const isCC = Boolean(store.get(`journal:${jid}`)?.flags?.['campaign-codex']?.type);
+    if (isCC && (store.get(`journal:${jid}`)?.pages || []).length === 1) {
+      updates.push({ 'flags.campaign-codex.data.description': html });
+    }
+    await mcpCall('modify_document', { type: 'JournalEntry', _id: jid, updates });
   }
 
   function patchCaches(jid, pageId, html, rev) {
@@ -96,12 +107,12 @@ export function createWriteService({ store, config, logger = console }) {
     }
     const entry = idx().find((j) => j._id === jid || j.flags?.holocron?.legacyId === jid);
     if (!entry) return null;
-    const editableFolders = new Set(
-      (store.get('folders') || [])
-        .filter((f) => (cc.categories || []).some((c) => c.editable && c.folder === f.name))
-        .map((f) => f._id),
-    );
-    if (!editableFolders.has(entry.folder)) return null; // étanchéité : jamais la bible
+    // Étanchéité : SEULES les catégories déclarées `editable` sont modifiables par
+    // l'app (jamais la bible MJ). Vaut pour les catégories par dossier comme par
+    // tag / type CC — c'est la même liste de catégories qui fait foi partout.
+    const editable = resolveCategories({ config: cc, folders: store.get('folders') })
+      .filter((c) => c.editable);
+    if (!editable.some((c) => c.match(entry))) return null;
     const doc = store.get(`journal:${entry._id}`);
     const page = pid ? (doc?.pages || []).find((p) => p._id === pid) : (doc?.pages || [])[0];
     return { entry, doc, page };

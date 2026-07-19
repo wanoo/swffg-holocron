@@ -3,6 +3,8 @@
 // Les catégories viennent de la config (dossiers Foundry déclarés) ; les
 // journaux du pack règles sont fusionnés comme une catégorie « rules ».
 
+import { resolveCategories, resolveFolder, categoryOf } from './categories.mjs';
+
 const RULES_CAT_ID = '__rules__';
 
 // Pages techniques à NE JAMAIS afficher brut : le barème « dice_helper » (JSON
@@ -76,12 +78,9 @@ export function parseDateBBY(s) {
   return era === 'BBY' ? -n : n;
 }
 
-// Résout la référence de dossier d'une catégorie : NOM Foundry, _id ou uuid
-// « Folder.<id> » (pratique : copier l'uuid depuis Foundry suffit).
-export function resolveFolder(folders, ref) {
-  const list = (folders || []).filter((f) => f && f.type === 'JournalEntry');
-  return list.find((f) => f.name === ref || f._id === ref || `Folder.${f._id}` === ref) || null;
-}
+// Résolution de dossier/catégories : implémentation partagée (transform/categories.mjs),
+// ré-exportée ici pour ne pas casser les imports existants.
+export { resolveFolder };
 
 // Icône Mini Calendar qui marque un événement CANON (le reste = campagne).
 export const CANON_ICON = 'fas fa-jedi';
@@ -109,10 +108,8 @@ export function buildTimelineView({ config, folders, journalsIndex, getJournal, 
       excerpt: excerpt.length > 240 ? excerpt.slice(0, 240) + '…' : excerpt,
     });
   }
-  const tlFolderIds = new Set((config?.categories || [])
-    .filter((c) => c && c.kind === 'timeline' && c.folder)
-    .map((c) => resolveFolder(folders, c.folder)?._id)
-    .filter(Boolean));
+  // catégories kind « timeline » — dossier, tag ou type CC (cf. categories.mjs)
+  const tlCats = resolveCategories({ config, folders }).filter((c) => c.kind === 'timeline');
 
   const excerptOf = (doc) => {
     const html = String(((doc.pages || []).find((p) => p.text?.content) || {}).text?.content || '');
@@ -121,7 +118,7 @@ export function buildTimelineView({ config, folders, journalsIndex, getJournal, 
   };
 
   for (const entry of (journalsIndex || [])) {
-    if (!tlFolderIds.has(entry.folder)) continue;
+    if (!tlCats.some((c) => c.match(entry))) continue;
     if (visibleFilter && !visibleFilter(entry)) continue;
     const doc = getJournal(entry._id);
     if (!doc) continue;
@@ -253,28 +250,23 @@ export function actSummaryView(raw, gm) {
 // journalsIndex + journaux complets (store) + pack règles → vue front.
 // `visibleFilter(doc)` applique l'ownership de la session (auth.canSee).
 export function buildJournalsView({ config, folders, journalsIndex, getJournal, rulesPack, visibleFilter, gm = false }) {
-  const cats = [];
   const journals = [];
-  const folderByName = new Map((folders || []).filter((f) => f.type === 'JournalEntry').map((f) => [f.name, f]));
 
-  const declared = (config?.categories || []);
-  for (const c of declared) {
-    // c.folder = nom Foundry, _id ou uuid « Folder.<id> » (resolveFolder)
-    const f = folderByName.get(c.folder) || resolveFolder(folders, c.folder);
-    if (!f) continue;
-    const label = c.label || (f.name || c.folder).replace(/^[^\p{L}\p{N}]+\s*/u, '');
-    cats.push({ id: f._id, label, kind: c.kind || 'misc', editable: Boolean(c.editable) });
-  }
+  // Catégories : par DOSSIER (historique), par TAG ou par TYPE Campaign Codex.
+  // Une entrée est classée dans la PREMIÈRE catégorie qui la reconnaît, donc une
+  // fiche taguée déjà rangée dans un dossier déclaré n'apparaît pas deux fois.
+  const resolved = resolveCategories({ config, folders });
+  const cats = resolved.map((c) => ({ id: c.id, label: c.label, kind: c.kind, editable: c.editable }));
 
-  // Journaux monde des dossiers déclarés (ordre du sort Foundry ; les catégories
+  // Journaux des catégories déclarées (ordre du sort Foundry ; les catégories
   // kind « rules » — dossier de règles importées — reçoivent le même traitement
   // que le pack : préfixe de tri « NN · » retiré, ordre alphanumérique).
-  const catIds = new Set(cats.map((c) => c.id));
   const rulesCatIds = new Set(cats.filter((c) => c.kind === 'rules').map((c) => c.id));
   const prefixRe = new RegExp(config?.packs?.rulesNamePrefix || '^\\d+\\s*·?\\s*');
   const sorted = [...(journalsIndex || [])].sort((a, b) => (a.sort || 0) - (b.sort || 0));
   for (const entry of sorted) {
-    if (!catIds.has(entry.folder)) continue;
+    const cat = categoryOf(resolved, entry);
+    if (!cat) continue;
     if (visibleFilter && !visibleFilter(entry)) continue;
     const doc = getJournal(entry._id);
     if (!doc) continue; // pas encore synchronisé — apparaîtra au prochain tick
@@ -284,14 +276,14 @@ export function buildJournalsView({ config, folders, journalsIndex, getJournal, 
     // flags.holocron.statut/mort est la source (posé par le convertisseur).
     const statut = MEJ_ROLE_STATUT[String(mej?.role || '').toLowerCase()] || fh.statut || '';
     const mort = /mort|décéd|décès|deceased|dead/i.test(String(mej?.attributes?.life || mej?.attributes?.vie || '')) || Boolean(fh.mort);
-    const isRules = rulesCatIds.has(entry.folder);
+    const isRules = rulesCatIds.has(cat.id);
     // Sommaire d'acte (récap de début d'acte, visible joueurs — champs masquables)
     const actSummary = actSummaryView(fh.actSummary, gm);
     journals.push({
       id: fh.legacyId || doc._id,
       foundryId: doc._id,
       name: isRules ? doc.name.replace(prefixRe, '') : doc.name,
-      categoryId: entry.folder,
+      categoryId: cat.id,
       ...(isRules ? { _sortName: doc.name } : {}),
       ...(statut ? { statut } : {}),
       ...(mort ? { mort: true } : {}),

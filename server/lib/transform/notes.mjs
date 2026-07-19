@@ -12,24 +12,13 @@
 //     hors MJ et hors default) — joueur ↔ PJ via actor.ownership OU user.character.
 // La VISIBILITÉ n'est pas décidée ici : l'appelant filtre par canSee(session).
 
-/** Normalisation de nom/tag : minuscules, sans accents, espaces réduits. */
-export const normName = (s) => String(s || '')
-  .toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
-  .replace(/\s+/g, ' ').trim();
+import { normName, docTags } from './tags.mjs';
 
-// tolérant aux deux formes : tableau de tags OU chaîne « a, b » (filterTag)
-const asList = (raw) => (Array.isArray(raw) ? raw : String(raw || '').split(','))
-  .map((s) => String(s).trim()).filter(Boolean);
+export { normName };
 
-/** Tags d'un journal de notes (toutes conventions confondues). */
-export function noteTags(entry) {
-  const f = entry?.flags || {};
-  return [
-    ...asList(f['campaign-codex']?.data?.tags),
-    ...asList(f['asset-librarian']?.filterTag),
-    ...asList(f.holocron?.tags),
-  ];
-}
+/** Tags d'un journal de notes (toutes conventions confondues — cf. tags.mjs :
+ * Campaign Codex ET Asset Librarian, dans les deux sens de lecture). */
+export const noteTags = docTags;
 
 /** Tags qui rattachent un journal de notes au vaisseau du groupe. */
 export const GROUP_TAGS = new Set(['equipage', 'groupe', 'vaisseau']);

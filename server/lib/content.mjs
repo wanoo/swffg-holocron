@@ -1,7 +1,8 @@
 // content.mjs — vues de contenu servies depuis le SyncStore (jamais de MCP dans
 // le chemin de requête). Formes = celles des anciens JSON statiques du front.
 import { transformCharacter, transformAdversary, transformVehicle } from './transform/actors.mjs';
-import { buildJournalsView, buildTimelineView, resolveFolder } from './transform/journals.mjs';
+import { buildJournalsView, buildTimelineView } from './transform/journals.mjs';
+import { resolveCategories, entriesOfKind } from './transform/categories.mjs';
 import { matchNotes } from './transform/notes.mjs';
 import { canSee, isGM } from './auth.mjs';
 
@@ -60,16 +61,11 @@ export function createContentService({ store, config }) {
     return out;
   }
 
-  // Journaux de la/des catégorie(s) de notes déclarées (config kind « notes »).
+  // Journaux de la/des catégorie(s) de notes déclarées (config kind « notes ») —
+  // dossier, tag ou type CC (transform/categories.mjs).
   function notesEntries() {
-    const cc = config();
-    const folders = store.get('folders');
-    const ids = new Set((cc.categories || [])
-      .filter((c) => c && c.kind === 'notes' && c.folder)
-      .map((c) => resolveFolder(folders, c.folder)?._id)
-      .filter(Boolean));
-    if (!ids.size) return [];
-    return (store.get('journalsIndex') || []).filter((e) => ids.has(e.folder));
+    const cats = resolveCategories({ config: config(), folders: store.get('folders') });
+    return entriesOfKind(cats, store.get('journalsIndex'), 'notes');
   }
   // Référence de note pour le front : id de vue (ancre legacy préservée) + nom.
   const noteRef = (e) => ({ id: e.flags?.holocron?.legacyId || e._id, foundryId: e._id, name: e.name });

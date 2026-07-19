@@ -13,8 +13,91 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { mcpCall } from './mcp.mjs';
+import { resolveCategories } from './transform/categories.mjs';
+import { ccType } from './transform/tags.mjs';
 
 const CHUNK = 40; // taille des lots _id__in pour les packs
+
+/* --------------------------------------------- contrat de réponse du gateway --
+ * Les outils `get_<collection>` répondent un TABLEAU NU de documents source
+ * (`_id` et `name` toujours projetés) — cf. docs/integrators.md du gateway. Une
+ * erreur remonte en exception depuis mcp.mjs, jamais en tableau : tout ce qui
+ * n'est pas un tableau ici est une anomalie, on la traite comme « vide » plutôt
+ * que de faire planter un tick entier.
+ *
+ * ⚠️ Piège vérifié contre le monde de prod : les opérateurs de `where` sont des
+ * SUFFIXES de clé (`{ _id__in: [...] }`), PAS des objets imbriqués
+ * (`{ _id: { __in: [...] } }`) — cette seconde forme ne lève aucune erreur et
+ * renvoie silencieusement 0 document. Toujours passer par `whereIdIn`/`whereOp`.
+ */
+export const asDocs = (res) => (Array.isArray(res) ? res : []).filter((d) => d && d._id);
+
+/** Clause `where` d'appartenance à une liste d'ids (forme suffixe du gateway). */
+export const whereIdIn = (ids) => ({ _id__in: [...ids] });
+
+/** Clause `where` générique : whereOp('flags.campaign-codex.type', 'in', [...]). */
+export const whereOp = (path, op, value) => ({ [op ? `${path}__${op}` : path]: value });
+
+/** Le document en cache est-il à jour vis-à-vis de son entrée d'index ? */
+export const isFresh = (cached, entry) =>
+  Boolean(cached) && (cached._stats?.modifiedTime || 0) >= (entry?._stats?.modifiedTime || 1);
+
+/** Signature d'une collection pour l'invalidation d'ETag (ids + modifiedTime). */
+export const indexSignature = (entries) =>
+  (entries || []).map((e) => `${e._id}:${e._stats?.modifiedTime || 0}`).join('|');
+
+// Dossiers de journaux que l'Holocron affiche/utilise réellement : catégories
+// déclarées PAR DOSSIER + Bible MJ + dossiers MJ/outils connus. Les catégories
+// définies par TAG ou par TYPE CC ne passent pas par là : elles sont résolues sur
+// l'index (cf. journalRelevance), donc valables où que vive la fiche.
+const GM_FOLDER_NAMES = ['🎭 PNJ & fronts', '🖥️ Poste de commande', '🧰 Ressources MJ', '🎬 Actes & scénarios', '🛠️ Ateliers', '🎴 Sabacc', 'Boutiques', '🎯 Quêtes'];
+
+export function relevantJournalFolderIds({ config, folders } = {}) {
+  const cfg = config || {};
+  const refs = new Set(GM_FOLDER_NAMES);
+  for (const c of (cfg.categories || [])) if (c && c.folder) refs.add(c.folder);
+  if (cfg.gmBibleFolder) refs.add(cfg.gmBibleFolder);
+  const list = (folders || []).filter((f) => f && f.type === 'JournalEntry');
+  // une référence de config = nom Foundry, _id ou uuid « Folder.<id> »
+  return new Set(list.filter((f) => refs.has(f.name) || refs.has(f._id) || refs.has(`Folder.${f._id}`)).map((f) => f._id));
+}
+
+// Journaux techniques suivis PAR NOM, où qu'ils soient rangés.
+const utilityNames = (cfg) => new Set([
+  '🚀 Vaisseau du groupe', '🖥️ Codex du groupe', '📡 HoloNet — Actualités',
+  '🗒️ Notes MJ (Holocron)', '⚔️ Bibliothèque de rencontres', '🗂️ Dossiers MJ (Holocron)',
+  '🗺️ Carte de campagne (Holocron)',
+  process.env.CONFIG_JOURNAL_NAME || '⚙️ Holocron Config',
+  ...Object.values(cfg?.journals || {}).filter((v) => typeof v === 'string' && v && !v.includes(':')),
+]);
+
+const NOISE = /^(sequencerDatabase|dice_helper)$/i; // DB de module / barème (synced à part)
+
+/**
+ * Prédicat de PERTINENCE d'un journal pour la synchro — un journal est
+ * synchronisé s'il est :
+ *   • dans un dossier de catégorie déclarée, la Bible MJ ou un dossier MJ connu ;
+ *   • une FICHE CAMPAIGN CODEX (`flags.campaign-codex.type`), OÙ QU'ELLE VIVE —
+ *     c'est le virage « 100 % CC » : le MJ range ses fiches comme il veut, y
+ *     compris dans les dossiers « Campaign Codex - * » créés par le module ;
+ *   • ciblé par une catégorie définie par TAG ou par TYPE CC (categories.mjs) ;
+ *   • un journal technique suivi par nom, ou sans dossier.
+ */
+export function journalRelevance({ config, folders } = {}) {
+  const cfg = config || {};
+  const relevantFolders = relevantJournalFolderIds({ config: cfg, folders });
+  const catsNoFolder = resolveCategories({ config: cfg, folders }).filter((c) => c.source !== 'folder');
+  const UTIL_NAMES = utilityNames(cfg);
+  return (e) => {
+    if (!e || !e._id) return false;
+    if (NOISE.test(e.name || '')) return false;
+    if (!e.folder) return true;                    // journaux à la racine
+    if (relevantFolders.has(e.folder)) return true;
+    if (ccType(e)) return true;                    // fiche CC : pertinente où qu'elle soit
+    if (UTIL_NAMES.has(e.name)) return true;       // journal technique suivi par nom
+    return catsNoFolder.some((c) => c.match(e));   // catégorie par tag / type CC
+  };
+}
 
 export function createStore({ dataDir, logger = console }) {
   const cacheDir = join(dataDir, 'cache');
@@ -50,6 +133,23 @@ export function createStore({ dataDir, logger = console }) {
     persist(name).catch((e) => logger.error(`[store] persist ${name}: ${e.message}`));
   }
 
+  // set() qui NE BUMPE PAS la version quand rien n'a bougé : `sig` est une
+  // signature bon marché du contenu (ids + modifiedTime). Les versions alimentent
+  // les ETag des vues — les re-poser à chaque tick ferait re-télécharger toute
+  // l'app toutes les 5 min alors que le monde n'a pas changé.
+  const sigs = new Map();
+  function setIfChanged(name, items, sig) {
+    if (mem.has(name) && sigs.get(name) === sig) {
+      const entry = mem.get(name);
+      entry.syncedAt = Date.now();
+      status.set(name, { ...(status.get(name) || {}), syncedAt: Date.now(), lastError: null });
+      return false;
+    }
+    sigs.set(name, sig);
+    set(name, items);
+    return true;
+  }
+
   const get = (name) => mem.get(name)?.items ?? null;
   const version = (name) => mem.get(name)?.version ?? 0;
 
@@ -72,126 +172,91 @@ export function createStore({ dataDir, logger = console }) {
     // Plusieurs journaux peuvent porter ce nom (doublon d'installeur, copie…) :
     // on prend celui dont flags.holocron.config est le plus RICHE — jamais le
     // premier venu, qui peut être une coquille quasi vide.
-    const candidates = (Array.isArray(list) ? list : [])
-      .filter((x) => x && x.name === configJournalName && x.flags?.holocron?.config);
+    const candidates = asDocs(list)
+      .filter((x) => x.name === configJournalName && x.flags?.holocron?.config);
     candidates.sort((a, b) => JSON.stringify(b.flags.holocron.config).length - JSON.stringify(a.flags.holocron.config).length);
-    set('config', candidates[0]?.flags?.holocron?.config || {});
+    const cfg = candidates[0]?.flags?.holocron?.config || {};
+    setIfChanged('config', cfg, JSON.stringify(cfg));
   }
 
   async function syncUsers() {
     const users = await mcpCall('get_users', {});
-    set('users', (Array.isArray(users) ? users : []).filter((u) => u && u._id)
-      .map((u) => ({ _id: u._id, name: u.name, role: u.role, character: u.character || null, color: u.color || null, active: !!u.active })));
+    const list = asDocs(users)
+      .map((u) => ({ _id: u._id, name: u.name, role: u.role, character: u.character || null, color: u.color || null, active: !!u.active }));
+    setIfChanged('users', list, JSON.stringify(list));
   }
 
   async function syncFolders() {
     const folders = await mcpCall('get_folders', {});
-    set('folders', (Array.isArray(folders) ? folders : []).filter((f) => f && f._id));
+    const list = asDocs(folders);
+    setIfChanged('folders', list, JSON.stringify(list));
   }
 
-  // Dossiers de journaux que l'Holocron affiche/utilise réellement : catégories
-  // déclarées + Bible MJ + dossiers MJ/outils connus. On EXCLUT tout le reste — en
-  // particulier les milliers de journaux hors-scope (planètes MEJ de la nouvelle
-  // astronav, gérées par leur propre module), qui sinon submergent la synchro.
-  const GM_FOLDER_NAMES = ['🎭 PNJ & fronts', '🖥️ Poste de commande', '🧰 Ressources MJ', '🎬 Actes & scénarios', '🛠️ Ateliers', '🎴 Sabacc', 'Boutiques', '🎯 Quêtes'];
-  function relevantJournalFolderIds() {
-    const cfg = get('config') || {};
-    const refs = new Set(GM_FOLDER_NAMES);
-    for (const c of (cfg.categories || [])) if (c && c.folder) refs.add(c.folder);
-    if (cfg.gmBibleFolder) refs.add(cfg.gmBibleFolder);
-    const folders = (get('folders') || []).filter((f) => f && f.type === 'JournalEntry');
-    // une référence de config = nom Foundry, _id ou uuid « Folder.<id> »
-    return new Set(folders.filter((f) => refs.has(f.name) || refs.has(f._id) || refs.has(`Folder.${f._id}`)).map((f) => f._id));
-  }
+  // --- Synchro des journaux : index global puis pulls CIBLÉS et GROUPÉS --------
+  //
+  // 1 appel d'INDEX pour tout le monde (`requested_fields` : jamais les pages),
+  // puis les seuls journaux PERTINENTS dont `_stats.modifiedTime` a bougé depuis
+  // le cache, tirés par LOTS `_id__in`. Le connecteur sérialise tout (cf. mcp.mjs)
+  // → on optimise le NOMBRE d'appels, pas le parallélisme.
+  //
+  //   à froid : 1 + ⌈pertinents / PULL_CHUNK⌉ appels
+  //   à chaud : 1 appel (rien n'a changé → aucun pull)
+  //
+  // Remplace la marche dossier-par-dossier et ses gardes empiriques (FOLDER_CHUNK
+  // 40 / FOLDER_MAX 800), qui re-dumpaient chaque dossier à chaque tick.
+  //
+  // Pertinence — un journal est synchronisé s'il est :
+  //   • dans un dossier de catégorie déclarée, la Bible MJ ou un dossier MJ connu ;
+  //   • une FICHE CAMPAIGN CODEX (`flags.campaign-codex.type`), OÙ QU'ELLE VIVE —
+  //     c'est le virage « 100 % CC » : le MJ range ses fiches comme il veut, y
+  //     compris dans les dossiers « Campaign Codex - * » créés par le module ;
+  //   • ciblé par une catégorie définie par TAG ou par TYPE CC (cf. categories.mjs) ;
+  //   • un journal technique suivi par NOM, ou sans dossier.
+  const PULL_CHUNK = 25;   // journaux par appel `_id__in` (réponses ~200 Ko max)
+  // Borne de sécurité : plafond de journaux tirés EN ENTIER dans un même tick.
+  // Ce n'est plus une garde anti-OOM par dossier mais un simple garde-fou de
+  // débit : au premier tick d'un très gros monde on en tire PULL_MAX, le reste
+  // suit au tick suivant (l'index, lui, est toujours complet — les vues affichent
+  // les fiches dès que leur contenu arrive). À 5 min/tick et 1500 docs, un monde
+  // de 10 000 fiches est intégralement chaud en ~35 min, sans jamais saturer la
+  // mémoire du connecteur.
+  const PULL_MAX = 1500;
 
-  // Entrée d'index (sans les pages) dérivée d'un doc complet.
-  const lightEntry = (j) => {
-    const e = {};
-    for (const k of INDEX_FIELDS) if (j[k] !== undefined) e[k] = j[k];
-    return e;
-  };
-
-  // Synchro des journaux en 1 SEUL APPEL PAR DOSSIER pertinent (PAGES INCLUSES) :
-  // d'une même réponse on remplit le cache `journal:<id>` ET l'index léger. Fini les
-  // ~70 pulls individuels (tous sériés par le connecteur socket) → de ~73 appels à
-  // ~une douzaine. Le connecteur ne supportant pas le concurrentiel (cf. mcp.mjs :
-  // file séquentielle), on optimise en RÉDUISANT le nombre d'appels, pas en parallèle.
-  // Dossiers hors-scope (ex. milliers de planètes MEJ) jamais visités : cf. l'allowlist.
-  // Gardes anti-OOM : au-delà de FOLDER_CHUNK journaux, un dossier est synchronisé
-  // en INCRÉMENTAL (index léger + full uniquement sur les journaux modifiés — une
-  // petite réponse par journal, jamais un dump du dossier entier, qui tue le
-  // connecteur par manque de mémoire sur une petite instance). Au-delà de
-  // FOLDER_MAX, le dossier est ignoré (dossier hors-scope, ex. atlas de planètes).
-  const FOLDER_CHUNK = 40;
-  const FOLDER_MAX = 800;
+  const isRelevantJournal = () => journalRelevance({ config: get('config'), folders: get('folders') });
 
   async function syncJournalsFull() {
-    const relevant = relevantJournalFolderIds();
-    const index = [];
-    // 0. liste légère GLOBALE (une seule fois par tick) : comptes par dossier
-    // (gardes) + base des pulls hors-dossier/techniques de la phase 2.
+    // 1. index GLOBAL léger (un seul appel, pages exclues) : c'est lui qui porte
+    // flags/ownership/_stats — donc la pertinence ET la détection de changement.
     let light = [];
     try {
-      const res = await mcpCall('get_journals', { requested_fields: ['_id', 'name', 'folder'] });
-      light = (Array.isArray(res) ? res : []).filter((r) => r && r._id);
-    } catch (e) { logger.error(`[store] liste légère journaux: ${e.message}`); }
-    const counts = new Map();
-    for (const r of light) if (r.folder) counts.set(r.folder, (counts.get(r.folder) || 0) + 1);
-
-    for (const fid of relevant) {
-      const n = counts.get(fid) || 0;
-      try {
-        if (n > FOLDER_MAX) { logger.error(`[store] dossier ${fid} ignoré : ${n} journaux (> ${FOLDER_MAX}, garde anti-dump)`); continue; }
-        if (n > FOLDER_CHUNK) {
-          // GROS dossier (ex. bible MJ) : index avec flags/_stats, puis full ciblé sur
-          // les seuls journaux nouveaux/modifiés (les écritures web bumpent _stats via
-          // le flag rev ; une édition de PAGE seule côté Foundry peut attendre un flag).
-          const idx = await mcpCall('get_journals', { where: { folder: fid }, requested_fields: INDEX_FIELDS });
-          for (const e of (Array.isArray(idx) ? idx : [])) {
-            if (!e || !e._id) continue;
-            index.push(e);
-            const cached = get(`journal:${e._id}`);
-            const fresh = cached && (cached._stats?.modifiedTime || 0) >= (e._stats?.modifiedTime || 1);
-            if (fresh) continue;
-            const list = await mcpCall('get_journals', { where: { _id: e._id } });
-            const j = (Array.isArray(list) ? list : []).find((x) => x && x._id === e._id);
-            if (j) set(`journal:${j._id}`, j);
-          }
-        } else {
-          const list = await mcpCall('get_journals', { where: { folder: fid } }); // docs complets
-          for (const j of (Array.isArray(list) ? list : [])) {
-            if (!j || !j._id) continue;
-            set(`journal:${j._id}`, j);
-            index.push(lightEntry(j));
-          }
-        }
-        if (index.length) set('journalsIndex', [...index]); // index PROGRESSIF : les journaux apparaissent dossier par dossier
-      } catch (e) { logger.error(`[store] journaux dossier ${fid}: ${e.message}`); }
+      light = asDocs(await mcpCall('get_journals', { requested_fields: INDEX_FIELDS }));
+    } catch (e) {
+      logger.error(`[store] index journaux: ${e.message}`);
+      return; // sans index on ne touche à rien : le cache précédent reste servi
     }
-    // journaux SANS dossier utiles (Dossiers/Notes MJ, Mondes…) + journaux TECHNIQUES
-    // suivis PAR NOM où qu'ils soient rangés (le module ≥1.5.0 les range dans le
-    // dossier système, hors allowlist) : réutilise la liste légère du début.
-    try {
-      const cfgJ = (get('config') || {}).journals || {};
-      const UTIL_NAMES = new Set([
-        '🚀 Vaisseau du groupe', '🖥️ Codex du groupe', '📡 HoloNet — Actualités',
-        '🗒️ Notes MJ (Holocron)', '⚔️ Bibliothèque de rencontres', '🗂️ Dossiers MJ (Holocron)',
-        '🗺️ Carte de campagne (Holocron)',
-        process.env.CONFIG_JOURNAL_NAME || '⚙️ Holocron Config',
-        ...Object.values(cfgJ).filter((v) => typeof v === 'string' && v && !v.includes(':')),
-      ]);
-      const NOISE = /^(sequencerDatabase|dice_helper)$/i; // DB de module / barème (déjà synced à part)
-      const nulls = light.filter((r) => (!r.folder || (UTIL_NAMES.has(r.name) && !relevant.has(r.folder)))
-        && !NOISE.test(r.name || ''));
-      for (const r of nulls) {
-        try {
-          const list = await mcpCall('get_journals', { where: { _id: r._id } });
-          const j = (Array.isArray(list) ? list : []).find((x) => x && x._id === r._id);
-          if (j) { set(`journal:${j._id}`, j); index.push(lightEntry(j)); }
-        } catch { /* journal individuel indisponible : on ignore */ }
-      }
-    } catch (e) { logger.error(`[store] journaux hors-dossier: ${e.message}`); }
-    if (index.length) set('journalsIndex', index);
+
+    const isRelevant = isRelevantJournal();
+    const index = light.filter(isRelevant);
+
+    // 2. delta : journaux pertinents absents du cache ou modifiés depuis.
+    const stale = index.filter((e) => !isFresh(get(`journal:${e._id}`), e));
+    if (stale.length > PULL_MAX) {
+      logger.log(`[store] ${stale.length} journaux à rafraîchir : ${PULL_MAX} ce tick, le reste au suivant`);
+    }
+    const todo = stale.slice(0, PULL_MAX);
+
+    // 3. pulls GROUPÉS par lots d'ids (docs complets, pages incluses).
+    for (let i = 0; i < todo.length; i += PULL_CHUNK) {
+      const ids = todo.slice(i, i + PULL_CHUNK).map((e) => e._id);
+      try {
+        for (const j of asDocs(await mcpCall('get_journals', { where: whereIdIn(ids) }))) {
+          set(`journal:${j._id}`, j);
+        }
+      } catch (e) { logger.error(`[store] lot de journaux (${ids.length}): ${e.message}`); }
+    }
+
+    // 4. index publié en une fois — version bumpée SEULEMENT s'il a bougé (ETag).
+    setIfChanged('journalsIndex', index, indexSignature(index));
   }
 
   // Barème de dépense FFG (journal « dice_helper ») — pullé par requête CIBLÉE
@@ -209,7 +274,7 @@ export function createStore({ dataDir, logger = console }) {
         for (const [k, v] of Object.entries(parsed)) out[k.replace(/^SWFFG\.SkillsName/, '')] = v;
       }
     } catch { /* journal absent ou non-JSON : barème vide, repli générique côté front */ }
-    set('diceHelper', out);
+    setIfChanged('diceHelper', out, JSON.stringify(out));
   }
 
   // Pull d'un journal complet — appelé par la boucle quand l'index a bougé,
@@ -252,30 +317,54 @@ export function createStore({ dataDir, logger = console }) {
         });
       }
     }
-    set('calendarEvents', events);
+    setIfChanged('calendarEvents', events, JSON.stringify(events));
   }
 
   // Page de notes du vaisseau (config.journals.shipNotes = "<jid>:<pid>") : son
-  // journal peut vivre hors des dossiers synchronisés → pull ciblé à chaque tick.
+  // journal peut vivre hors des dossiers synchronisés → pull ciblé, mais SEULEMENT
+  // s'il n'est pas déjà couvert par l'index (la fiche vaisseau est une fiche CC,
+  // donc pertinente à ce titre : la synchro des journaux l'a déjà rafraîchie).
   async function syncShipNotes() {
     const ref = String((get('config') || {}).journals?.shipNotes || '');
     const jid = ref.split(':')[0];
-    if (jid) await syncJournal(jid);
+    if (!jid) return;
+    const entry = (get('journalsIndex') || []).find((e) => e._id === jid);
+    const cached = get(`journal:${jid}`);
+    if (entry && cached && (cached._stats?.modifiedTime || 0) >= (entry._stats?.modifiedTime || 1)) return;
+    await syncJournal(jid);
   }
 
   // Tous les acteurs MONDE (PJ + PNJ custom) — les vues filtrent par dossier.
+  // Même patron que les journaux : index léger (sans `items`/`system`, qui pèsent
+  // l'essentiel d'une fiche SWFFG) puis pulls groupés des seuls acteurs modifiés.
+  // La collection `actors` reste la LISTE COMPLÈTE de documents attendue par les
+  // vues — elle est simplement reconstruite depuis le cache par acteur.
+  const ACTOR_INDEX_FIELDS = ['_id', 'name', 'folder', 'type', 'ownership', 'img', '_stats'];
+
   async function syncActors() {
-    const actors = await mcpCall('get_actors', {});
-    set('actors', (Array.isArray(actors) ? actors : []).filter((a) => a && a._id));
+    const light = asDocs(await mcpCall('get_actors', { requested_fields: ACTOR_INDEX_FIELDS }));
+    const stale = light.filter((a) => !isFresh(get(`actor:${a._id}`), a));
+    for (let i = 0; i < stale.length; i += PULL_CHUNK) {
+      const ids = stale.slice(i, i + PULL_CHUNK).map((a) => a._id);
+      try {
+        for (const a of asDocs(await mcpCall('get_actors', { where: whereIdIn(ids) }))) {
+          set(`actor:${a._id}`, a);
+        }
+      } catch (e) { logger.error(`[store] lot d'acteurs (${ids.length}): ${e.message}`); }
+    }
+    // reconstruction dans l'ordre de l'index ; un acteur dont le pull a échoué
+    // garde sa version en cache (et n'est omis que s'il n'a jamais été tiré).
+    const full = light.map((a) => get(`actor:${a._id}`)).filter(Boolean);
+    setIfChanged('actors', full, indexSignature(light));
   }
 
   // Compendium complet par chunks (index léger puis _id__in) — jamais de dump.
   async function syncPack(packId, type) {
-    const idx = await mcpCall('get_pack_documents', { type, pack: packId, requested_fields: ['_id', 'name'] });
-    const ids = (Array.isArray(idx) ? idx : []).map((d) => d._id).filter(Boolean);
+    const idx = asDocs(await mcpCall('get_pack_documents', { type, pack: packId, requested_fields: ['_id', 'name'] }));
+    const ids = idx.map((d) => d._id);
     const docs = [];
     for (let i = 0; i < ids.length; i += CHUNK) {
-      const chunk = await mcpCall('get_pack_documents', { type, pack: packId, query: { _id__in: ids.slice(i, i + CHUNK) } });
+      const chunk = await mcpCall('get_pack_documents', { type, pack: packId, query: whereIdIn(ids.slice(i, i + CHUNK)) });
       if (Array.isArray(chunk)) docs.push(...chunk);
     }
     set(`pack:${packId}`, docs);

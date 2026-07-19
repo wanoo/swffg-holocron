@@ -47,6 +47,33 @@ export function mcpQueue(fn) {
   return run;
 }
 
+/* ------------------------------------------------- métrologie des appels ---- */
+// Compteurs cumulés : nombre d'appels d'outil et VOLUME de réponse (octets bruts
+// du corps HTTP, avant parsing). Sert à mesurer le coût d'un tick de synchro
+// (/api/gm/sync GET) et à objectiver les refontes — un tick ne doit ni multiplier
+// les allers-retours (le connecteur sérialise tout) ni rapatrier des dumps.
+const stats = { calls: 0, bytes: 0, byTool: new Map() };
+let pendingBytes = 0; // octets du dernier échange HTTP, imputés à l'outil en cours
+
+export function mcpStats() {
+  return {
+    calls: stats.calls,
+    bytes: stats.bytes,
+    byTool: Object.fromEntries([...stats.byTool.entries()]
+      .sort((a, b) => b[1].bytes - a[1].bytes)
+      .map(([k, v]) => [k, { calls: v.calls, bytes: v.bytes }])),
+  };
+}
+export function resetMcpStats() {
+  stats.calls = 0; stats.bytes = 0; stats.byTool.clear();
+}
+function noteCall(name, bytes) {
+  stats.calls += 1; stats.bytes += bytes;
+  const e = stats.byTool.get(name) || { calls: 0, bytes: 0 };
+  e.calls += 1; e.bytes += bytes;
+  stats.byTool.set(name, e);
+}
+
 /* ------------------------------------------------------- client MCP « HTTP » */
 let httpSid = null;
 let rid = 1000;
@@ -56,6 +83,7 @@ async function httpRpc(payload) {
   const resp = await fetch(cfg.url, { method: 'POST', headers, body: JSON.stringify(payload) });
   httpSid = resp.headers.get('mcp-session-id') || httpSid;
   const body = await resp.text();
+  pendingBytes += body.length;
   const events = [...body.matchAll(/^data: (.*)$/gm)].map((m) => JSON.parse(m[1]));
   if (!events.length && body.trim()) events.push(JSON.parse(body));
   return events;
@@ -181,8 +209,11 @@ function unpack(msg) {
 export function mcpCall(name, args = {}) {
   if (cfg.mode === 'none') return Promise.reject(new Error('connecteur Foundry non configuré'));
   const call = cfg.mode === 'http' ? httpCall : sidecarCall;
-  return mcpQueue(() => callWithReconnectRetry(call, name, args))
-    .then((v) => { noteResult(true); return v; }, (e) => { noteResult(false); throw e; });
+  return mcpQueue(async () => {
+    pendingBytes = 0; // la file sérialise : aucun autre appel n'écrit pendingBytes ici
+    try { return await callWithReconnectRetry(call, name, args); }
+    finally { noteCall(name, pendingBytes); }
+  }).then((v) => { noteResult(true); return v; }, (e) => { noteResult(false); throw e; });
 }
 
 // Id du user Foundry du bot (author des ChatMessages, requis en v13).
