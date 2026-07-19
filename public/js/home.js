@@ -13,7 +13,7 @@ import { latestByName } from './ui-shared.js';
 import { THEMES } from './theme.js';
 import { statutPill } from './statut.js';
 import { STATUS as QUEST_STATUS } from './gm-quests.js';
-import { apiBase } from './collab.js';
+import { apiBase, getGMKey } from './collab.js';
 
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 // Icône du pack (public/img/icons) en masque CSS, teintée par currentColor.
@@ -171,11 +171,99 @@ function resumeJournal() {
     .sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
   return recaps[recaps.length - 1] || null;
 }
-function renderResume(body) {
+// --- 📓 La trace : la dernière séance jouée (MJ UNIQUEMENT) ------------------
+// flags.holocron.sessions ne sort QUE par la route gm-gated /api/gm/sessions :
+// un joueur ne le lit JAMAIS et voit le journal de reprise habituel. D'où le
+// bouton « publier le récap » : il pousse recap.players DANS ce journal public,
+// seul chemin par lequel la table apprend où on s'est arrêtés.
+let sessCache = null; // { t, session }
+async function lastGmSession() {
+  if (!isGM() && !getGMKey()) return null;
+  if (sessCache && Date.now() - sessCache.t < 30_000) return sessCache.session;
+  try {
+    const res = await fetch(`${apiBase()}/gm/sessions`, {
+      credentials: 'same-origin',
+      headers: getGMKey() ? { 'x-gm-key': getGMKey() } : {},
+    });
+    if (!res.ok) return null;
+    const { sessions } = await res.json();
+    const all = [...(sessions || [])].sort((a, b) => (b.startedAt || 0) - (a.startedAt || 0));
+    const session = all.find((s) => s.endedAt) || null; // séance CLOSE la plus récente
+    sessCache = { t: Date.now(), session };
+    return session;
+  } catch { return null; }
+}
+
+const sessionDay = (s) => {
+  const ms = s.startedAt || Date.parse(s.date || '') || 0;
+  return ms ? new Date(ms).toLocaleDateString('fr-FR') : (s.date || '');
+};
+const paras = (t) => String(t).split(/\n{2,}/).map((p) => `<p>${esc(p).replace(/\n/g, '<br>')}</p>`).join('');
+
+/** Publie recap.players DANS le journal de reprise (doc public éditable).
+ * Le journal doit appartenir à une catégorie `editable` de la config de
+ * campagne — sinon l'API répond 404 « document non éditable » et on le dit. */
+async function publishRecap(s, statusEl) {
   const j = resumeJournal();
-  if (!j) return false;
-  const cat = Data.categories.find((c) => c.id === j.categoryId);
+  const text = String(s.recap?.players || '').trim();
+  if (!text) { statusEl.textContent = '⚠️ Rédige d’abord le récap joueurs (🗺️ Campagne → onglet 📓 Séance).'; return; }
+  if (!j) { statusEl.textContent = '⚠️ Aucun journal de reprise choisi (⚙ options de ce widget).'; return; }
+  statusEl.textContent = 'Publication…';
+  const head = { credentials: 'same-origin', headers: { 'Content-Type': 'application/json', ...(getGMKey() ? { 'x-gm-key': getGMKey() } : {}) } };
+  try {
+    const curRes = await fetch(`${apiBase()}/docs/${encodeURIComponent(j.id)}`, head);
+    const cur = curRes.ok ? await curRes.json() : null;
+    if (!cur) { statusEl.textContent = `⚠️ « ${j.name} » n’est pas éditable par l’Archive (catégorie sans « editable » dans la config).`; return; }
+    if ((cur.html || '').includes(`data-seance="${s.id}"`)) { statusEl.textContent = '✅ Ce récap est déjà publié.'; return; }
+    const block = `<section data-seance="${esc(s.id)}"><h2>Séance ${s.no} — ${esc(sessionDay(s))}</h2>${paras(text)}</section>`;
+    const res = await fetch(`${apiBase()}/docs/${encodeURIComponent(j.id)}`, {
+      ...head, method: 'PUT',
+      body: JSON.stringify({ html: (cur.html || '') + block, baseUpdatedAt: cur.updatedAt }),
+    });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(out.error || `HTTP ${res.status}`);
+    statusEl.textContent = `✅ Publié dans « ${j.name} » — les joueurs le voient ici.`;
+  } catch (e) { statusEl.textContent = `⚠️ ${String(e.message).slice(0, 120)}`; }
+}
+
+/** Encart « dernière séance » (MJ) : récap joueurs s'il existe, sinon récap MJ. */
+function sessionCard(s) {
+  const box = document.createElement('article');
+  box.className = 'resume-doc page-surface';
+  const players = String(s.recap?.players || '').trim();
+  const gm = String(s.recap?.gm || '').trim();
+  box.innerHTML = `
+    <header class="resume-doc-head">
+      <p class="eyebrow">📓 Dernière séance <span class="acts-lock" title="Visible du MJ seulement">🔒 MJ</span></p>
+      <h3 class="resume-doc-title">Séance ${s.no} — ${esc(sessionDay(s))}</h3>
+    </header>
+    <div class="resume-doc-body journal-content">${
+  players ? paras(players)
+    : gm ? paras(gm) + '<p class="w-empty">Récap MJ (pas encore de version joueurs).</p>'
+      : `<p class="w-empty">${s.played.length} beat(s) joué(s), aucun récap rédigé — 🗺️ Campagne → onglet 📓 Séance.</p>`}</div>`;
+  const foot = document.createElement('footer');
+  foot.className = 'resume-doc-foot';
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'tile-link';
+  btn.textContent = '📣 Publier le récap';
+  btn.title = 'Écrit le récap joueurs dans le journal de reprise (visible de toute la table)';
+  const st = document.createElement('span');
+  st.className = 'w-empty';
+  btn.addEventListener('click', () => publishRecap(s, st));
+  foot.append(btn, st);
+  box.appendChild(foot);
+  return box;
+}
+
+async function renderResume(body) {
+  const session = await lastGmSession(); // null pour un joueur : étanchéité
+  const j = resumeJournal();
+  if (!j && !session) return false;
   body.innerHTML = '';
+  if (session) body.appendChild(sessionCard(session));
+  if (!j) return;
+  const cat = Data.categories.find((c) => c.id === j.categoryId);
   const box = document.createElement('article');
   box.className = 'resume-doc page-surface';
   box.innerHTML = `

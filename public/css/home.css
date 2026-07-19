@@ -426,7 +426,12 @@ a.qw-item:focus-visible { border-color: var(--border-active); }
   background: linear-gradient(to bottom, transparent, var(--surface-reading, var(--surface-default)));
 }
 .resume-doc-body .journal-content > :first-child { margin-top: 0; }
-.resume-doc-foot { display: flex; justify-content: flex-end; }
+.resume-doc-foot { display: flex; justify-content: flex-end; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+/* 📓 « dernière séance » (MJ) empilée au-dessus du journal de reprise : même
+   carte, liseré doré pour dire « donnée MJ », et le récap se lit en entier. */
+.resume-doc + .resume-doc { margin-top: 0.9rem; }
+.resume-doc-foot button.tile-link { border: 0; background: none; cursor: pointer; font: inherit; }
+.resume-doc-foot .w-empty { margin: 0; font-size: 0.78rem; }
 
 /* --- Cartes génériques (journaux, outils, bestiaire) --- */
 .dash-cards {

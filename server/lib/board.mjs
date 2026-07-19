@@ -5,6 +5,9 @@
 //                                  edges: [{from, to, label?}], hidden: [] }
 //     (id = _id Foundry du journal, ou « seq:<id> » pour une séquence de handouts)
 //   · flags.holocron.sequences = [{ id, name, items: [{src, title, note}] }]
+//   · flags.holocron.sessions  = [{ id, no, title, date, startedAt, endedAt,
+//                                   played, reveals, shown, present, recap }]
+//     (LA TRACE : ce qui s'est joué séance après séance — voir sanitizeSessions)
 // Le CATALOGUE des objets de campagne (actes, quêtes, PNJ, orgs, lieux, boutiques
 // Campaign Codex) et leurs LIENS AUTO sont DÉRIVÉS du SyncStore — jamais stockés.
 // Chaque ACTE porte en plus un STORYBOARD (flags.holocron.storyboard sur SON
@@ -88,6 +91,134 @@ export function sanitizeStoryboard(raw) {
     })
     .filter(Boolean);
   return { beats };
+}
+
+/* ---------------------------------------------------------------- séances --
+ * LA TRACE : `flags.holocron.sessions` SUR LE MÊME journal technique que
+ * board/sequences — ce qui s'est RÉELLEMENT joué, séance après séance :
+ *   { sessions: [{ id, no, title, date, startedAt, endedAt,
+ *       played:  [{ actId, beatId, title, kind, at }],   // beats passés à « fait »
+ *       reveals: [{ uuid, label, at, note }],            // ce qui a été révélé
+ *       shown:   [{ type, title, targets, at }],         // handouts projetés
+ *       present: [userId],                               // qui était là
+ *       recap:   { gm, players } }] }                    // debrief MJ + version publiable
+ * Une séance TRAVERSE les actes (played porte son actId) : la trace est indexée
+ * par SÉANCE, jamais par acte. Alimentée AUTOMATIQUEMENT par le storyboard
+ * (cycleStatus / projection / « marquer révélé ») — le MJ ne saisit que le récap.
+ * MJ-ONLY STRICT : ne sort que par les routes gm-gated (board.view / sessions). */
+const MAX_SESSIONS = 200;
+const MAX_ENTRIES = 400;
+
+// horodatage : epoch ms ou chaîne ISO → epoch ms (0 = absent).
+const clampAt = (v) => {
+  if (v == null || v === '') return 0;
+  const n = typeof v === 'number' ? v : Date.parse(String(v));
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  return Math.min(n, 4102444800000); // ≤ 2100-01-01, borne anti-absurde
+};
+const atOrNow = (v) => clampAt(v) || Date.now();
+// uuid d'entité : « Type.<id16> » (type conservé) ou id16 nu → JournalEntry.<id>
+const FOUNDRY_ID = /^[A-Za-z0-9]{16}$/;
+const anyUuid = (v) => {
+  const s = String(v || '').split('::')[0].trim();
+  const m = /^([A-Za-z]{1,32})\.([A-Za-z0-9]{16})$/.exec(s);
+  if (m) return `${m[1]}.${m[2]}`;
+  const tail = /([A-Za-z]{1,32})\.([A-Za-z0-9]{16})(?!.*\.)/.exec(s);
+  if (tail) return `${tail[1]}.${tail[2]}`;
+  return FOUNDRY_ID.test(s) ? `JournalEntry.${s}` : null;
+};
+const txt = (v, n) => String(v == null ? '' : v).slice(0, n);
+// ligne courte (titre, date…) : on rogne les blancs AVANT de borner, comme les beats
+const line = (v, n) => String(v == null ? '' : v).trim().slice(0, n);
+const list = (v) => (Array.isArray(v) ? v : []).slice(0, MAX_ENTRIES);
+
+/** Une entrée « beat joué ». null si inexploitable (pas de beat identifiable). */
+function sanitizePlayed(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  if (!okId(raw.beatId)) return null;
+  return {
+    actId: FOUNDRY_ID.test(String(raw.actId || '')) ? String(raw.actId) : '',
+    beatId: raw.beatId,
+    title: line(raw.title, 120),
+    kind: BEAT_KINDS.includes(raw.kind) ? raw.kind : 'scene',
+    at: atOrNow(raw.at),
+  };
+}
+
+/** Une révélation (entité CC montrée/semée). null si l'entité n'est pas identifiable. */
+function sanitizeReveal(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const uuid = anyUuid(raw.uuid);
+  if (!uuid) return null;
+  const note = txt(raw.note, 500);
+  return { uuid, label: line(raw.label, 120), at: atOrNow(raw.at), ...(note ? { note } : {}) };
+}
+
+/** Un handout réellement projeté. null si rien d'exploitable. */
+function sanitizeShown(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const targets = [...new Set(list(raw.targets).map(String).filter((t) => USER_ID.test(t)))].slice(0, 30);
+  return {
+    type: HANDOUT_TYPES.includes(raw.type) ? raw.type : 'image',
+    title: line(raw.title, 120),
+    at: atOrNow(raw.at),
+    ...(targets.length ? { targets } : {}), // absent = toute la table
+  };
+}
+
+/** Assainit UNE séance. Ne jette jamais : borne, normalise, jette l'illisible. */
+export function sanitizeSession(raw) {
+  const s = raw && typeof raw === 'object' ? raw : {};
+  const no = Number.isFinite(+s.no) ? Math.max(1, Math.min(9999, Math.round(+s.no))) : 1;
+  const recap = s.recap && typeof s.recap === 'object' ? s.recap : {};
+  const out = {
+    id: okId(s.id) ? s.id : `sess-${Math.random().toString(36).slice(2, 10)}`,
+    no,
+    title: txt(s.title, 120).trim(),
+    date: txt(s.date, 40).trim(), // date « humaine » (ISO court le plus souvent)
+    startedAt: clampAt(s.startedAt),
+    endedAt: clampAt(s.endedAt),
+    played: list(s.played).map(sanitizePlayed).filter(Boolean),
+    reveals: list(s.reveals).map(sanitizeReveal).filter(Boolean),
+    shown: list(s.shown).map(sanitizeShown).filter(Boolean),
+    present: [...new Set(list(s.present).map(String).filter((u) => USER_ID.test(u)))].slice(0, 30),
+    recap: { gm: txt(recap.gm, 8000), players: txt(recap.players, 8000) },
+  };
+  return out;
+}
+
+/** Assainit la collection complète (PUT client → flag). Ne jette jamais.
+ * Ids dupliqués : premier gagnant (même règle que les beats). */
+export function sanitizeSessions(raw) {
+  const arr = Array.isArray(raw) ? raw : (raw && Array.isArray(raw.sessions) ? raw.sessions : []);
+  const seen = new Set();
+  return arr.slice(0, MAX_SESSIONS)
+    .map((s) => {
+      const clean = sanitizeSession(s);
+      if (seen.has(clean.id)) return null;
+      seen.add(clean.id);
+      return clean;
+    })
+    .filter(Boolean);
+}
+
+/** Type d'entrée → liste de la séance (patron du POST .../event). */
+export const SESSION_EVENTS = { played: 'played', reveal: 'reveals', shown: 'shown' };
+const EVENT_SANITIZERS = { played: sanitizePlayed, reveal: sanitizeReveal, shown: sanitizeShown };
+
+/** Ajout PUR d'une entrée à une séance (testable, sans I/O) :
+ * retourne la NOUVELLE liste de séances, ou null si séance/kind inconnus ou
+ * entrée inexploitable. La liste visée est bornée (les plus anciennes tombent). */
+export function appendEvent(sessions, sessionId, { kind, ...entry }) {
+  const key = SESSION_EVENTS[kind];
+  const clean = EVENT_SANITIZERS[kind]?.(entry);
+  if (!key || !clean) return null;
+  const all = sanitizeSessions(sessions);
+  const i = all.findIndex((s) => s.id === sessionId);
+  if (i < 0) return null;
+  const target = [...all[i][key], clean].slice(-MAX_ENTRIES);
+  all[i] = { ...all[i], [key]: target };
+  return all;
 }
 
 /* Tags d'acte « mj:acte-<n> » : le storyboard POSE (option « taguer les
@@ -292,7 +423,7 @@ export function createBoardService({ store, config }) {
       const sysF = (store.get('folders') || []).find((f) => f.type === 'JournalEntry' && f.name === '🛠️ Holocron — Système');
       await mcpCall('create_document', { type: 'JournalEntry', data: [{
         name, ownership: { default: 0 }, ...(sysF ? { folder: sysF._id } : {}),
-        flags: { holocron: { board: BOARD_DEFAULTS, sequences: [] } },
+        flags: { holocron: { board: BOARD_DEFAULTS, sequences: [], sessions: [] } },
         pages: [{ name: 'Carte de campagne', type: 'text', text: {
           content: '<p>Carte de campagne du Holocron (flags.holocron.board / flags.holocron.sequences).</p>', format: 1 } }],
       }] });
@@ -313,13 +444,15 @@ export function createBoardService({ store, config }) {
     });
   }
 
-  /** Vue complète pour l'éditeur : board persisté + catalogue dérivé + séquences. */
+  /** Vue complète pour l'éditeur : board persisté + catalogue dérivé + séquences
+   * + la TRACE des séances (MJ-only, comme tout le reste de cette vue). */
   function view() {
     const entry = findEntry();
     const cc = config();
     return {
       board: sanitizeBoard(entry?.flags?.holocron?.board),
       sequences: (entry?.flags?.holocron?.sequences || []).map(sanitizeSequence),
+      sessions: sanitizeSessions(entry?.flags?.holocron?.sessions),
       catalog: buildCatalog({
         config: cc,
         folders: store.get('folders'),
@@ -341,6 +474,41 @@ export function createBoardService({ store, config }) {
       updates: [{ 'flags.holocron.board': clean }] });
     patchEntryFlags(entry._id, (h) => { h.board = clean; });
     return clean;
+  }
+
+  /* ------------------------------------------------------------- séances --- */
+  /** La trace, telle qu'elle est stockée (assainie à la lecture). */
+  function sessions() {
+    return sanitizeSessions(findEntry()?.flags?.holocron?.sessions);
+  }
+
+  /** Écrit la collection entière — MÊME écriture en deux temps que le board :
+   * le merge Foundry par chemin ne retire jamais une clé, on supprime le flag
+   * puis on le repose. Write-through des caches (le connecteur ne voit pas ses
+   * propres writes). */
+  async function writeSessions(clean) {
+    const entry = await boardJournal();
+    await mcpCall('modify_document', { type: 'JournalEntry', _id: entry._id,
+      updates: [{ 'flags.holocron.-=sessions': null }] });
+    await mcpCall('modify_document', { type: 'JournalEntry', _id: entry._id,
+      updates: [{ 'flags.holocron.sessions': clean }] });
+    patchEntryFlags(entry._id, (h) => { h.sessions = clean; });
+    return clean;
+  }
+
+  /** Remplacement complet (le client envoie toute sa collection). */
+  async function saveSessions(raw) {
+    return writeSessions(sanitizeSessions(raw));
+  }
+
+  /** AJOUT ATOMIQUE d'une entrée à une séance : le client n'envoie QUE l'entrée,
+   * jamais la collection — deux onglets MJ ouverts en séance ne s'écrasent pas.
+   * `patch` = { kind: 'played'|'reveal'|'shown', … }. */
+  async function appendToSession(sessionId, patch) {
+    const next = appendEvent(sessions(), sessionId, patch || {});
+    if (!next) throw Object.assign(new Error('séance inconnue ou entrée inexploitable'), { code: 400 });
+    await writeSessions(next);
+    return next.find((s) => s.id === sessionId);
   }
 
   async function saveSequence(raw) {
@@ -423,5 +591,6 @@ export function createBoardService({ store, config }) {
     return { storyboard: clean, ...(tags ? { tags } : {}) };
   }
 
-  return { view, saveBoard, saveSequence, removeSequence, saveActSummary, saveStoryboard };
+  return { view, saveBoard, saveSequence, removeSequence, saveActSummary, saveStoryboard,
+    sessions, saveSessions, appendToSession };
 }

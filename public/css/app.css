@@ -1895,6 +1895,9 @@ body.gm-session .gm-doc h2, body.gm-session .gm-doc h3, body.gm-session .gm-doc 
 .gmc-mini { border: 1px solid var(--line); background: transparent; color: var(--fg-muted); border-radius: 6px;
   width: 1.5rem; height: 1.5rem; cursor: pointer; line-height: 1; }
 .gmc-mini:hover { border-color: var(--gold); color: var(--gold); }
+/* 👁 déjà marqué révélé dans la séance ouverte (mémoire des révélations) */
+.gmc-mini.on { border-color: var(--gold); color: var(--gold); opacity: 0.75; }
+.gmc-mini:disabled { cursor: default; }
 .gmc-id-img { width: 100%; max-height: 160px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); }
 /* handouts multi-média : aperçu MJ d'un événement chat + pastille destinataires */
 .gmc-handout-chat { border: 1px solid var(--line); border-left: 3px solid var(--gold); border-radius: 8px;
