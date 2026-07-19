@@ -143,6 +143,9 @@ export const CAMPAIGN_DEFAULTS = {
     gmNotes: '🗒️ Notes MJ (Holocron)', encounters: '⚔️ Bibliothèque de rencontres',
     dossiers: '🗂️ Dossiers MJ (Holocron)',
     board: '🗺️ Carte de campagne (Holocron)', // éditeur de campagne : flags.holocron.board + sequences
+    // DOSSIER (pas un journal) d'accueil des fiches MJ Front/Secret/Prépa —
+    // fiches Campaign Codex `tag` privées, déplaçables librement dans Foundry.
+    mjSheets: '🔥 Fronts & secrets (MJ)',
     shipNotes: '', // page « notes du vaisseau » : "<journalId>:<pageId>" (vue #/vaisseau)
   },
   registry: [],
@@ -173,12 +176,16 @@ export function campaignConfig(store) {
 }
 
 // Sous-ensemble PUBLIC-SAFE exposé au front (jamais la bible ni les cfg MJ).
-export function publicConfig(cc, foundryBaseUrl = '') {
+// `registry` (le registre des personnages) n'est servi qu'au MJ : il n'est lu
+// que par les vues MJ (mentions cliquables des chapitres, écran de MJ) et,
+// régénéré automatiquement, il listerait sinon TOUS les PNJ de la campagne —
+// noms et ids compris — à n'importe quel visiteur anonyme.
+export function publicConfig(cc, foundryBaseUrl = '', gm = false) {
   return {
     foundryBaseUrl,
     meta: cc.meta,
     ui: cc.ui, // personnalisation de monde (thème, emblème, titre, dashboard, parties)
-    registry: cc.registry,
+    registry: gm ? cc.registry : [],
     advLinks: cc.advLinks,
     campaignPlanets: cc.campaignPlanets,
     editableKinds: (cc.categories || []).filter((c) => c.editable).map((c) => c.kind),

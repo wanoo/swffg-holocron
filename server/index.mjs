@@ -19,6 +19,9 @@ import { setCorsOrigin, cors, sendJSON, sendVersioned, readBody, rateLimited, ma
 import { createContentService } from './lib/content.mjs';
 import { createWriteService, createEncounterService } from './lib/write.mjs';
 import { createBoardService } from './lib/board.mjs';
+import { createGmSheetService } from './lib/gm-sheets.mjs';
+import { createPrepService } from './lib/gm-prep.mjs';
+import { parseScenarioToBeats } from './lib/transform/scenario.mjs';
 import { createShipService, createDashService } from './lib/ship.mjs';
 import { createAstroService } from './lib/astro.mjs';
 import * as tools from './lib/session-tools.mjs';
@@ -50,6 +53,11 @@ const content = createContentService({ store, config: cc });
 const writer = createWriteService({ store, config: cc, logger: console });
 const encounters = createEncounterService({ store, config: cc });
 const board = createBoardService({ store, config: cc });
+// Fiches MJ (Front / Secret / Prépa) : fiches Campaign Codex `tag` privées.
+const gmSheets = createGmSheetService({ store, config: cc, logger: console });
+// Préparation : checklist d'acte dérivée, import des combats de la bible,
+// régénération du registre des personnages.
+const prep = createPrepService({ store, config: cc, writer, encounters, gmSheets });
 const dashPayload = createDashService({ journals: campaignConfig(store).journals });
 const shipSvc = () => createShipService({ journalName: cc().journals.ship });
 const astro = createAstroService({ publicDir: PUBLIC_DIR, config: cc, store });
@@ -204,7 +212,13 @@ async function handleApi(req, res, urlPath) {
     // quêtes joueur-safe ({ id, name, status } filtrés canSee — jamais le graphe)
     if (kind === 'quests') return sendVersioned(req, res, content.questsPlayerView(session), v.quests * 13 + (session ? 1 : 0) + (isGM(session) ? 7 : 0));
     if (kind === 'dice-helper') return sendVersioned(req, res, content.diceHelper(), v.diceHelper);
-    if (kind === 'config') return sendVersioned(req, res, publicConfig(cc(), ENV.foundryBaseUrl), store.version('config'));
+    // `registry` n'est servi qu'au MJ (cf. publicConfig) : la version varie donc
+    // avec la session, comme les autres vues sensibles à l'identité.
+    if (kind === 'config') {
+      const gm = gmOK(req, session);
+      return sendVersioned(req, res, publicConfig(cc(), ENV.foundryBaseUrl, gm),
+        store.version('config') * 13 + (gm ? 7 : 0));
+    }
     if (kind === 'npcs') {
       if (!gmOK(req, session)) return sendJSON(res, 401, { error: 'réservé MJ' });
       return sendVersioned(req, res, content.npcsView(), v.npcs);
@@ -383,8 +397,84 @@ async function handleApi(req, res, urlPath) {
 
     if (parts[1] === 'quests' && req.method === 'GET') return sendJSON(res, 200, content.questsView());
     if (parts[1] === 'docs' && req.method === 'GET' && !id) return sendJSON(res, 200, { docs: writer.gmList() });
-    if (parts[1] === 'dossiers' && req.method === 'GET') return sendJSON(res, 200, { dossiers: writer.dossiers() });
+    // 🗂️ Dossiers MJ (couche narrative par entité — flags.holocron.dossiers) :
+    //   GET                → tout le flag
+    //   PUT  /<entityId>   → patch PARTIEL d'un dossier (panneau MJ des fiches)
+    //   POST /seed         → amorce depuis flags.holocron.statut des fiches CC
+    if (parts[1] === 'dossiers') {
+      try {
+        if (req.method === 'GET' && !id) return sendJSON(res, 200, { dossiers: writer.dossiers() });
+        if (req.method === 'POST' && id === 'seed') {
+          const body = JSON.parse(await readBody(req, 5000) || '{}');
+          return sendJSON(res, 200, await writer.dossiersSeed({ dryRun: body.dryRun === true }));
+        }
+        if (req.method === 'PUT' && id) {
+          const body = JSON.parse(await readBody(req, 20_000));
+          return sendJSON(res, 200, await writer.dossierSave(id, body));
+        }
+      } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
+      return sendJSON(res, 405, { error: 'méthode non supportée' });
+    }
     if (parts[1] === 'backrefs' && req.method === 'GET') return sendJSON(res, 200, { backrefs: writer.backrefs() });
+
+    // 🔥 Fiches MJ — Front / Secret / Prépa (fiches Campaign Codex `tag` privées,
+    // éditables et taggables depuis Foundry ; nœuds de la carte de campagne).
+    //   GET  [?kind=front]        → { sheets, templates }
+    //   POST                      → création { kind, title, data, tags, state, links }
+    //   PUT  /<id>                → patch PARTIEL
+    //   POST /migrate-fronts      → gm:cfg:fronts → fiches CC (non destructif)
+    if (parts[1] === 'mj-sheets') {
+      try {
+        if (req.method === 'GET' && !id) {
+          return sendJSON(res, 200, { sheets: gmSheets.list(q.get('kind') || ''), templates: gmSheets.MJ_TEMPLATES });
+        }
+        if (req.method === 'GET' && id) {
+          const s = gmSheets.get(id);
+          return s ? sendJSON(res, 200, { sheet: s }) : sendJSON(res, 404, { error: 'fiche inexistante' });
+        }
+        if (req.method === 'POST' && id === 'migrate-fronts') {
+          return sendJSON(res, 200, await gmSheets.migrateFronts());
+        }
+        if (req.method === 'POST' && !id) {
+          const body = JSON.parse(await readBody(req, 100_000));
+          return sendJSON(res, 200, { ok: true, sheet: await gmSheets.create(body) });
+        }
+        if (req.method === 'PUT' && id) {
+          const body = JSON.parse(await readBody(req, 100_000));
+          return sendJSON(res, 200, { ok: true, sheet: await gmSheets.update(id, body) });
+        }
+      } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
+      return sendJSON(res, 405, { error: 'méthode non supportée' });
+    }
+
+    // ✅ Checklist « prêt-à-jouer » d'un acte, DÉRIVÉE (remplace la liste manuelle).
+    if (parts[1] === 'act-check' && id) {
+      if (req.method !== 'GET') return sendJSON(res, 405, { error: 'GET uniquement' });
+      try { return sendJSON(res, 200, await prep.actCheck(id)); }
+      catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
+    }
+
+    // 🧾 Saisie rapide : texte collé → beats proposés (aucune écriture).
+    if (parts[1] === 'scenario' && id === 'parse') {
+      if (req.method !== 'POST') return sendJSON(res, 405, { error: 'POST uniquement' });
+      try {
+        const body = JSON.parse(await readBody(req, 400_000));
+        return sendJSON(res, 200, parseScenarioToBeats(body.text));
+      } catch (e) { return sendJSON(res, e.code || 400, { error: String(e.message || e).slice(0, 200) }); }
+    }
+
+    // 🧭 Registre des personnages (backrefs « Mentionné dans ») :
+    //   GET   → registre courant   ·   POST [{dryRun}] → régénération fusionnée
+    if (parts[1] === 'registry') {
+      try {
+        if (req.method === 'GET') return sendJSON(res, 200, { registry: cc().registry || [] });
+        if (req.method === 'POST') {
+          const body = JSON.parse(await readBody(req, 5000) || '{}');
+          return sendJSON(res, 200, await prep.rebuildRegistry({ dryRun: body.dryRun === true }));
+        }
+      } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
+      return sendJSON(res, 405, { error: 'méthode non supportée' });
+    }
     if (parts[1] === 'docs' && req.method === 'GET' && id) {
       // configs séance : gm:cfg:* vit dans le journal ⚙️ (compat client gm-config.js)
       if (id.startsWith('cfg:')) {
@@ -503,6 +593,14 @@ async function handleApi(req, res, urlPath) {
     }
     if (parts[1] === 'encounters') {
       try {
+        // Moulinette « combats en texte → bibliothèque » — DEUX TEMPS :
+        //   POST /import-scan  → APERÇU seul, aucune écriture
+        //   POST /import       → import de la SEULE sélection cochée par le MJ
+        if (req.method === 'POST' && id === 'import-scan') return sendJSON(res, 200, await prep.scanEncounters());
+        if (req.method === 'POST' && id === 'import') {
+          const body = JSON.parse(await readBody(req, 50_000));
+          return sendJSON(res, 200, await prep.importEncounters(body.ids, session?.name));
+        }
         if (req.method === 'GET') return sendJSON(res, 200, { encounters: await encounters.list() });
         if (req.method === 'PUT') {
           const body = JSON.parse(await readBody(req, 100_000));

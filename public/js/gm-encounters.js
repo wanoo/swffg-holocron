@@ -4,13 +4,14 @@
 // sur place (tracker) ou dans Foundry (🎬 scène + tokens).
 import { Data, ensureAdversaries } from './data.js';
 import { renderCombat } from './combat-tracker.js';
+import { gmHeaders } from './collab.js';
 
 const API = (window.HOLOCRON && window.HOLOCRON.api) || '/api';
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
 
 async function api(path, opts = {}) {
-  const res = await fetch(API + path, { credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, ...opts });
+  const res = await fetch(API + path, { credentials: 'same-origin', headers: gmHeaders({ 'Content-Type': 'application/json' }), ...opts });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
   return body;
@@ -68,12 +69,77 @@ export async function mountEncounters(container, targetId) {
     paintList();
   }
 
+  /* --- Import des combats en texte de la bible ------------------------------
+   * Les combats existent déjà, écrits à la main dans les chapitres (blocs
+   * ```combat). La moulinette les PROPOSE : rien n'est écrit tant que le MJ n'a
+   * pas coché. Deux appels : /import-scan (aperçu) puis /import (sélection). */
+  async function paintImport() {
+    current = null;
+    paintList();
+    editCol.innerHTML = '<p class="eyebrow">Import depuis la bible</p><p class="muted">Lecture des chapitres…</p>';
+    let scan;
+    try { scan = await api('/gm/encounters/import-scan', { method: 'POST', body: '{}' }); }
+    catch (e) { editCol.innerHTML = `<p class="muted">${esc(e.message)}</p>`; return; }
+
+    editCol.innerHTML = '<p class="eyebrow">Import depuis la bible</p>';
+    const intro = el('p', 'muted',
+      `${scan.chapters} chapitre(s) parcouru(s) · <b>${scan.found.length}</b> bloc(s) de combat trouvé(s), `
+      + `dont <b>${scan.news}</b> pas encore en bibliothèque. Coche ce que tu veux importer — rien n’est écrit avant.`);
+    editCol.appendChild(intro);
+    if (!scan.found.length) {
+      editCol.appendChild(el('p', 'muted',
+        'Aucun bloc <code>```combat</code> dans la bible. Écris tes combats dans les chapitres, '
+        + 'ou crée-les ici puis « 📋 Copier le bloc » pour les coller dans le texte.'));
+      return;
+    }
+
+    const boxes = new Map();
+    const list = el('div', 'enc-scan');
+    for (const f of scan.found) {
+      const row = el('label', 'enc-scan-row' + (f.exists ? ' enc-scan-known' : ''));
+      const cb = el('input'); cb.type = 'checkbox'; cb.checked = !f.exists;
+      boxes.set(f.encounter.id, cb);
+      const n = f.encounter.groups.reduce((t, g) => t + g.rows.reduce((x, r) => x + (r.count || 1), 0), 0);
+      const info = el('div', 'enc-scan-info',
+        `<b>${esc(f.encounter.title)}</b>`
+        + `<small>${n} combattant(s) · ${esc(f.chapterName)}`
+        + (f.exists ? ` · <em>déjà en bibliothèque (${esc(f.reason)})</em>` : '')
+        + (f.encounter.map ? ' · 🗺️' : '') + '</small>');
+      row.append(cb, info);
+      list.appendChild(row);
+    }
+    editCol.appendChild(list);
+
+    const actions = el('div', 'enc-actions');
+    const doImport = el('button', 'enc-btn gold', '📥 Importer la sélection');
+    doImport.type = 'button';
+    const msg = el('span', 'muted');
+    doImport.addEventListener('click', async () => {
+      const ids = [...boxes].filter(([, cb]) => cb.checked).map(([id]) => id);
+      if (!ids.length) { msg.textContent = 'Rien de coché.'; return; }
+      doImport.disabled = true; msg.textContent = 'Import…';
+      try {
+        const out = await api('/gm/encounters/import', { method: 'POST', body: JSON.stringify({ ids }) });
+        msg.textContent = `${out.imported.length} rencontre(s) importée(s).`;
+        await refresh();
+      } catch (e) { msg.textContent = e.message; }
+      finally { doImport.disabled = false; }
+    });
+    actions.append(doImport, msg);
+    editCol.appendChild(actions);
+  }
+
   function paintList() {
     listCol.innerHTML = '<p class="eyebrow">Bibliothèque</p>';
     const add = el('button', 'enc-new', '＋ Nouvelle rencontre');
     add.type = 'button';
     add.addEventListener('click', () => { current = blank(); paintEditor(); });
     listCol.appendChild(add);
+    const imp = el('button', 'enc-new enc-import', '📥 Importer depuis la bible');
+    imp.type = 'button';
+    imp.title = 'Repère les blocs ```combat des chapitres et propose une rencontre par bloc';
+    imp.addEventListener('click', () => { paintImport(); });
+    listCol.appendChild(imp);
     for (const enc of encounters) {
       const item = el('button', 'enc-item' + (current?.id === enc.id ? ' active' : ''));
       item.type = 'button';

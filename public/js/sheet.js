@@ -4,7 +4,7 @@ import { renderRichHTML } from './render-journal.js';
 import { openGenerator } from './dice-roller.js';
 import { openCard } from './modal.js';
 import { foundryAsset, Data } from './data.js';
-import { getGMKey, gmGetBackrefs, gmGetDossiers } from './collab.js';
+import { getGMKey, gmGetBackrefs, gmGetDossiers, gmSaveDossier } from './collab.js';
 import { addShowButton } from './show-image.js';
 import { mountEditablePage } from './editor.js';
 
@@ -861,6 +861,108 @@ function sheetTabs(entries) {
   return wrap;
 }
 
+/* --- Dossier MJ : lecture ET édition (flags.holocron.dossiers) ---------------
+ * Le flag est éditable dans Foundry et par un assistant MCP ; ce panneau est la
+ * troisième porte d'entrée. L'écriture est un PATCH PARTIEL du seul dossier de
+ * cette entité — rien de ce qui a été rempli ailleurs n'est touché.
+ * Gabarit MIROIR de DOSSIER_FIELDS (server/lib/write.mjs). */
+const DOSSIER_FORM = [
+  ['role', 'Rôle', 'input', 'Contrebandier, garde du corps…'],
+  ['statut', 'Statut', 'input', 'allie · ennemi · neutre · mentor · contact'],
+  ['veut', 'Ce qu’il veut', 'area', 'Son objectif, en une phrase.'],
+  ['levier', 'Levier', 'area', 'Ce qui le fait plier : dette, peur, loyauté…'],
+  ['indices', 'Indices', 'area', 'Ce que les PJ peuvent apprendre de lui.'],
+  ['attitude', 'Attitude', 'input', 'Comment il se comporte à la table.'],
+  ['replique', 'Réplique', 'input', 'Une phrase à lui faire dire.'],
+  ['advId', 'Fiche stats', 'input', 'id d’adversaire (bestiaire), si combat'],
+];
+
+function dossierSection(key, dossier, entity, kind) {
+  const sec = el('section', 'sheet-section gm-dossier');
+  const head = el('div', 'gm-dossier-head');
+  head.appendChild(el('h3', 'sheet-section-title', '🔒 Dossier MJ'));
+  const toggle = el('button', 'gm-dossier-edit', '✎ Modifier');
+  toggle.type = 'button';
+  head.appendChild(toggle);
+  sec.appendChild(head);
+  const body = el('div', 'gm-dossier-body');
+  sec.appendChild(body);
+
+  const paintRead = () => {
+    body.innerHTML = '';
+    toggle.textContent = Object.keys(dossier).some((k) => k !== 'name' && dossier[k]) ? '✎ Modifier' : '✎ Rédiger';
+    const dl = el('dl', 'gm-dossier-dl');
+    const row = (label, val) => { if (!val) return; dl.appendChild(el('dt', null, label)); dl.appendChild(el('dd', null, escape(val))); };
+    for (const [k, label] of DOSSIER_FORM) {
+      if (k === 'replique' || k === 'advId') continue;
+      row(label, dossier[k]);
+    }
+    if (dossier.replique && dossier.replique !== '—') {
+      dl.appendChild(el('dt', null, 'Réplique'));
+      dl.appendChild(el('dd', 'gm-dossier-rep', '« ' + escape(dossier.replique) + ' »'));
+    }
+    if (dl.children.length) body.appendChild(dl);
+    else {
+      body.appendChild(el('p', 'gm-dossier-empty muted',
+        'Pas encore de dossier. Note ici ce que ce personnage <b>veut</b>, ce qui le fait <b>plier</b> et '
+        + 'la <b>réplique</b> que tu veux lui faire dire : c’est ce qui te reviendra en séance.'));
+    }
+    if (dossier.advId && kind !== 'adversary') {
+      const link = el('a', 'gm-dossier-stats', '↗ Fiche stats (bestiaire)');
+      link.href = `#/adv/${dossier.advId}`;
+      body.appendChild(link);
+    }
+  };
+
+  const paintEdit = () => {
+    body.innerHTML = '';
+    toggle.textContent = '✕ Annuler';
+    const form = el('form', 'gm-dossier-form');
+    const inputs = {};
+    for (const [k, label, type, placeholder] of DOSSIER_FORM) {
+      const lab = el('label', 'gm-dossier-field');
+      lab.appendChild(el('span', 'gm-dossier-lbl', label));
+      const input = el(type === 'area' ? 'textarea' : 'input');
+      if (type === 'area') input.rows = 2;
+      input.value = dossier[k] || '';
+      input.placeholder = placeholder;
+      lab.appendChild(input);
+      inputs[k] = input;
+      form.appendChild(lab);
+    }
+    const actions = el('div', 'gm-dossier-actions');
+    const save = el('button', 'gm-dossier-save', '💾 Enregistrer');
+    save.type = 'submit';
+    const msg = el('span', 'gm-dossier-msg muted');
+    actions.append(save, msg);
+    form.appendChild(actions);
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      save.disabled = true;
+      msg.textContent = 'Enregistrement…';
+      // le NOM accompagne le dossier : il permet de le retrouver si l'id change
+      const patch = { name: entity.name };
+      for (const [k] of DOSSIER_FORM) patch[k] = inputs[k].value;
+      try {
+        const saved = await gmSaveDossier(key, patch);
+        for (const k of Object.keys(dossier)) delete dossier[k];
+        Object.assign(dossier, saved);
+        paintRead();
+      } catch (e) {
+        msg.textContent = e.message;
+        save.disabled = false;
+      }
+    });
+    body.appendChild(form);
+  };
+
+  toggle.addEventListener('click', () => {
+    if (body.querySelector('form')) paintRead(); else paintEdit();
+  });
+  paintRead();
+  return sec;
+}
+
 // Sections gated (Dossier MJ + back-links) — session MJ Foundry ou clé de secours.
 async function appendGmSections(root, entity, kind) {
   if (!(Data.gm || getGMKey()) || !entity?.id) return;
@@ -871,28 +973,13 @@ async function appendGmSections(root, entity, kind) {
   // 1) Dossier MJ narratif (gabarit constant). Résolution par id, puis par NOM :
   // les ids d'entités peuvent changer (rebuild de pack), le nom reste stable.
   const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
-  const d = dossiers[entity.id]
-    || Object.values(dossiers).find((x) => x?.name && norm(x.name) === norm(entity.name));
-  if (d) {
-    const sec = el('section', 'sheet-section gm-dossier');
-    sec.appendChild(el('h3', 'sheet-section-title', '🔒 Dossier MJ'));
-    const dl = el('dl', 'gm-dossier-dl');
-    const row = (label, val) => { if (!val) return; dl.appendChild(el('dt', null, label)); dl.appendChild(el('dd', null, escape(val))); };
-    row('Rôle', d.role);
-    row('Statut', d.statut);
-    row('Ce qu\'il veut', d.veut);
-    row('Levier', d.levier);
-    row('Indices', d.indices);
-    row('Attitude', d.attitude);
-    if (d.replique && d.replique !== '—') { dl.appendChild(el('dt', null, 'Réplique')); dl.appendChild(el('dd', 'gm-dossier-rep', '« ' + escape(d.replique) + ' »')); }
-    sec.appendChild(dl);
-    if (d.advId && kind !== 'adversary') {
-      const link = el('a', 'gm-dossier-stats', '↗ Fiche stats (bestiaire)');
-      link.href = `#/adv/${d.advId}`;
-      sec.appendChild(link);
-    }
-    anchor.appendChild(sec);
-  }
+  // La clé d'écriture est celle sous laquelle le dossier a été TROUVÉ (le MJ a pu
+  // le saisir sous un ancien id) ; à défaut, l'id de la fiche affichée.
+  const byName = Object.entries(dossiers)
+    .find(([, x]) => x?.name && norm(x.name) === norm(entity.name));
+  const dossierKey = dossiers[entity.id] ? entity.id : (byName?.[0] || entity.id);
+  const dossier = { ...(dossiers[entity.id] || byName?.[1] || {}) };
+  anchor.appendChild(dossierSection(dossierKey, dossier, entity, kind));
 
   // 2) « Mentionné dans (MJ) » (index inverse des mentions).
   const refs = backrefs[entity.id];

@@ -64,7 +64,10 @@ export function setGMKey(k) { gmKey = k || ''; sessionStorage.setItem('holocron-
 export function getGMKey() { return gmKey; }
 export function clearGMKey() { gmKey = ''; sessionStorage.removeItem('holocron-gm-key'); syncGMCookie(); }
 
-function gmHeaders(extra) { return { ...(gmKey ? { 'x-gm-key': gmKey } : {}), ...(extra || {}) }; }
+// En-têtes des appels MJ : la session Foundry (cookie) suffit normalement ; la
+// clé de secours s'ajoute quand elle est saisie. Exportée pour les vues MJ qui
+// ont leur propre client (rencontres, fiches MJ…).
+export function gmHeaders(extra) { return { ...(gmKey ? { 'x-gm-key': gmKey } : {}), ...(extra || {}) }; }
 
 // Liste des chapitres MJ. Renvoie null si la clé est refusée (401).
 export async function gmList() {
@@ -102,6 +105,17 @@ export async function gmGetDossiers() {
   const res = await fetch(`${API}/gm/dossiers`, { headers: gmHeaders(), cache: 'no-store' });
   if (!res.ok) return {};
   return (await res.json()).dossiers || {};
+}
+// Écrit LE dossier d'une entité — patch PARTIEL : ce que le MJ a rempli dans
+// Foundry (ou via un assistant MCP) et qui n'est pas dans ce formulaire survit.
+export async function gmSaveDossier(entityId, patch) {
+  const res = await fetch(`${API}/gm/dossiers/${encodeURIComponent(entityId)}`, {
+    method: 'PUT',
+    headers: gmHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(patch),
+  });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `Dossier → ${res.status}`);
+  return (await res.json()).dossier || {};
 }
 
 // --- Notes MJ (privées, gated) -------------------------------------------

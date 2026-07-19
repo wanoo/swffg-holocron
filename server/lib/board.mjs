@@ -15,6 +15,7 @@
 // MJ only, servi UNIQUEMENT par la vue board (route gm-gated).
 import { mcpCall } from './mcp.mjs';
 import { ccView, resolveFolder, sanitizeActSummary } from './transform/journals.mjs';
+import { mjKindOf, mjStateOf } from './transform/mj-sheets.mjs';
 
 export const BOARD_DEFAULTS = { nodes: {}, edges: [], hidden: [] };
 
@@ -431,9 +432,15 @@ export function buildCatalog({ config, folders, journalsIndex, getJournal }) {
     if (!entry || !entry._id) continue;
     if (entry.flags?.['swffg-astronavigation']) continue; // atlas astronav : hors carte
     const cc = entry.flags?.['campaign-codex']?.type;
-    const type = CC_NODE_TYPES[cc] || (storyFolderIds.has(entry.folder) ? 'acte' : null);
+    const doc0 = getJournal(entry._id) || entry;
+    // Fiches MJ (Front / Secret / Prépa) : fiches CC `tag` taguées « mj:* ».
+    // Elles sont des NŒUDS de la carte de campagne — c'est ce qui donne sa
+    // matière au « ne pas oublier » (un front relié à ses PNJ, un secret à son lieu).
+    const mj = cc === 'tag' ? mjKindOf(doc0) : '';
+    const type = CC_NODE_TYPES[cc] || (mj ? `mj-${mj}` : null)
+      || (storyFolderIds.has(entry.folder) ? 'acte' : null);
     if (!type) continue;
-    const doc = getJournal(entry._id) || entry;
+    const doc = doc0;
     if (doc.flags?.['swffg-astronavigation']) continue;
     const fh = entry.flags?.holocron || {};
     const img = (doc.pages || []).find((p) => p.src)?.src || null;
@@ -448,6 +455,7 @@ export function buildCatalog({ config, folders, journalsIndex, getJournal }) {
       ...(fh.statut ? { statut: fh.statut } : {}),
       ...(fh.mort ? { mort: true } : {}),
       ...(img ? { img } : {}),
+      ...(mj ? { mjKind: mj, mjState: mjStateOf(doc, mj) } : {}),
       ...(type === 'acte' ? { sort: entry.sort || 0, actSummary: sanitizeActSummary(fh.actSummary) } : {}),
       ...(sb?.beats.length ? { storyboard: sb } : {}),
     });
