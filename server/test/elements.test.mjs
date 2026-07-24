@@ -134,6 +134,8 @@ test('chapterKindHint : les chapitres réels de la prod sont reconnus', () => {
   assert.equal(chapterKindHint('🔊 Ambiances sonores par zone'), 'ambiance');
   assert.equal(chapterKindHint('🖼️ Banque visuelle'), 'visuel');
   assert.equal(chapterKindHint('📜 Histoire complète'), '');
+  // « vision » hors répertoire ne déclenche pas le hint (chapitre d'acte réel)
+  assert.equal(chapterKindHint('🎬 Acte 7 — Visions mortelles'), '');
 });
 
 test('extractPlaylist / extractWeather : bornés, jamais de faux id météo', () => {

@@ -74,7 +74,9 @@ export function splitSections(html) {
 /** Type d'élément suggéré par le NOM du chapitre ('' si aucun indice). */
 export function chapterKindHint(name) {
   const n = String(name || '');
-  if (/🔮|\bvisions?\b/iu.test(n)) return 'vision';
+  // « vision » seul est trop ambigu (🎬 Acte 7 — Visions mortelles) : il faut
+  // le chapitre-répertoire (🔮) ou la mention explicite « par PJ ».
+  if (/🔮/u.test(n) || (/\bvisions?\b/iu.test(n) && /\bpj\b/iu.test(n))) return 'vision';
   if (/📣|lecture|dialogue/iu.test(n)) return 'lecture';
   if (/🔊|ambiance|sonore|playlist/iu.test(n)) return 'ambiance';
   if (/🖼|visuel|banque\s+visuelle|illustration/iu.test(n)) return 'visuel';

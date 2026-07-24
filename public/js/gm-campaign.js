@@ -1717,9 +1717,10 @@ export async function mountGmCampaign(main, cleanup = []) {
     if (!readingBox) {
       readingBox = el('div', 'gmc-reading');
       readingBox.addEventListener('click', (ev) => { if (ev.target === readingBox) readingBox.hidden = true; });
-      document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && readingBox && !readingBox.hidden) readingBox.hidden = true; });
+      const onKey = (ev) => { if (ev.key === 'Escape' && readingBox && !readingBox.hidden) readingBox.hidden = true; };
+      document.addEventListener('keydown', onKey);
       document.body.appendChild(readingBox);
-      cleanup.push(() => { readingBox?.remove(); readingBox = null; });
+      cleanup.push(() => { document.removeEventListener('keydown', onKey); readingBox?.remove(); readingBox = null; });
     }
     const asHtml = text.split(/\n{2,}/).map((p) => `<p>${esc(p.trim()).replace(/\n/g, '<br>')}</p>`).join('');
     readingBox.innerHTML = '';
