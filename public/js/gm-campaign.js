@@ -22,6 +22,12 @@ export const NODE_TYPES = {
   location: { icon: '🌍', label: 'Lieu', plural: 'Lieux', color: '#f78c6c' },
   shop: { icon: '🏪', label: 'Boutique', plural: 'Boutiques', color: '#ffd166' },
   seq: { icon: '🎞️', label: 'Séquence', plural: 'Séquences', color: '#e06c9f' },
+  // Éléments de jeu (bible décomposée) : fiches CC `tag` taguées elem:* —
+  // attachables aux beats, leurs données pré-remplissent les déclencheurs.
+  'elem-lecture': { icon: '📣', label: 'Lecture', plural: 'Lectures', color: '#e6b422' },
+  'elem-ambiance': { icon: '🔊', label: 'Ambiance', plural: 'Ambiances', color: '#5fb3b3' },
+  'elem-visuel': { icon: '🖼️', label: 'Visuel', plural: 'Visuels', color: '#b48ead' },
+  'elem-vision': { icon: '🔮', label: 'Vision', plural: 'Visions', color: '#9d7bd8' },
 };
 const NODE_W = 180, NODE_H = 46;
 
@@ -1434,6 +1440,7 @@ export async function mountGmCampaign(main, cleanup = []) {
   let sbPos = new Map();     // beatId -> {x, y} du layout courant (drag/réordonnancement)
   let sbSatPos = new Map();  // entityId -> {x, y}
   let sbProj = false;        // player de séquence ouvert DEPUIS un beat
+  let prefillInfo = '';      // ⚡ ce que l'attache d'un élément vient de pré-remplir
   let encLib = null;         // ⚔️ bibliothèque de rencontres (lazy)
   async function loadEncLib() {
     try { encLib = (await api('/gm/encounters')).encounters || []; }
@@ -1679,6 +1686,61 @@ export async function mountGmCampaign(main, cleanup = []) {
    * DIDACTIQUE : on affiche avant ce qui partira, et après ce qui a marché. */
   const triggerOf = (b) => (b.trigger || (b.trigger = {}));
 
+  /** Attacher un ÉLÉMENT pré-remplit le déclencheur du beat — sans jamais
+   * écraser un réglage déjà posé par le MJ. Retourne la liste de ce qui a été
+   * pré-rempli (affichée en clair : aucun effet surprise). */
+  function applyElemPrefill(b, n) {
+    if (!n?.elemKind) return [];
+    const t = triggerOf(b);
+    const d = n.elemData || {};
+    const done = [];
+    if (n.elemKind === 'ambiance') {
+      if (d.playlist && !t.playlist) { t.playlist = d.playlist; done.push(`🎵 playlist « ${d.playlist} »`); }
+      const w = String(d.weather || '').split(',').map((x) => x.trim()).filter(Boolean).slice(0, 4);
+      if (w.length && !t.weather) { t.weather = w; done.push(`🌦️ météo ${w.join(', ')}`); }
+    }
+    if (n.elemKind === 'visuel' && d.src && !t.handout) {
+      t.handout = { type: 'image', src: d.src, title: (d.legende || n.name || '').slice(0, 120) };
+      done.push(`🖼️ handout image « ${t.handout.title} »`);
+    }
+    return done;
+  }
+
+  /* ------------------------------------- 📖 Lire (lectures & visions en grand) --
+   * Un élément 📣 lecture (ou 🔮 vision) attaché au beat donne un bouton
+   * « 📖 Lire » : le texte s'affiche en GRAND FORMAT côté MJ (théâtre de
+   * l'esprit, écran partagé), avec l'option de l'envoyer en handout chat. */
+  let readingBox = null;
+  function openReading(m) {
+    const d = m.elemData || {};
+    const text = String(d.texte || '');
+    if (!readingBox) {
+      readingBox = el('div', 'gmc-reading');
+      readingBox.addEventListener('click', (ev) => { if (ev.target === readingBox) readingBox.hidden = true; });
+      document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && readingBox && !readingBox.hidden) readingBox.hidden = true; });
+      document.body.appendChild(readingBox);
+      cleanup.push(() => { readingBox?.remove(); readingBox = null; });
+    }
+    const asHtml = text.split(/\n{2,}/).map((p) => `<p>${esc(p.trim()).replace(/\n/g, '<br>')}</p>`).join('');
+    readingBox.innerHTML = '';
+    const inner = el('div', 'gmc-reading-inner');
+    inner.appendChild(el('p', 'eyebrow', `${m.elemKind === 'vision' ? '🔮' : '📣'} ${esc(m.name)}${d.pj ? ` — pour ${esc(d.pj)}` : ''}`));
+    inner.appendChild(el('div', 'gmc-reading-text', asHtml || '<p class="muted">(texte vide — remplis le champ « texte » de la fiche)</p>'));
+    const bar = el('div', 'gmc-seq-nav');
+    const status = el('span', 'gmc-hint', '');
+    const send = el('button', 'gmc-btn gold', '💬 Envoyer au chat des joueurs');
+    send.type = 'button';
+    send.title = 'Poste ce texte en handout chat dans Foundry (toute la table)';
+    send.addEventListener('click', () => pushHandout({ type: 'chat', text: asHtml, title: m.name }, status));
+    const close = el('button', 'gmc-btn', '✕ Fermer (Échap)');
+    close.type = 'button';
+    close.addEventListener('click', () => { readingBox.hidden = true; });
+    bar.append(send, close, status);
+    inner.appendChild(bar);
+    readingBox.appendChild(inner);
+    readingBox.hidden = false;
+  }
+
   /** Bloc « ▶ jouera : … » + alertes + bouton + rapport d'exécution. */
   function playBlock(b) {
     const box = el('div', 'gmc-play');
@@ -1829,6 +1891,7 @@ export async function mountGmCampaign(main, cleanup = []) {
     // effet surprise, on annonce avant d'agir et on rend compte après).
     const playBox = playBlock(b);
     panel.appendChild(playBox);
+    if (prefillInfo) { panel.appendChild(el('p', 'gmc-hint gmc-prefill', esc(prefillInfo))); prefillInfo = ''; }
 
     // 📌 épingler ce beat : le bandeau de séance suit alors la chaîne d'ici
     const pin = pinnedBeat();
@@ -1909,7 +1972,16 @@ export async function mountGmCampaign(main, cleanup = []) {
         paint();
         paintSide();
       });
-      row.append(open, rev, rm);
+      row.append(open, rev);
+      // 📖 un élément lecture/vision attaché se lit en grand format d'un clic
+      if ((m.elemKind === 'lecture' || m.elemKind === 'vision') && m.elemData?.texte) {
+        const read = el('button', 'gmc-mini', '📖');
+        read.type = 'button';
+        read.title = 'Lire en grand format (et option d’envoi au chat des joueurs)';
+        read.addEventListener('click', () => openReading(m));
+        row.appendChild(read);
+      }
+      row.appendChild(rm);
       chips.appendChild(row);
     }
     if (!b.uuids?.length) chips.appendChild(el('p', 'muted', 'Aucune — attache PNJ, lieux, orgs, quêtes…'));
@@ -1933,6 +2005,9 @@ export async function mountGmCampaign(main, cleanup = []) {
         btn.type = 'button';
         btn.addEventListener('click', () => {
           b.uuids = [...(b.uuids || []), `JournalEntry.${n.id}`];
+          // un ÉLÉMENT attaché pré-remplit le déclencheur (jamais d'écrasement)
+          const filled = applyElemPrefill(b, n);
+          if (filled.length) prefillInfo = `⚡ pré-rempli : ${filled.join(' · ')}`;
           scheduleSbSave();
           paint();
           paintSide();

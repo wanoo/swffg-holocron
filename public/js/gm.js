@@ -16,6 +16,7 @@ import { renderGmHome } from './gm-home.js';
 import { mountGmQuests } from './gm-quests.js';
 import { mountGmCampaign } from './gm-campaign.js';
 import { mountGmSheets } from './gm-fronts.js';
+import { mountGmElements } from './gm-elements.js';
 import { addShowButton } from './show-image.js';
 import { initSession, isSessionOn, toggleSession, teardownSession, refreshSessionBar, injectPins } from './gm-session.js';
 
@@ -346,6 +347,10 @@ async function renderDocs(container, list, scrollTo, cleanup) {
   sheetsLink.href = '#/mj/fronts';
   sheetsLink.addEventListener('click', (e) => { e.preventDefault(); selectChap('fronts'); });
   nav.appendChild(sheetsLink);
+  const elementsLink = el('a', 'gm-chap-link gm-home-link', '🧩 Bible en éléments');
+  elementsLink.href = '#/mj/elements';
+  elementsLink.addEventListener('click', (e) => { e.preventDefault(); selectChap('elements'); });
+  nav.appendChild(elementsLink);
 
   // Vues-outils du cockpit : chapId → { mount, link }. Une seule table, pour que
   // l'activation des liens n'ait pas à énumérer chaque outil à trois endroits.
@@ -353,6 +358,7 @@ async function renderDocs(container, list, scrollTo, cleanup) {
     quetes: { mount: mountGmQuests, link: questsLink },
     campagne: { mount: mountGmCampaign, link: campaignLink },
     fronts: { mount: mountGmSheets, link: sheetsLink },
+    elements: { mount: mountGmElements, link: elementsLink },
   };
   const clearToolLinks = () => { for (const v of Object.values(TOOL_VIEWS)) v.link.classList.remove('active'); };
 

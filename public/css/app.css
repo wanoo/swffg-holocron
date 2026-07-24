@@ -2206,3 +2206,38 @@ textarea.gmc-input { resize: vertical; font-size: 0.85rem; line-height: 1.4; }
 .mjs-btn.gold { background: var(--gold, #d9b45b); color: var(--on-gold, #1b1408); border: 0; }
 .mjs-btn[disabled] { opacity: 0.55; cursor: progress; }
 .mjs-migrate { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; border-top: 1px dashed var(--line, #2a3242); padding-top: 0.9rem; font-size: 0.82rem; }
+
+/* ===== 🧩 La bible en éléments (#/mj/elements) ============================ */
+.elx-wrap { display: grid; gap: 1.4rem; }
+.elx-section { padding: 1rem 1.2rem; }
+.elx-h { margin: 0 0 0.4rem; font-size: 1.02rem; }
+.elx-h .elx-count { font-size: 0.78rem; opacity: 0.7; font-weight: 400; }
+.elx-row { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; margin-top: 0.6rem; }
+.elx-input { background: transparent; color: var(--fg); border: 1px solid var(--line, #2a3242); border-radius: 8px; padding: 0.35rem 0.6rem; max-width: 100%; }
+.elx-btn { cursor: pointer; background: transparent; color: var(--fg); border: 1px solid var(--line, #2a3242); border-radius: 999px; padding: 0.32rem 0.95rem; font-size: 0.86rem; font-weight: 700; }
+.elx-btn.gold { background: var(--gold, #d9b45b); color: var(--on-gold, #1b1408); border: 0; }
+.elx-btn[disabled] { opacity: 0.55; cursor: progress; }
+.elx-report { margin-top: 0.5rem; }
+.elx-scan { display: grid; gap: 0.45rem; margin-top: 0.7rem; }
+.elx-scan-row { display: flex; align-items: flex-start; gap: 0.6rem; cursor: pointer; border: 1px solid var(--line, #2a3242); border-radius: 9px; padding: 0.5rem 0.7rem; }
+.elx-scan-row:hover { border-color: var(--gold, #d9b45b); }
+.elx-scan-row input { margin-top: 0.25rem; }
+.elx-scan-info { display: grid; gap: 0.15rem; min-width: 0; }
+.elx-scan-info small { opacity: 0.75; }
+.elx-scan-info .elx-preview { opacity: 0.6; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.elx-kind { font-size: 0.74rem; border: 1px solid var(--line, #2a3242); border-radius: 999px; padding: 0.05rem 0.5rem; margin-left: 0.35rem; opacity: 0.85; }
+.elx-known { opacity: 0.62; }
+.elx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 0.9rem; margin-top: 0.6rem; }
+.elx-card { border: 1px solid var(--line, #2a3242); border-radius: 11px; padding: 0.7rem 0.85rem; display: grid; gap: 0.3rem; align-content: start; }
+.elx-elem { display: block; padding: 0.18rem 0; text-decoration: none; color: var(--fg); border-radius: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.elx-elem:hover { color: var(--gold, #d9b45b); }
+
+/* 📖 lecture en grand format (élément lecture/vision attaché à un beat) */
+.gmc-reading { position: fixed; inset: 0; z-index: 1200; background: rgba(8, 10, 16, 0.94); display: flex; align-items: center; justify-content: center; padding: 4vmin; }
+.gmc-reading[hidden] { display: none; }
+.gmc-reading-inner { max-width: 860px; max-height: 90vh; overflow: auto; background: var(--panel, #131826); border: 1px solid var(--gold, #d9b45b); border-radius: 14px; padding: 1.6rem 2rem; box-shadow: 0 12px 60px rgba(0, 0, 0, 0.6); }
+.gmc-reading-text { font-size: 1.28rem; line-height: 1.75; font-family: Georgia, 'Times New Roman', serif; margin: 0.8rem 0 1.1rem; }
+.gmc-reading-text p { margin: 0 0 0.9em; }
+.gmc-prefill { color: var(--gold, #d9b45b); }
+/* miroir des éléments 📣 dans les pages (blockquote de lecture) */
+.gm-doc .elem-lecture { border-left: 3px solid var(--gold, #d9b45b); padding: 0.4rem 0.9rem; font-style: italic; }
