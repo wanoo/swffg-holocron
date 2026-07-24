@@ -74,26 +74,102 @@ export const MJ_TEMPLATES = {
 };
 
 export const MJ_KINDS = Object.keys(MJ_TEMPLATES);
+
+/* ------------------------------------------------- éléments de jeu (bible) --
+ * La bible décomposée en ÉLÉMENTS RÉUTILISABLES : lecture à voix haute,
+ * ambiance sonore, visuel à projeter, vision par PJ. Même support que les
+ * fiches MJ (fiche CC `tag` privée, tags des deux côtés, TagSheet) — donc
+ * organisables, taggables et éditables DEPUIS FOUNDRY, exigence permanente.
+ * Chaque gabarit déclare en plus son RÉPERTOIRE : le sous-dossier direct du
+ * dossier bible où ses fiches sont rangées (= rubrique automatique de la
+ * sidebar MJ). `folder` n'existe pas sur les gabarits MJ (dossier unique). */
+export const ELEM_TEMPLATES = {
+  lecture: {
+    tag: 'elem:lecture',
+    label: 'Lecture',
+    icon: '📣',
+    folder: '📣 Lectures',
+    states: {},
+    defaultState: '',
+    fields: [
+      { key: 'texte', label: 'Texte à lire aux joueurs', max: 8000 },
+    ],
+  },
+  ambiance: {
+    tag: 'elem:ambiance',
+    label: 'Ambiance',
+    icon: '🔊',
+    folder: '🔊 Ambiances',
+    states: {},
+    defaultState: '',
+    fields: [
+      { key: 'playlist', label: 'Playlist Foundry', max: 100 },
+      { key: 'weather', label: 'Météo (fog, embers…)', max: 200 },
+    ],
+  },
+  visuel: {
+    tag: 'elem:visuel',
+    label: 'Visuel',
+    icon: '🖼️',
+    folder: '🖼️ Visuels',
+    states: {},
+    defaultState: '',
+    fields: [
+      { key: 'src', label: 'Image (chemin Foundry ou URL)', max: 300 },
+      { key: 'legende', label: 'Légende', max: 500 },
+    ],
+  },
+  vision: {
+    tag: 'elem:vision',
+    label: 'Vision',
+    icon: '🔮',
+    folder: '🔮 Visions',
+    states: {},
+    defaultState: '',
+    fields: [
+      { key: 'pj', label: 'PJ destinataire', max: 80 },
+      { key: 'texte', label: 'Texte de la vision', max: 8000 },
+    ],
+  },
+};
+
+export const ELEM_KINDS = Object.keys(ELEM_TEMPLATES);
+/** Gabarit (MJ ou élément) d'un kind — les fonctions ci-dessous servent les deux. */
+const tplOf = (kind) => MJ_TEMPLATES[kind] || ELEM_TEMPLATES[kind];
+/** Marqueur d'idempotence posé sous flags.holocron (mjSheet OU elemSheet). */
+const markerKeyOf = (kind) => (ELEM_TEMPLATES[kind] ? 'elemSheet' : 'mjSheet');
+
 /** Tous les tags d'état, tous gabarits confondus (retirés avant d'en poser un). */
-const ALL_STATE_TAGS = MJ_KINDS.flatMap((k) => Object.values(MJ_TEMPLATES[k].states));
+const ALL_STATE_TAGS = [...MJ_KINDS.flatMap((k) => Object.values(MJ_TEMPLATES[k].states)),
+  ...ELEM_KINDS.flatMap((k) => Object.values(ELEM_TEMPLATES[k].states))];
 
 const asList = (raw) => (Array.isArray(raw) ? raw : String(raw || '').split(','))
   .map((s) => String(s).trim()).filter(Boolean);
+
+// gabarit d'un document d'après ses tags, dans UN registre donné
+function kindIn(doc, templates) {
+  if (String(doc?.flags?.[CC]?.type || '') !== 'tag') return '';
+  const tags = new Set(docTags(doc).map(normName));
+  for (const kind of Object.keys(templates)) if (tags.has(normName(templates[kind].tag))) return kind;
+  return '';
+}
 
 /**
  * Gabarit d'un document, d'après ses tags (des DEUX côtés — le MJ a pu taguer
  * depuis Asset Librarian). '' si ce n'est pas une fiche MJ.
  */
 export function mjKindOf(doc) {
-  if (String(doc?.flags?.[CC]?.type || '') !== 'tag') return '';
-  const tags = new Set(docTags(doc).map(normName));
-  for (const kind of MJ_KINDS) if (tags.has(normName(MJ_TEMPLATES[kind].tag))) return kind;
-  return '';
+  return kindIn(doc, MJ_TEMPLATES);
+}
+
+/** Gabarit d'ÉLÉMENT d'un document ('' si ce n'en est pas un). */
+export function elemKindOf(doc) {
+  return kindIn(doc, ELEM_TEMPLATES);
 }
 
 /** État courant ('actif'/'eteint'/'seme'/''), lu dans les tags. */
 export function mjStateOf(doc, kind) {
-  const tpl = MJ_TEMPLATES[kind];
+  const tpl = tplOf(kind);
   if (!tpl) return '';
   const tags = new Set(docTags(doc).map(normName));
   for (const [state, tag] of Object.entries(tpl.states)) if (tags.has(normName(tag))) return state;
@@ -102,7 +178,7 @@ export function mjStateOf(doc, kind) {
 
 /** Tags voulus pour un gabarit + un état, l'état étant EXCLUSIF. */
 export function mjTags(kind, state, current = []) {
-  const tpl = MJ_TEMPLATES[kind];
+  const tpl = tplOf(kind);
   if (!tpl) return asList(current);
   const stateTag = state && tpl.states[state] ? tpl.states[state] : '';
   const drop = new Set(ALL_STATE_TAGS.map(normName));
@@ -123,17 +199,50 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
  * SHEET CC AFFICHE dans Foundry. Sans lui, le MJ ouvrirait une fiche vide.
  */
 export function mjDescription(kind, data) {
-  const tpl = MJ_TEMPLATES[kind];
+  const tpl = tplOf(kind);
   if (!tpl) return '';
+  // Miroir SPÉCIFIQUE des éléments : le contenu prime sur la liste de champs
+  // (une lecture s'affiche comme un texte, un visuel comme une image — pas
+  // comme un formulaire). Les gabarits MJ gardent le miroir « label : valeur ».
+  if (ELEM_TEMPLATES[kind]) return elemDescription(kind, data);
   const rows = tpl.fields
     .filter((f) => String(data?.[f.key] || '').trim())
     .map((f) => `<p><strong>${esc(f.label)} :</strong> ${esc(data[f.key]).replace(/\n/g, '<br>')}</p>`);
   return rows.join('\n');
 }
 
+// paragraphes HTML sûrs à partir d'un texte multi-lignes
+const paras = (txt) => String(txt || '').split(/\n{2,}/)
+  .map((p) => p.trim()).filter(Boolean)
+  .map((p) => `<p>${esc(p).replace(/\n/g, '<br>')}</p>`).join('\n');
+
+/** Miroir HTML d'un ÉLÉMENT — ce que la sheet CC ET la page du répertoire montrent. */
+export function elemDescription(kind, data) {
+  const d = data || {};
+  if (kind === 'lecture') {
+    return d.texte ? `<blockquote class="elem-lecture">\n${paras(d.texte)}\n</blockquote>` : '';
+  }
+  if (kind === 'ambiance') {
+    const rows = [];
+    if (d.playlist) rows.push(`<p><strong>🎵 Playlist :</strong> ${esc(d.playlist)}</p>`);
+    if (d.weather) rows.push(`<p><strong>🌦️ Météo :</strong> ${esc(d.weather)}</p>`);
+    return rows.join('\n');
+  }
+  if (kind === 'visuel') {
+    if (!d.src) return d.legende ? `<p>${esc(d.legende)}</p>` : '';
+    return `<figure><img src="${esc(d.src)}" alt="${esc(d.legende || '')}">`
+      + (d.legende ? `<figcaption>${esc(d.legende)}</figcaption>` : '') + '</figure>';
+  }
+  if (kind === 'vision') {
+    const head = d.pj ? `<p><strong>🔮 Vision — ${esc(d.pj)}</strong></p>\n` : '';
+    return d.texte ? `${head}<blockquote class="elem-lecture">\n${paras(d.texte)}\n</blockquote>` : head.trim();
+  }
+  return '';
+}
+
 /** Champs assainis (bornés au gabarit), sans les clés inconnues. */
 export function mjFields(kind, data) {
-  const tpl = MJ_TEMPLATES[kind];
+  const tpl = tplOf(kind);
   if (!tpl) return {};
   const out = {};
   for (const f of tpl.fields) {
@@ -157,14 +266,17 @@ const linkList = (v, type) => [...new Set((Array.isArray(v) ? v : (v ? [v] : [])
  * Corps de création d'une fiche MJ — forme EXACTE d'une fiche CC `tag`.
  * @returns {{ name, ownership, flags }} à passer tel quel à `create_document`
  */
-export function mjSheetDoc({ kind, title, data = {}, tags = [], state, links = {} }) {
-  const tpl = MJ_TEMPLATES[kind];
+export function mjSheetDoc({ kind, title, data = {}, tags = [], state, links = {}, source = null }) {
+  const tpl = tplOf(kind);
   if (!tpl) throw Object.assign(new Error(`gabarit inconnu : ${kind}`), { code: 400 });
   const fields = mjFields(kind, data);
   const st = state && tpl.states[state] ? state : tpl.defaultState;
   const allTags = mjTags(kind, st, tags);
+  const isElem = Boolean(ELEM_TEMPLATES[kind]);
+  const name = (String(title || '').trim() || `${tpl.icon} ${tpl.label} sans nom`).slice(0, 120);
+  const description = mjDescription(kind, fields);
   return {
-    name: (String(title || '').trim() || `${tpl.icon} ${tpl.label} sans nom`).slice(0, 120),
+    name,
     ownership: { default: 0 }, // MJ ONLY — jamais visible d'un joueur
     flags: {
       core: { sheetClass: TAG_SHEET_CLASS },
@@ -173,7 +285,7 @@ export function mjSheetDoc({ kind, title, data = {}, tags = [], state, links = {
         data: {
           tagMode: true,
           sheetTypeLabelOverride: tpl.label,
-          description: mjDescription(kind, fields),
+          description,
           notes: '',
           tags: allTags,
           associates: linkList(links.associates),
@@ -184,8 +296,16 @@ export function mjSheetDoc({ kind, title, data = {}, tags = [], state, links = {
         },
       },
       [AL]: { filterTag: allTags.join(', ') },
-      holocron: { mjSheet: kind }, // marqueur d'idempotence (pas un lien : les tags font foi)
+      // marqueur d'idempotence (pas un lien : les tags font foi) + provenance
+      // d'une décomposition (chapitre + id de proposition, pour ne jamais
+      // recréer deux fois le même élément).
+      holocron: { [markerKeyOf(kind)]: kind, ...(source ? { elemSource: source } : {}) },
     },
+    // Un ÉLÉMENT porte UNE page : son miroir lisible. Elle le rend lisible et
+    // éditable comme un chapitre dans la sidebar bible (l'éditeur web recopie
+    // la page dans data.description à chaque save — write.mjs), et lisible tel
+    // quel dans Foundry hors sheet CC.
+    ...(isElem ? { pages: [{ name, type: 'text', text: { content: description, format: 1 } }] } : {}),
   };
 }
 
@@ -195,8 +315,8 @@ export function mjSheetDoc({ kind, title, data = {}, tags = [], state, links = {
  * @returns {object} { '<chemin>': valeur } prêt pour `modify_document`
  */
 export function mjSheetUpdates(doc, { kind, title, data, tags, state, links } = {}) {
-  const k = kind || mjKindOf(doc);
-  const tpl = MJ_TEMPLATES[k];
+  const k = kind || mjKindOf(doc) || elemKindOf(doc);
+  const tpl = tplOf(k);
   if (!tpl) throw Object.assign(new Error(`gabarit inconnu : ${k}`), { code: 400 });
   const cur = doc?.flags?.[CC]?.data || {};
   const updates = {};
@@ -236,7 +356,8 @@ export function mjSheetUpdates(doc, { kind, title, data, tags, state, links } = 
   if (!doc?.flags?.[CC]?.data?.tagMode) updates[`flags.${CC}.data.tagMode`] = true;
   if (!doc?.flags?.core?.sheetClass) updates['flags.core.sheetClass'] = TAG_SHEET_CLASS;
   if (!doc?.flags?.[CC]?.data?.sheetTypeLabelOverride) updates[`flags.${CC}.data.sheetTypeLabelOverride`] = tpl.label;
-  if (doc?.flags?.holocron?.mjSheet !== k) updates['flags.holocron.mjSheet'] = k;
+  const markerKey = markerKeyOf(k);
+  if (doc?.flags?.holocron?.[markerKey] !== k) updates[`flags.holocron.${markerKey}`] = k;
   return updates;
 }
 
@@ -245,9 +366,20 @@ export function mjSheetUpdates(doc, { kind, title, data, tags, state, links } = 
  * pas une.
  */
 export function mjSheetView(doc) {
-  const kind = mjKindOf(doc);
+  return sheetViewIn(doc, mjKindOf(doc));
+}
+
+/** Vue d'un ÉLÉMENT pour l'app (même forme que mjSheetView, + `source`). */
+export function elemSheetView(doc) {
+  const v = sheetViewIn(doc, elemKindOf(doc));
+  if (!v) return null;
+  const src = doc.flags?.holocron?.elemSource;
+  return src && typeof src === 'object' ? { ...v, source: src } : v;
+}
+
+function sheetViewIn(doc, kind) {
   if (!kind) return null;
-  const tpl = MJ_TEMPLATES[kind];
+  const tpl = tplOf(kind);
   const cur = doc.flags?.[CC]?.data || {};
   return {
     id: doc._id,

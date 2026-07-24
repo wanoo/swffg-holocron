@@ -15,7 +15,7 @@
 // MJ only, servi UNIQUEMENT par la vue board (route gm-gated).
 import { mcpCall } from './mcp.mjs';
 import { ccView, resolveFolder, sanitizeActSummary } from './transform/journals.mjs';
-import { mjKindOf, mjStateOf } from './transform/mj-sheets.mjs';
+import { mjKindOf, mjStateOf, elemKindOf, mjFields } from './transform/mj-sheets.mjs';
 
 export const BOARD_DEFAULTS = { nodes: {}, edges: [], hidden: [] };
 
@@ -437,7 +437,11 @@ export function buildCatalog({ config, folders, journalsIndex, getJournal }) {
     // Elles sont des NŒUDS de la carte de campagne — c'est ce qui donne sa
     // matière au « ne pas oublier » (un front relié à ses PNJ, un secret à son lieu).
     const mj = cc === 'tag' ? mjKindOf(doc0) : '';
-    const type = CC_NODE_TYPES[cc] || (mj ? `mj-${mj}` : null)
+    // Éléments de jeu (📣 lecture / 🔊 ambiance / 🖼️ visuel / 🔮 vision) : fiches
+    // CC `tag` taguées « elem:* » — des NŒUDS attachables aux beats, dont les
+    // données pré-remplissent les déclencheurs (playlist, handout image…).
+    const elem = cc === 'tag' && !mj ? elemKindOf(doc0) : '';
+    const type = CC_NODE_TYPES[cc] || (mj ? `mj-${mj}` : null) || (elem ? `elem-${elem}` : null)
       || (storyFolderIds.has(entry.folder) ? 'acte' : null);
     if (!type) continue;
     const doc = doc0;
@@ -456,6 +460,7 @@ export function buildCatalog({ config, folders, journalsIndex, getJournal }) {
       ...(fh.mort ? { mort: true } : {}),
       ...(img ? { img } : {}),
       ...(mj ? { mjKind: mj, mjState: mjStateOf(doc, mj) } : {}),
+      ...(elem ? { elemKind: elem, elemData: mjFields(elem, doc.flags?.['campaign-codex']?.data || {}) } : {}),
       ...(type === 'acte' ? { sort: entry.sort || 0, actSummary: sanitizeActSummary(fh.actSummary) } : {}),
       ...(sb?.beats.length ? { storyboard: sb } : {}),
     });

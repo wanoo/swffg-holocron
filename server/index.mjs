@@ -20,6 +20,7 @@ import { createContentService } from './lib/content.mjs';
 import { createWriteService, createEncounterService } from './lib/write.mjs';
 import { createBoardService } from './lib/board.mjs';
 import { createGmSheetService } from './lib/gm-sheets.mjs';
+import { createBibleService } from './lib/bible-tools.mjs';
 import { createPrepService } from './lib/gm-prep.mjs';
 import { parseScenarioToBeats } from './lib/transform/scenario.mjs';
 import { createShipService, createDashService } from './lib/ship.mjs';
@@ -55,6 +56,9 @@ const encounters = createEncounterService({ store, config: cc });
 const board = createBoardService({ store, config: cc });
 // Fiches MJ (Front / Secret / Prépa) : fiches Campaign Codex `tag` privées.
 const gmSheets = createGmSheetService({ store, config: cc, logger: console });
+// La bible en éléments : archive de sécurité, répertoires (📣🔊🖼️🔮),
+// moulinette de décomposition, dédoublonnage PNJ.
+const bible = createBibleService({ store, config: cc, writer, logger: console });
 // Préparation : checklist d'acte dérivée, import des combats de la bible,
 // régénération du registre des personnages.
 const prep = createPrepService({ store, config: cc, writer, encounters, gmSheets });
@@ -445,6 +449,30 @@ async function handleApi(req, res, urlPath) {
         }
       } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
       return sendJSON(res, 405, { error: 'méthode non supportée' });
+    }
+
+    // 📚 LA BIBLE EN ÉLÉMENTS — quatre gestes, tous non destructifs :
+    //   POST /bible/archive         → copie de sécurité mensuelle (idempotente,
+    //                                 jamais de suppression)
+    //   GET  /bible/elements        → fiches élément existantes (+ gabarits)
+    //   POST /bible/decompose-scan  → APERÇU seul { chapterId? } — zéro écriture
+    //   POST /bible/decompose       → crée la sélection cochée { ids, chapterId? }
+    //   POST /bible/npc-scan        → APERÇU du dédoublonnage PNJ (par nom)
+    //   POST /bible/npc-merge       → report ADDITIF de la sélection { ids }
+    if (parts[1] === 'bible') {
+      try {
+        if (req.method === 'GET' && id === 'elements') {
+          return sendJSON(res, 200, { elements: bible.listElements(q.get('kind') || ''), templates: bible.ELEM_TEMPLATES });
+        }
+        if (req.method !== 'POST') return sendJSON(res, 405, { error: 'méthode non supportée' });
+        const body = JSON.parse(await readBody(req, 100_000) || '{}');
+        if (id === 'archive') return sendJSON(res, 200, await bible.archive());
+        if (id === 'decompose-scan') return sendJSON(res, 200, bible.decomposeScan({ chapterId: String(body.chapterId || '') }));
+        if (id === 'decompose') return sendJSON(res, 200, await bible.decompose({ ids: body.ids, chapterId: String(body.chapterId || '') }));
+        if (id === 'npc-scan') return sendJSON(res, 200, bible.npcScan({ chapterIds: body.chapterIds }));
+        if (id === 'npc-merge') return sendJSON(res, 200, await bible.npcMerge({ ids: body.ids }));
+      } catch (e) { return sendJSON(res, e.code || 500, { error: String(e.message || e).slice(0, 200) }); }
+      return sendJSON(res, 404, { error: 'action bible inconnue' });
     }
 
     // ✅ Checklist « prêt-à-jouer » d'un acte, DÉRIVÉE (remplace la liste manuelle).

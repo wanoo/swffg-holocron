@@ -59,7 +59,15 @@ export function relevantJournalFolderIds({ config, folders } = {}) {
   if (cfg.gmBibleFolder) refs.add(cfg.gmBibleFolder);
   const list = (folders || []).filter((f) => f && f.type === 'JournalEntry');
   // une référence de config = nom Foundry, _id ou uuid « Folder.<id> »
-  return new Set(list.filter((f) => refs.has(f.name) || refs.has(f._id) || refs.has(`Folder.${f._id}`)).map((f) => f._id));
+  const ids = new Set(list.filter((f) => refs.has(f.name) || refs.has(f._id) || refs.has(`Folder.${f._id}`)).map((f) => f._id));
+  // + les SOUS-DOSSIERS DIRECTS de la bible : ce sont les rubriques de la
+  // sidebar MJ et les répertoires d'éléments (gmList les liste — un chapitre
+  // rangé dans une rubrique doit donc être synchronisé comme les autres).
+  const bibleRoot = cfg.gmBibleFolder
+    ? list.find((f) => f.name === cfg.gmBibleFolder || f._id === cfg.gmBibleFolder || `Folder.${f._id}` === cfg.gmBibleFolder)
+    : null;
+  if (bibleRoot) for (const f of list) if (f.folder === bibleRoot._id) ids.add(f._id);
+  return ids;
 }
 
 // Journaux techniques suivis PAR NOM, où qu'ils soient rangés.
