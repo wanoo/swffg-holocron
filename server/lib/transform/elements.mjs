@@ -31,9 +31,11 @@ const unescapeHtml = (s) => String(s)
   .replace(/&nbsp;/g, ' ')
   .replace(/&amp;/g, '&');
 
-/** Texte BRUT d'un fragment HTML, paragraphes préservés (\n\n). */
+/** Texte BRUT d'un fragment HTML, paragraphes préservés (\n\n).
+ * Les liens Foundry `@UUID[…]{Nom}` sont aplatis en « Nom » (lisible à voix haute). */
 export function plainText(html) {
   return unescapeHtml(String(html || '')
+    .replace(/@UUID\[[^\]]*\]\{([^}]*)\}/g, '$1')
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/(p|div|li|blockquote|h[1-6]|figcaption|tr)>/gi, '\n\n')
     .replace(/<[^>]+>/g, ''))
@@ -109,10 +111,25 @@ export function extractPlaylist(text) {
   return m ? m[1].replace(/[»"”].*$/, '').trim().slice(0, 100) : '';
 }
 
-// callouts « à lire à voix haute » : classes du projet + formules usuelles
-const CALLOUT_RE = /class="[^"]*\b(?:gm-callout|callout|read-?aloud|lecture)\b[^"]*"/i;
+// Encadrés : ceux qui SE LISENT aux joueurs vs les notes MJ. Les callouts
+// gm-callout-tip / warn / note / mj / ambiance (vus dans la bible réelle) sont
+// des instructions de MJ — jamais une lecture.
+const MJ_CALLOUT_RE = /\bgm-callout-(?:tip|warn|warning|note|mj|ambiance)\b/i;
 const ALOUD_RE = /\b(?:[àa]\s+(?:lire\s+)?(?:[àa]\s+)?voix\s+haute|lis(?:ez)?\s+(?:ceci\s+)?aux?\s+joueurs?|read\s+aloud)\b/iu;
 const VISION_HEAD_RE = /^\s*(?:🔮\s*)?visions?\b\s*(?:de|pour|d['’])?\s*[—:–-]?\s*(.*)$/iu;
+
+/** Blockquotes « à lire » d'un HTML (les notes MJ en callout sont exclues). */
+function readableQuotes(html) {
+  const out = [];
+  const re = /<blockquote([^>]*)>([\s\S]*?)<\/blockquote>/gi;
+  for (let m = re.exec(String(html || '')); m; m = re.exec(String(html || ''))) {
+    const cls = /class="([^"]*)"/i.exec(m[1] || '')?.[1] || '';
+    if (MJ_CALLOUT_RE.test(cls)) continue;
+    const t = plainText(m[2]);
+    if (t) out.push(t);
+  }
+  return out;
+}
 
 // borne un texte au max du champ du gabarit
 const fieldMax = (kind, key) => (ELEM_TEMPLATES[kind]?.fields.find((f) => f.key === key)?.max || 2000);
@@ -135,17 +152,8 @@ export function guessElement(section, hint = '') {
   }
 
   // 🖼️ visuel — la section porte une image
-  const img = /<img\b[^>]*\bsrc="([^"]+)"[^>]*>/i.exec(html);
-  if (img) {
-    const alt = /\balt="([^"]*)"/i.exec(img[0])?.[1] || '';
-    const cap = /<figcaption[^>]*>([\s\S]*?)<\/figcaption>/i.exec(html)?.[1] || '';
-    // les visuels MJ passent par data-gm-asset (src retiré au rendu) : on lit les deux
-    const gmSrc = /\bdata-gm-asset="([^"]+)"/i.exec(html)?.[1] || '';
-    const src = cut(unescapeHtml(gmSrc || img[1]), fieldMax('visuel', 'src'));
-    if (src && !/^api\//.test(src)) {
-      return { kind: 'visuel', data: { src, legende: cut(plainText(cap) || unescapeHtml(alt) || heading, fieldMax('visuel', 'legende')) } };
-    }
-  }
+  const vis = imageProposal(html, heading);
+  if (vis) return vis;
 
   // 🔊 ambiance — une playlist est citée (ou chapitre d'ambiances)
   const playlist = extractPlaylist(text);
@@ -156,14 +164,65 @@ export function guessElement(section, hint = '') {
     }
   }
 
-  // 📣 lecture — callout, formule « à voix haute », citation, ou chapitre de lectures
-  const quotes = [...String(html).matchAll(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi)]
-    .map((m) => plainText(m[1])).filter(Boolean);
-  if (CALLOUT_RE.test(html) || ALOUD_RE.test(text) || quotes.length || hint === 'lecture') {
+  // 📣 lecture — encadré à lire, formule « à voix haute », ou chapitre de lectures
+  const quotes = readableQuotes(html);
+  if (ALOUD_RE.test(text) || quotes.length || hint === 'lecture') {
     const texte = cut(quotes.length ? quotes.join('\n\n') : text, fieldMax('lecture', 'texte'));
     if (texte) return { kind: 'lecture', data: { texte } };
   }
   return null;
+}
+
+/** Proposition 🖼️ visuel si le HTML porte une image exploitable, sinon null. */
+function imageProposal(html, heading = '') {
+  const img = /<img\b[^>]*\bsrc="([^"]+)"[^>]*>/i.exec(html);
+  if (!img) return null;
+  const alt = /\balt="([^"]*)"/i.exec(img[0])?.[1] || '';
+  const cap = /<figcaption[^>]*>([\s\S]*?)<\/figcaption>/i.exec(html)?.[1] || '';
+  // les visuels MJ passent par data-gm-asset (src retiré au rendu) : on lit les deux
+  const gmSrc = /\bdata-gm-asset="([^"]+)"/i.exec(html)?.[1] || '';
+  const src = cut(unescapeHtml(gmSrc || img[1]), fieldMax('visuel', 'src'));
+  if (!src || /^api\//.test(src)) return null;
+  return { kind: 'visuel', data: { src, legende: cut(plainText(cap) || unescapeHtml(alt) || heading, fieldMax('visuel', 'legende')) } };
+}
+
+/** Une vision PAR PJ dans une liste « <li><strong>PJ</strong> — texte…</li> »
+ * (la forme réelle du chapitre 🔮 de la bible : pas de titres, une liste). */
+export function visionItems(html) {
+  const out = [];
+  for (const m of String(html || '').matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)) {
+    const lead = /^\s*<strong[^>]*>([\s\S]*?)<\/strong>/i.exec(m[1]);
+    if (!lead) continue;
+    const pj = cut(plainText(lead[1]).replace(/\n[\s\S]*$/, ''), fieldMax('vision', 'pj'));
+    const texte = cut(plainText(m[1].slice(lead[0].length)).replace(/^[\s—:–-]+/, ''), fieldMax('vision', 'texte'));
+    if (pj && texte) out.push({ pj, texte });
+  }
+  return out;
+}
+
+/**
+ * TOUTES les propositions d'une section (une section réelle peut en porter
+ * plusieurs : l'illustration d'une vision + une vision par PJ, par exemple).
+ * @returns {Array<{ kind, data, title? }>}
+ */
+export function sectionProposals(section, hint = '') {
+  const { heading = '', html = '' } = section || {};
+  const visionCtx = hint === 'vision' || VISION_HEAD_RE.test(heading);
+  if (!visionCtx) {
+    const g = guessElement(section, hint);
+    return g ? [g] : [];
+  }
+  const out = [];
+  // l'image d'illustration d'une vision est un 🖼️ visuel à part entière
+  const vis = imageProposal(html, heading);
+  if (vis) out.push({ ...vis, title: vis.data.legende || heading });
+  const items = visionItems(html);
+  for (const it of items) out.push({ kind: 'vision', data: it, title: `Vision — ${it.pj}` });
+  if (!items.length) {
+    const g = guessElement(section, hint);
+    if (g && !(g.kind === 'visuel' && vis)) out.push(g);
+  }
+  return out;
 }
 
 /* ----------------------------------------------------------- id stable ------ */
@@ -189,26 +248,28 @@ export function scanChapterElements(chapters, existing = []) {
   const seen = new Set();
   for (const chap of (chapters || [])) {
     const hint = chapterKindHint(chap?.name);
-    // un chapitre-répertoire d'éléments déjà décomposés ne se re-scanne pas
     splitSections(chap?.html).forEach((section, index) => {
-      const found = guessElement(section, hint);
-      if (!found) return;
-      const title = cut(section.heading || `${ELEM_TEMPLATES[found.kind].label} — ${chap.name || 'chapitre'}`, 120);
-      const id = `elem-${found.kind}-${slug(title) || 'sans-titre'}-${djb2(section.html)}`;
-      if (seen.has(id)) return;
-      seen.add(id);
-      const exists = byProp.has(id) || byTitle.has(`${found.kind}:${normName(title)}`);
-      out.push({
-        chapterId: chap.id,
-        chapterName: chap.name || '',
-        index,
-        id,
-        kind: found.kind,
-        title,
-        data: found.data,
-        exists,
-        ...(exists ? { reason: byProp.has(id) ? 'déjà créé depuis cette section' : 'un élément du même nom existe' } : {}),
-      });
+      for (const found of sectionProposals(section, hint)) {
+        const title = cut(found.title || section.heading
+          || `${ELEM_TEMPLATES[found.kind].label} — ${chap.name || 'chapitre'}`, 120);
+        // id STABLE dérivé du CONTENU proposé (une section peut porter plusieurs
+        // éléments : l'id doit distinguer la vision de Kael du visuel qui l'illustre)
+        const id = `elem-${found.kind}-${slug(title) || 'sans-titre'}-${djb2(`${found.kind}|${JSON.stringify(found.data)}`)}`;
+        if (seen.has(id)) continue;
+        seen.add(id);
+        const exists = byProp.has(id) || byTitle.has(`${found.kind}:${normName(title)}`);
+        out.push({
+          chapterId: chap.id,
+          chapterName: chap.name || '',
+          index,
+          id,
+          kind: found.kind,
+          title,
+          data: found.data,
+          exists,
+          ...(exists ? { reason: byProp.has(id) ? 'déjà créé depuis cette section' : 'un élément du même nom existe' } : {}),
+        });
+      }
     });
   }
   return out;

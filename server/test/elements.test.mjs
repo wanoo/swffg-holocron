@@ -7,8 +7,8 @@ import assert from 'node:assert/strict';
 
 import {
   splitSections, plainText, chapterKindHint, extractPlaylist, extractWeather,
-  guessElement, scanChapterElements, scanNpcSections, dossierHints,
-  npcMergeBlock, npcMarker, isNpcChapter,
+  guessElement, visionItems, sectionProposals, scanChapterElements,
+  scanNpcSections, dossierHints, npcMergeBlock, npcMarker, isNpcChapter,
 } from '../lib/transform/elements.mjs';
 import {
   ELEM_TEMPLATES, ELEM_KINDS, TAG_SHEET_CLASS, mjSheetDoc, elemSheetView,
@@ -89,6 +89,43 @@ test('guessElement : hint de chapitre en repli (chapitre 📣 sans blockquote)',
   const v = guessElement({ heading: 'Nym', html: '<p>Une salle de trophées en flammes.</p>' }, 'vision');
   assert.equal(v.kind, 'vision');
   assert.equal(v.data.pj, 'Nym'); // chapitre « par PJ » : le titre EST le PJ
+});
+
+test('guessElement : un callout MJ (tip/ambiance) n’est JAMAIS une lecture', () => {
+  const html = '<blockquote class="gm-callout gm-callout-tip"><p>💡 Astuce : ouvre les onglets à l’avance.</p></blockquote>';
+  assert.equal(guessElement({ heading: 'Zone', html }, 'ambiance'), null);
+  // mais un callout DIALOGUE se lit bel et bien
+  const dial = '<blockquote class="gm-callout gm-callout-dialogue"><p>« Vous ne me remettez pas ? »</p></blockquote>';
+  assert.equal(guessElement({ heading: 'Jerserra', html: dial }).kind, 'lecture');
+});
+
+// La forme RÉELLE du chapitre 🔮 de la prod : pas de titres — une figure
+// d'illustration puis une liste « <li><strong>PJ</strong> — vision…</li> ».
+const VISIONS_PROD_HTML = `
+<figure class="gm-figure"><img alt="La laisse" src="worlds/star-wars/assets/gm-sw13.webp" />
+<figcaption>La laisse : un fil de Force vert-noir</figcaption></figure>
+<p>Une par PJ et par épisode, taillée sur leur faiblesse.</p>
+<ul><li><strong>@UUID[Actor.AGmmshjv8pMGZ6IP]{UCHEBE}</strong> — l'ombre et le <strong>bras de Romound</strong> ; l'ancre qui pourrait rompre.</li>
+<li><strong>PAHAS</strong> — la <strong>blessure inguérissable</strong>, celui qu'elle ne peut sauver.</li>
+<li><strong>EDEKER</strong> — la <strong>laisse Radrengir</strong> et les échos de Jerserra.</li></ul>
+`;
+
+test('sectionProposals : chapitre 🔮 réel → une vision PAR PJ + le visuel d’illustration', () => {
+  const props = sectionProposals({ heading: '', html: VISIONS_PROD_HTML }, 'vision');
+  assert.equal(props.length, 4);
+  assert.equal(props[0].kind, 'visuel');
+  assert.equal(props[0].data.src, 'worlds/star-wars/assets/gm-sw13.webp');
+  const visions = props.filter((p) => p.kind === 'vision');
+  assert.deepEqual(visions.map((v) => v.data.pj), ['UCHEBE', 'PAHAS', 'EDEKER']);
+  assert.match(visions[0].data.texte, /bras de Romound/);
+  assert.doesNotMatch(visions[0].data.texte, /@UUID/); // liens Foundry aplatis
+  assert.doesNotMatch(visions[0].data.texte, /^[—:–-]/); // séparateur de tête retiré
+  assert.deepEqual(visions.map((v) => v.title), ['Vision — UCHEBE', 'Vision — PAHAS', 'Vision — EDEKER']);
+});
+
+test('visionItems : liste sans <strong> de tête = rien (jamais de vision fantôme)', () => {
+  assert.deepEqual(visionItems('<ul><li>simple puce sans PJ</li></ul>'), []);
+  assert.deepEqual(visionItems(''), []);
 });
 
 test('chapterKindHint : les chapitres réels de la prod sont reconnus', () => {
